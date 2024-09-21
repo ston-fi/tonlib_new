@@ -1,7 +1,24 @@
 [workspace]
 members = [
-    "benchmarks",
-    "examples",
-    "library"
+    "src/benchmarks",
+    "src/examples",
+    "src/library"
 ]
+
 resolver = "2"
+
+[workspace.package]
+version = "0.1.2"
+description = "A simple pool that returns items automatically after it's dropped"
+edition = "2021"
+authors = ["Sild <silddev@proton.me"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sild/autoreturn_pool"
+rust-version = "1.80"
+keywords = ["pool", "object-pool", "autoreturn"]
+readme = "README.md"
+publish = false
+
+[workspace.dependencies]
+log = "0.4.22"
+anyhow = "1.0.87"

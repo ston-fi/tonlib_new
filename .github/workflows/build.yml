@@ -16,4 +16,4 @@ jobs:
     - uses: actions/checkout@v4
     - run: cargo fmt --check
     - run: cargo build --verbose
-    - run: cargo test --lib
+    - run: cargo test --all

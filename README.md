@@ -1,11 +1,11 @@
-# autoreturn-pool
+# autoreturn_pool
 
 This pool automatically manages the return of objects.
 
 The primary difference from competitors is the interface - implementation follows the RAII pattern, meaning the user must provide objects when creating the pool.
 
 The `Pool` class has only three public methods:
-- Constructor `with_config(items)`: Creates a new pool with a custom configuration.
+- Constructor `with_config(config: Config, items)`: Creates a new pool with a custom configuration.
 - Constructor `new(items)`: An alias for `with_config` that uses the default configuration.
 - `take(&self)`: Extracts an object from the pool.
 

@@ -1,0 +1,12 @@
+[package]
+name = "autoreturn_pool"
+edition.workspace = true
+rust-version.workspace = true
+publish = true
+version.workspace = true
+
+[dependencies]
+log.workspace = true
+
+[dev-dependencies]
+anyhow.workspace = true

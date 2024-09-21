@@ -1,0 +1,11 @@
+[package]
+name = "example"
+edition.workspace = true
+
+[[bin]]
+name = "example"
+path = "src/main.rs"
+
+[dependencies]
+anyhow.workspace = true
+autoreturn_pool = { path = "../library" }

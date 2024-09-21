@@ -1,4 +1,4 @@
 /target
 .idea
-examples/target
+src/examples/target
 Cargo.lock
