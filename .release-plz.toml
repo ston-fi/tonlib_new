@@ -1,10 +1,9 @@
 [workspace]
-git_release_enable = false
+git_release_enable = true
 dependencies_update = true # run `cargo update` in the release PR
 
 [[package]] # the double square brackets define a TOML table array
-name = "autoreturn-pool" # name of the package to configure
+name = "autoreturn_pool" # name of the package to configure
 changelog_include = []
 # set the path of the changelog to the root of the repository
 changelog_path = "./CHANGELOG.md"
-git_release_enable = true # create GitHub release
