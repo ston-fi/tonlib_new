@@ -8,7 +8,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.2"
+version = "0.1.3"
 description = "A simple pool that returns items automatically after it's dropped"
 edition = "2021"
 authors = ["Sild <silddev@proton.me"]

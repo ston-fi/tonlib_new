@@ -3,6 +3,14 @@
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/Sild/autoreturn-pool/compare/autoreturn-pool-v0.1.2...autoreturn-pool-v0.1.3) - 2024-09-22
+
+### Other
+
+- return dash back =( ([#17](https://github.com/Sild/autoreturn-pool/pull/17))
+- return descr&license ([#16](https://github.com/Sild/autoreturn-pool/pull/16))
+- merge dev ([#11](https://github.com/Sild/autoreturn-pool/pull/11))
+
 ## [0.1.2](https://github.com/Sild/autoreturn-pool/compare/autoreturn-pool-v0.1.1...autoreturn-pool-v0.1.2) - 2024-09-12
 
 ### Other
