@@ -4,6 +4,8 @@ edition.workspace = true
 rust-version.workspace = true
 publish = true
 version.workspace = true
+description.workspace = true
+license.workspace = true
 
 [dependencies]
 log.workspace = true
