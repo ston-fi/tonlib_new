@@ -1,5 +1,5 @@
 [package]
-name = "autoreturn_pool"
+name = "autoreturn-pool"
 edition.workspace = true
 rust-version.workspace = true
 publish = true

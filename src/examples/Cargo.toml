@@ -8,4 +8,4 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow.workspace = true
-autoreturn_pool = { path = "../library" }
+autoreturn-pool = { path = "../library" }
