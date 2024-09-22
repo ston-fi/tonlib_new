@@ -6,6 +6,7 @@ publish = true
 version.workspace = true
 description.workspace = true
 license.workspace = true
+readme.workspace = true
 
 [dependencies]
 log.workspace = true
