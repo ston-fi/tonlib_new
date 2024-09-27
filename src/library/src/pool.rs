@@ -114,7 +114,7 @@ mod tests {
     }
 
     #[test]
-    fn test_workflow() -> anyhow::Result<()> {
+    fn test_workflow() {
         let config = Config {
             wait_duration: std::time::Duration::from_millis(5),
         };
@@ -133,7 +133,5 @@ mod tests {
 
         let obj4 = pool.take();
         assert!(obj4.is_none());
-
-        Ok(())
     }
 }

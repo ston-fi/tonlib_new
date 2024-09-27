@@ -9,8 +9,4 @@ license.workspace = true
 readme = "../../README.md"
 
 [dependencies]
-log.workspace = true
 parking_lot.workspace = true
-
-[dev-dependencies]
-anyhow.workspace = true
