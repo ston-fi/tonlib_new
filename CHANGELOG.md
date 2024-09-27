@@ -3,6 +3,12 @@
 
 ## [Unreleased]
 
+## [0.2.1](https://github.com/Sild/autoreturn-pool/compare/autoreturn-pool-v0.2.0...autoreturn-pool-v0.2.1) - 2024-09-27
+
+### Other
+
+- update Cargo.toml dependencies
+
 ## [0.1.4](https://github.com/Sild/autoreturn-pool/compare/autoreturn-pool-v0.1.3...autoreturn-pool-v0.1.4) - 2024-09-22
 
 ### Fixed
