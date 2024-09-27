@@ -6,7 +6,7 @@ publish = true
 version.workspace = true
 description.workspace = true
 license.workspace = true
-readme.workspace = true
+readme = "../../README.md"
 
 [dependencies]
 log.workspace = true

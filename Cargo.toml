@@ -16,7 +16,6 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/sild/autoreturn-pool"
 rust-version = "1.80"
 keywords = ["pool", "object-pool", "autoreturn"]
-readme = "/README.md"
 publish = false
 
 [workspace.dependencies]
