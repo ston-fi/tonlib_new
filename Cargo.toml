@@ -8,7 +8,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.1.5"
+version = "0.2.0"
 description = "A simple pool that returns items automatically after it's dropped"
 edition = "2021"
 authors = ["Sild <silddev@proton.me"]
@@ -19,6 +19,6 @@ keywords = ["pool", "object-pool", "autoreturn"]
 publish = false
 
 [workspace.dependencies]
-log = "0.4.22"
-anyhow = "1.0.87"
+log = "0.4"
+anyhow = "1.0"
 parking_lot = "0.12"
