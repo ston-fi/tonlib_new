@@ -1,5 +1,5 @@
-use std::sync::Arc;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use std::sync::Arc;
 
 struct DummyObject {
     id: usize,
@@ -44,7 +44,7 @@ fn perf_lockfree_pool(pool: Arc<lockfree_object_pool::LinearObjectPool<DummyObje
 
 fn perf_object_pool(pool: Arc<object_pool::Pool<DummyObject>>) {
     run_tests(pool, |pool| {
-        let obj = pool.pull(||DummyObject {
+        let obj = pool.pull(|| DummyObject {
             id: 0,
             text: "text".to_string(),
         });
@@ -63,8 +63,11 @@ fn benchmark_functions(c: &mut Criterion) {
     // Nice interface...
     let lockfree_pool = {
         let pool = lockfree_object_pool::LinearObjectPool::new(
-            || DummyObject { id: 0, text: "text".to_string(), },
-            |_| {}
+            || DummyObject {
+                id: 0,
+                text: "text".to_string(),
+            },
+            |_| {},
         );
         {
             let mut items = Vec::with_capacity(POOL_SIZE);
