@@ -14,6 +14,12 @@ impl<'a, T: Send + 'static> PoolObject<'a, T> {
             parent,
         }
     }
+
+    /// Release inner object from the pool.
+    /// It won't be put back to the pool when wrapper is dropped
+    pub fn release(mut self) {
+        self.inner = None;
+    }
 }
 
 impl<T: Send + 'static> Deref for PoolObject<'_, T> {
@@ -32,9 +38,8 @@ impl<T: Send + 'static> DerefMut for PoolObject<'_, T> {
 
 impl<T: Send + 'static> Drop for PoolObject<'_, T> {
     fn drop(&mut self) {
-        let inner = self.inner.take().unwrap();
-        if let Err(err) = self.parent.put(inner) {
-            log::error!("Failed to put object back to the pool: {}", err);
+        if let Some(inner) = self.inner.take() {
+            self.parent.put(inner);
         }
     }
 }
