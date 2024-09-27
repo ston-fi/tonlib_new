@@ -10,3 +10,12 @@ readme = "../../README.md"
 
 [dependencies]
 parking_lot.workspace = true
+
+[dev-dependencies]
+criterion.workspace = true
+lockfree-object-pool.workspace = true
+object-pool.workspace = true
+
+[[bench]]
+name = "benchmark"
+harness = false

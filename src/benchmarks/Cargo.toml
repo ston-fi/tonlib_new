@@ -1,3 +1,0 @@
-[package]
-name = "benchmarks"
-edition.workspace = true

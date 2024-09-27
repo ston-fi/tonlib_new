@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "src/benchmarks",
     "src/examples",
     "src/library"
 ]
@@ -22,3 +21,8 @@ publish = false
 log = "0.4"
 anyhow = "1.0"
 parking_lot = "0.12"
+
+# bench
+criterion = { version = "0.5" }
+lockfree-object-pool = "0.1.6"
+object-pool = "0.6.0"
