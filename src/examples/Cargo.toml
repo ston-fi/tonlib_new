@@ -7,5 +7,5 @@ name = "example"
 path = "src/main.rs"
 
 [dependencies]
-anyhow.workspace = true
+anyhow = "1.0"
 autoreturn-pool = { path = "../library" }

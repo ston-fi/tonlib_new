@@ -9,12 +9,12 @@ license.workspace = true
 readme = "../../README.md"
 
 [dependencies]
-parking_lot.workspace = true
+parking_lot = "0.12"
 
 [dev-dependencies]
-criterion.workspace = true
-lockfree-object-pool.workspace = true
-object-pool.workspace = true
+criterion = { version = "0.5" }
+lockfree-object-pool = "0.1.6"
+object-pool = "0.6.0"
 
 [[bench]]
 name = "benchmark"
