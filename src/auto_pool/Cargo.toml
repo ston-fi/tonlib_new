@@ -1,0 +1,24 @@
+[package]
+name = "auto_pool"
+readme = "README.md"
+version = "0.0.1"
+description = "A simple pool that returns items automatically after it's dropped"
+keywords = ["pool", "object-pool", "autoreturn"]
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = true
+
+[dependencies]
+parking_lot = "0.12"
+
+[dev-dependencies]
+criterion = { version = "0.5" }
+lockfree-object-pool = "0.1.6"
+object-pool = "0.6.0"
+
+[[bench]]
+name = "benchmark"
+harness = false

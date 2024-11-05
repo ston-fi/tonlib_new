@@ -1,14 +1,14 @@
-use crate::pool::Pool;
+use crate::pool::AutoPool;
 use std::ops::{Deref, DerefMut};
 
 /// Wrapper allows to send object back to the pool when it's dropped
 pub struct PoolObject<'a, T: Send + 'static> {
     inner: Option<T>,
-    parent: &'a Pool<T>,
+    parent: &'a AutoPool<T>,
 }
 
 impl<'a, T: Send + 'static> PoolObject<'a, T> {
-    pub(crate) fn new(inner: T, parent: &'a Pool<T>) -> Self {
+    pub(crate) fn new(inner: T, parent: &'a AutoPool<T>) -> Self {
         Self {
             inner: Some(inner),
             parent,

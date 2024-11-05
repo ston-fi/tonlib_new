@@ -1,18 +1,15 @@
 [workspace]
 members = [
     "src/examples",
-    "src/library"
+    "src/auto_pool"
 ]
 
 resolver = "2"
 
 [workspace.package]
-version = "0.2.1"
-description = "A simple pool that returns items automatically after it's dropped"
 edition = "2021"
 authors = ["Sild <silddev@proton.me"]
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/sild/autoreturn-pool"
+repository = "https://github.com/sild/libs_rs"
 rust-version = "1.80"
-keywords = ["pool", "object-pool", "autoreturn"]
 publish = false

@@ -8,4 +8,4 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = "1.0"
-autoreturn-pool = { path = "../library" }
+auto_pool = { path = "../auto_pool" }

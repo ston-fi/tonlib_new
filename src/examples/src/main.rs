@@ -1,5 +1,5 @@
 use anyhow::bail;
-use autoreturn_pool::{Config, Pool};
+use auto_pool::{AutoPool, Config};
 use std::sync::Arc;
 
 fn main() -> anyhow::Result<()> {
@@ -22,7 +22,7 @@ impl MyObject {
 
 fn multi_thread() -> anyhow::Result<()> {
     let objects = [MyObject { value: 1 }, MyObject { value: 2 }];
-    let pool = Arc::new(Pool::new(objects));
+    let pool = Arc::new(AutoPool::new(objects));
 
     let pool_th = pool.clone();
     let join_handler = std::thread::spawn(move || {
@@ -50,7 +50,7 @@ fn single_thread() -> anyhow::Result<()> {
         wait_duration: std::time::Duration::from_millis(5),
     };
 
-    let pool = Pool::with_config(config, objects);
+    let pool = AutoPool::new_with_config(config, objects);
 
     let obj1_val = {
         let obj1 = pool.take().unwrap();
@@ -73,7 +73,7 @@ fn single_thread() -> anyhow::Result<()> {
 
 fn add_release() -> anyhow::Result<()> {
     let objects = [MyObject { value: 1 }];
-    let pool = Pool::new(objects);
+    let pool = AutoPool::new(objects);
 
     {
         let obj1 = pool.take().unwrap();
