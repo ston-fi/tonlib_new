@@ -17,8 +17,8 @@ impl<'a, T: Send + 'static> PoolObject<'a, T> {
 
     /// Release inner object from the pool.
     /// It won't be put back to the pool when wrapper is dropped
-    pub fn release(mut self) {
-        self.inner = None;
+    pub fn release(mut self) -> T {
+        self.inner.take().unwrap()
     }
 }
 
