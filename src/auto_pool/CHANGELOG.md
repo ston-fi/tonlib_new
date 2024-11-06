@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2](https://github.com/Sild/libs_rs/compare/auto_pool-v0.0.1...auto_pool-v0.0.2) - 2024-11-06
+
+### Other
+
+- expose PoolObject
+- release v0.2.2 ([#22](https://github.com/Sild/libs_rs/pull/22))
+
 ## [0.0.1](https://github.com/Sild/libs_rs/releases/tag/auto_pool-v0.0.1) - 2024-11-05
 
 ### Other
