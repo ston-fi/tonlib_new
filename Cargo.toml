@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "src/examples",
     "src/auto_pool"
 ]
 

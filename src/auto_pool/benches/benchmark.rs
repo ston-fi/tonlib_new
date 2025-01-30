@@ -1,9 +1,10 @@
+use auto_pool::pool::AutoPool;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::sync::Arc;
 
 struct DummyObject {
     id: usize,
-    text: String,
+    value: usize,
 }
 
 const POOL_SIZE: usize = 1000;
@@ -26,11 +27,11 @@ fn run_tests<P: Send + Sync + 'static>(arc_pool: Arc<P>, pool_op: fn(&P)) {
     }
 }
 
-fn perf_autoreturn_pool(pool: Arc<autoreturn_pool::Pool<DummyObject>>) {
+fn perf_auto_pool(pool: Arc<AutoPool<DummyObject>>) {
     run_tests(pool, |pool| {
-        let obj = pool.take().unwrap();
+        let obj = pool.get().unwrap();
         let _id = &obj.id;
-        let _text = &obj.text;
+        let _val = &obj.value;
     });
 }
 
@@ -38,37 +39,25 @@ fn perf_lockfree_pool(pool: Arc<lockfree_object_pool::LinearObjectPool<DummyObje
     run_tests(pool, |pool| {
         let obj = pool.pull();
         let _id = &obj.id;
-        let _text = &obj.text;
+        let _val = &obj.value;
     });
 }
 
 fn perf_object_pool(pool: Arc<object_pool::Pool<DummyObject>>) {
     run_tests(pool, |pool| {
-        let obj = pool.pull(|| DummyObject {
-            id: 0,
-            text: "text".to_string(),
-        });
+        let obj = pool.pull(|| DummyObject { id: 0, value: 1 });
         let _id = &obj.id;
-        let _text = &obj.text;
+        let _val = &obj.value;
     });
 }
 
 fn benchmark_functions(c: &mut Criterion) {
-    let autoreturn_pool = Arc::new(autoreturn_pool::Pool::new((0..POOL_SIZE).map(|id| DummyObject {
-        id,
-        text: "text".to_string(),
-    })));
-    c.bench_function("autoreturn_pool", |b| b.iter(|| perf_autoreturn_pool(black_box(autoreturn_pool.clone()))));
+    let auto_pool = Arc::new(AutoPool::new((0..POOL_SIZE).map(|id| DummyObject { id, value: 1 })));
+    c.bench_function("auto_pool", |b| b.iter(|| perf_auto_pool(black_box(auto_pool.clone()))));
 
     // Nice interface...
     let lockfree_pool = {
-        let pool = lockfree_object_pool::LinearObjectPool::new(
-            || DummyObject {
-                id: 0,
-                text: "text".to_string(),
-            },
-            |_| {},
-        );
+        let pool = lockfree_object_pool::LinearObjectPool::new(|| DummyObject { id: 0, value: 1 }, |_| {});
         {
             let mut items = Vec::with_capacity(POOL_SIZE);
             for _ in 0..POOL_SIZE {
@@ -80,10 +69,7 @@ fn benchmark_functions(c: &mut Criterion) {
     let lockfree_pool = Arc::new(lockfree_pool);
     c.bench_function("lockfree_pool", |b| b.iter(|| perf_lockfree_pool(black_box(lockfree_pool.clone()))));
 
-    let object_pool = object_pool::Pool::new(POOL_SIZE, || DummyObject {
-        id: 0,
-        text: "text".to_string(),
-    });
+    let object_pool = object_pool::Pool::new(POOL_SIZE, || DummyObject { id: 0, value: 1 });
     let object_pool = Arc::new(object_pool);
     c.bench_function("object_pool", |b| b.iter(|| perf_object_pool(black_box(object_pool.clone()))));
 }

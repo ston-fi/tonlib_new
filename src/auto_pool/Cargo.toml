@@ -11,13 +11,20 @@ repository.workspace = true
 rust-version.workspace = true
 publish = true
 
+[features]
+async = ["dep:async-std"]
+
 [dependencies]
 parking_lot = "0.12"
+async-std = { version = "1.13.0", optional = true }
 
 [dev-dependencies]
 criterion = { version = "0.5" }
 lockfree-object-pool = "0.1.6"
 object-pool = "0.6.0"
+anyhow = "1.0"
+tokio = { version = "1.43.0", features = ["rt", "macros"] }
+auto_pool = {path = ".", features = ["async"]}
 
 [[bench]]
 name = "benchmark"

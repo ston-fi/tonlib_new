@@ -1,7 +1,3 @@
-mod config;
-mod pool;
-mod pool_object;
-
-pub use config::Config;
-pub use pool::AutoPool;
-pub use pool_object::PoolObject;
+pub mod config;
+pub mod pool;
+pub mod pool_object;
