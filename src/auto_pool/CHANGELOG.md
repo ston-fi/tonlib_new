@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0](https://github.com/Sild/libs_rs/compare/v0.1.0...v0.2.0) - 2025-01-30
+
+### Other
+
+- add async interface ([#25](https://github.com/Sild/libs_rs/pull/25))
+
 ## [0.0.2](https://github.com/Sild/libs_rs/compare/auto_pool-v0.0.1...auto_pool-v0.0.2) - 2024-11-06
 
 ### Other
