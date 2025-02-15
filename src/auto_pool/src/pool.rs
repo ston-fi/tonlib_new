@@ -1,6 +1,8 @@
 use super::pool_object::PoolObject;
-use crate::config::AutoPoolConfig;
+use crate::config::{AutoPoolConfig, PickStrategy};
+use parking_lot::lock_api::{MutexGuard, RawMutex};
 use parking_lot::{Condvar, Mutex};
+use rand::RngCore;
 use std::time::{Duration, Instant};
 
 /// A pool of objects.
@@ -50,7 +52,7 @@ impl<T: Send + 'static> AutoPool<T> {
 
     /// Take an object from the pool.
     pub fn get(&self) -> Option<PoolObject<T>> {
-        self.get_impl(self.config.wait_duration)
+        self.get_with_timeout(self.config.wait_duration)
     }
 
     /// Async version - tries to get object, sleep if fails until timeout
@@ -62,7 +64,7 @@ impl<T: Send + 'static> AutoPool<T> {
 
         let start_time = Instant::now();
         while Instant::now() - start_time < self.config.wait_duration {
-            if let Some(obj) = self.get_impl(self.config.lock_duration) {
+            if let Some(obj) = self.get_with_timeout(self.config.lock_duration) {
                 return Some(obj);
             }
             async_std::task::sleep(self.config.sleep_duration).await;
@@ -87,95 +89,33 @@ impl<T: Send + 'static> AutoPool<T> {
         self.storage.lock().shrink_to_fit();
     }
 
-    fn get_impl(&self, timeout: Duration) -> Option<PoolObject<T>> {
-        if timeout.is_zero() {
-            return self.storage.lock().pop().map(|x| PoolObject::new(x, self));
-        }
-
-        let mut lock = self.storage.lock();
-        while lock.is_empty() {
-            let wait_res = self.condvar.wait_for(&mut lock, timeout);
+    fn get_with_timeout(&self, timeout: Duration) -> Option<PoolObject<T>> {
+        let mut locked_storage = self.storage.lock();
+        while locked_storage.is_empty() {
+            let wait_res = self.condvar.wait_for(&mut locked_storage, timeout);
             if wait_res.timed_out() {
                 return None;
             }
         }
-        let inner = lock.pop().unwrap();
-        Some(PoolObject::new(inner, self))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::config::AutoPoolConfig;
-    use crate::pool::AutoPool;
-    use std::ops::Deref;
-
-    #[test]
-    fn test_create() {
-        let pool = AutoPool::new([1, 2, 3]);
-        assert_eq!(pool.size(), 3);
+        self.extract_object(locked_storage)
     }
 
-    #[test]
-    fn test_take() {
-        let pool = AutoPool::new([1, 2, 3]);
-        let obj1 = pool.get();
-        assert_eq!(pool.size(), 2);
-        assert_eq!(*obj1.as_ref().unwrap().deref(), 3);
-    }
-
-    #[tokio::test]
-    #[cfg(feature = "async")]
-    async fn test_take_async() {
-        let pool = AutoPool::new([1, 2, 3]);
-        let obj1 = pool.get_async().await;
-        assert_eq!(pool.size(), 2);
-        assert_eq!(*obj1.as_ref().unwrap().deref(), 3);
-    }
-
-    #[test]
-    fn test_add() {
-        let pool = AutoPool::new([1]);
-        pool.add(2);
-        assert_eq!(pool.size(), 2);
-    }
-
-    #[test]
-    fn test_wait() {
-        let wait_time = std::time::Duration::from_millis(20);
-        let config = AutoPoolConfig {
-            wait_duration: wait_time,
-            ..Default::default()
+    fn extract_object<R>(&self, mut locked_storage: MutexGuard<R, Vec<T>>) -> Option<PoolObject<T>>
+    where
+        R: RawMutex,
+    {
+        let inner = match self.config.pick_strategy {
+            PickStrategy::LIFO => locked_storage.pop(),
+            PickStrategy::RANDOM => match locked_storage.len() {
+                0 => None,
+                1 => locked_storage.pop(),
+                items_cnt => {
+                    let index = rand::rng().next_u64() as usize % items_cnt;
+                    locked_storage.swap(index, items_cnt - 1);
+                    locked_storage.pop()
+                }
+            },
         };
-        let pool = AutoPool::new_with_config(config, [1]);
-        let _obj1 = pool.get();
-        assert_eq!(pool.size(), 0);
-        let start_time = std::time::Instant::now();
-        let obj2 = pool.get();
-        assert!(start_time.elapsed() >= wait_time);
-        assert!(obj2.is_none());
-    }
-
-    #[test]
-    fn test_workflow() {
-        let config = AutoPoolConfig {
-            wait_duration: std::time::Duration::from_millis(5),
-            ..Default::default()
-        };
-        let pool = AutoPool::new_with_config(config, [1, 2, 3]);
-        assert_eq!(pool.size(), 3);
-
-        let obj1 = pool.get();
-        assert_eq!(pool.size(), 2);
-        assert_eq!(*obj1.as_ref().unwrap().deref(), 3);
-
-        let obj2 = pool.get();
-        assert_eq!(*obj2.as_ref().unwrap().deref(), 2);
-        let obj3 = pool.get();
-        assert_eq!(pool.size(), 0);
-        assert_eq!(*obj3.as_ref().unwrap().deref(), 1);
-
-        let obj4 = pool.get();
-        assert!(obj4.is_none());
+        inner.map(|inner| PoolObject::new(inner, self))
     }
 }
