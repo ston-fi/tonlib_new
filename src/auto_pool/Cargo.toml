@@ -1,7 +1,7 @@
 [package]
 name = "auto_pool"
 readme = "README.md"
-version = "0.2.0"
+version = "0.3.0"
 description = "A simple pool that returns items automatically after it's dropped"
 keywords = ["pool", "object-pool", "autoreturn"]
 authors.workspace = true
