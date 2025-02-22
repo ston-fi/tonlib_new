@@ -25,7 +25,7 @@ lockfree-object-pool = "0.1.6"
 object-pool = "0.6.0"
 anyhow = "1.0"
 tokio = { version = "1.43.0", features = ["rt", "macros"] }
-auto_pool = {path = ".", features = ["async"]}
+auto_pool = {path = "", features = ["async"]}
 
 [[bench]]
 name = "benchmark"

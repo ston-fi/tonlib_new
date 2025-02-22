@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "src/auto_pool"
+    "auto_pool"
 ]
 
 resolver = "2"
