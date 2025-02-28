@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1](https://github.com/Sild/libs_rs/compare/auto_pool-v0.3.0...auto_pool-v0.3.1) - 2025-02-28
+
+### Other
+
+- move crate to root ([#30](https://github.com/Sild/libs_rs/pull/30))
+
 ## [0.3.0](https://github.com/Sild/libs_rs/compare/v0.2.0...v0.3.0) - 2025-02-15
 
 ### Other
