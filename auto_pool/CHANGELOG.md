@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2](https://github.com/Sild/libs_rs/compare/auto_pool-v0.3.1...auto_pool-v0.3.2) - 2025-03-07
+
+### Other
+
+- init tonlib ([#35](https://github.com/Sild/libs_rs/pull/35))
+
 ## [0.3.1](https://github.com/Sild/libs_rs/compare/auto_pool-v0.3.0...auto_pool-v0.3.1) - 2025-02-28
 
 ### Other
