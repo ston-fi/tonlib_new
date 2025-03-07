@@ -18,9 +18,7 @@ struct MyObject {
 }
 
 impl MyObject {
-    fn print_me(&self, tag: &str) {
-        println!("[{tag}]: MyObject: val={}", self.value)
-    }
+    fn print_me(&self, tag: &str) { println!("[{tag}]: MyObject: val={}", self.value) }
 }
 
 fn multi_thread() -> anyhow::Result<()> {

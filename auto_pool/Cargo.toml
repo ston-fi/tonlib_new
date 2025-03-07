@@ -28,5 +28,5 @@ tokio = { version = "1.43.0", features = ["rt", "macros"] }
 auto_pool = {path = "", features = ["async"]}
 
 [[bench]]
-name = "benchmark"
+name = "multithread_push_pop"
 harness = false

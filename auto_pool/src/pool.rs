@@ -3,7 +3,7 @@ use crate::config::{AutoPoolConfig, PickStrategy};
 use parking_lot::lock_api::{MutexGuard, RawMutex};
 use parking_lot::{Condvar, Mutex};
 use rand::RngCore;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 /// A pool of objects.
 /// After an object is taken from the pool, it is returned to the pool when it is dropped.
@@ -37,9 +37,7 @@ pub struct AutoPool<T: Send> {
 }
 
 impl<T: Send + 'static> AutoPool<T> {
-    pub fn new(items: impl IntoIterator<Item = T>) -> Self {
-        Self::new_with_config(AutoPoolConfig::default(), items)
-    }
+    pub fn new(items: impl IntoIterator<Item = T>) -> Self { Self::new_with_config(AutoPoolConfig::default(), items) }
 
     pub fn new_with_config(config: AutoPoolConfig, items: impl IntoIterator<Item = T>) -> Self {
         let objects = items.into_iter().collect();
@@ -51,9 +49,7 @@ impl<T: Send + 'static> AutoPool<T> {
     }
 
     /// Take an object from the pool.
-    pub fn get(&self) -> Option<PoolObject<T>> {
-        self.get_with_timeout(self.config.wait_duration)
-    }
+    pub fn get(&self) -> Option<PoolObject<T>> { self.get_with_timeout(self.config.wait_duration) }
 
     /// Async version - tries to get object, sleep if fails until timeout
     #[cfg(feature = "async")]
@@ -62,8 +58,8 @@ impl<T: Send + 'static> AutoPool<T> {
             return self.get();
         }
 
-        let start_time = Instant::now();
-        while Instant::now() - start_time < self.config.wait_duration {
+        let start_time = std::time::Instant::now();
+        while std::time::Instant::now() - start_time < self.config.wait_duration {
             if let Some(obj) = self.get_with_timeout(self.config.lock_duration) {
                 return Some(obj);
             }
@@ -80,14 +76,10 @@ impl<T: Send + 'static> AutoPool<T> {
     }
 
     /// Get the number of available items
-    pub fn size(&self) -> usize {
-        self.storage.lock().len()
-    }
+    pub fn size(&self) -> usize { self.storage.lock().len() }
 
     /// Shrink the pool to fit current number of items
-    pub fn shrink_to_fit(&self) {
-        self.storage.lock().shrink_to_fit();
-    }
+    pub fn shrink_to_fit(&self) { self.storage.lock().shrink_to_fit(); }
 
     fn get_with_timeout(&self, timeout: Duration) -> Option<PoolObject<T>> {
         let mut locked_storage = self.storage.lock();
