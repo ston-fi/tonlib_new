@@ -16,7 +16,8 @@ pub trait TonCell: Debug + Send + Sync {
     fn get_meta(&self) -> &CellMeta;
     fn get_data(&self) -> &[u8];
     fn get_data_bits_len(&self) -> usize;
-    fn get_ref(&self, index: usize) -> Option<&TonCellRef>;
+    fn get_refs(&self) -> &[TonCellRef];
+    fn get_ref(&self, index: usize) -> Option<&TonCellRef> { self.get_refs().get(index) }
     fn into_ref(self) -> TonCellRef
     where
         Self: Sized + 'static,

@@ -361,27 +361,6 @@ mod test {
 
     fn empty_cell_ref() -> TonCellRef { Arc::new(CellOwned::EMPTY) }
 
-    // #[test]
-    // fn test_refs_count() {
-    //     let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);
-    //     assert!(meta_builder.refs.is_empty());
-    //
-    //     let refs = [empty_cell_ref()];
-    //     let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
-    //     assert_eq!(meta_builder.refs.len(), 1);
-    //
-    //     let refs = [empty_cell_ref(), empty_cell_ref()];
-    //     let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
-    //     assert_eq!(meta_builder.refs.len(), 2);
-    //
-    //     let refs = [empty_cell_ref(), empty_cell_ref(), empty_cell_ref()];
-    //     let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
-    //     assert_eq!(meta_builder.refs.len(), 3);
-    //     let refs = [empty_cell_ref(), empty_cell_ref(), empty_cell_ref(), empty_cell_ref()];
-    //     let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
-    //     assert_eq!(meta_builder.refs_count, 4);
-    // }
-
     #[test]
     fn test_refs_descriptor_d1() {
         let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);

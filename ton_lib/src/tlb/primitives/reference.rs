@@ -1,8 +1,8 @@
 // use crate::errors::TLBResult;
 // use crate::tlb_type::TLBType;
 // use std::ops::{Deref, DerefMut};
-// use ton_lib_cell::cell_build_parse::builder::TonCellBuilder;
-// use ton_lib_cell::cell_build_parse::parser::TonCellParser;
+// use ton_lib_cell::build_parse::builder::TonCellBuilder;
+// use ton_lib_cell::build_parse::parser::TonCellParser;
 //
 // #[derive(Debug, PartialEq, Clone)]
 // pub struct Ref<T>(pub T);
@@ -36,7 +36,7 @@
 //     use crate::primitives::_test_types::TestType1;
 //     use crate::primitives::reference::Ref;
 //     use crate::tlb_type::TLBType;
-//     use ton_lib_cell::cell_build_parse::builder::TonCellBuilder;
+//     use ton_lib_cell::build_parse::builder::TonCellBuilder;
 //     use ton_lib_cell::cell::ton_cell::TonCell;
 //
 //     #[test]

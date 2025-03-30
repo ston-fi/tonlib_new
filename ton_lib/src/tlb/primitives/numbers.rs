@@ -1,6 +1,6 @@
-use crate::cell::numbers::TonNumber;
-use crate::cell_build_parse::builder::CellBuilder;
-use crate::cell_build_parse::parser::CellParser;
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_number::traits::TonNumber;
 use crate::errors::TonLibError;
 use crate::tlb::tlb_type::TLBType;
 use std::ops::{Deref, DerefMut};

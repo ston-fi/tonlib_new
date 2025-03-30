@@ -1,4 +1,4 @@
-use ton_lib::cell_build_parse::builder::CellBuilder;
+use ton_lib::cell::build_parse::builder::CellBuilder;
 
 fn main() -> anyhow::Result<()> {
     for _ in 0..10000000 {

@@ -1,12 +1,9 @@
-use crate::cell::cell_owned::CellOwned;
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
-use crate::cell::ton_hash::TonHash;
-use crate::cell_build_parse::builder::CellBuilder;
-use crate::cell_build_parse::parser::CellParser;
 use crate::errors::TonLibError;
 use crate::tlb::primitives::numbers::TLBNumber;
 use crate::tlb::tlb_type::TLBType;
-use std::collections::HashMap;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L281
 #[derive(Debug, Clone, PartialEq)]
@@ -15,7 +12,8 @@ pub struct StateInit {
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    pub library: HashMap<TonHash, CellOwned>,
+    // pub library: HashMap<TonHash, CellOwned>,
+    pub library: Option<TonCellRef>,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -31,7 +29,8 @@ impl StateInit {
             tick_tock: None,
             code: Some(code),
             data: Some(data),
-            library: HashMap::new(),
+            // library: HashMap::new(),
+            library: None,
         }
     }
 }
@@ -59,9 +58,10 @@ impl TLBType for StateInit {
 
 impl TLBType for TickTock {
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
-        let tick = parser.read_bit()?;
-        let tock = parser.read_bit()?;
-        Ok(TickTock { tick, tock })
+        Ok(TickTock {
+            tick: TLBType::read(parser)?,
+            tock: TLBType::read(parser)?,
+        })
     }
 
     fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {

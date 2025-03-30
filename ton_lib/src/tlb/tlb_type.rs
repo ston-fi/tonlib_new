@@ -1,8 +1,8 @@
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
 use crate::cell::cell_owned::CellOwned;
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
-use crate::cell_build_parse::builder::CellBuilder;
-use crate::cell_build_parse::parser::CellParser;
 use crate::errors::TonLibError;
 
 pub trait TLBType: Sized {
@@ -71,7 +71,7 @@ pub trait TLBType: Sized {
         if expected_prefix == &TLBPrefix::NULL {
             return Ok(());
         }
-        let actual_value = reader.lookup_bits(expected_prefix.bit_len as u8)?;
+        let actual_value = reader.read_num(expected_prefix.bit_len)?;
         if actual_value != expected_prefix.value {
             return Err(TonLibError::TLBWrongPrefix {
                 exp: expected_prefix.value,

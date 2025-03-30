@@ -1,6 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use ton_lib::cell::build_parse::builder::CellBuilder;
 use ton_lib::cell::ton_cell::TonCell;
-use ton_lib::cell_build_parse::builder::CellBuilder;
 use tonlib_core::cell::CellBuilder as TonlibCellBuilder;
 
 const ITERATIONS_COUNT: usize = 100;

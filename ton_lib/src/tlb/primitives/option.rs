@@ -1,5 +1,5 @@
-use crate::cell_build_parse::builder::CellBuilder;
-use crate::cell_build_parse::parser::CellParser;
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonLibError;
 use crate::tlb::tlb_type::TLBType;
 
@@ -30,7 +30,6 @@ impl<T: TLBType> TLBType for Option<T> {
 mod tests {
     use super::*;
     use crate::tlb::primitives::_test_types::TestType1;
-    use tokio_test::*;
 
     #[test]
     fn test_option() -> anyhow::Result<()> {
@@ -50,7 +49,7 @@ mod tests {
         // check layout
         let mut parser = CellParser::new(&cell);
         assert!(parser.read_bit()?); // Some
-        assert_ok!(parser.read_bits(32, &mut [0; 32])); // skipping
+        parser.seek_bits(32)?; // skipping
         assert!(!parser.read_bit()?); // None
         Ok(())
     }

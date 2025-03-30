@@ -1,10 +1,10 @@
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
 use crate::cell::cell_owned::CellOwned;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
-use crate::cell_build_parse::builder::CellBuilder;
-use crate::cell_build_parse::parser::CellParser;
 use crate::errors::TonLibError;
 use crate::tlb::tlb_type::TLBType;
 
@@ -13,8 +13,7 @@ impl TLBType for CellOwned {
         let bits_left = parser.data_bits_left()?;
 
         if parser.cell.get_data_bits_len() == bits_left as usize && parser.next_ref_pos == 0 {
-            let mut data = Vec::with_capacity((bits_left as usize) / 8 + 1);
-            parser.read_bits(bits_left, &mut data)?;
+            let _data = parser.read_bits(bits_left)?; // drain data from parser
 
             let mut refs = Vec::with_capacity(parser.cell.refs_count());
             for i in 0..parser.cell.refs_count() {
@@ -28,8 +27,7 @@ impl TLBType for CellOwned {
                 refs,
             ))
         } else {
-            let mut data = Vec::with_capacity((bits_left as usize) / 8 + 1);
-            parser.read_bits(bits_left, &mut data)?;
+            let data = parser.read_bits(bits_left)?;
 
             let mut refs = vec![];
             while let Ok(ref_cell) = parser.read_next_ref() {
@@ -47,6 +45,8 @@ impl TLBType for CellOwned {
         }
         Ok(())
     }
+
+    fn to_cell(&self) -> Result<CellOwned, TonLibError> { Ok(self.clone()) }
 }
 
 impl TLBType for TonCellRef {
@@ -60,9 +60,8 @@ impl TLBType for TonCellRef {
 
 impl TLBType for TonHash {
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
-        let mut data = [0; TonHash::BYTES_LEN];
-        parser.read_bytes(&mut data)?;
-        Ok(TonHash::from(data))
+        let data = parser.read_bytes(TonHash::BYTES_LEN as u32)?;
+        TonHash::from_vec(data)
     }
 
     fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {

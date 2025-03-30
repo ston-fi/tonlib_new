@@ -1,3 +1,5 @@
 /target
-.idea
 Cargo.lock
+.idea
+.vscode
+.DS_Store

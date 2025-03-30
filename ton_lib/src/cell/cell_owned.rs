@@ -38,7 +38,7 @@ impl TonCell for CellOwned {
     fn get_meta(&self) -> &CellMeta { &self.meta }
     fn get_data(&self) -> &[u8] { &self.data }
     fn get_data_bits_len(&self) -> usize { self.data_bits_len }
-    fn get_ref(&self, index: usize) -> Option<&TonCellRef> { self.refs.get(index) }
+    fn get_refs(&self) ->&[TonCellRef] { self.refs.as_slice() }
 }
 
 impl PartialEq for CellOwned {
