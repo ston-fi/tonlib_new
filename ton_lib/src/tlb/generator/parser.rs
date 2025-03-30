@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::tlb::predefined::BLOCK_TLB;
+    use crate::tlb::block::BLOCK_TLB;
 
     extern crate colog;
 

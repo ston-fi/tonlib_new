@@ -1,4 +1,3 @@
-use crate::cell::cell_owned::CellOwned;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
@@ -30,10 +29,15 @@ impl CellBuilder {
         }
     }
 
-    pub fn build(self) -> Result<CellOwned, TonLibError> {
+    pub fn build(self) -> Result<TonCell, TonLibError> {
         let (data, data_bits_len) = build_cell_data(self.data_writer)?;
         let meta = CellMeta::new(self.cell_type, &data, data_bits_len, &self.refs)?;
-        Ok(CellOwned::new(meta, data, data_bits_len, self.refs))
+        Ok(TonCell {
+            meta,
+            data,
+            data_bits_len,
+            refs: self.refs,
+        })
     }
 
     pub fn write_bit(&mut self, data: bool) -> Result<(), TonLibError> {
@@ -99,10 +103,10 @@ impl CellBuilder {
 
     pub fn write_byte(&mut self, data: u8) -> Result<(), TonLibError> { self.write_bytes([data]) }
 
-    pub fn write_cell(&mut self, cell: &dyn TonCell) -> Result<(), TonLibError> {
-        self.write_bits(cell.get_data(), cell.get_data_bits_len() as u32)?;
-        for i in 0..cell.refs_count() {
-            self.write_ref(cell.get_ref(i).unwrap().clone())?;
+    pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonLibError> {
+        self.write_bits(&cell.data, cell.data_bits_len as u32)?;
+        for i in 0..cell.refs.len() {
+            self.write_ref(cell.refs[i].clone())?;
         }
         Ok(())
     }
@@ -194,12 +198,10 @@ fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec
 mod tests {
     use super::*;
     use crate::cell::meta::level_mask::LevelMask;
-    use crate::cell::ton_cell::{TonCell, TonCellRefsStore};
     use crate::cell::ton_hash::TonHash;
     use hex::FromHex;
     use std::str::FromStr;
 
-    use std::sync::Arc;
     use tokio_test::{assert_err, assert_ok};
 
     #[test]
@@ -210,8 +212,8 @@ mod tests {
         cell_builder.write_bit(true)?;
         cell_builder.write_bit(false)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1010_0000]);
-        assert_eq!(cell.get_data_bits_len(), 4);
+        assert_eq!(cell.data, vec![0b1010_0000]);
+        assert_eq!(cell.data_bits_len, 4);
         Ok(())
     }
 
@@ -222,14 +224,14 @@ mod tests {
         cell_builder.write_bits_with_offset([0b0000_1111], 4, 4)?;
         cell_builder.write_bits_with_offset([0b1111_0011], 3, 4)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1010_1010, 0b1111_0010]);
-        assert_eq!(cell.get_data_bits_len(), 15);
+        assert_eq!(cell.data, vec![0b1010_1010, 0b1111_0010]);
+        assert_eq!(cell.data_bits_len, 15);
 
         let mut cell_builder = CellBuilder::new();
         cell_builder.write_bits_with_offset([0b1010_1010, 0b0000_1111], 3, 10)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b0010_0000]);
-        assert_eq!(cell.get_data_bits_len(), 3);
+        assert_eq!(cell.data, vec![0b0010_0000]);
+        assert_eq!(cell.data_bits_len, 3);
         Ok(())
     }
 
@@ -240,8 +242,8 @@ mod tests {
         cell_builder.write_bits([0b1010_1010], 8)?;
         cell_builder.write_bits([0b0101_0101], 4)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1101_0101, 0b0010_1000]);
-        assert_eq!(cell.get_data_bits_len(), 13);
+        assert_eq!(cell.data, vec![0b1101_0101, 0b0010_1000]);
+        assert_eq!(cell.data_bits_len, 13);
         Ok(())
     }
 
@@ -251,8 +253,8 @@ mod tests {
         cell_builder.write_byte(0b1010_1010)?;
         cell_builder.write_byte(0b0101_0101)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1010_1010, 0b0101_0101]);
-        assert_eq!(cell.get_data_bits_len(), 16);
+        assert_eq!(cell.data, vec![0b1010_1010, 0b0101_0101]);
+        assert_eq!(cell.data_bits_len, 16);
         Ok(())
     }
 
@@ -261,8 +263,8 @@ mod tests {
         let mut cell_builder = CellBuilder::new();
         cell_builder.write_bytes([0b1010_1010, 0b0101_0101])?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1010_1010, 0b0101_0101]);
-        assert_eq!(cell.get_data_bits_len(), 16);
+        assert_eq!(cell.data, vec![0b1010_1010, 0b0101_0101]);
+        assert_eq!(cell.data_bits_len, 16);
         Ok(())
     }
 
@@ -272,7 +274,7 @@ mod tests {
         cell_builder.write_bit(true)?;
         assert!(cell_builder.write_bits([0b1010_1010], CellMeta::CELL_MAX_DATA_BITS_LEN).is_err());
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1000_0000]);
+        assert_eq!(cell.data, vec![0b1000_0000]);
         Ok(())
     }
 
@@ -282,7 +284,7 @@ mod tests {
         cell_builder.write_num(0b1010_1010, 8)?;
         cell_builder.write_num(0b0000_0101, 4)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1010_1010, 0b0101_0000]);
+        assert_eq!(cell.data, vec![0b1010_1010, 0b0101_0000]);
         Ok(())
     }
 
@@ -300,8 +302,8 @@ mod tests {
         cell_builder.write_num(2u16, 5)?;
         cell_builder.write_num(5u32, 10)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b0001_0001, 0b0000_0000, 0b1010_0000]);
-        assert_eq!(cell.get_data_bits_len(), 19);
+        assert_eq!(cell.data, vec![0b0001_0001, 0b0000_0000, 0b1010_0000]);
+        assert_eq!(cell.data_bits_len, 19);
         Ok(())
     }
 
@@ -313,7 +315,7 @@ mod tests {
         cell_builder.write_num(-3i16, 16)?;
         cell_builder.write_num(-3i8, 8)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b1111_1111, 0b1111_1101, 0b1111_1101]);
+        assert_eq!(cell.data, vec![0b1111_1111, 0b1111_1101, 0b1111_1101]);
         Ok(())
     }
 
@@ -324,7 +326,7 @@ mod tests {
         cell_builder.write_num(-3i16, 16)?;
         cell_builder.write_num(-3i8, 8)?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.get_data(), vec![0b0111_1111, 0b1111_1110, 0b1111_1110, 0b1000_0000]);
+        assert_eq!(cell.data, vec![0b0111_1111, 0b1111_1110, 0b1111_1110, 0b1000_0000]);
         Ok(())
     }
 
@@ -350,16 +352,16 @@ mod tests {
 
     #[test]
     fn test_builder_write_refs() -> anyhow::Result<()> {
-        let cell_ref =
-            Arc::new(CellOwned::new(CellMeta::EMPTY_CELL_META, vec![0b1111_0000], 4, TonCellRefsStore::new()));
-
+        let mut builder = CellBuilder::new();
+        builder.write_bits([0b1111_0000], 4)?;
+        let cell_ref = builder.build()?.into_ref();
         let mut cell_builder = CellBuilder::new();
         cell_builder.write_ref(cell_ref.clone())?;
         cell_builder.write_ref(cell_ref.clone())?;
         let cell = cell_builder.build()?;
-        assert_eq!(cell.refs_count(), 2);
-        assert_eq!(cell.get_ref(0).unwrap().get_data(), cell_ref.get_data());
-        assert_eq!(cell.get_ref(0).unwrap().get_data(), cell_ref.get_data());
+        assert_eq!(cell.refs.len(), 2);
+        assert_eq!(cell.refs[0].data, cell_ref.data);
+        assert_eq!(cell.refs[1].data, cell_ref.data);
         Ok(())
     }
 
@@ -367,7 +369,7 @@ mod tests {
     fn test_builder_build_cell_ordinary_empty() -> anyhow::Result<()> {
         let cell_builder = CellBuilder::new();
         let cell = cell_builder.build()?;
-        assert_eq!(cell, CellOwned::EMPTY);
+        assert_eq!(cell, TonCell::EMPTY);
         for level in 0..4 {
             assert_eq!(cell.hash_for_level(LevelMask::new(level)), &TonHash::EMPTY_CELL_HASH);
         }
@@ -414,14 +416,14 @@ mod tests {
         builder0.write_ref(cell2.clone().into())?;
         let cell0 = builder0.build()?;
 
-        assert_eq!(cell0.refs_count(), 2);
-        assert_eq!(cell0.get_data_bits_len(), 17);
-        assert_eq!(cell0.get_data(), vec![0b1000_0000, 0b1000_0001, 0b1000_0000]);
+        assert_eq!(cell0.refs.len(), 2);
+        assert_eq!(cell0.data_bits_len, 17);
+        assert_eq!(cell0.data, vec![0b1000_0000, 0b1000_0001, 0b1000_0000]);
 
         let exp_hash = TonHash::from_hex("5d64a52c76eb32a63a393345a69533f095f945f2d30f371a1f323ac10102c395")?;
         for level in 0..4 {
             assert_eq!(cell0.hash_for_level(LevelMask::new(level)), &exp_hash);
-            assert_eq!(cell0.get_meta().depths[level as usize], 3);
+            assert_eq!(cell0.meta.depths[level as usize], 3);
         }
         Ok(())
     }
@@ -440,7 +442,7 @@ mod tests {
         let expected_hash = TonHash::from_hex("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;
         for level in 0..4 {
             assert_eq!(lib_cell.hash_for_level(LevelMask::new(level)), &expected_hash);
-            assert_eq!(lib_cell.get_meta().depths[level as usize], 0);
+            assert_eq!(lib_cell.meta.depths[level as usize], 0);
         }
         Ok(())
     }
@@ -473,12 +475,12 @@ mod tests {
         };
 
         let cell = prepare_cell("3", 33)?;
-        assert_eq!(cell.get_data(), [0, 0, 0, 0, 3]);
+        assert_eq!(cell.data, [0, 0, 0, 0, 3]);
 
         // 256 bits (+ sign)
         let cell = prepare_cell("97887266651548624282413032824435501549503168134499591480902563623927645013201", 257)?;
         assert_eq!(
-            cell.get_data(),
+            cell.data,
             [
                 0, 216, 106, 58, 195, 97, 8, 173, 64, 195, 26, 52, 186, 72, 230, 253, 248, 12, 245, 147, 137, 170, 38,
                 117, 66, 220, 74, 104, 103, 119, 137, 4, 209
@@ -487,22 +489,22 @@ mod tests {
 
         let cell = prepare_cell("-5", 257)?;
         assert_eq!(
-            cell.get_data(),
+            cell.data,
             [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5]
         );
 
         let cell = prepare_cell("-5", 33)?;
-        assert_eq!(cell.get_data(), [1, 0, 0, 0, 5]);
+        assert_eq!(cell.data, [1, 0, 0, 0, 5]);
 
         let cell = prepare_cell("-5", 4)?;
-        assert_eq!(cell.get_data(), [1, 160]);
+        assert_eq!(cell.data, [1, 160]);
 
         let cell = prepare_cell("-5", 5)?;
-        assert_eq!(cell.get_data(), [1, 80]);
+        assert_eq!(cell.data, [1, 80]);
         Ok(())
     }
 
-    fn prepare_cell_big_uint(num_str: &str, bits_len: u32) -> anyhow::Result<CellOwned> {
+    fn prepare_cell_big_uint(num_str: &str, bits_len: u32) -> anyhow::Result<TonCell> {
         let number = num_bigint::BigUint::from_str(num_str)?;
         let mut builder = CellBuilder::new();
         builder.write_bits([0], 7)?; // for pretty printing
@@ -523,7 +525,7 @@ mod tests {
         };
 
         let cell = prepare_cell("3", 33)?;
-        assert_eq!(cell.get_data(), [0, 0, 0, 0, 3]);
+        assert_eq!(cell.data, [0, 0, 0, 0, 3]);
 
         // 256 bits (+ sign)
         let cell = prepare_cell_big_uint(
@@ -531,7 +533,7 @@ mod tests {
             257,
         )?;
         assert_eq!(
-            cell.get_data(),
+            cell.data,
             [
                 0, 216, 106, 58, 195, 97, 8, 173, 64, 195, 26, 52, 186, 72, 230, 253, 248, 12, 245, 147, 137, 170, 38,
                 117, 66, 220, 74, 104, 103, 119, 137, 4, 209

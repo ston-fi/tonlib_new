@@ -1,10 +1,9 @@
 use super::raw::boc_raw::BOCRaw;
-use crate::cell::cell_owned::CellOwned;
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonLibError;
 use std::marker::PhantomData;
 
-pub struct BOC<C = CellOwned> {
+pub struct BOC<C = TonCell> {
     roots: Vec<TonCellRef>,
     _phantom: PhantomData<C>,
 }
@@ -26,7 +25,7 @@ impl BOC {
     pub fn from_bytes<T: AsRef<[u8]>>(bytes: T) -> Result<Self, TonLibError> {
         let raw = BOCRaw::from_bytes(bytes.as_ref())?;
         Ok(Self {
-            roots: raw.into_roots::<CellOwned>()?,
+            roots: raw.into_roots()?,
             _phantom: PhantomData,
         })
     }
@@ -52,13 +51,12 @@ impl BOC {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cell::cell_owned::CellOwned;
     use crate::cell::ton_hash::TonHash;
     use hex::FromHex;
 
     #[test]
     fn test_boc_create() {
-        let cell = CellOwned::EMPTY;
+        let cell = TonCell::EMPTY;
         let boc = BOC::new(cell);
         assert_eq!(boc.roots.len(), 1);
     }

@@ -65,8 +65,8 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
             cells_by_hash.insert(hash.clone(), indexed_cell);
 
             new_hash_index += 1;
-            for ref_pos in 0..cell.refs_count() {
-                next_cells.push(cell.get_ref(ref_pos).unwrap());
+            for ref_pos in 0..cell.refs.len() {
+                next_cells.push(&cell.refs[ref_pos]);
             }
         }
 
@@ -79,8 +79,8 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
         verify_order = false;
 
         for index_cell in cells_by_hash.values() {
-            for ref_pos in 0..index_cell.cell.refs_count() {
-                let ref_cell = index_cell.cell.get_ref(ref_pos).unwrap();
+            for ref_pos in 0..index_cell.cell.refs.len() {
+                let ref_cell = &index_cell.cell.refs[ref_pos];
                 let ref_hash = ref_cell.hash();
                 if let Some(indexed) = cells_by_hash.get(ref_hash) {
                     if indexed.index < index_cell.index {
@@ -99,11 +99,11 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
 fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonLibError> {
     let refs_positions = raw_cell_refs_indexes(cell, cells_by_hash)?;
     Ok(CellRaw {
-        cell_type: cell.get_meta().cell_type,
-        data: cell.get_data().to_vec(),
-        data_bits_len: cell.get_data_bits_len(),
+        cell_type: cell.meta.cell_type,
+        data: cell.data.clone(),
+        data_bits_len: cell.data_bits_len,
         refs_positions,
-        level_mask: cell.get_meta().level_mask,
+        level_mask: cell.meta.level_mask,
     })
 }
 
@@ -111,9 +111,9 @@ fn raw_cell_refs_indexes(
     cell: &TonCellRef,
     cells_by_hash: &HashMap<TonHash, CellIndexed>,
 ) -> Result<Vec<usize>, TonLibError> {
-    let mut vec = Vec::with_capacity(cell.refs_count());
-    for ref_pos in 0..cell.refs_count() {
-        let cell_ref = cell.get_ref(ref_pos).unwrap();
+    let mut vec = Vec::with_capacity(cell.refs.len());
+    for ref_pos in 0..cell.refs.len() {
+        let cell_ref = &cell.refs[ref_pos];
         vec.push(get_position(cell_ref, cells_by_hash)?);
     }
     Ok(vec)

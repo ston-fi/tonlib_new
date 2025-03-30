@@ -1,14 +1,16 @@
+use crate::boc::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::cell_owned::CellOwned;
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
+use std::ops::Deref;
 
 pub trait TLBType: Sized {
     // read-write definition
     // https://docs.ton.org/v3/documentation/data-formats/tlb/tl-b-language#overview
     // must be implemented by all TLB objects
+    // doesn't include prefix handling
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError>;
     fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError>;
 
@@ -30,39 +32,31 @@ pub trait TLBType: Sized {
 
     /// Parsing
     ///
-    fn from_cell(cell: &dyn TonCell) -> Result<Self, TonLibError> { Self::read(&mut CellParser::new(cell)) }
+    fn from_cell(cell: &TonCell) -> Result<Self, TonLibError> { Self::read(&mut CellParser::new(cell)) }
 
-    // fn from_boc(boc: &[u8]) -> Ton<Self> {
-    //     unimplemented!()
-    // }
-    //
-    // fn from_boc_hex(boc_hex: &str) -> TonLibResult<Self> {
-    //     unimplemented!()
-    // }
-    //
-    // fn from_boc_b64(boc_b64: &str) -> TonLibResult<Self> {
-    //     unimplemented!()
-    // }
+    fn from_boc(boc: &[u8]) -> Result<Self, TonLibError> {
+        Self::from_cell(BOC::from_bytes(boc)?.single_root()?.deref())
+    }
+
+    fn from_boc_hex(boc_hex: &str) -> Result<Self, TonLibError> {
+        Self::from_cell(BOC::from_hex(boc_hex)?.single_root()?.deref())
+    }
 
     /// Serialization
     ///
-    fn to_cell(&self) -> Result<CellOwned, TonLibError> {
+    fn to_cell(&self) -> Result<TonCell, TonLibError> {
         let mut builder = CellBuilder::new();
         self.write(&mut builder)?;
         builder.build()
     }
 
-    // fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonCellError> {
-    //     unimplemented!()
-    // }
-    //
-    // fn to_boc_hex(&self, add_crc32: bool) -> Result<String, TonCellError> {
-    //     unimplemented!()
-    // }
-    //
-    // fn to_boc_b64(&self, add_crc32: bool) -> Result<String, TonCellError> {
-    //     unimplemented!()
-    // }
+    fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonLibError> {
+        let mut builder = CellBuilder::new();
+        self.write(&mut builder)?;
+        BOC::new(builder.build()?).to_bytes(add_crc32)
+    }
+
+    fn to_boc_hex(&self, add_crc32: bool) -> Result<String, TonLibError> { Ok(hex::encode(self.to_boc(add_crc32)?)) }
 
     /// Helpers - for internal use
     ///

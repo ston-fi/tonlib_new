@@ -63,7 +63,6 @@ fn test_build_parse_num() -> anyhow::Result<()> {
 mod bignum {
     use crate::cell::build_parse::builder::CellBuilder;
     use crate::cell::build_parse::parser::CellParser;
-    use crate::cell::ton_cell::TonCell;
     use num_bigint::{BigInt, BigUint};
 
     #[test]
@@ -82,7 +81,7 @@ mod bignum {
             writer.write_big_num(value, *bits)?;
         }
         let cell = writer.build()?;
-        for byte in cell.get_data() {
+        for byte in &cell.data {
             println!("{:08b}", byte);
         }
 
@@ -107,7 +106,7 @@ mod bignum {
             writer.write_big_num(value, *bits)?;
         }
         let cell = writer.build()?;
-        for byte in cell.get_data() {
+        for byte in &cell.data {
             println!("{:08b}", byte);
         }
 

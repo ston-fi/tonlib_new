@@ -5,7 +5,7 @@ use crate::errors::TonLibError;
 
 impl BOCRaw {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
-    pub(crate) fn into_roots<T: TonCell + 'static>(self) -> Result<Vec<TonCellRef>, TonLibError> {
+    pub(crate) fn into_roots(self) -> Result<Vec<TonCellRef>, TonLibError> {
         let num_cells = self.cells.len();
         let mut cells: Vec<TonCellRef> = Vec::with_capacity(num_cells);
 
@@ -20,7 +20,13 @@ impl BOCRaw {
 
             let meta = CellMeta::new(cell_raw.cell_type, &cell_raw.data, cell_raw.data_bits_len, &refs)?;
 
-            let cell_ref = T::from_data(meta, cell_raw.data, cell_raw.data_bits_len, refs).into_ref();
+            let cell_ref = TonCell {
+                meta,
+                data: cell_raw.data,
+                data_bits_len: cell_raw.data_bits_len,
+                refs,
+            }
+            .into_ref();
             cells.push(cell_ref);
         }
 

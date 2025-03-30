@@ -46,7 +46,7 @@ impl<'a> CellMetaBuilder<'a> {
             CellType::Ordinary => self.calc_level_mask_ordinary(),
             CellType::PrunedBranch => self.calc_level_mask_pruned(),
             CellType::Library => LevelMask::new(0),
-            CellType::MerkleProof => self.refs[0].get_meta().level_mask >> 1,
+            CellType::MerkleProof => self.refs[0].meta.level_mask >> 1,
             CellType::MerkleUpdate => self.calc_level_mask_merkle_update(),
         }
     }
@@ -136,7 +136,7 @@ impl<'a> CellMetaBuilder<'a> {
     fn calc_level_mask_ordinary(&self) -> LevelMask {
         let mut mask = LevelMask::new(0);
         for cell_ref in self.refs {
-            mask |= cell_ref.get_meta().level_mask;
+            mask |= cell_ref.meta.level_mask;
         }
         mask
     }
@@ -149,7 +149,7 @@ impl<'a> CellMetaBuilder<'a> {
     }
 
     fn calc_level_mask_merkle_update(&self) -> LevelMask {
-        let refs_lm = self.refs[0].get_meta().level_mask | self.refs[1].get_meta().level_mask;
+        let refs_lm = self.refs[0].meta.level_mask | self.refs[1].meta.level_mask;
         refs_lm >> 1
     }
 
@@ -299,14 +299,14 @@ impl<'a> CellMetaBuilder<'a> {
         Ok((resolved_hashes, resolved_depths))
     }
 
-    fn get_ref_depth(&self, cell_ref: &dyn TonCell, level: u8) -> u16 {
+    fn get_ref_depth(&self, cell_ref: &TonCell, level: u8) -> u16 {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.get_meta().depths[level as usize + extra_level]
+        cell_ref.meta.depths[level as usize + extra_level]
     }
 
-    fn get_ref_hash(&self, cell_ref: &dyn TonCell, level: u8) -> TonHash {
+    fn get_ref_hash(&self, cell_ref: &TonCell, level: u8) -> TonHash {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.get_meta().hashes[level as usize + extra_level].clone()
+        cell_ref.meta.hashes[level as usize + extra_level].clone()
     }
 
     fn calc_pruned_hash_depth(&self, level_mask: LevelMask) -> Result<Vec<Pruned>, TonLibError> {
@@ -356,10 +356,8 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::cell::cell_owned::CellOwned;
-    use std::sync::Arc;
 
-    fn empty_cell_ref() -> TonCellRef { Arc::new(CellOwned::EMPTY) }
+    fn empty_cell_ref() -> TonCellRef { TonCell::EMPTY.into_ref() }
 
     #[test]
     fn test_refs_descriptor_d1() {
