@@ -50,8 +50,9 @@ tlb_number_primitive_impl!(i64);
 tlb_number_primitive_impl!(u64);
 tlb_number_primitive_impl!(i128);
 tlb_number_primitive_impl!(u128);
-//
-//
+
+
+#[cfg(any(feature = "num-bigint", feature = "fastnum"))]
 macro_rules! tlb_big_number_impl {
     ($t:ty) => {
         impl<const BITS_LEN: u32> TLBType for TLBNumber<$t, BITS_LEN> {
