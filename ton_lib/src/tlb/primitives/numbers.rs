@@ -51,7 +51,6 @@ tlb_number_primitive_impl!(u64);
 tlb_number_primitive_impl!(i128);
 tlb_number_primitive_impl!(u128);
 
-
 #[cfg(any(feature = "num-bigint", feature = "fastnum"))]
 macro_rules! tlb_big_number_impl {
     ($t:ty) => {
