@@ -41,7 +41,7 @@ pub enum TonLibError {
 
     // tlb
     #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}")]
-    TLBWrongPrefix { exp: u128, given: u128 },
+    TLBWrongOpcode { exp: u128, given: u128 },
 
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),

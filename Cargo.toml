@@ -2,7 +2,7 @@
 members = [
     "auto_pool",
     "ton_lib",
-    "ton_lib/src/tlb/tlb_derive",
+    "ton_lib_proc_macro",
 ]
 
 resolver = "2"

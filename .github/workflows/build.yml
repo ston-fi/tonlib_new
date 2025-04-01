@@ -19,3 +19,4 @@ jobs:
     - run: cargo +nightly fmt --check
     - run: cargo build --verbose
     - run: cargo test --all
+    - run: cargo test --all --all-features

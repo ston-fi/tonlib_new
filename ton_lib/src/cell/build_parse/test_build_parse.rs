@@ -81,10 +81,6 @@ mod bignum {
             writer.write_big_num(value, *bits)?;
         }
         let cell = writer.build()?;
-        for byte in &cell.data {
-            println!("{:08b}", byte);
-        }
-
         let mut reader = CellParser::new(&cell);
         for (value, bits) in &values {
             let read_value = reader.read_big_num::<BigInt>(*bits)?;
@@ -106,10 +102,6 @@ mod bignum {
             writer.write_big_num(value, *bits)?;
         }
         let cell = writer.build()?;
-        for byte in &cell.data {
-            println!("{:08b}", byte);
-        }
-
         let mut reader = CellParser::new(&cell);
         for (value, bits) in &values {
             let read_value = reader.read_big_num::<BigUint>(*bits)?;
