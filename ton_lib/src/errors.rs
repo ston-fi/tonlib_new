@@ -40,9 +40,15 @@ pub enum TonLibError {
     BocCustom(String),
 
     // tlb
-    #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}")]
-    TLBWrongOpcode { exp: u128, given: u128 },
-
+    #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={exp_bits}, left_bits={left_bits}")]
+    TLBWrongPrefix {
+        exp: u128,
+        given: u128,
+        exp_bits: u32,
+        left_bits: u32,
+    },
+    #[error("TLBEnum: Out of options")]
+    TLBEnumOutOfOptions,
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
 

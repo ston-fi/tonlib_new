@@ -21,7 +21,7 @@ impl TLBType for TestType1 {
     }
 
     fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
-        dst.write_num(self.value, 32)?;
+        dst.write_num(&self.value, 32)?;
         Ok(())
     }
 }
@@ -34,7 +34,7 @@ impl TLBType for TestType2 {
     }
 
     fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
-        dst.write_num(self.value, 64)?;
+        dst.write_num(&self.value, 64)?;
         Ok(())
     }
 }

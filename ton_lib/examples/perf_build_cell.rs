@@ -5,7 +5,7 @@ fn main() -> anyhow::Result<()> {
         let mut builder1 = CellBuilder::new();
         builder1.write_bit(true)?;
         builder1.write_bytes([1, 2, 3])?;
-        builder1.write_num(4, 4)?;
+        builder1.write_num(&4, 4)?;
 
         let mut builder2 = CellBuilder::new();
         builder2.write_bytes([10, 20, 30])?;

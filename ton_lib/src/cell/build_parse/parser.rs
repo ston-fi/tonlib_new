@@ -1,8 +1,9 @@
 use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::num::traits::TonCellNum;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
-use crate::cell::ton_number::traits::{TonBigNumber, TonNumber};
 use crate::errors::TonLibError;
 use bitstream_io::{BigEndian, BitRead, BitReader};
+use num_traits::Zero;
 use std::io::{Cursor, SeekFrom};
 
 pub struct CellParser<'a> {
@@ -56,27 +57,17 @@ impl<'a> CellParser<'a> {
 
     pub fn read_bytes(&mut self, bytes_len: u32) -> Result<Vec<u8>, TonLibError> { self.read_bits(bytes_len * 8) }
 
-    pub fn read_num<N: TonNumber>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
-        self.ensure_enough_bits(bits_len)?;
-        Ok(self.data_reader.read::<N>(bits_len)?)
-    }
-
-    pub fn read_big_num<N: TonBigNumber>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
+    pub fn read_num<N: TonCellNum>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
         if bits_len == 0 {
-            return Ok(N::zero());
+            return Ok(N::from_primitive(N::Primitive::zero()));
         }
         self.ensure_enough_bits(bits_len)?;
-        let mut dst = self.read_bits(bits_len)?;
-
-        let negative = if N::SIGNED {
-            let is_negative = dst.first().unwrap() & (1 << 7) != 0;
-            *dst.first_mut().unwrap() &= !(1 << 7); // make first bit 0: convert to proper unsigned value
-            is_negative
-        } else {
-            false
-        };
-        let res = N::from_unsigned_bytes_be(negative, &dst);
-
+        if N::IS_PRIMITIVE {
+            let primitive = self.data_reader.read::<N::Primitive>(bits_len)?;
+            return Ok(N::from_primitive(primitive));
+        }
+        let bytes = self.read_bits(bits_len)?;
+        let res = N::from_bytes(&bytes);
         if bits_len % 8 != 0 {
             return Ok(res.shr(8 - bits_len % 8));
         }
@@ -308,25 +299,25 @@ mod tests {
 
     #[test]
     fn test_parser_read_bigint() -> anyhow::Result<()> {
-        let cell_slice = make_test_cell(&[0b10101010, 0b01010101, 0b11111111, 0b11111111], 32)?;
+        let cell_slice = make_test_cell(&[0b111_01010, 0b01101011, 0b10000000, 0b00000001], 32)?;
         let mut parser = CellParser::new(&cell_slice);
-        assert_eq!(parser.read_big_num::<BigInt>(3)?, (-1).into());
+        assert_eq!(parser.read_num::<BigInt>(3)?, (-1).into());
         assert_eq!(parser.data_reader.position_in_bits()?, 3);
-        assert_eq!(parser.read_big_num::<BigInt>(5)?, 10.into()); // finish with first byte
+        assert_eq!(parser.read_num::<BigInt>(5)?, 10.into()); // finish with first byte
         assert_eq!(parser.data_reader.position_in_bits()?, 8);
         parser.read_bit()?; // skip 1 bit
-        assert_eq!(parser.read_big_num::<BigInt>(7)?, (-21).into()); // finish with second byte
+        assert_eq!(parser.read_num::<BigInt>(7)?, (-21).into()); // finish with second byte
         assert_eq!(parser.data_reader.position_in_bits()?, 16);
-        assert_eq!(parser.read_big_num::<BigInt>(16)?, (-32767).into());
+        assert_eq!(parser.read_num::<BigInt>(16)?, (-32767).into());
         Ok(())
     }
 
     #[test]
     fn test_parser_read_bigint_unaligned() -> anyhow::Result<()> {
-        let cell_slice = make_test_cell(&[0b00011010, 0b01010000], 16)?;
+        let cell_slice = make_test_cell(&[0b00011110, 0b11111111], 16)?;
         let mut parser = CellParser::new(&cell_slice);
         parser.seek_bits(3)?;
-        assert_eq!(parser.read_big_num::<BigInt>(9)?, (-165).into());
+        assert_eq!(parser.read_num::<BigInt>(9)?, (-17).into());
         Ok(())
     }
 
@@ -334,14 +325,14 @@ mod tests {
     fn test_parser_read_biguint() -> anyhow::Result<()> {
         let cell_slice = make_test_cell(&[0b10101010, 0b01010101, 0b11111111, 0b11111111], 32)?;
         let mut parser = CellParser::new(&cell_slice);
-        assert_eq!(parser.read_big_num::<BigUint>(3)?, 5u32.into());
+        assert_eq!(parser.read_num::<BigUint>(3)?, 5u32.into());
         assert_eq!(parser.data_reader.position_in_bits()?, 3);
-        assert_eq!(parser.read_big_num::<BigUint>(5)?, 10u32.into()); // finish with first byte
+        assert_eq!(parser.read_num::<BigUint>(5)?, 10u32.into()); // finish with first byte
         assert_eq!(parser.data_reader.position_in_bits()?, 8);
         parser.read_bit()?; // skip 1 bit
-        assert_eq!(parser.read_big_num::<BigUint>(7)?, 85u32.into()); // finish with second byte
+        assert_eq!(parser.read_num::<BigUint>(7)?, 85u32.into()); // finish with second byte
         assert_eq!(parser.data_reader.position_in_bits()?, 16);
-        assert_eq!(parser.read_big_num::<BigUint>(16)?, 65535u32.into());
+        assert_eq!(parser.read_num::<BigUint>(16)?, 65535u32.into());
         Ok(())
     }
 }

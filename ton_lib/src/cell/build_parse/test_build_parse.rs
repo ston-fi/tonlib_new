@@ -39,12 +39,12 @@ fn test_build_parse_bits() -> anyhow::Result<()> {
 #[test]
 fn test_build_parse_num() -> anyhow::Result<()> {
     let mut writer = CellBuilder::new();
-    writer.write_num(1u8, 4)?;
-    writer.write_num(2u16, 5)?;
-    writer.write_num(5u32, 10)?;
-    writer.write_num(-1i8, 8)?;
-    writer.write_num(-2i16, 16)?;
-    writer.write_num(-5i32, 32)?;
+    writer.write_num(&1u8, 4)?;
+    writer.write_num(&2u16, 5)?;
+    writer.write_num(&5u32, 10)?;
+    writer.write_num(&-1i8, 8)?;
+    writer.write_num(&-2i16, 16)?;
+    writer.write_num(&-5i32, 32)?;
     let cell = writer.build()?;
 
     let mut reader = CellParser::new(&cell);
@@ -64,6 +64,7 @@ mod bignum {
     use crate::cell::build_parse::builder::CellBuilder;
     use crate::cell::build_parse::parser::CellParser;
     use num_bigint::{BigInt, BigUint};
+    use std::str::FromStr;
 
     #[test]
     fn test_build_parse_bigint() -> anyhow::Result<()> {
@@ -74,16 +75,18 @@ mod bignum {
             (BigInt::from(-1), 8),
             (BigInt::from(-2), 16),
             (BigInt::from(-5), 32),
+            (BigInt::from(-5), 32),
+            (BigInt::from_str("97887266651548624282413032824435501549503168134499591480902563623927645013201")?, 257),
         ];
 
         let mut writer = CellBuilder::new();
         for (value, bits) in &values {
-            writer.write_big_num(value, *bits)?;
+            writer.write_num(value, *bits)?;
         }
         let cell = writer.build()?;
         let mut reader = CellParser::new(&cell);
         for (value, bits) in &values {
-            let read_value = reader.read_big_num::<BigInt>(*bits)?;
+            let read_value = reader.read_num::<BigInt>(*bits)?;
             assert_eq!(read_value, *value);
         }
         Ok(())
@@ -99,12 +102,12 @@ mod bignum {
 
         let mut writer = CellBuilder::new();
         for (value, bits) in &values {
-            writer.write_big_num(value, *bits)?;
+            writer.write_num(value, *bits)?;
         }
         let cell = writer.build()?;
         let mut reader = CellParser::new(&cell);
         for (value, bits) in &values {
-            let read_value = reader.read_big_num::<BigUint>(*bits)?;
+            let read_value = reader.read_num::<BigUint>(*bits)?;
             assert_eq!(read_value, *value);
         }
         Ok(())

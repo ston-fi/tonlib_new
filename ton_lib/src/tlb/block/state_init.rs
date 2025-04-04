@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonLibError;
-use crate::tlb::primitives::numbers::TLBNumber;
+use crate::tlb::primitives::dyn_len::ConstLen;
 use crate::tlb::tlb_type::TLBPrefix;
 use crate::tlb::tlb_type::TLBType;
 use ton_lib_proc_macro::TLBDerive;
@@ -10,7 +10,7 @@ use ton_lib_proc_macro::TLBDerive;
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L281
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct StateInit {
-    pub split_depth: Option<TLBNumber<u8, 5>>,
+    pub split_depth: Option<ConstLen<u8, 5>>,
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
