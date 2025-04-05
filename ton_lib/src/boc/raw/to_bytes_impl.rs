@@ -10,7 +10,7 @@ impl BOCRaw {
     pub(crate) fn to_bytes(&self, has_crc32: bool) -> Result<Vec<u8>, TonLibError> {
         let root_count = self.roots.len();
         let num_ref_bits = 32 - (self.cells.len() as u32).leading_zeros();
-        let num_ref_bytes = (num_ref_bits + 7) / 8;
+        let num_ref_bytes = num_ref_bits.div_ceil(8);
         let has_idx = false;
 
         let mut full_size = 0u32;
@@ -20,7 +20,7 @@ impl BOCRaw {
         }
 
         let num_offset_bits = 32 - full_size.leading_zeros();
-        let num_offset_bytes = (num_offset_bits + 7) / 8;
+        let num_offset_bytes = num_offset_bits.div_ceil(8);
 
         let total_size = 4 + // magic
             1 + // flags and s_bytes
@@ -62,7 +62,7 @@ impl BOCRaw {
 }
 
 fn raw_cell_size(cell: &CellRaw, ref_size_bytes: u32) -> u32 {
-    let data_len = (cell.data_bits_len + 7) / 8;
+    let data_len = cell.data_bits_len.div_ceil(8);
     2 + data_len as u32 + cell.refs_positions.len() as u32 * ref_size_bytes
 }
 
@@ -78,7 +78,7 @@ fn write_raw_cell(
 
     let padding_bits = cell.data_bits_len % 8;
     let full_bytes = padding_bits == 0;
-    let data_len_bytes = (cell.data_bits_len + 7) / 8;
+    let data_len_bytes = cell.data_bits_len.div_ceil(8);
     // data_len_bytes <= 128 by spec, but d2 must be u8 by spec as well
     let d2 = (data_len_bytes * 2 - if full_bytes { 0 } else { 1 }) as u8; //subtract 1 if the last byte is not full
 

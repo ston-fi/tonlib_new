@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonLibError;
-use crate::tlb::primitives::dyn_len::VarLen;
+use crate::tlb::primitives::VarLen;
 use crate::tlb::tlb_type::TLBPrefix;
 use crate::tlb::tlb_type::TLBType;
 #[cfg(feature = "num-bigint")]

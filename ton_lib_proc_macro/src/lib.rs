@@ -1,12 +1,24 @@
 use proc_macro::TokenStream;
 use quote::quote;
+use std::process::exit;
 use syn::{Data, Fields};
 
 #[derive(deluxe::ExtractAttributes, Debug)]
 #[deluxe(attributes(tlb_derive))] // Match only `tlb_prefix` attributes
-struct TLBDeriveAttrs {
+struct TLBPrefixAttrs {
     prefix: Option<u128>,
     bits_len: Option<u32>,
+}
+
+#[derive(deluxe::ExtractAttributes, Debug)]
+#[deluxe(attributes(tlb_derive))] // Match only `tlb_prefix` attributes
+struct TLBFieldAttrs {
+    bits_len: Option<u32>,
+}
+
+struct FieldInfo {
+    ident: syn::Ident,
+    attrs: TLBFieldAttrs,
 }
 
 /// Automatic `TLBType` implementation
@@ -17,33 +29,56 @@ struct TLBDeriveAttrs {
 pub fn tlb_derive(input: TokenStream) -> TokenStream {
     let mut input = syn::parse::<syn::DeriveInput>(input).unwrap();
     // Extract a description, modifying `input.attrs` to remove the matched attributes.
-    let args: TLBDeriveAttrs = match deluxe::extract_attributes(&mut input) {
+    let prefix_attrs: TLBPrefixAttrs = match deluxe::extract_attributes(&mut input) {
         Ok(desc) => desc,
         Err(e) => return e.into_compile_error().into(),
     };
 
-    let value = args.prefix.unwrap_or(0);
-    let bits_len = args.bits_len.unwrap_or(0);
-
     let ident = &input.ident;
     // let (impl_generics, type_generics, where_clause) = input.generics.split_for_impl();
-
+    let prefix_val = prefix_attrs.prefix.unwrap_or(0);
+    let prefix_bits_len = prefix_attrs.bits_len.unwrap_or(0);
     // Extract fields if it's a struct
-    let tokens = match &input.data {
+    let tokens = match &mut input.data {
         Data::Struct(data) => {
-            let fields = match &data.fields {
-                Fields::Named(fields) => &fields.named,     // For struct { field1: T, field2: T }
-                Fields::Unnamed(fields) => &fields.unnamed, // For tuple struct (T, T)
+            let fields = match &mut data.fields {
+                Fields::Named(fields) => &mut fields.named, // For struct { field1: T, field2: T }
+                Fields::Unnamed(fields) => &mut fields.unnamed, // For tuple struct (T, T)
                 Fields::Unit => panic!("MyDerive only supports structs"),
             };
-            let read_def_str = fields
+
+            let fields_info = fields
+                .iter_mut()
+                .map(|f| {
+                    let ident = &f.ident;
+
+                    let field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut f.attrs) {
+                        Ok(desc) => desc,
+                        Err(_err) => exit(777),
+                    };
+                    FieldInfo {
+                        ident: ident.clone().unwrap(),
+                        attrs: field_attrs,
+                    }
+                })
+                .collect::<Vec<_>>();
+
+            let read_def_str = fields_info
                 .iter()
                 .map(|f| {
                     let ident = &f.ident;
-                    quote!(let #ident = TLBType::read(parser)?;)
+                    if let Some(bits_len) = f.attrs.bits_len {
+                        quote!(
+                            let ident_tmp: ConstLen<_, #bits_len> = TLBType::read(parser)?;
+                            let #ident = ident_tmp.0;
+                        )
+                    } else {
+                        quote!(let #ident = TLBType::read(parser)?;)
+                    }
                 })
                 .collect::<Vec<_>>();
-            let init_obj_str = fields
+
+            let init_obj_str = fields_info
                 .iter()
                 .map(|f| {
                     let ident = &f.ident;
@@ -51,17 +86,24 @@ pub fn tlb_derive(input: TokenStream) -> TokenStream {
                 })
                 .collect::<Vec<_>>();
 
-            let write_def_str = fields
+            let write_def_str = fields_info
                 .iter()
                 .map(|f| {
                     let ident = &f.ident;
-                    quote!(self.#ident.write(dst)?;)
+                    if let Some(bits_len) = f.attrs.bits_len {
+                        quote!(
+                            let tmp_ident = ConstLen::<_, #bits_len>::from(&self.#ident);
+                            tmp_ident.write(dst)?;
+                        )
+                    } else {
+                        quote!(self.#ident.write(dst)?;)
+                    }
                 })
                 .collect::<Vec<_>>();
 
             let tokens = quote::quote! {
                 impl TLBType for #ident {
-                    const PREFIX: TLBPrefix = TLBPrefix::new(#value, #bits_len);
+                    const PREFIX: TLBPrefix = TLBPrefix::new(#prefix_val, #prefix_bits_len);
 
                     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
                         #(#read_def_str)*
@@ -116,7 +158,7 @@ pub fn tlb_derive(input: TokenStream) -> TokenStream {
 
             quote! {
                 impl TLBType for #ident {
-                    const PREFIX: TLBPrefix = TLBPrefix::new(#value, #bits_len);
+                    const PREFIX: TLBPrefix = TLBPrefix::new(#prefix_val, #prefix_bits_len);
 
                     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
                         #(#variant_readers)*

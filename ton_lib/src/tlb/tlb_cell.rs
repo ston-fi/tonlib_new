@@ -5,7 +5,7 @@ use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
-use crate::tlb::tlb_type::TLBType;
+use crate::tlb::TLBType;
 
 impl TLBType for TonCell {
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
@@ -58,8 +58,10 @@ impl TLBType for TonCellRef {
 
 impl TLBType for TonHash {
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
-        TonHash::from_vec(parser.read_bytes(TonHash::BYTES_LEN as u32)?)
+        TonHash::from_vec(parser.read_bits(TonHash::BITS_LEN as u32)?)
     }
 
-    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> { builder.write_bytes(self.as_slice()) }
+    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
+        builder.write_bits(self.as_slice(), TonHash::BITS_LEN as u32)
+    }
 }

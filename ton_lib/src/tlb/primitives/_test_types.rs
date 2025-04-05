@@ -3,12 +3,12 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonLibError;
 use crate::tlb::tlb_type::TLBType;
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(super) struct TestType1 {
     pub(super) value: i32,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub(super) struct TestType2 {
     pub(super) value: i64,
 }

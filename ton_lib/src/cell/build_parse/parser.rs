@@ -37,7 +37,7 @@ impl<'a> CellParser<'a> {
 
     pub fn read_bits(&mut self, bits_len: u32) -> Result<Vec<u8>, TonLibError> {
         self.ensure_enough_bits(bits_len)?;
-        let mut dst = vec![0; (bits_len as usize + 7) / 8];
+        let mut dst = vec![0; (bits_len as usize).div_ceil(8)];
         let full_bytes = bits_len as usize / 8;
         let remaining_bits = bits_len % 8;
 
@@ -49,13 +49,6 @@ impl<'a> CellParser<'a> {
         }
         Ok(dst)
     }
-
-    pub fn read_byte(&mut self) -> Result<u8, TonLibError> {
-        self.ensure_enough_bits(8)?;
-        Ok(self.data_reader.read::<u8>(8)?)
-    }
-
-    pub fn read_bytes(&mut self, bytes_len: u32) -> Result<Vec<u8>, TonLibError> { self.read_bits(bytes_len * 8) }
 
     pub fn read_num<N: TonCellNum>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
         if bits_len == 0 {
@@ -217,7 +210,7 @@ mod tests {
     #[test]
     fn test_parser_read_ref() -> anyhow::Result<()> {
         let mut ref_builder = CellBuilder::new();
-        ref_builder.write_bytes([0b11110000])?;
+        ref_builder.write_num(&0b11110000, 8)?;
         let cell_ref = ref_builder.build()?.into_ref();
 
         let mut cell_builder = CellBuilder::new();
@@ -240,26 +233,6 @@ mod tests {
         assert_eq!(dst, [0b10100000]);
         let dst = parser.read_bits(6)?;
         assert_eq!(dst, [0b01010000]);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parser_read_byte() -> anyhow::Result<()> {
-        let cell_slice = make_test_cell(&[0b10101010, 0b01010101], 16)?;
-        let mut parser = CellParser::new(&cell_slice);
-        assert_eq!(parser.read_byte()?, 0b10101010);
-        assert_eq!(parser.data_reader.position_in_bits()?, 8);
-        assert_eq!(parser.read_byte()?, 0b01010101);
-        assert_eq!(parser.data_reader.position_in_bits()?, 16);
-        Ok(())
-    }
-
-    #[test]
-    fn test_parser_read_bytes() -> anyhow::Result<()> {
-        let cell_slice = make_test_cell(&[0b10101010, 0b01010101], 16)?;
-        let mut parser = CellParser::new(&cell_slice);
-        let dst = parser.read_bytes(2)?;
-        assert_eq!(dst, [0b10101010, 0b01010101]);
         Ok(())
     }
 

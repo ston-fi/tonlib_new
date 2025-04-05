@@ -57,7 +57,7 @@ impl CellBuilder {
         self.ensure_capacity(bits_len)?;
         let mut data_ref = data.as_ref();
 
-        if (bits_len + bits_offset + 7) / 8 > data_ref.len() as u32 {
+        if (bits_len + bits_offset).div_ceil(8) > data_ref.len() as u32 {
             return Err(TonLibError::BuilderNotEnoughData {
                 required_bits: bits_len + bits_offset,
                 given: data_ref.len() as u32,
@@ -95,14 +95,6 @@ impl CellBuilder {
     pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: u32) -> Result<(), TonLibError> {
         self.write_bits_with_offset(data, bits_len, 0)
     }
-
-    pub fn write_bytes<T: AsRef<[u8]>>(&mut self, data: T) -> Result<(), TonLibError> {
-        let data_ref = data.as_ref();
-        self.write_bits(data_ref, data_ref.len() as u32 * 8)?;
-        Ok(())
-    }
-
-    pub fn write_byte(&mut self, data: u8) -> Result<(), TonLibError> { self.write_bytes([data]) }
 
     pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonLibError> {
         self.write_bits(&cell.data, cell.data_bits_len as u32)?;
@@ -159,7 +151,7 @@ impl CellBuilder {
             _ => 0,
         };
         let padding_bits_len = bits_len.saturating_sub(min_bits_len);
-        let padding_to_write = vec![padding_val; (padding_bits_len as usize + 7) / 8];
+        let padding_to_write = vec![padding_val; (padding_bits_len as usize).div_ceil(8)];
         self.write_bits(padding_to_write, padding_bits_len)?;
 
         let bits_offset = (data_bytes.len() as u32 * 8).saturating_sub(min_bits_len);
@@ -246,27 +238,6 @@ mod tests {
     }
 
     #[test]
-    fn test_builder_write_byte() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
-        cell_builder.write_byte(0b1010_1010)?;
-        cell_builder.write_byte(0b0101_0101)?;
-        let cell = cell_builder.build()?;
-        assert_eq!(cell.data, vec![0b1010_1010, 0b0101_0101]);
-        assert_eq!(cell.data_bits_len, 16);
-        Ok(())
-    }
-
-    #[test]
-    fn test_builder_write_bytes() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
-        cell_builder.write_bytes([0b1010_1010, 0b0101_0101])?;
-        let cell = cell_builder.build()?;
-        assert_eq!(cell.data, vec![0b1010_1010, 0b0101_0101]);
-        assert_eq!(cell.data_bits_len, 16);
-        Ok(())
-    }
-
-    #[test]
     fn test_builder_write_data_overflow() -> anyhow::Result<()> {
         let mut cell_builder = CellBuilder::new();
         cell_builder.write_bit(true)?;
@@ -332,7 +303,7 @@ mod tests {
     fn test_builder_write_cell() -> anyhow::Result<()> {
         let mut ref_builder = CellBuilder::new();
         ref_builder.write_bit(true)?;
-        ref_builder.write_bytes([1, 2, 3])?;
+        ref_builder.write_bits([1, 2, 3], 24)?;
         let ref_cell = ref_builder.build()?.into_ref();
 
         let mut cell_with_ref_builder = CellBuilder::new();
@@ -384,32 +355,32 @@ mod tests {
         //   /
         //  5
         let mut builder5 = CellBuilder::new();
-        builder5.write_byte(0x05)?;
+        builder5.write_num(&0x05, 8)?;
         let cell5 = builder5.build()?;
 
         let mut builder3 = CellBuilder::new();
-        builder3.write_byte(0x03)?;
+        builder3.write_num(&0x03, 8)?;
         builder3.write_ref(cell5.clone().into())?;
         let cell3 = builder3.build()?;
 
         let mut builder4 = CellBuilder::new();
-        builder4.write_byte(0x04)?;
+        builder4.write_num(&0x04, 8)?;
         let cell4 = builder4.build()?;
 
         let mut builder2 = CellBuilder::new();
-        builder2.write_byte(0x02)?;
+        builder2.write_num(&0x02, 8)?;
         let cell2 = builder2.build()?;
 
         let mut builder1 = CellBuilder::new();
-        builder1.write_byte(0x01)?;
+        builder1.write_num(&0x01, 8)?;
         builder1.write_ref(cell3.clone().into())?;
         builder1.write_ref(cell4.clone().into())?;
         let cell1 = builder1.build()?;
 
         let mut builder0 = CellBuilder::new();
         builder0.write_bit(true)?;
-        builder0.write_byte(0b0000_0001)?;
-        builder0.write_byte(0b0000_0011)?;
+        builder0.write_num(&0b0000_0001, 8)?;
+        builder0.write_num(&0b0000_0011, 8)?;
         builder0.write_ref(cell1.clone().into())?;
         builder0.write_ref(cell2.clone().into())?;
         let cell0 = builder0.build()?;
@@ -429,12 +400,12 @@ mod tests {
     #[test]
     fn test_builder_build_cell_library() -> anyhow::Result<()> {
         let mut builder = CellBuilder::new_with_type(CellType::Library);
-        builder.write_bytes(TonHash::ZERO)?;
+        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN as u32)?;
         assert_err!(builder.build()); // no ton_lib prefix
 
         let mut builder = CellBuilder::new_with_type(CellType::Library);
-        builder.write_byte(2)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
-        builder.write_bytes(TonHash::ZERO)?;
+        builder.write_num(&2, 8)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
+        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN as u32)?;
         let lib_cell = assert_ok!(builder.build());
 
         let expected_hash = TonHash::from_hex("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;

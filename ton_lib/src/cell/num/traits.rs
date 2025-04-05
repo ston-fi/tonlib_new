@@ -3,7 +3,7 @@ pub use num_traits::Num;
 use num_traits::Zero;
 use std::fmt::Display;
 
-pub trait TonCellNum: Display + Sized {
+pub trait TonCellNum: Display + Sized + Clone {
     const SIGNED: bool;
     const IS_PRIMITIVE: bool = false;
     type UnsignedPrimitive: Numeric;

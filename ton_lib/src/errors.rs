@@ -49,6 +49,11 @@ pub enum TonLibError {
     },
     #[error("TLBEnum: Out of options")]
     TLBEnumOutOfOptions,
+    #[error("TLBObject: No internal value found (method: {0})")]
+    TLBObjectNoValue(String),
+    #[error("TLBSnakeFormat: Unsupported bits_len ({0})")]
+    TLBSnakeFormatUnsupportedBitsLen(u32),
+
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
 

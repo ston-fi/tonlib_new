@@ -6,7 +6,7 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
 use std::ops::Deref;
 
-pub trait TLBType: Sized {
+pub trait TLBType: Sized + Clone {
     const PREFIX: TLBPrefix = TLBPrefix::NULL;
 
     /// read-write definition

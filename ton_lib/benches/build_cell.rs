@@ -25,13 +25,13 @@ fn build_empty_cell_tonlib_core() {
 fn build_full_cell_ton_lib() {
     for _ in 0..ITERATIONS_COUNT {
         let mut builder1 = CellBuilder::new();
-        builder1.write_bytes([1, 2, 3]).unwrap();
+        builder1.write_bits([1, 2, 3], 24).unwrap();
 
         let mut builder2 = CellBuilder::new();
-        builder2.write_bytes([10, 20, 30]).unwrap();
+        builder2.write_bits([10, 20, 30], 24).unwrap();
 
         let mut builder3 = CellBuilder::new();
-        builder3.write_bytes([100, 200, 255]).unwrap();
+        builder3.write_bits([100, 200, 255], 24).unwrap();
 
         let mut builder = CellBuilder::new();
         builder.write_ref(builder1.build().unwrap().into_ref()).unwrap();
