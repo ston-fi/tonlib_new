@@ -2,7 +2,7 @@ use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
 use crate::errors::TonLibError::TonAddressParseError;
-use crate::tlb::block::StateInit;
+use crate::tlb::block::TLBStateInit;
 use crate::tlb::TLBType;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
@@ -21,7 +21,7 @@ impl TonAddress {
     pub fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
 
     pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonLibError> {
-        let state_init = StateInit::new(code, data);
+        let state_init = TLBStateInit::new(code, data);
         Ok(TonAddress::new(wc, state_init.cell_hash()?))
     }
 

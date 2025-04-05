@@ -127,3 +127,40 @@ mod core_traits_impl {
     impl<T, const L: u32> DerefMut for ConstLen<T, L> { fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 } }
     impl<T, const L: u32, const BL: bool> DerefMut for VarLen<T, L, BL> { fn deref_mut(&mut self) -> &mut Self::Target { &mut self.data } }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tlb::tlb_type::TLBType;
+
+    #[test]
+    fn test_const_len() -> anyhow::Result<()> {
+        let obj = ConstLen::<u32, 24>::new(1u8);
+        let cell = obj.to_cell()?;
+        assert_eq!(&cell.data, &[0, 0, 1]);
+        let parsed = ConstLen::<u32, 24>::from_cell(&cell)?;
+        assert_eq!(obj, parsed);
+        Ok(())
+    }
+
+    #[test]
+    fn test_var_len() -> anyhow::Result<()> {
+        // len in bits
+        let obj = VarLen::<u32, 8>::new(1u8, 4);
+        let cell = obj.to_cell()?;
+        // 8 bits of length (value = 4) + 4 bits of data (value = 1)
+        assert_eq!(&cell.data, &[0b00000100, 0b00010000]);
+        let parsed = VarLen::<u32, 8>::from_cell(&cell)?;
+        assert_eq!(obj, parsed);
+
+        // len in bytes
+        let obj = VarLen::<u32, 16, true>::new(1u8, 2);
+        let cell = obj.to_cell()?;
+        // 16 bits of length (value = 2), and then 16 (value * 8) bits of data (value = 1)
+        assert_eq!(&cell.data, &[0b00000000, 0b00000010, 0b00000000, 0b00000001]);
+        let parsed = VarLen::<u32, 16, true>::from_cell(&cell)?;
+        assert_eq!(obj, parsed);
+
+        Ok(())
+    }
+}

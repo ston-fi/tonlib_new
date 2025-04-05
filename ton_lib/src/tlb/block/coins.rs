@@ -11,18 +11,18 @@ use ton_lib_proc_macro::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-pub struct Grams {
+pub struct TLBGrams {
     pub amount: VarLen<BigUint, 4, true>,
 }
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-pub struct CurrencyCollection {
-    pub grams: Grams,
+pub struct TLBCurCollection {
+    pub grams: TLBGrams,
     pub other: Option<TonCellRef>, // dict, but it's equal to Option<TonCellRef> in tlb format
 }
 
-impl Grams {
+impl TLBGrams {
     pub fn new<T: Into<BigUint>>(amount: T) -> Self {
         Self {
             amount: (4, amount.into()).into(),
@@ -30,44 +30,44 @@ impl Grams {
     }
 }
 
-impl<T: Into<BigUint>> From<T> for Grams {
+impl<T: Into<BigUint>> From<T> for TLBGrams {
     fn from(amount: T) -> Self { Self::new(amount) }
 }
 
-impl CurrencyCollection {
+impl TLBCurCollection {
     pub fn new<T: Into<BigUint>>(grams: T) -> Self {
         Self {
-            grams: Grams::new(grams),
+            grams: TLBGrams::new(grams),
             other: None,
         }
     }
 }
 
-impl<T: Into<BigUint>> From<T> for CurrencyCollection {
+impl<T: Into<BigUint>> From<T> for TLBCurCollection {
     fn from(amount: T) -> Self { Self::new(amount) }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tlb::block::coins::CurrencyCollection;
+    use crate::tlb::block::coins::TLBCurCollection;
 
     #[test]
     fn test_currency_collection() -> anyhow::Result<()> {
-        let parsed = CurrencyCollection::from_boc_hex("b5ee9c720101010100070000094c143b1d14")?;
+        let parsed = TLBCurCollection::from_boc_hex("b5ee9c720101010100070000094c143b1d14")?;
         assert_eq!(*parsed.grams.amount, 3242439121u32.into());
 
         let cell_serial = parsed.to_cell()?;
-        let parsed_back = CurrencyCollection::from_cell(&cell_serial)?;
+        let parsed_back = TLBCurCollection::from_cell(&cell_serial)?;
         assert_eq!(parsed, parsed_back);
         Ok(())
     }
 
     #[test]
     fn test_currency_collection_zero_grams() -> anyhow::Result<()> {
-        let currency = CurrencyCollection::new(0u32);
+        let currency = TLBCurCollection::new(0u32);
         let cell = currency.to_cell()?;
-        let parsed = CurrencyCollection::from_cell(&cell)?;
+        let parsed = TLBCurCollection::from_cell(&cell)?;
         assert_eq!(*parsed.grams.amount, 0u32.into());
 
         let cell_serial = parsed.to_cell()?;
