@@ -1,6 +1,6 @@
 [package]
 name = "ton_lib_proc_macro"
-version = "0.0.1"
+version = "0.0.2"
 description = "proc-macros for ton_lib crate"
 keywords = ["ton", "the-open-network", "blockchain", "crypto"]
 edition.workspace = true

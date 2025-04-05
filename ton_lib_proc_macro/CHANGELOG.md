@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.2](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.1...ton_lib_proc_macro-v0.0.2) - 2025-04-05
+
+### Other
+
+- Update export ([#42](https://github.com/Sild/libs_rs/pull/42))
+- Add msg address ([#41](https://github.com/Sild/libs_rs/pull/41))
+
 ## [0.0.1](https://github.com/Sild/libs_rs/releases/tag/ton_lib_proc_macro-v0.0.1) - 2025-04-01
 
 ### Other

@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.3...ton_lib-v0.0.4) - 2025-04-05
+
+### Fixed
+
+- fix formatting
+
+### Other
+
+- add TLB prefix to tlb entities, add tests for dyn_len types ([#43](https://github.com/Sild/libs_rs/pull/43))
+- Update export ([#42](https://github.com/Sild/libs_rs/pull/42))
+- Add msg address ([#41](https://github.com/Sild/libs_rs/pull/41))
+
 ## [0.0.3](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.2...ton_lib-v0.0.3) - 2025-04-01
 
 ### Other
