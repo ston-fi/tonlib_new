@@ -131,7 +131,6 @@ impl<'a> CellParser<'a> {
 }
 
 #[cfg(feature = "fastnum")]
-#[cfg(feature = "num-bigint")]
 #[cfg(test)]
 mod tests {
     use super::*;

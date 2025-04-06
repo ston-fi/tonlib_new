@@ -1,6 +1,5 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-// use crate::cell::cell_slice::CellSlice;
 
 #[test]
 fn test_build_parse_bit() -> anyhow::Result<()> {
@@ -57,7 +56,6 @@ fn test_build_parse_num() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "num-bigint")]
 #[cfg(feature = "fastnum")]
 #[cfg(test)]
 mod bignum {

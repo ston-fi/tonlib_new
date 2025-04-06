@@ -183,7 +183,6 @@ fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec
 }
 
 #[cfg(test)]
-#[cfg(feature = "num-bigint")]
 #[cfg(feature = "fastnum")]
 mod tests {
     use super::*;

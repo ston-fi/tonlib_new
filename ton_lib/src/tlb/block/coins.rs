@@ -5,7 +5,6 @@ use crate::errors::TonLibError;
 use crate::tlb::primitives::VarLen;
 use crate::tlb::tlb_type::TLBPrefix;
 use crate::tlb::tlb_type::TLBType;
-#[cfg(feature = "num-bigint")]
 use num_bigint::BigUint;
 use ton_lib_proc_macro::TLBDerive;
 
