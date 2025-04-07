@@ -62,27 +62,25 @@ pub trait TLBType: Sized + Clone {
             return Ok(());
         }
 
-        let actual_val: u128 = match reader.read_num(Self::PREFIX.bits_len) {
-            Ok(val) => val,
-            Err(TonLibError::ParserDataUnderflow { req, left }) => {
-                return Err(TonLibError::TLBWrongPrefix {
-                    exp: Self::PREFIX.value,
-                    given: 0,
-                    exp_bits: req,
-                    left_bits: left,
-                });
-            }
-            Err(err) => return Err(err),
+        let prefix_error = |given, bits_left| {
+            Err(TonLibError::TLBWrongPrefix {
+                exp: Self::PREFIX.value,
+                given,
+                bits_exp: Self::PREFIX.bits_len,
+                bits_left,
+            })
         };
+
+        if reader.data_bits_left()? < Self::PREFIX.bits_len {
+            return prefix_error(0, reader.data_bits_left()?);
+        }
+
+        // we handle cell_underflow above - all other errors can be rethrown
+        let actual_val: u128 = reader.read_num(Self::PREFIX.bits_len)?;
 
         if actual_val != Self::PREFIX.value {
             reader.seek_bits(-(Self::PREFIX.bits_len as i32))?; // revert reader position
-            return Err(TonLibError::TLBWrongPrefix {
-                exp: Self::PREFIX.value,
-                given: actual_val,
-                exp_bits: Self::PREFIX.bits_len,
-                left_bits: reader.data_bits_left()?,
-            });
+            return prefix_error(actual_val, reader.data_bits_left()?);
         }
         Ok(())
     }
