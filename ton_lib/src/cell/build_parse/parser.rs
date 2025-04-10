@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
-use crate::cell::num::traits::TonCellNum;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonLibError;
 use bitstream_io::{BigEndian, BitRead, BitReader};
 use num_traits::Zero;

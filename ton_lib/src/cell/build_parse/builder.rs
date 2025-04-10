@@ -1,7 +1,7 @@
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
-use crate::cell::num::traits::TonCellNum;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
+use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonLibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use std::cmp::min;

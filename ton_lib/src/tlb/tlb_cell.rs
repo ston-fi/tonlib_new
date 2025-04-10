@@ -6,6 +6,7 @@ use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
 use crate::tlb::TLBType;
+use std::ops::Deref;
 
 impl TLBType for TonCell {
     fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
@@ -50,10 +51,13 @@ impl TLBType for TonCell {
     fn to_cell(&self) -> Result<TonCell, TonLibError> { Ok(self.clone()) }
 }
 
+/// Have the same behavior as TonCell. To store object as a child cell, use TLBRef wrapper
 impl TLBType for TonCellRef {
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> { Ok(parser.read_next_ref()?.clone()) }
+    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> { Ok(TonCell::read(parser)?.into_ref()) }
 
-    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> { builder.write_ref(self.clone()) }
+    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> { self.deref().write(builder) }
+
+    fn to_cell(&self) -> Result<TonCell, TonLibError> { Ok(self.deref().clone()) }
 }
 
 impl TLBType for TonHash {
@@ -63,5 +67,30 @@ impl TLBType for TonHash {
 
     fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
         builder.write_bits(self.as_slice(), TonHash::BITS_LEN as u32)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_tlb_cell() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        builder.write_num(&3u32, 32)?;
+        let cell = builder.build()?;
+        let parsed = TonCell::from_cell(&cell)?;
+        assert_eq!(cell, parsed);
+        Ok(())
+    }
+
+    #[test]
+    fn test_tlb_cell_ref() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        builder.write_num(&3u32, 32)?;
+        let cell = builder.build()?.into_ref();
+        let parsed = TonCellRef::from_cell(&cell)?;
+        assert_eq!(cell, parsed);
+        Ok(())
     }
 }

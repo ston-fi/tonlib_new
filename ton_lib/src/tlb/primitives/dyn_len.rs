@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::num::traits::TonCellNum;
+use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonLibError;
 use crate::tlb::tlb_type::TLBType;
 
@@ -102,22 +102,12 @@ impl<T: TonCellNum, const L: u32, const BL: bool> TLBType for VarLen<T, L, BL> {
 
 #[rustfmt::skip]
 mod core_traits_impl {
-    // use std::borrow::{Borrow, BorrowMut};
     use std::ops::{Deref, DerefMut};
-    use crate::tlb::primitives::{ConstLen, VarLen};
-    
+    use crate::tlb::primitives::dyn_len::{ConstLen, VarLen};
+
     // From
     impl<T, const L: u32> From<T> for ConstLen<T, L> { fn from(value: T) -> Self { Self(value) } }
     impl<T, const L: u32, const LB: bool> From<(u32, T)> for VarLen<T, L, LB> { fn from(value: (u32, T)) -> Self { Self { len: value.0, data: value.1} } }
-    
-    // // Borrow
-    // impl<T, const L: u32> Borrow<T> for ConstLen<T, L> { fn borrow(&self) -> &T { &self.0 } }
-    // impl<T, const L: u32, const BL: bool> Borrow<T> for VarLen<T, L, BL> { fn borrow(&self) -> &T { &self.data } }
-    // 
-    // // BorrowMut
-    // impl<T, const L: u32> BorrowMut<T> for ConstLen<T, L> { fn borrow_mut(&mut self) -> &mut T { &mut self.0 } }
-    // impl<T, const L: u32, const BL: bool> BorrowMut<T> for VarLen<T, L, BL> { fn borrow_mut(&mut self) -> &mut T { &mut self.data } }
-    // 
     
     // Deref
     impl<T, const L: u32> Deref for ConstLen<T, L> { type Target = T; fn deref(&self) -> &Self::Target { &self.0 }}

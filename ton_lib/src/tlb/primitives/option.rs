@@ -14,9 +14,7 @@ impl<T: TLBType> TLBType for Option<T> {
 
     fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
         match self {
-            None => {
-                dst.write_bit(false)?;
-            }
+            None => dst.write_bit(false)?,
             Some(value) => {
                 dst.write_bit(true)?;
                 value.write(dst)?;

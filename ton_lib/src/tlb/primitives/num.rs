@@ -13,6 +13,7 @@ macro_rules! tlb_num_impl {
     };
 }
 
+// BigNum doesn't have predefined len, so can't be implemented here
 tlb_num_impl!(i8, 8);
 tlb_num_impl!(i16, 16);
 tlb_num_impl!(i32, 32);
