@@ -1,6 +1,6 @@
 [package]
 name = "ton_lib"
-version = "0.0.4"
+version = "0.0.5"
 description = "A collection of types and utilities for interacting with the TON network"
 keywords = ["ton", "the-open-network", "blockchain", "crypto"]
 edition.workspace = true

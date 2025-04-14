@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.4...ton_lib-v0.0.5) - 2025-04-14
+
+### Other
+
+- Support dict ([#45](https://github.com/Sild/libs_rs/pull/45))
+- cleanup naming, update imports, add TLBRef, TonCellRef now behave like TonCell in TLB context
+- cleanup verify_prefix
+
 ## [0.0.4](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.3...ton_lib-v0.0.4) - 2025-04-05
 
 ### Fixed
