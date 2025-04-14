@@ -2,7 +2,7 @@ use num_bigint::BigUint;
 use num_traits::{One, Zero};
 
 /// All functions except `add_leading_bit` expect 1 extra leading bit in `val` set to 1
-pub(super) fn all_bits_same(val: &BigUint) -> bool {
+pub(in crate::tlb) fn all_bits_same(val: &BigUint) -> bool {
     if val.is_zero() {
         return true;
     }
@@ -12,18 +12,18 @@ pub(super) fn all_bits_same(val: &BigUint) -> bool {
     all_zero || all_ones
 }
 
-pub(super) fn common_prefix_len(a: &BigUint, b: &BigUint) -> usize {
+pub(in crate::tlb) fn common_prefix_len(a: &BigUint, b: &BigUint) -> usize {
     let xor = a ^ b;
     (a.bits() - xor.bits() - 1) as usize // don't forget leading zero
 }
 
-pub(super) fn remove_leading_bit(val: &BigUint) -> BigUint {
+pub(in crate::tlb) fn remove_leading_bit(val: &BigUint) -> BigUint {
     let bits = val.bits();
     let mask = BigUint::one() << (bits - 1);
     val ^ mask
 }
 
-pub(super) fn add_leading_bit(val: &BigUint, val_bit_len: usize) -> BigUint {
+pub(in crate::tlb) fn add_leading_bit(val: &BigUint, val_bit_len: usize) -> BigUint {
     let leading_bit = BigUint::one() << val_bit_len;
     leading_bit | val
 }
@@ -34,11 +34,7 @@ mod tests {
 
     #[test]
     fn test_all_bits_same() {
-        for val in [
-            BigUint::from(0u32),
-            BigUint::from(0b1111u32),
-            BigUint::from(0b1000u32),
-        ] {
+        for val in [BigUint::from(0u32), BigUint::from(0b1111u32), BigUint::from(0b1000u32)] {
             assert!(all_bits_same(&val));
         }
 

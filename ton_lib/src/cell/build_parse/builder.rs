@@ -77,7 +77,7 @@ impl CellBuilder {
         if first_byte_bits_len == bits_len {
             first_byte_val >>= 8 - bits_offset - bits_len
         }
-        self.data_writer.write(first_byte_bits_len, first_byte_val)?;
+        self.data_writer.write_var(first_byte_bits_len, first_byte_val)?;
 
         data_ref = &data_ref[1..];
         bits_len -= first_byte_bits_len;
@@ -86,7 +86,7 @@ impl CellBuilder {
         self.data_writer.write_bytes(&data_ref[0..full_bytes])?;
         let rest_bits_len = bits_len % 8;
         if rest_bits_len != 0 {
-            self.data_writer.write(rest_bits_len, data_ref[full_bytes] >> (8 - rest_bits_len))?;
+            self.data_writer.write_var(rest_bits_len, data_ref[full_bytes] >> (8 - rest_bits_len))?;
         }
         self.data_bits_len += bits_len as usize;
         Ok(())
@@ -123,7 +123,7 @@ impl CellBuilder {
         // handling it like ton-core
         // https://github.com/ton-core/ton-core/blob/main/src/boc/BitBuilder.ts#L122
         if bits_len == 0 {
-            if data_ref.is_zero() {
+            if data_ref.tcn_is_zero() {
                 return Ok(());
             }
             return Err(TonLibError::BuilderNumberBitsMismatch {
@@ -132,12 +132,12 @@ impl CellBuilder {
             });
         }
 
-        if let Some(unsigned) = data_ref.to_unsigned_primitive() {
-            self.data_writer.write(bits_len, unsigned)?;
+        if let Some(unsigned) = data_ref.tcn_to_unsigned_primitive() {
+            self.data_writer.write_var(bits_len, unsigned)?;
             return Ok(());
         }
 
-        let min_bits_len = data_ref.min_bits_len();
+        let min_bits_len = data_ref.tcn_min_bits_len();
         if min_bits_len > bits_len {
             return Err(TonLibError::BuilderNumberBitsMismatch {
                 number: format!("{data_ref}"),
@@ -145,7 +145,7 @@ impl CellBuilder {
             });
         }
 
-        let data_bytes = data_ref.to_bytes();
+        let data_bytes = data_ref.tcn_to_bytes();
         let padding_val: u8 = match (N::SIGNED, data_bytes[0] >> 7 != 0) {
             (true, true) => 255,
             _ => 0,
@@ -183,7 +183,6 @@ fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec
 }
 
 #[cfg(test)]
-#[cfg(feature = "fastnum")]
 mod tests {
     use super::*;
     use crate::cell::meta::level_mask::LevelMask;
@@ -359,7 +358,7 @@ mod tests {
 
         let mut builder3 = CellBuilder::new();
         builder3.write_num(&0x03, 8)?;
-        builder3.write_ref(cell5.clone().into())?;
+        builder3.write_ref(cell5.clone().into_ref())?;
         let cell3 = builder3.build()?;
 
         let mut builder4 = CellBuilder::new();
@@ -372,16 +371,16 @@ mod tests {
 
         let mut builder1 = CellBuilder::new();
         builder1.write_num(&0x01, 8)?;
-        builder1.write_ref(cell3.clone().into())?;
-        builder1.write_ref(cell4.clone().into())?;
+        builder1.write_ref(cell3.clone().into_ref())?;
+        builder1.write_ref(cell4.clone().into_ref())?;
         let cell1 = builder1.build()?;
 
         let mut builder0 = CellBuilder::new();
         builder0.write_bit(true)?;
         builder0.write_num(&0b0000_0001, 8)?;
         builder0.write_num(&0b0000_0011, 8)?;
-        builder0.write_ref(cell1.clone().into())?;
-        builder0.write_ref(cell2.clone().into())?;
+        builder0.write_ref(cell1.clone().into_ref())?;
+        builder0.write_ref(cell2.clone().into_ref())?;
         let cell0 = builder0.build()?;
 
         assert_eq!(cell0.refs.len(), 2);

@@ -10,26 +10,21 @@ repository.workspace = true
 rust-version.workspace = true
 publish = true
 
-[features]
-fastnum = ["dep:fastnum"]
-
 [dependencies]
 # Internal
 ton_lib_proc_macro = { path = "../ton_lib_proc_macro", version = "0" }
 
-bitstream-io = "2.6"
+bitstream-io = "3.1.0"
 thiserror = "2.0"
 log = "0.4"
 sha2 = {version = "0.10"}
 crc = "3.2.1"
 hex = "0.4.3"
 base64 = "0.22"
-fastnum = { version = "0.2", optional = true }
 num-bigint = { version = "0.4" }
 num-traits = { version = "0.2.19" }
 
 [dev-dependencies]
-ton_lib = { path = ".", features = ["fastnum"] }
 anyhow = "1.0"
 tokio-test = "0.4"
 tonlib-core = "0.24.2"

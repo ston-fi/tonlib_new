@@ -6,25 +6,25 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
 use std::ops::Deref;
 
-pub trait TLBType: Sized + Clone {
+pub trait TLBType: Sized {
     const PREFIX: TLBPrefix = TLBPrefix::NULL;
 
     /// read-write definition
     /// https://docs.ton.org/v3/documentation/data-formats/tlb/tl-b-language#overview
     /// must be implemented by all TLB objects
     /// doesn't include prefix handling
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError>;
-    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError>;
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError>;
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError>;
 
     /// interface - must be used by external code to read/write TLB objects
     fn read(parser: &mut CellParser) -> Result<Self, TonLibError> {
         Self::verify_prefix(parser)?;
-        Self::read_def(parser)
+        Self::read_definition(parser)
     }
 
     fn write(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
         Self::write_prefix(builder)?;
-        self.write_def(builder)
+        self.write_definition(builder)
     }
 
     // Utilities
@@ -37,8 +37,8 @@ pub trait TLBType: Sized + Clone {
         Self::from_cell(BOC::from_bytes(boc)?.single_root()?.deref())
     }
 
-    fn from_boc_hex(boc_hex: &str) -> Result<Self, TonLibError> {
-        Self::from_cell(BOC::from_hex(boc_hex)?.single_root()?.deref())
+    fn from_boc_hex<T: AsRef<[u8]>>(boc_hex: T) -> Result<Self, TonLibError> {
+        Self::from_boc(&hex::decode(boc_hex.as_ref())?)
     }
 
     /// Writing

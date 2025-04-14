@@ -1,10 +1,9 @@
-mod tlb_cell;
-mod tlb_object;
-mod tlb_type;
+pub mod tlb_cell;
+pub mod tlb_object;
+pub mod tlb_type;
 
-pub mod block;
+pub mod adapters;
+pub mod block_tlb;
+pub mod dict;
 pub mod primitives;
 pub mod tep_0064;
-
-pub use tlb_object::*;
-pub use tlb_type::*;

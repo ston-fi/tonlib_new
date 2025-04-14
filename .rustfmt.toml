@@ -1,4 +1,5 @@
 max_width=120
 chain_width=110
 fn_call_width=110
+attr_fn_like_width=110
 fn_single_line=true

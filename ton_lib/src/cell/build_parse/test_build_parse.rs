@@ -56,7 +56,6 @@ fn test_build_parse_num() -> anyhow::Result<()> {
     Ok(())
 }
 
-#[cfg(feature = "fastnum")]
 #[cfg(test)]
 mod bignum {
     use crate::cell::build_parse::builder::CellBuilder;

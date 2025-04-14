@@ -13,6 +13,8 @@ rust-version.workspace = true
 syn = { version = "2.0", features = ["full", "extra-traits"] }
 quote = "1"
 deluxe = "0.5.0"
+proc-macro2 = "1.0.94"
+proc-macro-crate = "3"
 
 [lib]
 proc-macro = true

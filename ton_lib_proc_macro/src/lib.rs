@@ -1,180 +1,80 @@
-use proc_macro::TokenStream;
-use quote::quote;
-use std::process::exit;
-use syn::{Data, Fields};
+mod tlb_derive_enum;
+mod tlb_derive_struct;
 
-#[derive(deluxe::ExtractAttributes, Debug)]
-#[deluxe(attributes(tlb_derive))] // Match only `tlb_prefix` attributes
-struct TLBPrefixAttrs {
-    prefix: Option<u128>,
-    bits_len: Option<u32>,
+use crate::tlb_derive_enum::tlb_derive_enum;
+use crate::tlb_derive_struct::tlb_derive_struct;
+use proc_macro::TokenStream;
+use proc_macro_crate::{crate_name, FoundCrate};
+use quote::{format_ident, quote};
+use syn::Data;
+
+#[derive(deluxe::ExtractAttributes)]
+#[deluxe(attributes(tlb_derive))]
+struct TLBHeaderAttrs {
+    prefix: Option<u128>,       // use 0 as default
+    bits_len: Option<u32>,      // use 0 as default
+    ensure_empty: Option<bool>, // use false as default
 }
 
-#[derive(deluxe::ExtractAttributes, Debug)]
-#[deluxe(attributes(tlb_derive))] // Match only `tlb_prefix` attributes
+#[derive(deluxe::ExtractAttributes)]
+#[deluxe(attributes(tlb_derive))]
 struct TLBFieldAttrs {
     bits_len: Option<u32>,
-}
-
-struct FieldInfo {
-    ident: syn::Ident,
-    attrs: TLBFieldAttrs,
+    key_bits_len: Option<u32>,
+    key_adapter: Option<String>,
+    val_adapter: Option<String>,
 }
 
 /// Automatic `TLBType` implementation
 // #[derive(ton_lib_proc_macro::TLBDerive)]
-// #[tlb_derive(prefix="0x12345678", bits_len=32)]
+// #[tlb_derive(prefix="0x12345678", bits_len=32, ensure_empty=true)]
 // struct MyStruct {}
 #[proc_macro_derive(TLBDerive, attributes(tlb_derive))]
 pub fn tlb_derive(input: TokenStream) -> TokenStream {
     let mut input = syn::parse::<syn::DeriveInput>(input).unwrap();
     // Extract a description, modifying `input.attrs` to remove the matched attributes.
-    let prefix_attrs: TLBPrefixAttrs = match deluxe::extract_attributes(&mut input) {
+    let header_attrs: TLBHeaderAttrs = match deluxe::extract_attributes(&mut input) {
         Ok(desc) => desc,
         Err(e) => return e.into_compile_error().into(),
     };
 
-    let ident = &input.ident;
-    // let (impl_generics, type_generics, where_clause) = input.generics.split_for_impl();
-    let prefix_val = prefix_attrs.prefix.unwrap_or(0);
-    let prefix_bits_len = prefix_attrs.bits_len.unwrap_or(0);
-    // Extract fields if it's a struct
-    let tokens = match &mut input.data {
-        Data::Struct(data) => {
-            let fields = match &mut data.fields {
-                Fields::Named(fields) => &mut fields.named, // For struct { field1: T, field2: T }
-                Fields::Unnamed(fields) => &mut fields.unnamed, // For tuple struct (T, T)
-                Fields::Unit => panic!("MyDerive only supports structs"),
-            };
+    let found_crate = crate_name("ton_lib").expect("ton_lib crate not found");
 
-            let fields_info = fields
-                .iter_mut()
-                .map(|f| {
-                    let ident = &f.ident;
-
-                    let field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut f.attrs) {
-                        Ok(desc) => desc,
-                        Err(_err) => exit(777),
-                    };
-                    FieldInfo {
-                        ident: ident.clone().unwrap(),
-                        attrs: field_attrs,
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let read_def_str = fields_info
-                .iter()
-                .map(|f| {
-                    let ident = &f.ident;
-                    if let Some(bits_len) = f.attrs.bits_len {
-                        quote!(
-                            let ident_tmp: ConstLen<_, #bits_len> = TLBType::read(parser)?;
-                            let #ident = ident_tmp.0;
-                        )
-                    } else {
-                        quote!(let #ident = TLBType::read(parser)?;)
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let init_obj_str = fields_info
-                .iter()
-                .map(|f| {
-                    let ident = &f.ident;
-                    quote!(#ident,)
-                })
-                .collect::<Vec<_>>();
-
-            let write_def_str = fields_info
-                .iter()
-                .map(|f| {
-                    let ident = &f.ident;
-                    if let Some(bits_len) = f.attrs.bits_len {
-                        quote!(
-                            let tmp_ident = ConstLen::<_, #bits_len>::from(&self.#ident);
-                            tmp_ident.write(dst)?;
-                        )
-                    } else {
-                        quote!(self.#ident.write(dst)?;)
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let tokens = quote::quote! {
-                impl TLBType for #ident {
-                    const PREFIX: TLBPrefix = TLBPrefix::new(#prefix_val, #prefix_bits_len);
-
-                    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
-                        #(#read_def_str)*
-                        Ok(Self {
-                            #(#init_obj_str)*
-                        })
-                    }
-
-                    fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
-                        #(#write_def_str)*
-                        Ok(())
-                    }
-                }
-            };
-            return tokens.into();
+    let crate_path = match found_crate {
+        FoundCrate::Itself => quote::quote! { crate },
+        FoundCrate::Name(name) => {
+            let ident = format_ident!("{}", name);
+            quote! { #ident }
         }
-        Data::Enum(data) => {
-            let variant_readers = data.variants.iter().map(|variant| {
-                let variant_name = &variant.ident;
-                // Expect single unnamed field (like `Std(...)`)
-                if let Fields::Unnamed(fields) = &variant.fields {
-                    if fields.unnamed.len() != 1 {
-                        panic!("Each enum variant must have exactly one unnamed field");
-                    }
-                    let field_type = &fields.unnamed.first().unwrap().ty;
-                    quote! {
-                            match #field_type::read(parser) {
-                                Ok(res) => return Ok(#ident::#variant_name(res)),
-                                Err(TonLibError::TLBWrongPrefix { .. }) => {},
-                                Err(err) => return Err(err),
-                            };
-                    }
-                } else {
-                    panic!("TryFromParser only supports tuple-like enums");
-                }
-            });
+    };
 
-            let variant_writers = data.variants.iter().map(|variant| {
-                let variant_name = &variant.ident;
-                // Expect single unnamed field (like `Std(...)`)
-                if let Fields::Unnamed(fields) = &variant.fields {
-                    if fields.unnamed.len() != 1 {
-                        panic!("Each enum variant must have exactly one unnamed field");
-                    }
-                    quote! {
-                        Self::#variant_name(ref value) => value.write(dst)?,
-                    }
-                } else {
-                    panic!("TryFromParser only supports tuple-like enums");
-                }
-            });
+    let ident = &input.ident;
 
-            quote! {
-                impl TLBType for #ident {
-                    const PREFIX: TLBPrefix = TLBPrefix::new(#prefix_val, #prefix_bits_len);
+    let (read_def_tokens, write_def_tokens) = match &mut input.data {
+        Data::Struct(data) => tlb_derive_struct(&header_attrs, data),
+        Data::Enum(data) => tlb_derive_enum(&crate_path, ident, data),
+        _ => panic!("TLBDerive only supports structs and enums"),
+    };
 
-                    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
-                        #(#variant_readers)*
-                        Err(TonLibError::TLBEnumOutOfOptions)
-                    }
+    let prefix_val = header_attrs.prefix.unwrap_or(0);
+    let prefix_bits_len = header_attrs.bits_len.unwrap_or(0);
 
-                    fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
-                        match self {
-                            #(#variant_writers)*
-                        }
-                        Ok(())
-                    }
-                }
+    quote::quote! {
+        impl #crate_path::tlb::tlb_type::TLBType for #ident {
+            const PREFIX: #crate_path::tlb::tlb_type::TLBPrefix = #crate_path::tlb::tlb_type::TLBPrefix::new(#prefix_val, #prefix_bits_len);
+
+            fn read_definition(parser: &mut #crate_path::cell::build_parse::parser::CellParser) -> Result<Self, #crate_path::errors::TonLibError> {
+                use #crate_path::tlb::tlb_type::TLBType;
+
+                #read_def_tokens
+            }
+
+            fn write_definition(&self, builder: &mut #crate_path::cell::build_parse::builder::CellBuilder) -> Result<(), #crate_path::errors::TonLibError> {
+                use #crate_path::tlb::tlb_type::TLBType;
+
+                #write_def_tokens
             }
         }
-        _ => panic!("MyDerive only supports structs"),
-    };
-    tokens.into()
+    }
+    .into()
 }

@@ -2,11 +2,8 @@ use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::level_mask::LevelMask;
 use crate::cell::ton_hash::TonHash;
 use std::fmt::{Debug, Display, Formatter};
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
-
-pub type TonCellRef = Arc<TonCell>;
-pub type TonCellRefsStore = Vec<TonCellRef>;
 
 #[derive(Debug, Clone)]
 pub struct TonCell {
@@ -26,7 +23,7 @@ impl TonCell {
 
     pub fn hash_for_level(&self, level: LevelMask) -> &TonHash { &self.meta.hashes[level.mask() as usize] }
     pub fn hash(&self) -> &TonHash { self.hash_for_level(LevelMask::MAX_LEVEL) }
-    pub fn into_ref(self) -> TonCellRef { Arc::new(self) }
+    pub fn into_ref(self) -> TonCellRef { TonCellRef(self.into()) }
 }
 
 unsafe impl Sync for TonCell {}
@@ -41,6 +38,24 @@ impl Eq for TonCell {}
 impl Display for TonCell {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) }
 }
+
+#[derive(Debug, Clone, PartialEq)]
+pub struct TonCellRef(pub Arc<TonCell>);
+impl Deref for TonCellRef {
+    type Target = TonCell;
+    fn deref(&self) -> &Self::Target { &self.0 }
+}
+impl DerefMut for TonCellRef {
+    fn deref_mut(&mut self) -> &mut Self::Target { Arc::get_mut(&mut self.0).unwrap() }
+}
+impl AsRef<TonCell> for TonCellRef {
+    fn as_ref(&self) -> &TonCell { &self.0 }
+}
+impl From<TonCell> for TonCellRef {
+    fn from(value: TonCell) -> Self { value.into_ref() }
+}
+
+pub type TonCellRefsStore = Vec<TonCellRef>;
 
 pub fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {
     use std::fmt::Write;

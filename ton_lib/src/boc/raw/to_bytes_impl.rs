@@ -33,20 +33,20 @@ impl BOCRaw {
             (if has_crc32 { 4 } else { 0 });
 
         let mut writer = BitWriter::endian(Vec::with_capacity(total_size as usize), BigEndian);
-        writer.write(32, GENERIC_BOC_MAGIC)?;
+        writer.write_var(32, GENERIC_BOC_MAGIC)?;
         writer.write_bit(has_idx)?;
         writer.write_bit(has_crc32)?;
         writer.write_bit(false)?; // has_cache_bits
-        writer.write(2, 0)?; // flags
-        writer.write(3, num_ref_bytes)?;
-        writer.write(8, num_offset_bytes)?;
-        writer.write(8 * num_ref_bytes, self.cells.len() as u32)?;
-        writer.write(8 * num_ref_bytes, root_count as u32)?;
-        writer.write(8 * num_ref_bytes, 0)?; // Complete BOCs only
-        writer.write(8 * num_offset_bytes, full_size)?;
+        writer.write_var(2, 0)?; // flags
+        writer.write_var(3, num_ref_bytes)?;
+        writer.write_var(8, num_offset_bytes)?;
+        writer.write_var(8 * num_ref_bytes, self.cells.len() as u32)?;
+        writer.write_var(8 * num_ref_bytes, root_count as u32)?;
+        writer.write_var(8 * num_ref_bytes, 0)?; // Complete BOCs only
+        writer.write_var(8 * num_offset_bytes, full_size)?;
 
         for &root in &self.roots {
-            writer.write(8 * num_ref_bytes, root as u32)?;
+            writer.write_var(8 * num_ref_bytes, root as u32)?;
         }
 
         for cell in &self.cells {
@@ -82,18 +82,18 @@ fn write_raw_cell(
     // data_len_bytes <= 128 by spec, but d2 must be u8 by spec as well
     let d2 = (data_len_bytes * 2 - if full_bytes { 0 } else { 1 }) as u8; //subtract 1 if the last byte is not full
 
-    writer.write(8, d1)?;
-    writer.write(8, d2)?;
+    writer.write_var(8, d1)?;
+    writer.write_var(8, d2)?;
 
     let full_bytes = cell.data_bits_len / 8;
     writer.write_bytes(&cell.data[0..full_bytes])?;
     let rest_bits_len = cell.data_bits_len % 8;
     if rest_bits_len != 0 {
-        writer.write(8, cell.data[full_bytes] | (1 << (8 - rest_bits_len - 1)))?;
+        writer.write_var(8, cell.data[full_bytes] | (1 << (8 - rest_bits_len - 1)))?;
     }
 
     for r in &cell.refs_positions {
-        writer.write(8 * ref_size_bytes, *r as u32)?;
+        writer.write_var(8 * ref_size_bytes, *r as u32)?;
     }
 
     Ok(())

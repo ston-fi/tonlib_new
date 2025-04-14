@@ -2,14 +2,12 @@ use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
 use crate::errors::TonLibError::TonAddressParseError;
-use crate::tlb::block::StateInit;
-use crate::tlb::TLBType;
+use crate::tlb::block_tlb::state_init::StateInit;
+use crate::tlb::tlb_type::TLBType;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use crc::Crc;
 use std::str::FromStr;
-
-const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TonAddress {
@@ -49,6 +47,8 @@ impl TonAddress {
     }
 
     pub fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<Self, TonLibError> {
+        const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
+
         if bytes.len() != 36 {
             raise_address_error(addr_str, format!("expecting 36 bytes, got {}", bytes.len()))?;
         }

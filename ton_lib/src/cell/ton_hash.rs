@@ -1,9 +1,10 @@
 use crate::errors::TonLibError;
 use hex::FromHex;
+use std::cmp::Ordering;
 use std::fmt::{Display, UpperHex};
 use std::hash::Hash;
 
-#[derive(Debug, Clone, PartialEq, Hash, Eq)]
+#[derive(Debug, Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 pub struct TonHash(TonHashData);
 
 #[derive(Debug)]
@@ -92,6 +93,15 @@ impl PartialEq for TonHashData {
 }
 
 impl Eq for TonHashData {}
+
+// TODO implement proper ordering (using cell store)
+impl Ord for TonHashData {
+    fn cmp(&self, other: &Self) -> Ordering { self.partial_cmp(other).unwrap_or(Ordering::Equal) }
+}
+
+impl PartialOrd for TonHashData {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
+}
 
 impl Hash for TonHashData {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {

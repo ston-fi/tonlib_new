@@ -1,7 +1,9 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonLibError;
-use crate::tlb::primitives::dyn_len::{ConstLen, VarLen};
+use crate::tlb::adapters::const_len::ConstLen;
+use crate::tlb::adapters::const_len::ConstLenRef;
+use crate::tlb::block_tlb::var_len::var_len::VarLenBits;
 use crate::tlb::tlb_type::TLBPrefix;
 use crate::tlb::tlb_type::TLBType;
 use ton_lib_proc_macro::TLBDerive;
@@ -27,7 +29,7 @@ pub struct MsgAddressNone {}
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
 pub struct MsgAddressExtern {
-    pub address: VarLen<Vec<u8>, 9>,
+    pub address: VarLenBits<Vec<u8>, 9>,
 }
 
 // Int
@@ -51,7 +53,7 @@ pub struct MsgAddressIntStd {
 #[derive(Debug, Clone, PartialEq)]
 pub struct MsgAddressIntVar {
     pub anycast: Option<Anycast>,
-    pub addr_bits_len: ConstLen<u32, 9>,
+    pub addr_bits_len: u32, // 9 bit
     pub workchain: i32,
     pub address: Vec<u8>,
 }
@@ -60,11 +62,11 @@ impl TLBType for MsgAddressIntVar {
     #[rustfmt::skip]
     const PREFIX: TLBPrefix = TLBPrefix { value: 0b11, bits_len: 2};
 
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         let anycast = TLBType::read(parser)?;
-        let addr_bits_len: ConstLen<_, 9> = TLBType::read(parser)?;
+        let addr_bits_len = ConstLen::<u32, 9>::read(parser)?.0;
         let workchain = TLBType::read(parser)?;
-        let address = parser.read_bits(addr_bits_len.0)?;
+        let address = parser.read_bits(addr_bits_len)?;
         Ok(Self {
             anycast,
             addr_bits_len,
@@ -73,11 +75,11 @@ impl TLBType for MsgAddressIntVar {
         })
     }
 
-    fn write_def(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
         self.anycast.write(builder)?;
-        self.addr_bits_len.write(builder)?;
+        ConstLen::<_, 9>(self.addr_bits_len).write(builder)?;
         self.workchain.write(builder)?;
-        builder.write_bits(&self.address, self.addr_bits_len.0)?;
+        builder.write_bits(&self.address, self.addr_bits_len)?;
         Ok(())
     }
 }
@@ -85,7 +87,7 @@ impl TLBType for MsgAddressIntVar {
 /// Allows easily convert enum variants to parent type
 #[rustfmt::skip]
 mod from_impl {
-    use crate::tlb::block::msg_address::*;
+    use crate::tlb::block_tlb::msg_address::*;
     impl From<MsgAddressNone> for MsgAddressExt { fn from(value: MsgAddressNone) -> Self { Self::None(value) } }
     impl From<MsgAddressExtern> for MsgAddressExt { fn from(value: MsgAddressExtern) -> Self { Self::Extern(value) } }
     impl From<MsgAddressIntStd> for MsgAddressInt { fn from(value: MsgAddressIntStd) -> Self { Self::Std(value) } }
@@ -100,13 +102,13 @@ mod from_impl {
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct Anycast {
-    pub rewrite_pfx: VarLen<Vec<u8>, 5>,
+    pub rewrite_pfx: VarLenBits<Vec<u8>, 5>,
 }
 
 impl Anycast {
     pub fn new(depth: u32, rewrite_pfx: Vec<u8>) -> Self {
         Self {
-            rewrite_pfx: VarLen::new(rewrite_pfx, depth),
+            rewrite_pfx: VarLenBits::new(rewrite_pfx, depth),
         }
     }
 }

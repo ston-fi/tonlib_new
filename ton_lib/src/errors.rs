@@ -1,4 +1,5 @@
 use hex::FromHexError;
+use num_bigint::BigUint;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -14,8 +15,8 @@ pub enum TonLibError {
     ParserBadPosition { new_pos: i32, bits_len: u32 },
     #[error("ParserError: No ref with index={req}")]
     ParserRefsUnderflow { req: usize },
-    #[error("ParserError: Cell is not empty: {bits_left} bits left")]
-    ParserCellNotEmpty { bits_left: u32 },
+    #[error("ParserError: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]
+    ParserCellNotEmpty { bits_left: u32, refs_left: usize },
 
     // cell_builder
     #[error("BuilderError: Can't write {req} bits: only {left} free bits available")]
@@ -48,14 +49,19 @@ pub enum TonLibError {
         bits_left: u32,
     },
     #[error("TLBEnum: Out of options")]
-    TLBEnumOutOfOptions,
+    TLBEnumOutOfOptions, // TODO collect errors from all options
     #[error("TLBObject: No internal value found (method: {0})")]
     TLBObjectNoValue(String),
     #[error("TLBSnakeFormat: Unsupported bits_len ({0})")]
     TLBSnakeFormatUnsupportedBitsLen(u32),
+    #[error("TLBDictWrongKeyLen: Wrong key_bits_len: exp={exp}, got={got} for key={key}")]
+    TLBDictWrongKeyLen { exp: usize, got: usize, key: BigUint },
 
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
+
+    #[error("TonLibCustomError: {0}")]
+    CustomError(String),
 
     // handling external errors
     #[error("{0}")]
@@ -66,4 +72,6 @@ pub enum TonLibError {
     B64Error(#[from] base64::DecodeError),
     #[error("{0}")]
     ParseInt(#[from] std::num::ParseIntError),
+    #[error("{0}")]
+    FromUtf8(#[from] std::string::FromUtf8Error),
 }

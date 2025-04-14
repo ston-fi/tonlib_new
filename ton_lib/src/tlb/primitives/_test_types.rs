@@ -14,26 +14,26 @@ pub(super) struct TestType2 {
 }
 
 impl TLBType for TestType1 {
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         Ok(TestType1 {
             value: parser.read_num(32)?,
         })
     }
 
-    fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
         dst.write_num(&self.value, 32)?;
         Ok(())
     }
 }
 
 impl TLBType for TestType2 {
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         Ok(TestType2 {
             value: parser.read_num(64)?,
         })
     }
 
-    fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
         dst.write_num(&self.value, 64)?;
         Ok(())
     }

@@ -44,7 +44,7 @@ impl<'a> CellParser<'a> {
         self.data_reader.read_bytes(&mut dst[..full_bytes])?;
 
         if remaining_bits != 0 {
-            let last_byte = self.data_reader.read::<u8>(remaining_bits)?;
+            let last_byte = self.data_reader.read_var::<u8>(remaining_bits)?;
             dst[full_bytes] = last_byte << (8 - remaining_bits);
         }
         Ok(dst)
@@ -52,17 +52,17 @@ impl<'a> CellParser<'a> {
 
     pub fn read_num<N: TonCellNum>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
         if bits_len == 0 {
-            return Ok(N::from_primitive(N::Primitive::zero()));
+            return Ok(N::tcn_from_primitive(N::Primitive::zero()));
         }
         self.ensure_enough_bits(bits_len)?;
         if N::IS_PRIMITIVE {
-            let primitive = self.data_reader.read::<N::Primitive>(bits_len)?;
-            return Ok(N::from_primitive(primitive));
+            let primitive = self.data_reader.read_var::<N::Primitive>(bits_len)?;
+            return Ok(N::tcn_from_primitive(primitive));
         }
         let bytes = self.read_bits(bits_len)?;
-        let res = N::from_bytes(&bytes);
+        let res = N::tcn_from_bytes(&bytes);
         if bits_len % 8 != 0 {
-            return Ok(res.shr(8 - bits_len % 8));
+            return Ok(res.tcn_shr(8 - bits_len % 8));
         }
         Ok(res)
     }
@@ -109,11 +109,12 @@ impl<'a> CellParser<'a> {
 
     pub fn ensure_empty(&mut self) -> Result<(), TonLibError> {
         let bits_left = self.data_bits_left()?;
-        if bits_left == 0 {
+        let refs_left = self.cell.refs.len() - self.next_ref_pos;
+        if bits_left == 0 && refs_left == 0 {
             return Ok(());
         }
 
-        Err(TonLibError::ParserCellNotEmpty { bits_left })
+        Err(TonLibError::ParserCellNotEmpty { bits_left, refs_left })
     }
 
     // returns remaining bits
@@ -130,7 +131,6 @@ impl<'a> CellParser<'a> {
     }
 }
 
-#[cfg(feature = "fastnum")]
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -305,6 +305,23 @@ mod tests {
         assert_eq!(parser.read_num::<BigUint>(7)?, 85u32.into()); // finish with second byte
         assert_eq!(parser.data_reader.position_in_bits()?, 16);
         assert_eq!(parser.read_num::<BigUint>(16)?, 65535u32.into());
+        Ok(())
+    }
+
+    #[test]
+    fn test_parser_ensure_empty() -> anyhow::Result<()> {
+        let cell_ref = make_test_cell(&[0b10101010, 0b01010101], 16)?;
+        let mut builder = CellBuilder::new();
+        builder.write_ref(cell_ref.into_ref())?;
+        builder.write_num(&3, 3)?;
+        let cell = builder.build()?;
+
+        let mut parser = CellParser::new(&cell);
+        assert_err!(parser.ensure_empty());
+        parser.read_bits(3)?;
+        assert_err!(parser.ensure_empty());
+        parser.read_next_ref()?;
+        assert_ok!(parser.ensure_empty());
         Ok(())
     }
 }

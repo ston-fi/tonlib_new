@@ -5,14 +5,14 @@ use crate::tlb::tlb_type::TLBType;
 
 // Maybe X
 impl<T: TLBType> TLBType for Option<T> {
-    fn read_def(parser: &mut CellParser) -> Result<Self, TonLibError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         match parser.read_bit()? {
             false => Ok(None),
             true => Ok(Some(T::read(parser)?)),
         }
     }
 
-    fn write_def(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonLibError> {
         match self {
             None => dst.write_bit(false)?,
             Some(value) => {

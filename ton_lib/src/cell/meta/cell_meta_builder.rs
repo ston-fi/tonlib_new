@@ -226,8 +226,8 @@ impl<'a> CellMetaBuilder<'a> {
         let d2 = get_bits_descriptor(self.data_bits_len);
 
         // Write descriptors
-        writer.write(8, d1)?;
-        writer.write(8, d2)?;
+        writer.write_var(8, d1)?;
+        writer.write_var(8, d2)?;
         // Write main data
         write_data(&mut writer, cur_data, cur_data_bits_len)?;
         // Write ref data
@@ -261,8 +261,8 @@ impl<'a> CellMetaBuilder<'a> {
     fn write_ref_depths(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonLibError> {
         for cell_ref in self.refs {
             let ref_depth = self.get_ref_depth(cell_ref.as_ref(), level);
-            writer.write(8, ref_depth / 256)?;
-            writer.write(8, ref_depth % 256)?;
+            writer.write_var(8, ref_depth / 256)?;
+            writer.write_var(8, ref_depth % 256)?;
         }
         Ok(())
     }
@@ -345,7 +345,7 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
         writer.write_bytes(&data[..data_len - 1])?;
         let last_byte = data[data_len - 1];
         let l = last_byte | (1 << (8 - rest_bits - 1));
-        writer.write(8, l)?;
+        writer.write_var(8, l)?;
     } else {
         writer.write_bytes(data)?;
     }
