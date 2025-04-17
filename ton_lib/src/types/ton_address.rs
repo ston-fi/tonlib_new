@@ -66,6 +66,11 @@ impl TonAddress {
     }
 }
 
+impl TryFrom<&str> for TonAddress {
+    type Error = TonLibError;
+    fn try_from(s: &str) -> Result<Self, Self::Error> { TonAddress::from_str(s) }
+}
+
 impl FromStr for TonAddress {
     type Err = TonLibError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
@@ -83,15 +88,14 @@ fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TonLi
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::boc::boc::BOC;
-
+    use crate::cell::ton_cell::TonCell;
     #[test]
     fn test_ton_address_derive_stonfi_pool() -> anyhow::Result<()> {
-        let code_cell = BOC::from_hex(
+        let code_cell = TonCell::from_boc_hex(
             "b5ee9c7201010101002300084202a9338ecd624ca15d37e4a8d9bf677ddc9b84f0e98f05f2fb84c7afe332a281b4",
         )?
-        .single_root()?;
-        let data_cell = BOC::from_hex("b5ee9c720101040100b900010d000000000000050102c9801459f7c0a12bb4ac4b78a788c425ee4d52f8b6041dda17b77b09fc5a03e894d6900287cd9fbe2ea663415da0aa6bbdf0cb136abe9c4f45214dd259354b80da8c265a006aebb27f5d0f1daf43e200f52408f3eb9ff5610f5b43284224644e7c6a590d14400203084202c00836440d084e44fb94316132ac5a21417ef4f429ee09b5560b5678b334c3e8084202c95a2ed22ab516f77f9d4898dc4578e72f18a2448e8f6832334b0b4bf501bc79")?.single_root()?;
+        .into_ref();
+        let data_cell = TonCell::from_boc_hex("b5ee9c720101040100b900010d000000000000050102c9801459f7c0a12bb4ac4b78a788c425ee4d52f8b6041dda17b77b09fc5a03e894d6900287cd9fbe2ea663415da0aa6bbdf0cb136abe9c4f45214dd259354b80da8c265a006aebb27f5d0f1daf43e200f52408f3eb9ff5610f5b43284224644e7c6a590d14400203084202c00836440d084e44fb94316132ac5a21417ef4f429ee09b5560b5678b334c3e8084202c95a2ed22ab516f77f9d4898dc4578e72f18a2448e8f6832334b0b4bf501bc79")?.into_ref();
         let address = TonAddress::derive(0, code_cell, data_cell)?;
         let exp_addr = TonAddress::from_str("EQAdltEfzXG_xteLFaKFGd-HPVKrEJqv_FdC7z2roOddRNdM")?;
         assert_eq!(address, exp_addr);

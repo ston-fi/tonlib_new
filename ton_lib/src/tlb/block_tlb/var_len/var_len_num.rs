@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonLibError;
-use crate::tlb::block_tlb::var_len::var_len::VarLen;
+use crate::tlb::block_tlb::var_len::VarLen;
 use crate::tlb::tlb_type::TLBType;
 
 impl<T: TonCellNum, const L: u32, const LEN_IN_BYTES: bool> TLBType for VarLen<T, L, LEN_IN_BYTES> {

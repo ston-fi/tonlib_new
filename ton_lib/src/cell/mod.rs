@@ -1,3 +1,4 @@
+pub mod boc;
 pub mod build_parse;
 pub mod meta;
 pub mod ton_cell;

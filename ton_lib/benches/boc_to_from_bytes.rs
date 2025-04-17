@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use std::ops::Deref;
 use std::sync::LazyLock;
-use ton_lib::boc::boc::BOC;
+use ton_lib::cell::boc::BOC;
 use tonlib_core::cell::BagOfCells;
 
 const ITERATIONS_COUNT: usize = 100;

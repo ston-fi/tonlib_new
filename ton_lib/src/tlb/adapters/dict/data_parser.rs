@@ -3,26 +3,26 @@ use std::collections::HashMap;
 use super::label_type::LabelType;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonLibError;
+use crate::tlb::adapters::dict::dict_val_adapters::DictValAdapter;
 use crate::tlb::block_tlb::unary::Unary;
-use crate::tlb::dict::adapters_val::DictValAdapter;
 use crate::tlb::tlb_type::TLBType;
 use num_bigint::BigUint;
 use num_traits::One;
 
-pub(super) struct DictDataParser {
+pub(in crate::tlb) struct DictDataParser {
     key_bits_len: usize,
     cur_key_prefix: BigUint, // store leading 1 to determinate len properly
 }
 
 impl DictDataParser {
-    pub(super) fn new(key_len_bits: usize) -> DictDataParser {
+    pub(in crate::tlb) fn new(key_len_bits: usize) -> DictDataParser {
         DictDataParser {
             key_bits_len: key_len_bits,
             cur_key_prefix: BigUint::one(),
         }
     }
 
-    pub(super) fn read<T, VA: DictValAdapter<T>>(
+    pub(in crate::tlb) fn read<T, VA: DictValAdapter<T>>(
         &mut self,
         parser: &mut CellParser,
     ) -> Result<HashMap<BigUint, T>, TonLibError> {

@@ -1,6 +1,9 @@
 use hex::FromHexError;
 use num_bigint::BigUint;
+use std::time::Duration;
 use thiserror::Error;
+use ton_liteapi::tl::request::Request;
+use ton_liteapi::types::LiteError;
 
 #[derive(Error, Debug)]
 pub enum TonLibError {
@@ -60,9 +63,23 @@ pub enum TonLibError {
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
 
-    #[error("TonLibCustomError: {0}")]
-    CustomError(String),
+    #[error("TonLiteClientWrongResponseType: expected {0}, got {1}")]
+    TonLiteClientWrongResponseType(String, String),
+    #[error("NetRequestTimeout: {msg}, timeout={timeout:?}")]
+    NetRequestTimeout { msg: String, timeout: Duration },
 
+    // LiteClint
+    #[error("LiteClientLiteError: {0}")]
+    LiteClientLiteError(#[from] LiteError),
+    #[error("LiteClientConnTimeout: {0:?}")]
+    LiteClientConnTimeout(Duration),
+    #[error("LiteClientReqTimeout: {0:?}")]
+    LiteClientReqTimeout(Box<(Request, Duration)>),
+
+    #[error("CustomError: {0}")]
+    CustomError(String),
+    #[error("UnexpectedError: {0}")]
+    UnexpectedError(#[from] Box<dyn std::error::Error + Send + Sync + 'static>),
     // handling external errors
     #[error("{0}")]
     IO(#[from] std::io::Error),
@@ -74,4 +91,10 @@ pub enum TonLibError {
     ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]
     FromUtf8(#[from] std::string::FromUtf8Error),
+    #[error("{0}")]
+    SerdeJson(#[from] serde_json::Error),
+    #[error("{0}")]
+    ElapsedError(#[from] tokio::time::error::Elapsed),
+    #[error("{0}")]
+    AdnlError(#[from] adnl::AdnlError),
 }

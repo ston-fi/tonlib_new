@@ -1,4 +1,4 @@
-use crate::boc::raw::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
+use crate::cell::boc::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 use crate::errors::TonLibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use crc::Crc;

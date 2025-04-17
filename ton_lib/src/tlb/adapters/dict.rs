@@ -1,22 +1,30 @@
+pub mod data_builder;
+pub mod data_parser;
+pub mod dict_key_adapters;
+pub mod dict_val_adapters;
+pub mod label_type;
+pub mod leading_bit_utils;
+
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonLibError;
-use crate::tlb::dict::adapters_key::DictKeyAdapter;
-use crate::tlb::dict::adapters_val::DictValAdapter;
-use crate::tlb::dict::data_builder::DictDataBuilder;
-use crate::tlb::dict::data_parser::DictDataParser;
+use crate::tlb::adapters::dict::data_builder::DictDataBuilder;
+use crate::tlb::adapters::dict::data_parser::DictDataParser;
+use crate::tlb::adapters::dict::dict_key_adapters::DictKeyAdapter;
+use crate::tlb::adapters::dict::dict_val_adapters::DictValAdapter;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::marker::PhantomData;
 
-pub struct Dict<K, V, KA: DictKeyAdapter<K>, VA: DictValAdapter<V>> {
-    _phantom: std::marker::PhantomData<(K, V, KA, VA)>,
-}
+/// Adapter to write HashMap with arbitrary key/values into a cell.
+/// Usage: `#[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>", key_bits_len = 256)]` instead
+pub struct Dict<KA: DictKeyAdapter<K>, VA: DictValAdapter<V>, K, V>(PhantomData<(KA, VA, K, V)>);
 
-impl<K, V, KA, VA> Dict<K, V, KA, VA>
+impl<KA, VA, K, V> Dict<KA, VA, K, V>
 where
-    K: Eq + Hash + Ord,
     KA: DictKeyAdapter<K>,
     VA: DictValAdapter<V>,
+    K: Eq + Hash + Ord,
 {
     pub fn read(parser: &mut CellParser, key_bits_len: u32) -> Result<HashMap<K, V>, TonLibError> {
         if !parser.read_bit()? {
@@ -33,7 +41,7 @@ where
         Ok(data)
     }
 
-    pub fn write(builder: &mut CellBuilder, key_bits_len: u32, data: &HashMap<K, V>) -> Result<(), TonLibError> {
+    pub fn write(builder: &mut CellBuilder, data: &HashMap<K, V>, key_bits_len: u32) -> Result<(), TonLibError> {
         if data.is_empty() {
             builder.write_bit(false)?;
             return Ok(());
@@ -58,8 +66,8 @@ where
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::tlb::dict::adapters_key::DictKeyAdapterInto;
-    use crate::tlb::dict::adapters_val::DictValAdapterNum;
+    use crate::tlb::adapters::dict::dict_key_adapters::DictKeyAdapterInto;
+    use crate::tlb::adapters::dict::dict_val_adapters::DictValAdapterNum;
     use crate::tlb::tlb_type::TLBType;
     use num_bigint::BigUint;
     use std::collections::HashMap;
@@ -76,11 +84,11 @@ mod tests {
         let mut parser = CellParser::new(&dict_cell);
         let some_data = parser.read_bits(96)?;
 
-        let parsed_data = Dict::<_, _, DictKeyAdapterInto, DictValAdapterNum<150>>::read(&mut parser, 8)?;
+        let parsed_data = Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::read(&mut parser, 8)?;
         assert_eq!(expected_data, parsed_data);
         let mut builder = CellBuilder::new();
         builder.write_bits(&some_data, 96)?;
-        Dict::<_, _, DictKeyAdapterInto, DictValAdapterNum<150>>::write(&mut builder, 8, &expected_data)?;
+        Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::write(&mut builder, &expected_data, 8)?;
         let constructed_cell = builder.build()?;
         assert_eq!(dict_cell, constructed_cell);
         Ok(())
@@ -98,10 +106,10 @@ mod tests {
 
         for key_len_bits in [8u32, 16, 32, 64, 111] {
             let mut builder = CellBuilder::new();
-            Dict::<_, _, DictKeyAdapterInto, DictValAdapterNum<150>>::write(&mut builder, key_len_bits, &data)?;
+            Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::write(&mut builder, &data, key_len_bits)?;
             let dict_cell = builder.build()?;
             let mut parser = CellParser::new(&dict_cell);
-            let parsed = Dict::<_, _, DictKeyAdapterInto, DictValAdapterNum<150>>::read(&mut parser, key_len_bits)?;
+            let parsed = Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::read(&mut parser, key_len_bits)?;
             assert_eq!(data, parsed, "key_len_bits: {}", key_len_bits);
         }
         Ok(())

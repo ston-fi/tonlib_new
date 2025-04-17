@@ -1,9 +1,9 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
-use crate::tlb::adapters::const_len::ConstLen;
-use crate::tlb::adapters::const_len::ConstLenRef;
-use crate::tlb::block_tlb::var_len::var_len::VarLenBits;
+use crate::tlb::adapters::ConstLen;
+use crate::tlb::block_tlb::var_len::VarLenBits;
 use crate::tlb::tlb_type::TLBPrefix;
 use crate::tlb::tlb_type::TLBType;
 use ton_lib_proc_macro::TLBDerive;
@@ -44,8 +44,7 @@ pub enum MsgAddressInt {
 pub struct MsgAddressIntStd {
     pub anycast: Option<Anycast>,
     pub workchain: i8,
-    #[tlb_derive(bits_len = 256)]
-    pub address: Vec<u8>,
+    pub address: TonHash,
 }
 
 // peculiar object - addr_bits_len is separated from addr value,
@@ -64,7 +63,7 @@ impl TLBType for MsgAddressIntVar {
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         let anycast = TLBType::read(parser)?;
-        let addr_bits_len = ConstLen::<u32, 9>::read(parser)?.0;
+        let addr_bits_len = ConstLen::<u32>::read(parser, 9)?;
         let workchain = TLBType::read(parser)?;
         let address = parser.read_bits(addr_bits_len)?;
         Ok(Self {
@@ -77,7 +76,7 @@ impl TLBType for MsgAddressIntVar {
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
         self.anycast.write(builder)?;
-        ConstLen::<_, 9>(self.addr_bits_len).write(builder)?;
+        ConstLen::<u32>::write(builder, &self.addr_bits_len, 9)?;
         self.workchain.write(builder)?;
         builder.write_bits(&self.address, self.addr_bits_len)?;
         Ok(())
@@ -129,10 +128,11 @@ mod tests {
         let expected = MsgAddressIntStd {
             anycast: Some(Anycast::new(30, vec![3, 16, 83, 16])),
             workchain: 0,
-            address: vec![
+            address: [
                 77, 58, 155, 26, 56, 188, 179, 186, 88, 102, 247, 73, 204, 146, 79, 206, 132, 216, 123, 51, 95, 20,
                 153, 234, 122, 207, 23, 115, 175, 20, 206, 237,
-            ],
+            ]
+            .into(),
         };
         assert_eq!(parsed, expected.into());
 
@@ -150,7 +150,7 @@ mod tests {
         let expected = MsgAddressIntStd {
             anycast: None,
             workchain: -1,
-            address: vec![0; 32],
+            address: TonHash::from([0; 32]),
         };
         assert_eq!(parsed, expected.into());
 
@@ -169,7 +169,7 @@ mod tests {
         let expected = MsgAddressIntStd {
             anycast: None,
             workchain: -1,
-            address: vec![0; 32],
+            address: TonHash::from([0; 32]),
         };
         assert_eq!(parsed, expected.into());
 

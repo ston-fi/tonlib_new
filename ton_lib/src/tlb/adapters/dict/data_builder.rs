@@ -4,15 +4,15 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::ton_cell::TonCell;
 use crate::errors::TonLibError;
 use crate::errors::TonLibError::TLBDictWrongKeyLen;
+use crate::tlb::adapters::dict::dict_val_adapters::DictValAdapter;
 use crate::tlb::block_tlb::unary::Unary;
-use crate::tlb::dict::adapters_val::DictValAdapter;
 use crate::tlb::tlb_type::TLBType;
 use num_bigint::BigUint;
 use num_traits::{One, Zero};
 use std::marker::PhantomData;
 use std::mem::swap;
 
-pub(super) struct DictDataBuilder<'a, T, VA: DictValAdapter<T>> {
+pub(in crate::tlb) struct DictDataBuilder<'a, T, VA: DictValAdapter<T>> {
     keys_sorted: Vec<BigUint>, // contains 1 extra leading bit set to 1
     values_sorted: &'a [&'a T],
     key_bits_len_left: usize,
@@ -20,7 +20,7 @@ pub(super) struct DictDataBuilder<'a, T, VA: DictValAdapter<T>> {
 }
 
 impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
-    pub(super) fn new(
+    pub(in crate::tlb) fn new(
         key_bits_len: usize,
         mut keys_sorted: Vec<BigUint>,
         values_sorted: &'a [&'a T],
@@ -36,7 +36,7 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         Ok(builder)
     }
 
-    pub(super) fn build(mut self) -> Result<TonCell, TonLibError> {
+    pub(in crate::tlb) fn build(mut self) -> Result<TonCell, TonLibError> {
         let mut builder = CellBuilder::new();
         if self.keys_sorted.is_empty() {
             return builder.build();

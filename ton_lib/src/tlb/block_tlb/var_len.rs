@@ -1,3 +1,6 @@
+mod var_len_num;
+mod var_len_vec;
+
 use std::ops::{Deref, DerefMut};
 
 pub type VarLenBits<T, const BITS_LEN: u32> = VarLen<T, BITS_LEN, false>;

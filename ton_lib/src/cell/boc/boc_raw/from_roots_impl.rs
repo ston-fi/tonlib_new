@@ -1,4 +1,4 @@
-use crate::boc::raw::boc_raw::{BOCRaw, CellRaw};
+use crate::cell::boc::boc_raw::{BOCRaw, CellRaw};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;

@@ -21,8 +21,7 @@ struct TLBHeaderAttrs {
 struct TLBFieldAttrs {
     bits_len: Option<u32>,
     key_bits_len: Option<u32>,
-    key_adapter: Option<String>,
-    val_adapter: Option<String>,
+    adapter: Option<String>,
 }
 
 /// Automatic `TLBType` implementation

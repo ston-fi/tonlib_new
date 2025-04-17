@@ -1,4 +1,6 @@
-use super::raw::boc_raw::BOCRaw;
+mod boc_raw;
+
+use crate::cell::boc::boc_raw::BOCRaw;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonLibError;
 use std::marker::PhantomData;

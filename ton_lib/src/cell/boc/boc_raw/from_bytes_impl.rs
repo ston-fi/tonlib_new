@@ -1,4 +1,4 @@
-use crate::boc::raw::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
+use crate::cell::boc::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
 use crate::errors::TonLibError;
