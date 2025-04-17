@@ -72,6 +72,13 @@ fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (
                 write_tokens.push(quote!(ConstLen::<#ty>::write(builder, &self.#ident, #bits_len)?;));
                 continue;
             }
+
+            if adapter.starts_with("TLBRef") {
+                read_tokens.push(quote!(let #ident = TLBRef::<#ty>::read(parser)?;));
+                init_tokens.push(quote!(#ident,));
+                write_tokens.push(quote!(TLBRef::<#ty>::write(builder, &self.#ident)?;));
+                continue;
+            }
             panic!("Unsupported adapter: {}", adapter);
         } else {
             read_tokens.push(quote!(let #ident = TLBType::read(parser)?;));
@@ -126,6 +133,12 @@ fn derive_unnamed_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) ->
                 read_tokens.push(quote!(let #read_ident = ConstLen<#ty>::read(parser, #bits_len)?;));
                 init_tokens.push(quote!(#read_ident,));
                 write_tokens.push(quote!(ConstLen<#ty>::write(builder, &self.#position, #bits_len)?;));
+                continue;
+            }
+            if adapter.starts_with("TLBRef") {
+                read_tokens.push(quote!(let #read_ident = TLBRef::<#ty>::read(parser)?;));
+                init_tokens.push(quote!(#read_ident,));
+                write_tokens.push(quote!(TLBRef::<#ty>::write(builder, &self.#position)?;));
                 continue;
             }
             panic!("Unsupported adapter: {}", adapter);
