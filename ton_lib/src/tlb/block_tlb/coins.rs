@@ -10,6 +10,10 @@ use ton_lib_proc_macro::TLBDerive;
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct Grams(pub VarLenBytes<BigUint, 4>);
 
+// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L118
+// ¯\_(ツ)_/¯
+pub type Coins = Grams;
+
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct CurrencyCollection {

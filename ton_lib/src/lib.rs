@@ -1,3 +1,5 @@
+pub use ton_lib_proc_macro; // re-export
+
 pub mod bc_constants;
 pub mod cell;
 pub mod errors;

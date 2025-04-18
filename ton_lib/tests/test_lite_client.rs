@@ -1,5 +1,5 @@
 use ton_lib::errors::TonLibError;
-use ton_lib::lite_client::client::LiteApiClient;
+use ton_lib::lite_client::client::LiteClient;
 use ton_lib::lite_client::config::LiteClientConfig;
 use ton_lib::net_config::TON_NET_CONF_MAINNET;
 use ton_lib::unwrap_lite_rsp;
@@ -9,7 +9,7 @@ use ton_liteapi::tl::response::Response;
 #[tokio::test]
 async fn test_lite_client() -> anyhow::Result<()> {
     let config = LiteClientConfig::new(TON_NET_CONF_MAINNET)?;
-    let lite_client = LiteApiClient::new(config)?;
+    let lite_client = LiteClient::new(config)?;
 
     // generic function
     let mc_info_rsp = lite_client.exec(Request::GetMasterchainInfo, None).await?;

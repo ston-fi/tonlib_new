@@ -34,12 +34,12 @@ macro_rules! unwrap_lite_rsp {
 
 /// Raw client - provides multi-connection client with retry logic
 #[derive(Clone)]
-pub struct LiteApiClient {
+pub struct LiteClient {
     inner: Arc<Inner>,
 }
 
 // converts ton_block -> ton_liteapi objects under the hood
-impl LiteApiClient {
+impl LiteClient {
     pub fn new(config: LiteClientConfig) -> Result<Self, TonLibError> {
         Ok(Self {
             inner: Arc::new(Inner::new(config)?),
