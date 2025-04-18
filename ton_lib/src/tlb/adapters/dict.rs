@@ -18,7 +18,10 @@ use std::marker::PhantomData;
 
 /// Adapter to write HashMap with arbitrary key/values into a cell.
 /// Usage: `#[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>", key_bits_len = 256)]` instead
-pub struct Dict<KA: DictKeyAdapter<K>, VA: DictValAdapter<V>, K, V>(PhantomData<(KA, VA, K, V)>);
+pub struct Dict<KA: DictKeyAdapter<K>, VA: DictValAdapter<V>, K, V> {
+    key_bits_len: u32,
+    _phantom: PhantomData<(KA, VA, K, V)>,
+}
 
 impl<KA, VA, K, V> Dict<KA, VA, K, V>
 where
@@ -26,13 +29,20 @@ where
     VA: DictValAdapter<V>,
     K: Eq + Hash + Ord,
 {
-    pub fn read(parser: &mut CellParser, key_bits_len: u32) -> Result<HashMap<K, V>, TonLibError> {
+    pub fn new(key_bits_len: u32) -> Self {
+        Self {
+            key_bits_len,
+            _phantom: PhantomData,
+        }
+    }
+
+    pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TonLibError> {
         if !parser.read_bit()? {
             return Ok(HashMap::default());
         }
 
         let data_cell = parser.read_next_ref()?;
-        let mut data_parser = DictDataParser::new(key_bits_len as usize);
+        let mut data_parser = DictDataParser::new(self.key_bits_len as usize);
         let data_raw = data_parser.read::<V, VA>(&mut CellParser::new(data_cell))?;
         let data = data_raw
             .into_iter()
@@ -41,7 +51,7 @@ where
         Ok(data)
     }
 
-    pub fn write(builder: &mut CellBuilder, data: &HashMap<K, V>, key_bits_len: u32) -> Result<(), TonLibError> {
+    pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TonLibError> {
         if data.is_empty() {
             builder.write_bit(false)?;
             return Ok(());
@@ -55,7 +65,8 @@ where
             values_sorted.push(value);
         }
         let keys_sorted = keys.into_iter().map(|k| KA::make_key(k)).collect::<Result<Vec<_>, TonLibError>>()?;
-        let data_builder = DictDataBuilder::<V, VA>::new(key_bits_len as usize, keys_sorted, values_sorted.as_slice())?;
+        let data_builder =
+            DictDataBuilder::<V, VA>::new(self.key_bits_len as usize, keys_sorted, values_sorted.as_slice())?;
         let dict_data_cell = data_builder.build()?.into_ref();
         builder.write_bit(true)?;
         builder.write_ref(dict_data_cell)
@@ -84,11 +95,11 @@ mod tests {
         let mut parser = CellParser::new(&dict_cell);
         let some_data = parser.read_bits(96)?;
 
-        let parsed_data = Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::read(&mut parser, 8)?;
+        let parsed_data = Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(8).read(&mut parser)?;
         assert_eq!(expected_data, parsed_data);
         let mut builder = CellBuilder::new();
         builder.write_bits(&some_data, 96)?;
-        Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::write(&mut builder, &expected_data, 8)?;
+        Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(8).write(&mut builder, &expected_data)?;
         let constructed_cell = builder.build()?;
         assert_eq!(dict_cell, constructed_cell);
         Ok(())
@@ -106,10 +117,11 @@ mod tests {
 
         for key_len_bits in [8u32, 16, 32, 64, 111] {
             let mut builder = CellBuilder::new();
-            Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::write(&mut builder, &data, key_len_bits)?;
+            Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(key_len_bits).write(&mut builder, &data)?;
             let dict_cell = builder.build()?;
             let mut parser = CellParser::new(&dict_cell);
-            let parsed = Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::read(&mut parser, key_len_bits)?;
+            let parsed =
+                Dict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(key_len_bits).read(&mut parser)?;
             assert_eq!(data, parsed, "key_len_bits: {}", key_len_bits);
         }
         Ok(())

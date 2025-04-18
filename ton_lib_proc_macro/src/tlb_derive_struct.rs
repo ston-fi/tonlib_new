@@ -8,7 +8,6 @@ struct FieldInfo {
     ident: Option<syn::Ident>,
     position: usize,
     attrs: TLBFieldAttrs,
-    ty: syn::Type,
 }
 
 pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataStruct) -> (TokenStream, TokenStream) {
@@ -31,7 +30,6 @@ pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataSt
                 ident: ident.clone(),
                 position,
                 attrs: field_attrs,
-                ty: field.ty.clone(),
             }
         })
         .collect::<Vec<_>>();
@@ -49,37 +47,12 @@ fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (
     let mut write_tokens = Vec::with_capacity(fields.len());
     for field in fields {
         let ident = field.ident.as_ref().unwrap();
-        let ty = &field.ty;
         if let Some(adapter) = &field.attrs.adapter {
-            if adapter.starts_with("Dict") {
-                let key_bits_len = match field.attrs.key_bits_len {
-                    Some(key_bits_len) => key_bits_len,
-                    None => panic!("for dict, bits_len attr is required"),
-                };
-                let dict_ident: TokenStream = syn::parse_str(adapter).unwrap();
-                read_tokens.push(quote!(let #ident = #dict_ident::read(parser, #key_bits_len)?;));
-                init_tokens.push(quote!(#ident,));
-                write_tokens.push(quote!(#dict_ident::write(builder, &self.#ident, #key_bits_len)?;));
-                continue;
-            }
-            if adapter.starts_with("ConstLen") {
-                let bits_len = match field.attrs.bits_len {
-                    Some(bits_len) => bits_len,
-                    None => panic!("for const len, bits_len attr is required"),
-                };
-                read_tokens.push(quote!(let #ident = ConstLen::<#ty>::read(parser, #bits_len)?;));
-                init_tokens.push(quote!(#ident,));
-                write_tokens.push(quote!(ConstLen::<#ty>::write(builder, &self.#ident, #bits_len)?;));
-                continue;
-            }
-
-            if adapter.starts_with("TLBRef") {
-                read_tokens.push(quote!(let #ident = TLBRef::<#ty>::read(parser)?;));
-                init_tokens.push(quote!(#ident,));
-                write_tokens.push(quote!(TLBRef::<#ty>::write(builder, &self.#ident)?;));
-                continue;
-            }
-            panic!("Unsupported adapter: {}", adapter);
+            let adapter_ident: TokenStream = syn::parse_str(adapter).unwrap();
+            read_tokens.push(quote!(let #ident = #adapter_ident.read(parser)?;));
+            init_tokens.push(quote!(#ident,));
+            write_tokens.push(quote!(#adapter_ident.write(builder, &self.#ident)?;));
+            continue;
         } else {
             read_tokens.push(quote!(let #ident = TLBType::read(parser)?;));
             init_tokens.push(quote!(#ident,));
@@ -112,36 +85,12 @@ fn derive_unnamed_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) ->
     for field in fields {
         let position = Index::from(field.position);
         let read_ident = format_ident!("field_{}", field.position);
-        let ty = &field.ty;
         if let Some(adapter) = &field.attrs.adapter {
-            if adapter.starts_with("Dict") {
-                let key_bits_len = match field.attrs.key_bits_len {
-                    Some(key_bits_len) => key_bits_len,
-                    None => panic!("for dict, key_bits_len attr is required"),
-                };
-                let dict_ident: TokenStream = syn::parse_str(adapter).unwrap();
-                read_tokens.push(quote!(let #read_ident = #dict_ident::read(parser, #key_bits_len)?;));
-                init_tokens.push(quote!(#read_ident,));
-                write_tokens.push(quote!(#dict_ident::write(builder, &self.#position, #key_bits_len)?;));
-                continue;
-            }
-            if adapter.starts_with("ConstLen") {
-                let bits_len = match field.attrs.bits_len {
-                    Some(key_bits_len) => key_bits_len,
-                    None => panic!("for dict, bits_len attr is required"),
-                };
-                read_tokens.push(quote!(let #read_ident = ConstLen<#ty>::read(parser, #bits_len)?;));
-                init_tokens.push(quote!(#read_ident,));
-                write_tokens.push(quote!(ConstLen<#ty>::write(builder, &self.#position, #bits_len)?;));
-                continue;
-            }
-            if adapter.starts_with("TLBRef") {
-                read_tokens.push(quote!(let #read_ident = TLBRef::<#ty>::read(parser)?;));
-                init_tokens.push(quote!(#read_ident,));
-                write_tokens.push(quote!(TLBRef::<#ty>::write(builder, &self.#position)?;));
-                continue;
-            }
-            panic!("Unsupported adapter: {}", adapter);
+            let adapter_ident: TokenStream = syn::parse_str(adapter).unwrap();
+            read_tokens.push(quote!(let #read_ident = #adapter_ident.read(parser)?;));
+            init_tokens.push(quote!(#read_ident,));
+            write_tokens.push(quote!(#adapter_ident.write(builder, &self.#position)?;));
+            continue;
         } else {
             read_tokens.push(quote!(let #read_ident = TLBType::read(parser)?;));
             init_tokens.push(quote!(#read_ident,));

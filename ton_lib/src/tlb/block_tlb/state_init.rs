@@ -11,12 +11,12 @@ use ton_lib_proc_macro::TLBDerive;
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(ensure_empty = true)]
 pub struct StateInit {
-    #[tlb_derive(adapter = "ConstLen", bits_len = 5)]
+    #[tlb_derive(adapter = "ConstLen::<Option<u8>>::new(5)")]
     pub split_depth: Option<u8>,
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    #[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>", key_bits_len = 256)]
+    #[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
     pub library: HashMap<TonHash, TonCellRef>,
 }
 

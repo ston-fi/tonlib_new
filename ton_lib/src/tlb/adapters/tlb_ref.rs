@@ -11,11 +11,17 @@ use std::marker::PhantomData;
 pub struct TLBRef<T: TLBType>(PhantomData<T>);
 
 impl<T: TLBType> TLBRef<T> {
-    pub fn read(parser: &mut CellParser) -> Result<T, TonLibError> { T::from_cell(parser.read_next_ref()?) }
+    pub fn new() -> Self { TLBRef(PhantomData) }
 
-    pub fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonLibError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonLibError> { T::from_cell(parser.read_next_ref()?) }
+
+    pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonLibError> {
         builder.write_ref(val.to_cell()?.into_ref())
     }
+}
+
+impl<T: TLBType> Default for TLBRef<T> {
+    fn default() -> Self { Self::new() }
 }
 
 #[cfg(test)]
@@ -26,19 +32,19 @@ mod tests {
     #[test]
     fn test_tlb_ref() -> anyhow::Result<()> {
         let mut builder = CellBuilder::new();
-        TLBRef::<bool>::write(&mut builder, &true)?;
+        TLBRef::<bool>::new().write(&mut builder, &true)?;
         let cell = builder.build()?;
         assert_eq!(cell.refs.len(), 1);
         assert_eq!(cell.refs[0].data, vec![0b10000000]);
 
-        let parsed = TLBRef::<bool>::read(&mut CellParser::new(&cell))?;
+        let parsed = TLBRef::<bool>::new().read(&mut CellParser::new(&cell))?;
         assert!(parsed);
         Ok(())
     }
 
     #[derive(TLBDerive, PartialEq, Debug)]
     struct TestStruct {
-        #[tlb_derive(adapter = "TLBRef")]
+        #[tlb_derive(adapter = "TLBRef::<u8>::new()")]
         pub a: u8,
     }
 

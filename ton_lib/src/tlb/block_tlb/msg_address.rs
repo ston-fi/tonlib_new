@@ -63,7 +63,7 @@ impl TLBType for MsgAddressIntVar {
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
         let anycast = TLBType::read(parser)?;
-        let addr_bits_len = ConstLen::<u32>::read(parser, 9)?;
+        let addr_bits_len = ConstLen::<u32>::new(9).read(parser)?;
         let workchain = TLBType::read(parser)?;
         let address = parser.read_bits(addr_bits_len)?;
         Ok(Self {
@@ -76,7 +76,7 @@ impl TLBType for MsgAddressIntVar {
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
         self.anycast.write(builder)?;
-        ConstLen::<u32>::write(builder, &self.addr_bits_len, 9)?;
+        ConstLen::<u32>::new(9).write(builder, &self.addr_bits_len)?;
         self.workchain.write(builder)?;
         builder.write_bits(&self.address, self.addr_bits_len)?;
         Ok(())

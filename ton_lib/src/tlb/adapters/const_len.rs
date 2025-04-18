@@ -7,51 +7,62 @@ use std::marker::PhantomData;
 /// Adaptor to write data with fixed length into a cell.
 ///
 /// Usage: `#[tlb_derive(adapter="ConstLen", bits_len={BITS_LEN})]`
-pub struct ConstLen<T>(PhantomData<T>);
+pub struct ConstLen<T> {
+    bits_len: u32,
+    _phantom: PhantomData<T>,
+}
+
+impl<T> ConstLen<T> {
+    pub fn new(bits_len: u32) -> Self {
+        Self {
+            bits_len,
+            _phantom: PhantomData,
+        }
+    }
+}
 
 impl<T: TonCellNum> ConstLen<T> {
-    pub fn read(parser: &mut CellParser, bits_len: u32) -> Result<T, TonLibError> { parser.read_num(bits_len) }
-    pub fn write(builder: &mut CellBuilder, val: &T, bits_len: u32) -> Result<(), TonLibError> {
-        builder.write_num(val, bits_len)
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonLibError> { parser.read_num(self.bits_len) }
+    pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonLibError> {
+        builder.write_num(val, self.bits_len)
     }
 }
 
 impl<T: TonCellNum> ConstLen<Option<T>> {
-    pub fn read(parser: &mut CellParser, bits_len: u32) -> Result<Option<T>, TonLibError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TonLibError> {
         match parser.read_bit()? {
-            true => Ok(Some(parser.read_num(bits_len)?)),
+            true => Ok(Some(parser.read_num(self.bits_len)?)),
             false => Ok(None),
         }
     }
-    pub fn write(builder: &mut CellBuilder, val: &Option<T>, bits_len: u32) -> Result<(), TonLibError> {
+    pub fn write(&self, builder: &mut CellBuilder, val: &Option<T>) -> Result<(), TonLibError> {
+        builder.write_bit(val.is_some())?;
         if let Some(val) = val {
-            builder.write_bit(true)?;
-            builder.write_num(val, bits_len)
-        } else {
-            builder.write_bit(false)
-        }
+            return builder.write_num(val, self.bits_len);
+        };
+        Ok(())
     }
 }
 
 impl ConstLen<Vec<u8>> {
-    pub fn read(parser: &mut CellParser, bits_len: u32) -> Result<Vec<u8>, TonLibError> { parser.read_bits(bits_len) }
-    pub fn write(builder: &mut CellBuilder, val: &Vec<u8>, bits_len: u32) -> Result<(), TonLibError> {
-        builder.write_bits(val, bits_len)
+    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TonLibError> { parser.read_bits(self.bits_len) }
+    pub fn write(&self, builder: &mut CellBuilder, val: &Vec<u8>) -> Result<(), TonLibError> {
+        builder.write_bits(val, self.bits_len)
     }
 }
 
 impl ConstLen<Option<Vec<u8>>> {
-    pub fn read(parser: &mut CellParser, bits_len: u32) -> Result<Option<Vec<u8>>, TonLibError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<Option<Vec<u8>>, TonLibError> {
         match parser.read_bit()? {
-            true => Ok(Some(parser.read_bits(bits_len)?)),
+            true => Ok(Some(parser.read_bits(self.bits_len)?)),
             false => Ok(None),
         }
     }
-    pub fn write(builder: &mut CellBuilder, val: &Option<Vec<u8>>, bits_len: u32) -> Result<(), TonLibError> {
+    pub fn write(&self, builder: &mut CellBuilder, val: &Option<Vec<u8>>) -> Result<(), TonLibError> {
         match val {
             Some(val) => {
                 builder.write_bit(true)?;
-                builder.write_bits(val, bits_len)
+                builder.write_bits(val, self.bits_len)
             }
             None => builder.write_bit(false),
         }
@@ -65,10 +76,10 @@ mod tests {
     #[test]
     fn test_const_len() -> anyhow::Result<()> {
         let mut builder = CellBuilder::new();
-        ConstLen::<u32>::write(&mut builder, &1u32, 24)?;
+        ConstLen::<u32>::new(24).write(&mut builder, &1u32)?;
         let cell = builder.build()?;
         assert_eq!(&cell.data, &[0, 0, 1]);
-        let parsed = ConstLen::<u32>::read(&mut CellParser::new(&cell), 24)?;
+        let parsed = ConstLen::<u32>::new(24).read(&mut CellParser::new(&cell))?;
         assert_eq!(parsed, 1u32);
         Ok(())
     }
