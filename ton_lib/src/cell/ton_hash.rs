@@ -33,6 +33,12 @@ impl TonHash {
         Ok(Self(TonHashData::Vec(data)))
     }
 
+    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonLibError> {
+        let bytes = hex::decode(hex)?;
+        check_bytes_len(&bytes)?;
+        Ok(Self(TonHashData::Vec(bytes)))
+    }
+
     pub fn as_slice(&self) -> &[u8] {
         match &self.0 {
             TonHashData::Slice(data) => data,

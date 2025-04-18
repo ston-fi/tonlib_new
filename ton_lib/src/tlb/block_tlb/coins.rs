@@ -1,7 +1,9 @@
 use crate::cell::ton_cell::TonCellRef;
+use crate::errors::TonLibError;
 use crate::tlb::block_tlb::var_len::VarLenBytes;
 use num_bigint::BigUint;
 use std::ops::{Deref, DerefMut};
+use std::str::FromStr;
 use ton_lib_proc_macro::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
@@ -30,6 +32,11 @@ impl CurrencyCollection {
             other: None,
         }
     }
+}
+
+impl FromStr for CurrencyCollection {
+    type Err = TonLibError;
+    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
 }
 
 impl Deref for Grams {

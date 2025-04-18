@@ -54,7 +54,6 @@ impl BOC {
 mod tests {
     use super::*;
     use crate::cell::ton_hash::TonHash;
-    use hex::FromHex;
 
     #[test]
     fn test_boc_create() {

@@ -17,7 +17,7 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 
 /// Adapter to write HashMap with arbitrary key/values into a cell.
-/// Usage: `#[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>", key_bits_len = 256)]` instead
+/// Usage: `#[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]` instead
 pub struct Dict<KA: DictKeyAdapter<K>, VA: DictValAdapter<V>, K, V> {
     key_bits_len: u32,
     _phantom: PhantomData<(KA, VA, K, V)>,

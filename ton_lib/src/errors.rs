@@ -97,4 +97,6 @@ pub enum TonLibError {
     ElapsedError(#[from] tokio::time::error::Elapsed),
     #[error("{0}")]
     AdnlError(#[from] adnl::AdnlError),
+    #[error("{0}")]
+    ParseBigIntError(#[from] num_bigint::ParseBigIntError),
 }

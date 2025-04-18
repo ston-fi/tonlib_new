@@ -187,7 +187,6 @@ mod tests {
     use super::*;
     use crate::cell::meta::level_mask::LevelMask;
     use crate::cell::ton_hash::TonHash;
-    use hex::FromHex;
     use std::str::FromStr;
 
     use tokio_test::{assert_err, assert_ok};

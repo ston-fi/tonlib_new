@@ -1,3 +1,4 @@
+pub mod account;
 pub mod coins;
 pub mod msg_address;
 pub mod state_init;

@@ -67,8 +67,6 @@ pub fn tlb_derive(input: TokenStream) -> TokenStream {
             }
 
             fn write_definition(&self, builder: &mut #crate_path::cell::build_parse::builder::CellBuilder) -> Result<(), #crate_path::errors::TonLibError> {
-                use #crate_path::tlb::tlb_type::TLBType;
-
                 #write_def_tokens
             }
         }

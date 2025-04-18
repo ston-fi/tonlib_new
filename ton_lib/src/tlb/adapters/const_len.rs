@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 /// Adaptor to write data with fixed length into a cell.
 ///
-/// Usage: `#[tlb_derive(adapter="ConstLen", bits_len={BITS_LEN})]`
+/// Usage: `#[tlb_derive(adapter="ConstLen::<_>::new({BITS_LEN})")]`
 pub struct ConstLen<T> {
     bits_len: u32,
     _phantom: PhantomData<T>,
