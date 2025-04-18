@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.5...ton_lib-v0.0.6) - 2025-04-18
+
+### Fixed
+
+- fix flack test
+
+### Other
+
+- impl Account TLB
+- generalize adapters
+- support adapter="TLBRef"
+- Update adapter interfaces ([#46](https://github.com/Sild/libs_rs/pull/46))
+
 ## [0.0.5](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.4...ton_lib-v0.0.5) - 2025-04-14
 
 ### Other
