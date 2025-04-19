@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.4...ton_lib_proc_macro-v0.0.5) - 2025-04-19
+
+### Other
+
+- add TonAddress converters + TLBType, fix TLBDerive for Enums
+
 ## [0.0.4](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.3...ton_lib_proc_macro-v0.0.4) - 2025-04-18
 
 ### Other

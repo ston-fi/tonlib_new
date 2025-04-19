@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.7...ton_lib-v0.0.8) - 2025-04-19
+
+### Other
+
+- add Coins::zero() constructor
+- add TonAddress converters + TLBType, fix TLBDerive for Enums
+
 ## [0.0.7](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.6...ton_lib-v0.0.7) - 2025-04-18
 
 ### Other
