@@ -114,13 +114,12 @@ impl Anycast {
 
 #[cfg(test)]
 mod tests {
-    use tokio_test::assert_ok;
-
     use super::*;
     use crate::tlb::tlb_type::TLBType;
+    use tokio_test::assert_ok;
 
     #[test]
-    fn test_read_write_msg_address() -> anyhow::Result<()> {
+    fn test_msg_address_read_write() -> anyhow::Result<()> {
         // Anyhow read/write is covered under the hood
         let boc =
             "b5ee9c7201010101002800004bbe031053100134ea6c68e2f2cee9619bdd2732493f3a1361eccd7c5267a9eb3c5dcebc533bb6";
@@ -143,7 +142,7 @@ mod tests {
     }
 
     #[test]
-    fn test_read_msg_address_int_i8_workchain() -> anyhow::Result<()> {
+    fn test_msg_address_int_read_i8_workchain() -> anyhow::Result<()> {
         let boc = "b5ee9c720101010100240000439fe00000000000000000000000000000000000000000000000000000000000000010";
         let parsed = assert_ok!(MsgAddress::from_boc_hex(boc));
 
@@ -162,7 +161,7 @@ mod tests {
     }
 
     #[test]
-    fn test_read_msg_address_int() -> anyhow::Result<()> {
+    fn test_msg_address_int_read() -> anyhow::Result<()> {
         let boc = "b5ee9c720101010100240000439fe00000000000000000000000000000000000000000000000000000000000000010";
         let parsed = assert_ok!(MsgAddressInt::from_boc_hex(boc));
 
@@ -177,6 +176,21 @@ mod tests {
         let serial_cell = parsed.to_cell()?;
         let parsed_back = assert_ok!(MsgAddressInt::from_cell(&serial_cell));
         assert_eq!(parsed, parsed_back);
+        Ok(())
+    }
+
+    #[test]
+    fn test_msg_address_none() -> anyhow::Result<()> {
+        let addr: MsgAddress = MsgAddressNone {}.into();
+        let cell = addr.to_cell()?;
+        let parsed = MsgAddress::from_cell(&cell)?;
+        assert_eq!(parsed, addr);
+
+        let addr_none = MsgAddressNone {};
+        let addr_none_cell = addr_none.to_cell()?;
+        let parsed_none = MsgAddress::from_cell(&addr_none_cell)?;
+        let msg_addr_none: MsgAddress = addr_none.into();
+        assert_eq!(parsed_none, msg_addr_none);
         Ok(())
     }
 }

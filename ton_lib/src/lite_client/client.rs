@@ -77,16 +77,12 @@ impl LiteClient {
     }
 
     // returns account_boc
-    pub async fn get_account_boc<T>(&self, address: T, mc_seqno: u32) -> Result<Vec<u8>, TonLibError>
-    where
-        T: TryInto<TonAddress, Error = TonLibError>,
-    {
-        let addr = address.try_into()?;
+    pub async fn get_account_boc(&self, address: &TonAddress, mc_seqno: u32) -> Result<Vec<u8>, TonLibError> {
         let req = Request::GetAccountState(GetAccountState {
             id: self.lookup_mc_block(mc_seqno).await?,
             account: AccountId {
-                workchain: addr.wc,
-                id: Int256(*addr.hash.as_slice_sized()),
+                workchain: address.wc,
+                id: Int256(*address.hash.as_slice_sized()),
             },
         });
         let rsp = self.exec(req, Some(mc_seqno)).await?;

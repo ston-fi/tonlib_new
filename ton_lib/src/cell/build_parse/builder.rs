@@ -88,7 +88,6 @@ impl CellBuilder {
         if rest_bits_len != 0 {
             self.data_writer.write_var(rest_bits_len, data_ref[full_bytes] >> (8 - rest_bits_len))?;
         }
-        self.data_bits_len += bits_len as usize;
         Ok(())
     }
 
@@ -522,6 +521,19 @@ mod tests {
         assert_ok!(builder.write_num(&number, 1));
         assert_ok!(builder.write_num(&number, 2));
 
+        Ok(())
+    }
+
+    #[test]
+    fn test_builder_write_bits_with_offset_proper_data_bits_len() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        let data = vec![0b1010_1010, 0b0000_1111];
+        builder.write_bits_with_offset(&data, 8, 0)?;
+        assert_eq!(builder.data_bits_len, 8);
+        builder.write_bits_with_offset(&data, 4, 4)?;
+        assert_eq!(builder.data_bits_len, 12);
+        builder.write_bits_with_offset(&data, 3, 4)?;
+        assert_eq!(builder.data_bits_len, 15);
         Ok(())
     }
 }

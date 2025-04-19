@@ -1,13 +1,11 @@
 use crate::errors::TonLibError;
-use hex::FromHex;
-use std::cmp::Ordering;
 use std::fmt::{Display, UpperHex};
 use std::hash::Hash;
 
 #[derive(Debug, Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 pub struct TonHash(TonHashData);
 
-#[derive(Debug)]
+#[derive(Debug, PartialOrd, Ord, Clone)]
 enum TonHashData {
     Slice([u8; 32]),
     Vec(Vec<u8>),
@@ -22,7 +20,7 @@ impl TonHash {
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]));
 
-    pub fn from_bytes<T: AsRef<[u8]>>(data: T) -> Result<Self, TonLibError> {
+    pub fn from_slice<T: AsRef<[u8]>>(data: T) -> Result<Self, TonLibError> {
         let bytes = data.as_ref();
         check_bytes_len(bytes)?;
         Ok(Self(TonHashData::Slice(bytes[..32].try_into().unwrap())))
@@ -39,17 +37,19 @@ impl TonHash {
         Ok(Self(TonHashData::Vec(bytes)))
     }
 
-    pub fn as_slice(&self) -> &[u8] {
-        match &self.0 {
-            TonHashData::Slice(data) => data,
-            TonHashData::Vec(data) => data.as_slice(),
-        }
-    }
+    pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
 
     pub fn as_slice_sized(&self) -> &[u8; 32] {
         match &self.0 {
             TonHashData::Slice(data) => data,
             TonHashData::Vec(data) => data.as_slice().try_into().unwrap(),
+        }
+    }
+
+    pub fn as_mut_slice(&mut self) -> &mut [u8] {
+        match &mut self.0 {
+            TonHashData::Slice(data) => data,
+            TonHashData::Vec(data) => data.as_mut_slice(),
         }
     }
 
@@ -59,6 +59,15 @@ impl TonHash {
         match self.0 {
             TonHashData::Slice(data) => data.to_vec(),
             TonHashData::Vec(data) => data,
+        }
+    }
+}
+
+impl TonHashData {
+    fn as_slice(&self) -> &[u8] {
+        match self {
+            TonHashData::Slice(data) => data.as_slice(),
+            TonHashData::Vec(data) => data.as_slice(),
         }
     }
 }
@@ -73,50 +82,15 @@ fn check_bytes_len(bytes: &[u8]) -> Result<(), TonLibError> {
     Ok(())
 }
 
-impl Clone for TonHashData {
-    fn clone(&self) -> Self {
-        let slice = match self {
-            TonHashData::Slice(data) => data.as_slice(),
-            TonHashData::Vec(data) => data.as_slice(),
-        };
-        // safe for valid data
-        Self::Slice(slice.try_into().unwrap())
-    }
-}
-
+// Must implement it manually, because we don't distinguish between Vec and Slice
 impl PartialEq for TonHashData {
-    fn eq(&self, other: &Self) -> bool {
-        let self_slice = match self {
-            TonHashData::Slice(data) => data.as_slice(),
-            TonHashData::Vec(data) => data.as_slice(),
-        };
-        let other_slice = match other {
-            TonHashData::Slice(data) => data.as_slice(),
-            TonHashData::Vec(data) => data.as_slice(),
-        };
-        self_slice == other_slice
-    }
+    fn eq(&self, other: &Self) -> bool { self.as_slice() == other.as_slice() }
 }
 
 impl Eq for TonHashData {}
 
-// TODO implement proper ordering (using cell store)
-impl Ord for TonHashData {
-    fn cmp(&self, other: &Self) -> Ordering { self.partial_cmp(other).unwrap_or(Ordering::Equal) }
-}
-
-impl PartialOrd for TonHashData {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> { Some(self.cmp(other)) }
-}
-
 impl Hash for TonHashData {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        let slice = match self {
-            TonHashData::Slice(data) => data.as_slice(),
-            TonHashData::Vec(data) => data.as_slice(),
-        };
-        state.write(slice);
-    }
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { state.write(self.as_slice()); }
 }
 
 impl From<[u8; 32]> for TonHash {
@@ -131,17 +105,8 @@ impl UpperHex for TonHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.as_hex().to_uppercase()) }
 }
 
-impl From<TonHash> for Vec<u8> {
-    fn from(value: TonHash) -> Vec<u8> { value.into_vec() }
-}
-
 impl Display for TonHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") }
-}
-
-impl FromHex for TonHash {
-    type Error = TonLibError;
-    fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, Self::Error> { Self::from_vec(Vec::from_hex(hex)?) }
 }
 
 #[cfg(test)]
@@ -168,7 +133,7 @@ mod tests {
     #[test]
     fn test_ton_hash_from_bytes() -> anyhow::Result<()> {
         let data = [1u8; 32];
-        let hash = TonHash::from_bytes(data)?;
+        let hash = TonHash::from_slice(data)?;
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }
@@ -176,7 +141,7 @@ mod tests {
     #[test]
     fn test_ton_hash_from_vec() -> anyhow::Result<()> {
         let data = [1u8; 32];
-        let hash = TonHash::from_bytes(data)?;
+        let hash = TonHash::from_slice(data)?;
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }

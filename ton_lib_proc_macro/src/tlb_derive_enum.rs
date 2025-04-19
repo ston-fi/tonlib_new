@@ -22,6 +22,7 @@ pub(crate) fn tlb_derive_enum(
                 match #field_type::read(parser) {
                     Ok(res) => return Ok(#ident::#variant_name(res)),
                     Err(#crate_path::errors::TonLibError::TLBWrongPrefix { .. }) => {},
+                    Err(#crate_path::errors::TonLibError::TLBEnumOutOfOptions { .. }) => {},
                     Err(err) => return Err(err),
                 };
         }

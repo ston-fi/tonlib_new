@@ -35,6 +35,8 @@ impl TLBType for TonCell {
         self.refs.iter().cloned().try_for_each(|r| builder.write_ref(r))
     }
 
+    fn cell_hash(&self) -> Result<TonHash, TonLibError> { Ok(self.hash().clone()) }
+
     fn from_boc(boc: &[u8]) -> Result<Self, TonLibError> {
         // optimization - doesn't copy Cell, just takes ownership
         // unwrap is safe - no one own Reference expect this function
@@ -48,6 +50,8 @@ impl TLBType for TonCellRef {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> { parser.read_next_ref().cloned() }
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> { builder.write_ref(self.clone()) }
+
+    fn cell_hash(&self) -> Result<TonHash, TonLibError> { Ok(self.hash().clone()) }
 }
 
 impl TLBType for TonHash {

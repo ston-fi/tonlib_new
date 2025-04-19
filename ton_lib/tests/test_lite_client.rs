@@ -1,7 +1,9 @@
+use std::str::FromStr;
 use ton_lib::errors::TonLibError;
 use ton_lib::lite_client::client::LiteClient;
 use ton_lib::lite_client::config::LiteClientConfig;
 use ton_lib::net_config::TON_NET_CONF_MAINNET;
+use ton_lib::types::ton_address::TonAddress;
 use ton_lib::unwrap_lite_rsp;
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::tl::response::Response;
@@ -22,8 +24,8 @@ async fn test_lite_client() -> anyhow::Result<()> {
     let block_id = lite_client.lookup_mc_block(mc_info.last.seqno).await?;
     assert_eq!(block_id, mc_info.last);
 
-    let account_boc =
-        lite_client.get_account_boc("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs", mc_info.last.seqno).await?;
+    let usdt_addr = TonAddress::from_str("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")?;
+    let account_boc = lite_client.get_account_boc(&usdt_addr, mc_info.last.seqno).await?;
     assert_ne!(account_boc.len(), 0);
 
     Ok(())
