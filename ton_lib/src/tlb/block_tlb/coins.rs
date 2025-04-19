@@ -27,6 +27,7 @@ impl Grams {
         let bits_len = amount.bits() as u32;
         Self(VarLenBytes::new(amount, bits_len))
     }
+    pub fn zero() -> Self { Grams::new(0u32) }
 }
 
 impl CurrencyCollection {
