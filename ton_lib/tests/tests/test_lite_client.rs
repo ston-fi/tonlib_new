@@ -1,8 +1,6 @@
+use crate::tests::utils::make_lite_client;
 use std::str::FromStr;
 use ton_lib::errors::TonLibError;
-use ton_lib::lite_client::client::LiteClient;
-use ton_lib::lite_client::config::LiteClientConfig;
-use ton_lib::net_config::TON_NET_CONF_MAINNET;
 use ton_lib::types::ton_address::TonAddress;
 use ton_lib::unwrap_lite_rsp;
 use ton_liteapi::tl::request::Request;
@@ -10,8 +8,7 @@ use ton_liteapi::tl::response::Response;
 
 #[tokio::test]
 async fn test_lite_client() -> anyhow::Result<()> {
-    let config = LiteClientConfig::new(TON_NET_CONF_MAINNET)?;
-    let lite_client = LiteClient::new(config)?;
+    let lite_client = make_lite_client(true).await?;
 
     // generic function
     let mc_info_rsp = lite_client.exec(Request::GetMasterchainInfo, None).await?;

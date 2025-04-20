@@ -62,7 +62,7 @@ pub fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: u
     let indent = "    ".repeat(indent_level);
     // Generate the data display string
     let mut data_display = cell.data.iter().fold(String::new(), |mut res, byte| {
-        let _ = write!(res, "{byte:02x}");
+        let _ = write!(res, "{byte:02X}");
         res
     });
     // completion tag
