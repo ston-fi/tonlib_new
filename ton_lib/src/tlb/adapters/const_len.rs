@@ -6,7 +6,8 @@ use std::marker::PhantomData;
 
 /// Adaptor to write data with fixed length into a cell.
 ///
-/// Usage: `#[tlb_derive(adapter="ConstLen::<_>::new({BITS_LEN})")]`
+/// Usage: `#[tlb_derive(adapter="ConstLen::<{TYPE}>::new({BITS_LEN})")]`
+/// OR:    `#[tlb_derive(bits_len={BITS_LEN})]`
 pub struct ConstLen<T> {
     bits_len: u32,
     _phantom: PhantomData<T>,
@@ -72,6 +73,8 @@ impl ConstLen<Option<Vec<u8>>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::tlb::tlb_type::TLBType;
+    use ton_lib_proc_macro::TLBDerive;
 
     #[test]
     fn test_const_len() -> anyhow::Result<()> {
@@ -81,6 +84,23 @@ mod tests {
         assert_eq!(&cell.data, &[0, 0, 1]);
         let parsed = ConstLen::<u32>::new(24).read(&mut CellParser::new(&cell))?;
         assert_eq!(parsed, 1u32);
+        Ok(())
+    }
+
+    #[derive(TLBDerive)]
+    struct TestType {
+        #[tlb_derive(bits_len = 4)]
+        a: u32,
+    }
+
+    #[test]
+    fn test_cont_len_bits_len() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        TestType { a: 1 }.write(&mut builder)?;
+        let cell = builder.build()?;
+        assert_eq!(&cell.data, &[0b00010000]);
+        let parsed = TestType::read(&mut CellParser::new(&cell))?;
+        assert_eq!(parsed.a, 1u32);
         Ok(())
     }
 }

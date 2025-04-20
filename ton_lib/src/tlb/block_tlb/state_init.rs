@@ -11,7 +11,7 @@ use ton_lib_proc_macro::TLBDerive;
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(ensure_empty = true)]
 pub struct StateInit {
-    #[tlb_derive(adapter = "ConstLen::<Option<u8>>::new(5)")]
+    #[tlb_derive(bits_len = 5)]
     pub split_depth: Option<u8>,
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,

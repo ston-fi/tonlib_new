@@ -1,6 +1,6 @@
 use crate::{TLBFieldAttrs, TLBHeaderAttrs};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{format_ident, quote, ToTokens};
 use std::process::exit;
 use syn::{DataStruct, Fields, Index};
 
@@ -22,10 +22,15 @@ pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataSt
         .enumerate()
         .map(|(position, field)| {
             let ident = &field.ident;
-            let field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut field.attrs) {
+            let mut field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut field.attrs) {
                 Ok(desc) => desc,
                 Err(_err) => exit(777),
             };
+            // bits_len=XXX is alias for ConstLen adapter
+            if field_attrs.bits_len.is_some() {
+                let adapter_str = format!("ConstLen::<{}>::new({})", field.ty.to_token_stream(), field_attrs.bits_len.unwrap());
+                field_attrs.adapter = Some(adapter_str);
+            }
             FieldInfo {
                 ident: ident.clone(),
                 position,

@@ -19,6 +19,7 @@ struct TLBHeaderAttrs {
 #[derive(deluxe::ExtractAttributes)]
 #[deluxe(attributes(tlb_derive))]
 struct TLBFieldAttrs {
+    bits_len: Option<u32>,
     adapter: Option<String>,
 }
 
