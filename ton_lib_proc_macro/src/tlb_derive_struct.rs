@@ -31,6 +31,10 @@ pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataSt
                 let adapter_str = format!("ConstLen::<{}>::new({})", field.ty.to_token_stream(), field_attrs.bits_len.unwrap());
                 field_attrs.adapter = Some(adapter_str);
             }
+            if field_attrs.adapter.is_some() && field_attrs.adapter.as_ref().unwrap().starts_with("TLBRef") {
+                field_attrs.adapter = Some(format!("TLBRef::<{}>::new()", field.ty.to_token_stream()));
+            }
+
             FieldInfo {
                 ident: ident.clone(),
                 position,

@@ -46,14 +46,17 @@ mod tests {
     struct TestStruct {
         #[tlb_derive(adapter = "TLBRef::<u8>::new()")]
         pub a: u8,
+        #[tlb_derive(adapter = "TLBRef")]
+        pub b: u8,
     }
 
     #[test]
     fn test_tlb_ref_derive() -> anyhow::Result<()> {
-        let expected = TestStruct { a: 255 };
+        let expected = TestStruct { a: 255, b: 255 };
         let cell = expected.to_cell()?;
-        assert_eq!(cell.refs.len(), 1);
+        assert_eq!(cell.refs.len(), 2);
         assert_eq!(cell.refs[0].data, vec![255]);
+        assert_eq!(cell.refs[1].data, vec![255]);
 
         let parsed = TestStruct::from_cell(&cell)?;
         assert_eq!(parsed, expected);
