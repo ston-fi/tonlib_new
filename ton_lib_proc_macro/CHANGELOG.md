@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.5...ton_lib_proc_macro-v0.0.6) - 2025-04-20
+
+### Fixed
+
+- fix formatting
+
+### Other
+
+- add TLBRef alias for derive
+- use bits_len as alias for adapter=ConstLen
+
 ## [0.0.5](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.4...ton_lib_proc_macro-v0.0.5) - 2025-04-19
 
 ### Other

@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.8...ton_lib-v0.0.9) - 2025-04-20
+
+### Other
+
+- add TLBRef alias for derive
+- use bits_len as alias for adapter=ConstLen
+
 ## [0.0.8](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.7...ton_lib-v0.0.8) - 2025-04-19
 
 ### Other
