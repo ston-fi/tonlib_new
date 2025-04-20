@@ -28,7 +28,8 @@ pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataSt
             };
             // bits_len=XXX is alias for ConstLen adapter
             if field_attrs.bits_len.is_some() {
-                let adapter_str = format!("ConstLen::<{}>::new({})", field.ty.to_token_stream(), field_attrs.bits_len.unwrap());
+                let adapter_str =
+                    format!("ConstLen::<{}>::new({})", field.ty.to_token_stream(), field_attrs.bits_len.unwrap());
                 field_attrs.adapter = Some(adapter_str);
             }
             if field_attrs.adapter.is_some() && field_attrs.adapter.as_ref().unwrap().starts_with("TLBRef") {
