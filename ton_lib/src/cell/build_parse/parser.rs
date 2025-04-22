@@ -217,7 +217,7 @@ mod tests {
         cell_builder.write_ref(cell_ref.clone())?;
         let cell = cell_builder.build()?.into_ref();
 
-        let mut parser = CellParser::new(cell.as_ref());
+        let mut parser = CellParser::new(&cell);
         assert_eq!(parser.read_next_ref()?.data, cell_ref.data);
         assert_eq!(parser.read_next_ref()?.data, cell_ref.data);
         assert!(parser.read_next_ref().is_err());

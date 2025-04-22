@@ -51,7 +51,7 @@ pub trait TLBType: Sized {
     fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonLibError> {
         let mut builder = CellBuilder::new();
         self.write(&mut builder)?;
-        BOC::new(builder.build()?).to_bytes(add_crc32)
+        BOC::new(builder.build()?.into_ref()).to_bytes(add_crc32)
     }
 
     fn to_boc_hex(&self, add_crc32: bool) -> Result<String, TonLibError> { Ok(hex::encode(self.to_boc(add_crc32)?)) }

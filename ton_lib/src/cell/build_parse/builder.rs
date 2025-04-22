@@ -157,6 +157,8 @@ impl CellBuilder {
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
+    pub fn data_bits_left(&self) -> u32 { CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len as u32 }
+
     fn ensure_capacity(&mut self, bits_len: u32) -> Result<(), TonLibError> {
         let new_bits_len = self.data_bits_len as u32 + bits_len;
         if new_bits_len <= CellMeta::CELL_MAX_DATA_BITS_LEN {
@@ -534,6 +536,16 @@ mod tests {
         assert_eq!(builder.data_bits_len, 12);
         builder.write_bits_with_offset(&data, 3, 4)?;
         assert_eq!(builder.data_bits_len, 15);
+        Ok(())
+    }
+
+    #[test]
+    fn test_builder_data_bits_left() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        builder.write_bits([0b1010_1010], 8)?;
+        assert_eq!(builder.data_bits_left(), CellMeta::CELL_MAX_DATA_BITS_LEN - 8);
+        builder.write_bits([0b0000_1111], 4)?;
+        assert_eq!(builder.data_bits_left(), CellMeta::CELL_MAX_DATA_BITS_LEN - 12);
         Ok(())
     }
 }

@@ -14,9 +14,9 @@ fn main() -> anyhow::Result<()> {
         builder3.write_bits([100, 200, 255], 24)?;
 
         let mut builder = CellBuilder::new();
-        builder.write_ref(builder1.build()?.into())?;
-        builder.write_ref(builder2.build()?.into())?;
-        builder.write_ref(builder3.build()?.into())?;
+        builder.write_ref(builder1.build()?.into_ref())?;
+        builder.write_ref(builder2.build()?.into_ref())?;
+        builder.write_ref(builder3.build()?.into_ref())?;
 
         #[allow(unused)]
         let cell = builder.build()?;

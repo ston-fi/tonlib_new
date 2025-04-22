@@ -195,7 +195,7 @@ impl<'a> CellMetaBuilder<'a> {
             } else {
                 let mut max_ref_depth = 0;
                 for cell_ref in self.refs {
-                    let ref_depth = self.get_ref_depth(cell_ref.as_ref(), level_pos);
+                    let ref_depth = self.get_ref_depth(cell_ref, level_pos);
                     max_ref_depth = max_ref_depth.max(ref_depth);
                 }
                 max_ref_depth + 1
@@ -251,7 +251,7 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn write_ref_hashes(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonLibError> {
         for cell_ref in self.refs {
-            let ref_hash = self.get_ref_hash(cell_ref.as_ref(), level);
+            let ref_hash = self.get_ref_hash(cell_ref, level);
             writer.write_bytes(ref_hash.as_slice())?;
         }
 
@@ -260,7 +260,7 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn write_ref_depths(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonLibError> {
         for cell_ref in self.refs {
-            let ref_depth = self.get_ref_depth(cell_ref.as_ref(), level);
+            let ref_depth = self.get_ref_depth(cell_ref, level);
             writer.write_var(8, ref_depth / 256)?;
             writer.write_var(8, ref_depth % 256)?;
         }

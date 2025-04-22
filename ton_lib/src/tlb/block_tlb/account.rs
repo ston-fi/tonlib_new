@@ -7,18 +7,18 @@ use num_bigint::BigUint;
 use ton_lib_proc_macro::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L259
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 pub enum MaybeAccount {
     None(AccountNone),
     #[rustfmt::skip]
     Some(Box::<Account>),
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0b0, bits_len = 1)]
 pub struct AccountNone {}
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0b1, bits_len = 1)]
 pub struct Account {
     pub addr: MsgAddressInt,
@@ -26,49 +26,69 @@ pub struct Account {
     pub storage: AccountStorage,
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 pub struct StorageUsed {
     pub cells: VarLenBytes<BigUint, 3>,
     pub bits: VarLenBytes<BigUint, 3>,
     pub public_cells: VarLenBytes<BigUint, 3>,
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 pub struct StorageInfo {
     pub used: StorageUsed,
     pub last_paid: u32,
     pub due_payment: Option<Grams>,
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 pub struct AccountStorage {
     pub last_trans_lt: u64,
     pub balance: CurrencyCollection,
     pub state: AccountState,
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 pub enum AccountState {
     Uninit(AccountStateUninit),
-    Active(AccountStateActive),
     Frozen(AccountStateFrozen),
+    Active(AccountStateActive),
 }
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
 pub struct AccountStateUninit {}
 
-#[derive(Debug, TLBDerive)]
+#[derive(Debug, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0b01, bits_len = 2)]
+pub struct AccountStateFrozen {
+    pub state_hash: TonHash,
+}
+
+#[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0b1, bits_len = 1)]
 pub struct AccountStateActive {
     pub state_init: StateInit,
 }
 
-#[derive(Debug, TLBDerive)]
-#[tlb_derive(prefix = 0b01, bits_len = 2)]
-pub struct AccountStateFrozen {
-    pub state_hash: TonHash,
+// Almost like AccountState, but quite different ¯\_(ツ)_/¯
+// https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L271
+#[derive(Debug, Clone, TLBDerive)]
+pub enum AccountStatus {
+    Uninit(AccountStateUninit),
+    Frozen(AccountStateFrozen),
+    Active(AccountStatusActive),
+    NonExist(AccountStatusNotExist),
 }
+
+#[derive(Debug, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0b10, bits_len = 2)]
+pub struct AccountStatusActive {
+    pub state_init: StateInit,
+}
+
+#[derive(Debug, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0b11, bits_len = 2)]
+pub struct AccountStatusNotExist {}
 
 #[cfg(test)]
 mod tests {

@@ -58,7 +58,7 @@ mod tests {
     #[test]
     fn test_boc_create() {
         let cell = TonCell::EMPTY;
-        let boc = BOC::new(cell);
+        let boc = BOC::new(cell.into_ref());
         assert_eq!(boc.roots.len(), 1);
     }
 

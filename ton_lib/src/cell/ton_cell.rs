@@ -39,8 +39,10 @@ impl Display for TonCell {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) }
 }
 
+// TonCelRef
 #[derive(Debug, Clone, PartialEq)]
 pub struct TonCellRef(pub Arc<TonCell>);
+
 impl Deref for TonCellRef {
     type Target = TonCell;
     fn deref(&self) -> &Self::Target { &self.0 }
@@ -48,16 +50,10 @@ impl Deref for TonCellRef {
 impl DerefMut for TonCellRef {
     fn deref_mut(&mut self) -> &mut Self::Target { Arc::get_mut(&mut self.0).unwrap() }
 }
-impl AsRef<TonCell> for TonCellRef {
-    fn as_ref(&self) -> &TonCell { &self.0 }
-}
-impl From<TonCell> for TonCellRef {
-    fn from(value: TonCell) -> Self { value.into_ref() }
-}
 
 pub type TonCellRefsStore = Vec<TonCellRef>;
 
-pub fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {
+fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {
     use std::fmt::Write;
     let indent = "    ".repeat(indent_level);
     // Generate the data display string
