@@ -188,7 +188,6 @@ mod tests {
     use super::*;
     use crate::cell::meta::level_mask::LevelMask;
     use crate::cell::ton_hash::TonHash;
-    use crate::tlb::tlb_type::TLBType;
     use num_traits::FromPrimitive;
     use std::str::FromStr;
     use tokio_test::{assert_err, assert_ok};
@@ -509,7 +508,6 @@ mod tests {
         );
 
         let mut builder = CellBuilder::new();
-        // builder.write_bits([0], 7)?;
         builder.write_num(&num_bigint::BigUint::from_u64(117146891372).unwrap(), 257)?;
         let cell = builder.build()?;
         assert_eq!(
