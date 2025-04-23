@@ -74,10 +74,20 @@ pub struct AccountStateActive {
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L271
 #[derive(Debug, Clone, TLBDerive)]
 pub enum AccountStatus {
-    Uninit(AccountStateUninit),
-    Frozen(AccountStateFrozen),
+    Uninit(AccountStatusUninit),
+    Frozen(AccountStatusFrozen),
     Active(AccountStatusActive),
     NonExist(AccountStatusNotExist),
+}
+
+#[derive(Debug, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0b00, bits_len = 2)]
+pub struct AccountStatusUninit {}
+
+#[derive(Debug, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0b01, bits_len = 2)]
+pub struct AccountStatusFrozen {
+    pub state_hash: TonHash,
 }
 
 #[derive(Debug, Clone, TLBDerive)]
