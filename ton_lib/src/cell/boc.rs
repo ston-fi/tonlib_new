@@ -3,6 +3,8 @@ mod boc_raw;
 use crate::cell::boc::boc_raw::BOCRaw;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonLibError;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
 use std::marker::PhantomData;
 
 pub struct BOC<C = TonCell> {
@@ -35,12 +37,17 @@ impl BOC {
     pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonLibError> {
         Self::from_bytes(hex::decode(hex.as_ref())?)
     }
+    pub fn from_b64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonLibError> {
+        Self::from_bytes(BASE64_STANDARD.decode(hex.as_ref())?)
+    }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonLibError> {
         BOCRaw::from_roots(&self.roots)?.to_bytes(add_crc32)
     }
-
     pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonLibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
+    pub fn to_b64(&self, add_crc32: bool) -> Result<String, TonLibError> {
+        Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
+    }
 
     pub fn single_root(mut self) -> Result<TonCellRef, TonLibError> {
         if self.roots.len() != 1 {

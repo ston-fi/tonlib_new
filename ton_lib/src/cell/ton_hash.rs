@@ -1,8 +1,8 @@
 use crate::errors::TonLibError;
-use std::fmt::{Display, UpperHex};
+use std::fmt::{Debug, Display, UpperHex};
 use std::hash::Hash;
 
-#[derive(Debug, Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
+#[derive(Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 pub struct TonHash(TonHashData);
 
 #[derive(Debug, PartialOrd, Ord, Clone)]
@@ -107,6 +107,10 @@ impl UpperHex for TonHash {
 
 impl Display for TonHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") }
+}
+
+impl Debug for TonHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") }
 }
 
 #[cfg(test)]

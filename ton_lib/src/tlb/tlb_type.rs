@@ -4,6 +4,8 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonLibError;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
 use std::ops::Deref;
 
 pub trait TLBType: Sized {
@@ -41,6 +43,10 @@ pub trait TLBType: Sized {
         Self::from_boc(&hex::decode(boc_hex.as_ref())?)
     }
 
+    fn from_boc_b64<T: AsRef<[u8]>>(boc_b64: T) -> Result<Self, TonLibError> {
+        Self::from_boc(&BASE64_STANDARD.decode(boc_b64.as_ref())?)
+    }
+
     /// Writing
     fn to_cell(&self) -> Result<TonCell, TonLibError> {
         let mut builder = CellBuilder::new();
@@ -55,6 +61,10 @@ pub trait TLBType: Sized {
     }
 
     fn to_boc_hex(&self, add_crc32: bool) -> Result<String, TonLibError> { Ok(hex::encode(self.to_boc(add_crc32)?)) }
+
+    fn to_boc_b64(&self, add_crc32: bool) -> Result<String, TonLibError> {
+        Ok(BASE64_STANDARD.encode(self.to_boc(add_crc32)?))
+    }
 
     /// Helpers - mostly for internal use
     fn verify_prefix(reader: &mut CellParser) -> Result<(), TonLibError> {
