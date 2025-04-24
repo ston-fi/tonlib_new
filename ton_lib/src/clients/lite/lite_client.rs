@@ -1,8 +1,8 @@
 use super::connection::Connection;
 // use super::metrics::{LiteClientMetrics, Status};
 use crate::bc_constants::{TON_MC_WC_ID, TON_SHARD_FULL};
+use crate::clients::lite::config::LiteClientConfig;
 use crate::errors::TonLibError;
-use crate::lite_client::config::LiteClientConfig;
 use crate::types::ton_address::TonAddress;
 use auto_pool::config::{AutoPoolConfig, PickStrategy};
 use auto_pool::pool::AutoPool;

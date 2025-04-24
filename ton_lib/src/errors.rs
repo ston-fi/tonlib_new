@@ -76,6 +76,14 @@ pub enum TonLibError {
     #[error("LiteClientReqTimeout: {0:?}")]
     LiteClientReqTimeout(Box<(Request, Duration)>),
 
+    // TonlibClient
+    #[error("TonlibClientUnexpectedResult: expected type: {0}, got: {1}")]
+    TonlibClientUnexpectedResult(String, String),
+
+    // TVM
+    #[error("TvmStackError: {0}")]
+    TvmStackError(String),
+
     #[error("CustomError: {0}")]
     CustomError(String),
     #[error("UnexpectedError: {0}")]
@@ -91,6 +99,10 @@ pub enum TonLibError {
     ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]
     FromUtf8(#[from] std::string::FromUtf8Error),
+    #[error("{0}")]
+    Utf8Error(#[from] std::str::Utf8Error),
+    #[error("{0}")]
+    NulError(#[from] std::ffi::NulError),
     #[error("{0}")]
     SerdeJson(#[from] serde_json::Error),
     #[error("{0}")]

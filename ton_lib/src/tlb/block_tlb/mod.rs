@@ -7,3 +7,4 @@ pub mod state_init;
 pub mod tx;
 pub mod unary;
 pub mod var_len;
+pub mod vm_stack;

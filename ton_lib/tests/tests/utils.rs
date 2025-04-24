@@ -5,14 +5,14 @@ use log4rs::Config;
 use std::fs::{exists, File};
 use std::io::Read;
 use std::sync::Once;
-use ton_lib::lite_client::client::LiteClient;
-use ton_lib::lite_client::config::LiteClientConfig;
+use ton_lib::clients::lite::config::LiteClientConfig;
+use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 static LOG: Once = Once::new();
 
 pub(crate) async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient> {
     init_logging();
-    log::info!("initializing lite_client with mainnet={mainnet}...");
+    log::info!("initializing lite with mainnet={mainnet}...");
     let mut net_conf = if mainnet {
         TON_NET_CONF_MAINNET.to_string()
     } else {

@@ -1,4 +1,6 @@
 use crate::errors::TonLibError;
+use base64::prelude::BASE64_STANDARD;
+use base64::Engine;
 use std::fmt::{Debug, Display, UpperHex};
 use std::hash::Hash;
 
@@ -37,6 +39,10 @@ impl TonHash {
         Ok(Self(TonHashData::Vec(bytes)))
     }
 
+    pub fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<Self, TonLibError> {
+        Self::from_vec(BASE64_STANDARD.decode(b64)?)
+    }
+
     pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
 
     pub fn as_slice_sized(&self) -> &[u8; 32] {
@@ -53,7 +59,8 @@ impl TonHash {
         }
     }
 
-    pub fn as_hex(&self) -> String { hex::encode(self.as_slice()) }
+    pub fn to_hex(&self) -> String { hex::encode(self.as_slice()) }
+    pub fn to_b64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
 
     pub fn into_vec(self) -> Vec<u8> {
         match self.0 {
@@ -102,7 +109,7 @@ impl AsRef<[u8]> for TonHash {
 }
 
 impl UpperHex for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.as_hex().to_uppercase()) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.to_hex().to_uppercase()) }
 }
 
 impl Display for TonHash {
@@ -111,6 +118,30 @@ impl Display for TonHash {
 
 impl Debug for TonHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") }
+}
+
+pub mod ton_hash_serde_b64 {
+    use serde::{de::Error, Deserialize, Deserializer, Serializer};
+    pub fn serialize<S: Serializer>(hash: &super::TonHash, serializer: S) -> Result<S::Ok, S::Error> {
+        serializer.serialize_str(hash.to_b64().as_str())
+    }
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<super::TonHash, D::Error> {
+        super::TonHash::from_b64(String::deserialize(deserializer)?).map_err(Error::custom)
+    }
+}
+
+pub mod vec_ton_hash_serde_b64 {
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<S: Serializer>(data: &Vec<super::TonHash>, serializer: S) -> Result<S::Ok, S::Error> {
+        let b64_strings: Vec<String> = data.iter().map(|h| h.to_b64()).collect();
+        b64_strings.serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<super::TonHash>, D::Error> {
+        let b64_vec: Vec<String> = Vec::deserialize(deserializer)?;
+        b64_vec.into_iter().map(|s| super::TonHash::from_b64(&s).map_err(serde::de::Error::custom)).collect()
+    }
 }
 
 #[cfg(test)]
