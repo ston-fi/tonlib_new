@@ -1,7 +1,7 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_cell_num::TonCellNum;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitRead, BitReader};
 use num_traits::Zero;
 use std::io::{Cursor, SeekFrom};
@@ -24,18 +24,18 @@ impl<'a> CellParser<'a> {
         }
     }
 
-    pub fn lookup_bits(&mut self, bits_len: u8) -> Result<u128, TonLibError> {
+    pub fn lookup_bits(&mut self, bits_len: u8) -> Result<u128, TonlibError> {
         let value = self.read_num(bits_len as u32)?;
         self.seek_bits(-(bits_len as i32))?;
         Ok(value)
     }
 
-    pub fn read_bit(&mut self) -> Result<bool, TonLibError> {
+    pub fn read_bit(&mut self) -> Result<bool, TonlibError> {
         self.ensure_enough_bits(1)?;
         Ok(self.data_reader.read_bit()?)
     }
 
-    pub fn read_bits(&mut self, bits_len: u32) -> Result<Vec<u8>, TonLibError> {
+    pub fn read_bits(&mut self, bits_len: u32) -> Result<Vec<u8>, TonlibError> {
         self.ensure_enough_bits(bits_len)?;
         let mut dst = vec![0; (bits_len as usize).div_ceil(8)];
         let full_bytes = bits_len as usize / 8;
@@ -50,7 +50,7 @@ impl<'a> CellParser<'a> {
         Ok(dst)
     }
 
-    pub fn read_num<N: TonCellNum>(&mut self, bits_len: u32) -> Result<N, TonLibError> {
+    pub fn read_num<N: TonCellNum>(&mut self, bits_len: u32) -> Result<N, TonlibError> {
         if bits_len == 0 {
             return Ok(N::tcn_from_primitive(N::Primitive::zero()));
         }
@@ -67,7 +67,7 @@ impl<'a> CellParser<'a> {
         Ok(res)
     }
 
-    pub fn read_cell(&mut self) -> Result<TonCell, TonLibError> {
+    pub fn read_cell(&mut self) -> Result<TonCell, TonlibError> {
         let bits_left = self.data_bits_left()?;
         let data = self.read_bits(bits_left)?;
 
@@ -80,25 +80,25 @@ impl<'a> CellParser<'a> {
         builder.build()
     }
 
-    pub fn read_next_ref(&mut self) -> Result<&TonCellRef, TonLibError> {
+    pub fn read_next_ref(&mut self) -> Result<&TonCellRef, TonlibError> {
         if self.next_ref_pos == self.cell.refs.len() {
-            return Err(TonLibError::ParserRefsUnderflow { req: self.next_ref_pos });
+            return Err(TonlibError::ParserRefsUnderflow { req: self.next_ref_pos });
         }
         let cell_ref = &self.cell.refs[self.next_ref_pos];
         self.next_ref_pos += 1;
         Ok(cell_ref)
     }
 
-    pub fn data_bits_left(&mut self) -> Result<u32, TonLibError> {
+    pub fn data_bits_left(&mut self) -> Result<u32, TonlibError> {
         let reader_pos = self.data_reader.position_in_bits()? as u32;
         Ok(self.cell.data_bits_len as u32 - reader_pos)
     }
 
-    pub fn seek_bits(&mut self, offset: i32) -> Result<(), TonLibError> {
+    pub fn seek_bits(&mut self, offset: i32) -> Result<(), TonlibError> {
         let new_pos = self.data_reader.position_in_bits()? as i32 + offset;
         let data_bits_len = self.cell.data_bits_len as i32;
         if new_pos < 0 || new_pos > (data_bits_len - 1) {
-            return Err(TonLibError::ParserBadPosition {
+            return Err(TonlibError::ParserBadPosition {
                 new_pos,
                 bits_len: data_bits_len as u32,
             });
@@ -107,24 +107,24 @@ impl<'a> CellParser<'a> {
         Ok(())
     }
 
-    pub fn ensure_empty(&mut self) -> Result<(), TonLibError> {
+    pub fn ensure_empty(&mut self) -> Result<(), TonlibError> {
         let bits_left = self.data_bits_left()?;
         let refs_left = self.cell.refs.len() - self.next_ref_pos;
         if bits_left == 0 && refs_left == 0 {
             return Ok(());
         }
 
-        Err(TonLibError::ParserCellNotEmpty { bits_left, refs_left })
+        Err(TonlibError::ParserCellNotEmpty { bits_left, refs_left })
     }
 
     // returns remaining bits
-    fn ensure_enough_bits(&mut self, bit_len: u32) -> Result<u32, TonLibError> {
+    fn ensure_enough_bits(&mut self, bit_len: u32) -> Result<u32, TonlibError> {
         let bits_left = self.data_bits_left()?;
 
         if bit_len <= bits_left {
             return Ok(bits_left);
         }
-        Err(TonLibError::ParserDataUnderflow {
+        Err(TonlibError::ParserDataUnderflow {
             req: bit_len,
             left: bits_left,
         })

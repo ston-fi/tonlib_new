@@ -2,7 +2,7 @@ use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
 use crate::cell::ton_cell_num::TonCellNum;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use std::cmp::min;
 use std::ops::Deref;
@@ -30,7 +30,7 @@ impl CellBuilder {
         }
     }
 
-    pub fn build(self) -> Result<TonCell, TonLibError> {
+    pub fn build(self) -> Result<TonCell, TonlibError> {
         let (data, data_bits_len) = build_cell_data(self.data_writer)?;
         let meta = CellMeta::new(self.cell_type, &data, data_bits_len, &self.refs)?;
         Ok(TonCell {
@@ -41,7 +41,7 @@ impl CellBuilder {
         })
     }
 
-    pub fn write_bit(&mut self, data: bool) -> Result<(), TonLibError> {
+    pub fn write_bit(&mut self, data: bool) -> Result<(), TonlibError> {
         self.ensure_capacity(1)?;
         self.data_writer.write_bit(data)?;
         Ok(())
@@ -53,12 +53,12 @@ impl CellBuilder {
         data: T,
         mut bits_len: u32,
         mut bits_offset: u32,
-    ) -> Result<(), TonLibError> {
+    ) -> Result<(), TonlibError> {
         self.ensure_capacity(bits_len)?;
         let mut data_ref = data.as_ref();
 
         if (bits_len + bits_offset).div_ceil(8) > data_ref.len() as u32 {
-            return Err(TonLibError::BuilderNotEnoughData {
+            return Err(TonlibError::BuilderNotEnoughData {
                 required_bits: bits_len + bits_offset,
                 given: data_ref.len() as u32,
             });
@@ -91,11 +91,11 @@ impl CellBuilder {
         Ok(())
     }
 
-    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: u32) -> Result<(), TonLibError> {
+    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: u32) -> Result<(), TonlibError> {
         self.write_bits_with_offset(data, bits_len, 0)
     }
 
-    pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonLibError> {
+    pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonlibError> {
         self.write_bits(&cell.data, cell.data_bits_len as u32)?;
         for i in 0..cell.refs.len() {
             self.write_ref(cell.refs[i].clone())?;
@@ -103,9 +103,9 @@ impl CellBuilder {
         Ok(())
     }
 
-    pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TonLibError> {
+    pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TonlibError> {
         if self.refs.len() >= CellMeta::CELL_MAX_REFS_COUNT {
-            return Err(TonLibError::BuilderRefsOverflow);
+            return Err(TonlibError::BuilderRefsOverflow);
         }
         self.refs.push(cell);
         Ok(())
@@ -115,7 +115,7 @@ impl CellBuilder {
         &mut self,
         data: B,
         bits_len: u32,
-    ) -> Result<(), TonLibError> {
+    ) -> Result<(), TonlibError> {
         self.ensure_capacity(bits_len)?;
         let data_ref = data.deref();
 
@@ -125,7 +125,7 @@ impl CellBuilder {
             if data_ref.tcn_is_zero() {
                 return Ok(());
             }
-            return Err(TonLibError::BuilderNumberBitsMismatch {
+            return Err(TonlibError::BuilderNumberBitsMismatch {
                 number: format!("{data_ref}"),
                 bits: bits_len,
             });
@@ -138,7 +138,7 @@ impl CellBuilder {
 
         let min_bits_len = data_ref.tcn_min_bits_len();
         if min_bits_len > bits_len {
-            return Err(TonLibError::BuilderNumberBitsMismatch {
+            return Err(TonlibError::BuilderNumberBitsMismatch {
                 number: format!("{data_ref}"),
                 bits: bits_len,
             });
@@ -159,20 +159,20 @@ impl CellBuilder {
 
     pub fn data_bits_left(&self) -> u32 { CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len as u32 }
 
-    fn ensure_capacity(&mut self, bits_len: u32) -> Result<(), TonLibError> {
+    fn ensure_capacity(&mut self, bits_len: u32) -> Result<(), TonlibError> {
         let new_bits_len = self.data_bits_len as u32 + bits_len;
         if new_bits_len <= CellMeta::CELL_MAX_DATA_BITS_LEN {
             self.data_bits_len = new_bits_len as usize;
             return Ok(());
         }
-        Err(TonLibError::BuilderDataOverflow {
+        Err(TonlibError::BuilderDataOverflow {
             req: bits_len,
             left: CellMeta::CELL_MAX_DATA_BITS_LEN - bits_len,
         })
     }
 }
 
-fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec<u8>, usize), TonLibError> {
+fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec<u8>, usize), TonlibError> {
     let mut trailing_zeros = 0;
     while !bit_writer.byte_aligned() {
         bit_writer.write_bit(false)?;

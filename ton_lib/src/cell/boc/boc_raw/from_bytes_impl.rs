@@ -1,19 +1,19 @@
 use crate::cell::boc::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, ByteRead, ByteReader};
 use std::io::Cursor;
 
 impl BOCRaw {
-    pub(crate) fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonLibError> {
+    pub(crate) fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonlibError> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
         // serialized_boc#b5ee9c72
         let magic = reader.read::<u32>()?;
 
         if magic != GENERIC_BOC_MAGIC {
-            return Err(TonLibError::BocWrongMagic(magic));
+            return Err(TonlibError::BocWrongMagic(magic));
         };
 
         let (has_idx, has_crc32c, _has_cache_bits, size) = {
@@ -67,7 +67,7 @@ impl BOCRaw {
     }
 }
 
-fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<CellRaw, TonLibError> {
+fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<CellRaw, TonlibError> {
     let d1 = reader.read::<u8>()?;
     let d2 = reader.read::<u8>()?;
 
@@ -94,7 +94,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
         // see https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/BitString.js#L302
         let num_zeros = data[data_len - 1].trailing_zeros();
         if num_zeros >= 8 {
-            return Err(TonLibError::BocCustom(
+            return Err(TonlibError::BocCustom(
                 "Last byte of binary must not be zero if full_byte flag is not set".to_string(),
             ));
         }
@@ -112,7 +112,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     let cell_type = match is_exotic {
         true => {
             if data.is_empty() {
-                return Err(TonLibError::BocCustom("Exotic cell must have at least 1 byte".to_string()));
+                return Err(TonlibError::BocCustom("Exotic cell must have at least 1 byte".to_string()));
             }
             CellType::new_exotic(data[0])?
         }
@@ -129,7 +129,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     Ok(cell)
 }
 
-fn read_var_size(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, n: u8) -> Result<usize, TonLibError> {
+fn read_var_size(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, n: u8) -> Result<usize, TonlibError> {
     let bytes = reader.read_to_vec(n.into())?;
 
     let mut result = 0;

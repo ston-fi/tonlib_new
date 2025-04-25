@@ -1,4 +1,4 @@
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::fmt::{Debug, Display, UpperHex};
@@ -22,24 +22,26 @@ impl TonHash {
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]));
 
-    pub fn from_slice<T: AsRef<[u8]>>(data: T) -> Result<Self, TonLibError> {
+    pub fn from_slice<T: AsRef<[u8]>>(data: T) -> Result<Self, TonlibError> {
         let bytes = data.as_ref();
         check_bytes_len(bytes)?;
         Ok(Self(TonHashData::Slice(bytes[..32].try_into().unwrap())))
     }
 
-    pub fn from_vec(data: Vec<u8>) -> Result<Self, TonLibError> {
+    pub fn from_slice_sized(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
+
+    pub fn from_vec(data: Vec<u8>) -> Result<Self, TonlibError> {
         check_bytes_len(&data)?;
         Ok(Self(TonHashData::Vec(data)))
     }
 
-    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonLibError> {
+    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
         let bytes = hex::decode(hex)?;
         check_bytes_len(&bytes)?;
         Ok(Self(TonHashData::Vec(bytes)))
     }
 
-    pub fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<Self, TonLibError> {
+    pub fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<Self, TonlibError> {
         Self::from_vec(BASE64_STANDARD.decode(b64)?)
     }
 
@@ -79,9 +81,9 @@ impl TonHashData {
     }
 }
 
-fn check_bytes_len(bytes: &[u8]) -> Result<(), TonLibError> {
+fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {
     if bytes.len() != TonHash::BYTES_LEN {
-        return Err(TonLibError::TonHashWrongLen {
+        return Err(TonlibError::TonHashWrongLen {
             exp: TonHash::BYTES_LEN,
             given: bytes.len(),
         });

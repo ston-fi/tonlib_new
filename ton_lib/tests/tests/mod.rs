@@ -1,2 +1,2 @@
-mod test_lite_client;
+mod test_clients;
 mod utils;

@@ -6,7 +6,7 @@ use ton_liteapi::tl::request::Request;
 use ton_liteapi::types::LiteError;
 
 #[derive(Error, Debug)]
-pub enum TonLibError {
+pub enum TonlibError {
     // ton_hash
     #[error("TonHashError: Expecting {exp} bytes, got {given}")]
     TonHashWrongLen { exp: usize, given: usize },
@@ -63,12 +63,12 @@ pub enum TonLibError {
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
 
-    #[error("TonLiteClientWrongResponseType: expected {0}, got {1}")]
-    TonLiteClientWrongResponseType(String, String),
     #[error("NetRequestTimeout: {msg}, timeout={timeout:?}")]
     NetRequestTimeout { msg: String, timeout: Duration },
 
-    // LiteClint
+    // LiteClient
+    #[error("LiteClientWrongResponse: expected {0}, got {1}")]
+    TonLiteClientWrongResponse(String, String),
     #[error("LiteClientLiteError: {0}")]
     LiteClientLiteError(#[from] LiteError),
     #[error("LiteClientConnTimeout: {0:?}")]
@@ -77,8 +77,16 @@ pub enum TonLibError {
     LiteClientReqTimeout(Box<(Request, Duration)>),
 
     // TonlibClient
-    #[error("TonlibClientUnexpectedResult: expected type: {0}, got: {1}")]
-    TonlibClientUnexpectedResult(String, String),
+    #[error("TLJClientWrongResult: expected type: {0}, got: {1}")]
+    TLJClientWrongResponse(String, String),
+    #[error("TLJInvalidArguments: {0}")]
+    TLJInvalidArgs(String),
+    #[error("TLJSendError: fail to send request: {0}")]
+    TLJSendError(String),
+    #[error("TLJInvalidResponse: method: {method}, code: {code}, message: {message}")]
+    TLJExecError { method: String, code: i32, message: String },
+    #[error("TLJWrongExecImplUsage: {0}")]
+    TLJWrongUsage(String),
 
     // TVM
     #[error("TvmStackError: {0}")]
@@ -111,4 +119,8 @@ pub enum TonLibError {
     AdnlError(#[from] adnl::AdnlError),
     #[error("{0}")]
     ParseBigIntError(#[from] num_bigint::ParseBigIntError),
+}
+
+impl<T> From<TonlibError> for Result<T, TonlibError> {
+    fn from(val: TonlibError) -> Self { Err(val) }
 }

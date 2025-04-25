@@ -3,7 +3,7 @@ use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter, ByteRead, ByteReader};
 use sha2::{Digest, Sha256};
 use std::io::Cursor;
@@ -31,7 +31,7 @@ impl<'a> CellMetaBuilder<'a> {
         }
     }
 
-    pub(super) fn validate(&self) -> Result<(), TonLibError> {
+    pub(super) fn validate(&self) -> Result<(), TonlibError> {
         match self.cell_type {
             CellType::Ordinary => self.validate_ordinary(), // guaranteed by builder
             CellType::PrunedBranch => self.validate_pruned(),
@@ -51,19 +51,19 @@ impl<'a> CellMetaBuilder<'a> {
         }
     }
 
-    fn validate_ordinary(&self) -> Result<(), TonLibError> {
+    fn validate_ordinary(&self) -> Result<(), TonlibError> {
         if self.data_bits_len as u32 > CellMeta::CELL_MAX_DATA_BITS_LEN {
-            return Err(TonLibError::BuilderMeta("Ordinary cell data bits length is too big".to_owned()));
+            return Err(TonlibError::BuilderMeta("Ordinary cell data bits length is too big".to_owned()));
         }
         Ok(())
     }
 
-    fn validate_pruned(&self) -> Result<(), TonLibError> {
+    fn validate_pruned(&self) -> Result<(), TonlibError> {
         if !self.refs.is_empty() {
-            return Err(TonLibError::BuilderMeta("Pruned cell can't have refs".to_owned()));
+            return Err(TonlibError::BuilderMeta("Pruned cell can't have refs".to_owned()));
         }
         if self.data_bits_len < 16 {
-            return Err(TonLibError::BuilderMeta("PrunedBranch require at least 16 bits data".to_owned()));
+            return Err(TonlibError::BuilderMeta("PrunedBranch require at least 16 bits data".to_owned()));
         }
 
         if self.is_config_proof() {
@@ -74,7 +74,7 @@ impl<'a> CellMetaBuilder<'a> {
 
         if level_mask == LevelMask::MIN_LEVEL || level_mask > LevelMask::MAX_LEVEL {
             let err_msg = format!("Pruned Branch cell level must in range [1, 3] (got {level_mask})");
-            return Err(TonLibError::BuilderMeta(err_msg));
+            return Err(TonlibError::BuilderMeta(err_msg));
         }
 
         let expected_size = (2 + level_mask.apply(level_mask.level() - 1u8).hash_count()
@@ -83,54 +83,54 @@ impl<'a> CellMetaBuilder<'a> {
 
         if self.data_bits_len != expected_size {
             let err_msg = format!("PrunedBranch must have exactly {expected_size} bits, got {}", self.data_bits_len);
-            return Err(TonLibError::BuilderMeta(err_msg));
+            return Err(TonlibError::BuilderMeta(err_msg));
         }
 
         Ok(())
     }
 
-    fn validate_library(&self) -> Result<(), TonLibError> {
+    fn validate_library(&self) -> Result<(), TonlibError> {
         const LIB_CELL_BITS_LEN: usize = (1 + TonHash::BYTES_LEN) * 8;
 
         if self.data_bits_len != LIB_CELL_BITS_LEN {
             let err_msg =
                 format!("Library cell must have exactly {LIB_CELL_BITS_LEN} bits, got {}", self.data_bits_len);
-            return Err(TonLibError::BuilderMeta(err_msg));
+            return Err(TonlibError::BuilderMeta(err_msg));
         }
 
         Ok(())
     }
 
-    fn validate_merkle_proof(&self) -> Result<(), TonLibError> {
+    fn validate_merkle_proof(&self) -> Result<(), TonlibError> {
         // type + hash + depth
         const MERKLE_PROOF_BITS_LEN: usize = (1 + TonHash::BYTES_LEN + CellMeta::DEPTH_BYTES) * 8;
 
         if self.data_bits_len != MERKLE_PROOF_BITS_LEN {
             let err_msg =
                 format!("MerkleProof must have exactly {MERKLE_PROOF_BITS_LEN} bits, got {}", self.data_bits_len);
-            return Err(TonLibError::BuilderMeta(err_msg));
+            return Err(TonlibError::BuilderMeta(err_msg));
         }
 
         if self.refs.len() != 1 {
-            return Err(TonLibError::BuilderMeta("Merkle Proof cell must have exactly 1 ref".to_owned()));
+            return Err(TonlibError::BuilderMeta("Merkle Proof cell must have exactly 1 ref".to_owned()));
         }
 
         let mut data_slice = &self.data[1..];
         let _proof_hash = TonHash::from_slice(&data_slice[..TonHash::BYTES_LEN])
-            .map_err(|err| TonLibError::BuilderMeta(format!("Can't get proof hash bytes from cell data: {err}")))?;
+            .map_err(|err| TonlibError::BuilderMeta(format!("Can't get proof hash bytes from cell data: {err}")))?;
 
         data_slice = &data_slice[TonHash::BYTES_LEN..];
         let _proof_depth = u16::from_be_bytes(data_slice[..CellMeta::DEPTH_BYTES].try_into().unwrap());
-        log::error!("validate_merkle_proof is not implemented yet");
+        log::warn!("validate_merkle_proof is not implemented yet!");
         Ok(())
     }
 
-    fn validate_merkle_update(&self) -> Result<(), TonLibError> {
+    fn validate_merkle_update(&self) -> Result<(), TonlibError> {
         // type + hash + hash + depth + depth
         // const MERKLE_UPDATE_BITS_LEN: usize = 8 + (2 * (256 + 16));
         log::error!("validate_merkle_proof is not implemented yet");
-        // Ok(())
-        todo!();
+        Ok(())
+        // todo!();
     }
 
     fn calc_level_mask_ordinary(&self) -> LevelMask {
@@ -163,7 +163,7 @@ impl<'a> CellMetaBuilder<'a> {
     pub(super) fn calc_hashes_and_depths(
         &self,
         level_mask: LevelMask,
-    ) -> Result<([TonHash; 4], [u16; 4]), TonLibError> {
+    ) -> Result<([TonHash; 4], [u16; 4]), TonlibError> {
         let hash_count = if self.cell_type == CellType::PrunedBranch {
             1
         } else {
@@ -217,7 +217,7 @@ impl<'a> CellMetaBuilder<'a> {
         cur_data_bits_len: usize,
         level_mask: LevelMask,
         level: u8,
-    ) -> Result<Vec<u8>, TonLibError> {
+    ) -> Result<Vec<u8>, TonlibError> {
         // descriptors + data + (hash + depth) * refs_count
         let buffer_len = 2 + cur_data.len() + (32 + 2) * self.refs.len();
 
@@ -236,7 +236,7 @@ impl<'a> CellMetaBuilder<'a> {
 
         let result = writer
             .writer()
-            .ok_or_else(|| TonLibError::BuilderMeta("Stream for cell repr is not byte-aligned".to_string()))?
+            .ok_or_else(|| TonlibError::BuilderMeta("Stream for cell repr is not byte-aligned".to_string()))?
             .to_vec();
 
         Ok(result)
@@ -249,7 +249,7 @@ impl<'a> CellMetaBuilder<'a> {
         self.refs.len() as u8 + 8 * cell_type_var + level_mask.into() * 32
     }
 
-    fn write_ref_hashes(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonLibError> {
+    fn write_ref_hashes(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonlibError> {
         for cell_ref in self.refs {
             let ref_hash = self.get_ref_hash(cell_ref, level);
             writer.write_bytes(ref_hash.as_slice())?;
@@ -258,7 +258,7 @@ impl<'a> CellMetaBuilder<'a> {
         Ok(())
     }
 
-    fn write_ref_depths(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonLibError> {
+    fn write_ref_depths(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TonlibError> {
         for cell_ref in self.refs {
             let ref_depth = self.get_ref_depth(cell_ref, level);
             writer.write_var(8, ref_depth / 256)?;
@@ -272,7 +272,7 @@ impl<'a> CellMetaBuilder<'a> {
         hashes: [TonHash; 4],
         depths: [u16; 4],
         level_mask: LevelMask,
-    ) -> Result<([TonHash; 4], [u16; 4]), TonLibError> {
+    ) -> Result<([TonHash; 4], [u16; 4]), TonlibError> {
         let mut resolved_hashes = [TonHash::ZERO; 4];
         let mut resolved_depths = [0; 4];
 
@@ -309,7 +309,7 @@ impl<'a> CellMetaBuilder<'a> {
         cell_ref.meta.hashes[level as usize + extra_level].clone()
     }
 
-    fn calc_pruned_hash_depth(&self, level_mask: LevelMask) -> Result<Vec<Pruned>, TonLibError> {
+    fn calc_pruned_hash_depth(&self, level_mask: LevelMask) -> Result<Vec<Pruned>, TonlibError> {
         let current_index = if self.is_config_proof() { 1 } else { 2 };
 
         let cursor = Cursor::new(&self.data[current_index..]);
@@ -336,7 +336,7 @@ impl<'a> CellMetaBuilder<'a> {
 /// See https://docs.ton.org/tvm.pdf 3.1.4 for details
 fn get_bits_descriptor(data_bits_len: usize) -> u8 { (data_bits_len / 8 + data_bits_len.div_ceil(8)) as u8 }
 
-fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result<(), TonLibError> {
+fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result<(), TonlibError> {
     let data_len = data.len();
     let rest_bits = bit_len % 8;
     let full_bytes = rest_bits == 0;

@@ -1,7 +1,7 @@
 use crate::cell::boc::boc_raw::{BOCRaw, CellRaw};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
@@ -13,7 +13,7 @@ struct CellIndexed<'a> {
 }
 
 impl BOCRaw {
-    pub(crate) fn from_roots(roots: &[TonCellRef]) -> Result<Self, TonLibError> {
+    pub(crate) fn from_roots(roots: &[TonCellRef]) -> Result<Self, TonlibError> {
         let cell_by_hash = build_and_verify_index(roots);
 
         // Sort indexed cells by their index value.
@@ -29,9 +29,9 @@ impl BOCRaw {
         let raw_cells = cell_sorted
             .into_iter()
             .map(|indexed| raw_from_indexed(indexed.cell, &cell_by_hash))
-            .collect::<Result<_, TonLibError>>()?;
+            .collect::<Result<_, TonlibError>>()?;
 
-        let root_indices = roots.iter().map(|x| get_position(x, &cell_by_hash)).collect::<Result<_, TonLibError>>()?;
+        let root_indices = roots.iter().map(|x| get_position(x, &cell_by_hash)).collect::<Result<_, TonlibError>>()?;
 
         Ok(BOCRaw {
             cells: raw_cells,
@@ -96,7 +96,7 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
     cells_by_hash
 }
 
-fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonLibError> {
+fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonlibError> {
     let refs_positions = raw_cell_refs_indexes(cell, cells_by_hash)?;
     Ok(CellRaw {
         cell_type: cell.meta.cell_type,
@@ -110,7 +110,7 @@ fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellInde
 fn raw_cell_refs_indexes(
     cell: &TonCellRef,
     cells_by_hash: &HashMap<TonHash, CellIndexed>,
-) -> Result<Vec<usize>, TonLibError> {
+) -> Result<Vec<usize>, TonlibError> {
     let mut vec = Vec::with_capacity(cell.refs.len());
     for ref_pos in 0..cell.refs.len() {
         let cell_ref = &cell.refs[ref_pos];
@@ -119,10 +119,10 @@ fn raw_cell_refs_indexes(
     Ok(vec)
 }
 
-fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TonLibError> {
+fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TonlibError> {
     let hash = cell.hash();
     call_by_hash
         .get(hash)
-        .ok_or_else(|| TonLibError::BocCustom(format!("cell with hash {hash:?} not found in available hashes")))
+        .ok_or_else(|| TonlibError::BocCustom(format!("cell with hash {hash:?} not found in available hashes")))
         .map(|indexed_cell| *indexed_cell.index.borrow().deref())
 }

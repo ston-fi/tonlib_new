@@ -1,11 +1,11 @@
 use std::time::Duration;
 
-use crate::errors::TonLibError;
-use crate::net_config::TonNetConf;
+use crate::errors::TonlibError;
+use crate::net_config::TonNetConfig;
 
 #[derive(Debug, Clone)]
 pub struct LiteClientConfig {
-    pub net_conf: TonNetConf,
+    pub net_config: TonNetConfig,
     pub connections_per_node: u32,
     pub conn_timeout: Duration,
     pub retry_count: u32,
@@ -16,9 +16,9 @@ pub struct LiteClientConfig {
 }
 
 impl LiteClientConfig {
-    pub fn new(json: &str) -> Result<Self, TonLibError> {
+    pub fn new(net_config: &str) -> Result<Self, TonlibError> {
         Ok(Self {
-            net_conf: TonNetConf::new(json)?,
+            net_config: TonNetConfig::new(net_config)?,
             connections_per_node: 1,
             conn_timeout: Duration::from_millis(500),
             retry_count: 10,

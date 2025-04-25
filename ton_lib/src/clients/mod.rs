@@ -1,2 +1,2 @@
 pub mod lite;
-pub mod tonlib;
+pub mod tonlibjson;

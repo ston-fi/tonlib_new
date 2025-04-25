@@ -1,11 +1,11 @@
 use crate::cell::boc::boc_raw::BOCRaw;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
 
 impl BOCRaw {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
-    pub(crate) fn into_roots(self) -> Result<Vec<TonCellRef>, TonLibError> {
+    pub(crate) fn into_roots(self) -> Result<Vec<TonCellRef>, TonlibError> {
         let num_cells = self.cells.len();
         let mut cells: Vec<TonCellRef> = Vec::with_capacity(num_cells);
 
@@ -13,7 +13,7 @@ impl BOCRaw {
             let mut refs = Vec::with_capacity(cell_raw.refs_positions.len());
             for ref_index in &cell_raw.refs_positions {
                 if *ref_index <= cell_index {
-                    return Err(TonLibError::BocCustom("refs to previous cells are not supported".to_string()));
+                    return Err(TonlibError::BocCustom("refs to previous cells are not supported".to_string()));
                 }
                 refs.push(cells[num_cells - 1 - ref_index].clone());
             }

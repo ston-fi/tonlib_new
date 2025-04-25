@@ -58,16 +58,16 @@ pub fn tlb_derive(input: TokenStream) -> TokenStream {
     let prefix_bits_len = header_attrs.bits_len.unwrap_or(0);
 
     quote::quote! {
-        impl #crate_path::tlb::tlb_type::TLBType for #ident {
-            const PREFIX: #crate_path::tlb::tlb_type::TLBPrefix = #crate_path::tlb::tlb_type::TLBPrefix::new(#prefix_val, #prefix_bits_len);
+        impl #crate_path::types::tlb::tlb_type::TLBType for #ident {
+            const PREFIX: #crate_path::types::tlb::tlb_type::TLBPrefix = #crate_path::types::tlb::tlb_type::TLBPrefix::new(#prefix_val, #prefix_bits_len);
 
-            fn read_definition(parser: &mut #crate_path::cell::build_parse::parser::CellParser) -> Result<Self, #crate_path::errors::TonLibError> {
-                use #crate_path::tlb::tlb_type::TLBType;
+            fn read_definition(parser: &mut #crate_path::cell::build_parse::parser::CellParser) -> Result<Self, #crate_path::errors::TonlibError> {
+                use #crate_path::types::tlb::tlb_type::TLBType;
 
                 #read_def_tokens
             }
 
-            fn write_definition(&self, builder: &mut #crate_path::cell::build_parse::builder::CellBuilder) -> Result<(), #crate_path::errors::TonLibError> {
+            fn write_definition(&self, builder: &mut #crate_path::cell::build_parse::builder::CellBuilder) -> Result<(), #crate_path::errors::TonlibError> {
                 #write_def_tokens
             }
         }

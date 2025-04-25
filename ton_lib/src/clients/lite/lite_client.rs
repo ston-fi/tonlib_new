@@ -1,8 +1,11 @@
 use super::connection::Connection;
-// use super::metrics::{LiteClientMetrics, Status};
-use crate::bc_constants::{TON_MC_WC_ID, TON_SHARD_FULL};
+use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::clients::lite::config::LiteClientConfig;
-use crate::errors::TonLibError;
+use crate::errors::TonlibError;
+use crate::types::client_types::common::MasterchainInfo;
+use crate::types::tlb::block_tlb::account::MaybeAccount;
+use crate::types::tlb::block_tlb::block::BlockIdExt;
+use crate::types::tlb::tlb_type::TLBType;
 use crate::types::ton_address::TonAddress;
 use auto_pool::config::{AutoPoolConfig, PickStrategy};
 use auto_pool::pool::AutoPool;
@@ -12,27 +15,25 @@ use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
-use ton_liteapi::tl::common::{AccountId, BlockId, BlockIdExt, Int256};
-use ton_liteapi::tl::request::{GetAccountState, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest};
-use ton_liteapi::tl::response::{MasterchainInfo, Response};
+use ton_liteapi::tl::common::AccountId;
+use ton_liteapi::tl::request::{GetAccountState, GetBlock, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest};
+use ton_liteapi::tl::response::{BlockData, Response};
 
 const WAIT_MC_SEQNO_MS: u32 = 5000;
 const WAIT_CONNECTION_MS: u64 = 5;
 
 #[macro_export]
-macro_rules! unwrap_lite_rsp {
+macro_rules! unwrap_lite_response {
     ($result:expr, $variant:ident) => {
         match $result {
             Response::$variant(inner) => Ok(inner),
-            _ => Err(TonLibError::TonLiteClientWrongResponseType(
-                stringify!($variant).to_string(),
-                format!("{:?}", $result),
-            )),
+            _ => {
+                Err(TonlibError::TonLiteClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result)))
+            }
         }
     };
 }
 
-/// Raw client - provides multi-connection client with retry logic
 #[derive(Clone)]
 pub struct LiteClient {
     inner: Arc<Inner>,
@@ -40,25 +41,26 @@ pub struct LiteClient {
 
 // converts ton_block -> ton_liteapi objects under the hood
 impl LiteClient {
-    pub fn new(config: LiteClientConfig) -> Result<Self, TonLibError> {
+    pub fn new(config: LiteClientConfig) -> Result<Self, TonlibError> {
         Ok(Self {
             inner: Arc::new(Inner::new(config)?),
         })
     }
 
-    pub async fn get_mc_info(&self) -> Result<MasterchainInfo, TonLibError> {
+    pub async fn get_mc_info(&self) -> Result<MasterchainInfo, TonlibError> {
         let rsp = self.exec(Request::GetMasterchainInfo, None).await?;
-        unwrap_lite_rsp!(rsp, MasterchainInfo)
+        let mc_info = unwrap_lite_response!(rsp, MasterchainInfo)?;
+        Ok(mc_info.into())
     }
 
-    pub async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TonLibError> {
-        self.lookup_block(TON_MC_WC_ID, TON_SHARD_FULL, seqno).await
+    pub async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TonlibError> {
+        self.lookup_block(TON_MASTERCHAIN_ID, TON_SHARD_FULL, seqno).await
     }
 
-    pub async fn lookup_block(&self, wc: i32, shard: u64, seqno: u32) -> Result<BlockIdExt, TonLibError> {
+    pub async fn lookup_block(&self, wc: i32, shard: u64, seqno: u32) -> Result<BlockIdExt, TonlibError> {
         let req = Request::LookupBlock(LookupBlock {
             mode: (),
-            id: BlockId {
+            id: ton_liteapi::tl::common::BlockId {
                 workchain: wc,
                 shard,
                 seqno,
@@ -73,23 +75,31 @@ impl LiteClient {
             with_prev_blk_signatures: None,
         });
         let rsp = self.exec(req, Some(seqno)).await?;
-        Ok(unwrap_lite_rsp!(rsp, BlockHeader)?.id)
+        let lite_id = unwrap_lite_response!(rsp, BlockHeader)?.id;
+        Ok(lite_id.into())
     }
 
-    // returns account_boc
-    pub async fn get_account_boc(&self, address: &TonAddress, mc_seqno: u32) -> Result<Vec<u8>, TonLibError> {
+    pub async fn get_block(&self, block_id: BlockIdExt) -> Result<BlockData, TonlibError> {
+        let seqno = block_id.seqno;
+        let req = Request::GetBlock(GetBlock { id: block_id.into() });
+        let rsp = self.exec(req, Some(seqno)).await?;
+        unwrap_lite_response!(rsp, BlockData)
+    }
+
+    pub async fn get_account_state(&self, address: &TonAddress, mc_seqno: u32) -> Result<MaybeAccount, TonlibError> {
         let req = Request::GetAccountState(GetAccountState {
-            id: self.lookup_mc_block(mc_seqno).await?,
+            id: self.lookup_mc_block(mc_seqno).await?.into(),
             account: AccountId {
                 workchain: address.wc,
-                id: Int256(*address.hash.as_slice_sized()),
+                id: address.hash.clone().into(),
             },
         });
         let rsp = self.exec(req, Some(mc_seqno)).await?;
-        Ok(unwrap_lite_rsp!(rsp, AccountState)?.state)
+        let account_state_rsp = unwrap_lite_response!(rsp, AccountState)?;
+        MaybeAccount::from_boc(&account_state_rsp.state)
     }
 
-    pub async fn exec(&self, req: Request, wait_mc_seqno: Option<u32>) -> Result<Response, TonLibError> {
+    pub async fn exec(&self, req: Request, wait_mc_seqno: Option<u32>) -> Result<Response, TonlibError> {
         self.exec_with_timeout(req, self.inner.config.query_timeout, wait_mc_seqno).await
     }
 
@@ -98,7 +108,7 @@ impl LiteClient {
         request: Request,
         timeout: Duration,
         wait_mc_seqno: Option<u32>,
-    ) -> Result<Response, TonLibError> {
+    ) -> Result<Response, TonlibError> {
         self.inner.exec_with_retries(request, timeout, wait_mc_seqno).await
     }
 }
@@ -110,18 +120,18 @@ struct Inner {
 }
 
 impl Inner {
-    fn new(config: LiteClientConfig) -> Result<Self, TonLibError> {
+    fn new(config: LiteClientConfig) -> Result<Self, TonlibError> {
         let conn_per_node = max(1, config.connections_per_node);
         log::info!(
             "Creating LiteClient with {} conns per node; nodes_cnt: {}, query_timeout: {:?}",
             conn_per_node,
-            config.net_conf.lite_endpoints.len(),
+            config.net_config.lite_endpoints.len(),
             config.query_timeout,
         );
 
         let mut connections = Vec::new();
         for _ in 0..conn_per_node {
-            for endpoint in &config.net_conf.lite_endpoints {
+            for endpoint in &config.net_config.lite_endpoints {
                 let conn = Connection::new(endpoint.clone(), config.conn_timeout)?;
                 connections.push(conn);
             }
@@ -148,7 +158,7 @@ impl Inner {
         request: Request,
         req_timeout: Duration,
         wait_seqno: Option<u32>,
-    ) -> Result<Response, TonLibError> {
+    ) -> Result<Response, TonlibError> {
         let wrap_req = WrappedRequest {
             wait_masterchain_seqno: wait_seqno.map(|seqno| WaitMasterchainSeqno {
                 seqno,
@@ -195,7 +205,7 @@ impl Inner {
         _retry_num: u32,
         req: WrappedRequest,
         req_timeout: Duration,
-    ) -> Result<Response, TonLibError> {
+    ) -> Result<Response, TonlibError> {
         // pool is configured to spin until get connection
         let mut conn = self.conn_pool.get_async().await.unwrap();
         conn.exec(req, req_timeout).await

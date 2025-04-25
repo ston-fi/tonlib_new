@@ -2,14 +2,14 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::errors::TonLibError;
-use crate::errors::TonLibError::TonAddressParseError;
-use crate::tlb::block_tlb::msg_address::MsgAddressInt::{Std, Var};
-use crate::tlb::block_tlb::msg_address::{
+use crate::errors::TonlibError;
+use crate::errors::TonlibError::TonAddressParseError;
+use crate::types::tlb::block_tlb::msg_address::MsgAddressInt::{Std, Var};
+use crate::types::tlb::block_tlb::msg_address::{
     MsgAddress, MsgAddressExt, MsgAddressInt, MsgAddressIntStd, MsgAddressIntVar, MsgAddressNone,
 };
-use crate::tlb::block_tlb::state_init::StateInit;
-use crate::tlb::tlb_type::TLBType;
+use crate::types::tlb::block_tlb::state_init::StateInit;
+use crate::types::tlb::tlb_type::TLBType;
 use crate::utils::rewrite_bits;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
@@ -32,12 +32,12 @@ impl TonAddress {
 
     pub const fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
 
-    pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonLibError> {
+    pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonlibError> {
         let state_init = StateInit::new(code, data);
         Ok(TonAddress::new(wc, state_init.cell_hash()?))
     }
 
-    pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TonLibError> {
+    pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TonlibError> {
         match msg_address.into() {
             MsgAddress::Ext(MsgAddressExt::None(_)) => Ok(TonAddress::ZERO),
             MsgAddress::Int(int) => from_msg_address_int(&int),
@@ -71,10 +71,10 @@ impl TonAddress {
         }
     }
 
-    pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TonLibError> {
+    pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TonlibError> {
         if self != &TonAddress::ZERO {
             let err_str = format!("Can't convert non-zero address={self} to MsgAddressNone");
-            return Err(TonLibError::CustomError(err_str));
+            return Err(TonlibError::CustomError(err_str));
         }
         Ok(MsgAddressNone {})
     }
@@ -90,7 +90,7 @@ impl TonAddress {
 }
 
 impl FromStr for TonAddress {
-    type Err = TonLibError;
+    type Err = TonlibError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() == 48 {
             return from_b64(s);
@@ -100,11 +100,11 @@ impl FromStr for TonAddress {
 }
 
 impl TLBType for TonAddress {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TonLibError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         TonAddress::from_msg_address(MsgAddress::read(parser)?)
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonLibError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
         match self.to_msg_address_none() {
             Ok(none) => none.write(builder),
             Err(_) => self.to_msg_address_int().write(builder),
@@ -158,7 +158,7 @@ impl<'de> Deserialize<'de> for TonAddress {
     }
 }
 
-fn from_b64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonLibError> {
+fn from_b64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonlibError> {
     let addr_str = addr.as_ref();
     if addr_str.chars().any(|c| c == '-' || c == '_') {
         from_bytes(&URL_SAFE_NO_PAD.decode(addr_str)?, addr_str)
@@ -167,7 +167,7 @@ fn from_b64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonLibError> {
     }
 }
 
-fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonLibError> {
+fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonlibError> {
     let addr_str = addr.as_ref();
     let parts: Vec<&str> = addr_str.split(':').collect();
 
@@ -181,7 +181,7 @@ fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonLibError> {
     Ok(TonAddress::new(wc, hash))
 }
 
-fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonLibError> {
+fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonlibError> {
     if bytes.len() != 36 {
         raise_address_error(addr_str, format!("expecting 36 bytes, got {}", bytes.len()))?;
     }
@@ -198,7 +198,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonLibError> {
     Ok(address)
 }
 
-fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TonLibError> {
+fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TonlibError> {
     let (wc, addr, bits_len, anycast) = match msg_address {
         Std(MsgAddressIntStd {
             workchain,
@@ -240,7 +240,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TonLi
     Ok(TonAddress::new(wc, TonHash::from_vec(addr_mutable)?))
 }
 
-fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TonLibError> {
+fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TonlibError> {
     Err(TonAddressParseError(address.to_string(), msg.as_ref().to_string()))
 }
 

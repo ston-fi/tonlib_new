@@ -3,7 +3,7 @@ use prometheus::core::Collector;
 use prometheus::{HistogramOpts, HistogramVec, IntCounterVec, IntGauge, Opts};
 use std::fmt;
 use std::time::Duration;
-use ton_liteapi::tl::request::Request;
+use ton_liteapi::tl_api::request::Request;
 use tongrid_core::metrics::DURATION_BUCKETS_1MS_20S;
 use crate::errors::TonLibError;
 

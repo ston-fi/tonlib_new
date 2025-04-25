@@ -7,17 +7,36 @@ use std::io::Read;
 use std::sync::Once;
 use ton_lib::clients::lite::config::LiteClientConfig;
 use ton_lib::clients::lite::lite_client::LiteClient;
+use ton_lib::clients::tonlibjson::tlj_config::TLJClientConfig;
 use ton_lib::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 static LOG: Once = Once::new();
 
 pub(crate) async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient> {
     init_logging();
-    log::info!("initializing lite with mainnet={mainnet}...");
-    let mut net_conf = if mainnet {
-        TON_NET_CONF_MAINNET.to_string()
-    } else {
-        TON_NET_CONF_TESTNET.to_string()
+    log::info!("initializing lite_client with mainnet={mainnet}...");
+    let net_conf = get_net_conf(mainnet)?;
+    let config = LiteClientConfig::new(&net_conf)?;
+    Ok(LiteClient::new(config)?)
+}
+
+#[cfg(feature = "sys")]
+pub(crate) async fn make_tlj_client_default(
+    mainnet: bool,
+    archive_only: bool,
+) -> anyhow::Result<ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault> {
+    init_logging();
+    log::info!("initializing tlj_client with mainnet={mainnet}...");
+    let net_conf = get_net_conf(mainnet)?;
+    let config = TLJClientConfig::new(net_conf, archive_only);
+    Ok(ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault::new(config).await?)
+}
+
+fn get_net_conf(mainnet: bool) -> anyhow::Result<String> {
+    let mut net_conf = match mainnet {
+        true => TON_NET_CONF_MAINNET.to_string(),
+        false => TON_NET_CONF_TESTNET.to_string(),
     };
+
     if let Ok(path) = std::env::var("TON_NET_CONF_PATH") {
         if exists(&path)? {
             let mut new_conf = String::new();
@@ -29,8 +48,7 @@ pub(crate) async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient
             log::warn!("env_var TON_NET_CONF_PATH is set, but path {path} is not available");
         }
     }
-    let config = LiteClientConfig::new(&net_conf)?;
-    Ok(LiteClient::new(config)?)
+    Ok(net_conf)
 }
 
 pub(crate) fn init_logging() {

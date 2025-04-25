@@ -10,10 +10,14 @@ repository.workspace = true
 rust-version.workspace = true
 publish = true
 
+[features]
+sys = ["tonlib-sys"]
+
 [dependencies]
 # Internal
 ton_lib_proc_macro = { path = "../ton_lib_proc_macro", version = "0" }
 
+# External
 bitstream-io = "3.1.0"
 thiserror = "2.0"
 log = "0.4"
@@ -23,7 +27,7 @@ hex = "0.4.3"
 base64 = "0.22"
 num-bigint = { version = "0.4" }
 num-traits = { version = "0.2.19" }
-ton_liteapi = "0.2.0"
+ton_liteapi = "0.2"
 tokio = "1.43.0"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -32,10 +36,13 @@ adnl = "2.0"
 tokio-tower = "0.6.0"
 tower = { version = "0.5", features = ["util"] }
 rand = "0.9.1"
-strum = "0.27.1"
+strum = { version = "0.27", features = ["derive"] }
 serde-aux = "4.7.0"
 base64-serde = "0.8.0"
 tonlib-sys = { version = "2025.2.2", optional = true }
+libc = { version = "0.2" }
+async-trait = "0.1.88"
+futures-util = "0.3"
 
 [dev-dependencies]
 anyhow = "1.0"

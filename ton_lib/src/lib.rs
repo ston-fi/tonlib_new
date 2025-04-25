@@ -5,6 +5,5 @@ pub mod cell;
 pub mod clients;
 pub mod errors;
 pub mod net_config;
-pub mod tlb;
 pub mod types;
 pub mod utils;
