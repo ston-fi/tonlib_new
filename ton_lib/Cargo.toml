@@ -39,7 +39,7 @@ rand = "0.9.1"
 strum = { version = "0.27", features = ["derive"] }
 serde-aux = "4.7.0"
 base64-serde = "0.8.0"
-tonlib-sys = { version = "2025.2.2", optional = true }
+tonlib-sys = { version = "2025.2.2", optional = true, features = ["with_debug_info"] }
 libc = { version = "0.2" }
 async-trait = "0.1.88"
 futures-util = "0.3"

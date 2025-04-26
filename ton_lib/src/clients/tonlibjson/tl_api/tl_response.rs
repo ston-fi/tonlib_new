@@ -1,9 +1,7 @@
-use crate::clients::tonlibjson::tl_api::stack::TLTvmCell;
 use crate::clients::tonlibjson::tl_api::tl_types::{
     SmcLibraryResult, TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt,
-    TLBlocksTxs, TLConfigInfo, TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo,
-    TLRawExtMessageInfo, TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResultExt, TLSmcRunResult,
-    TLUpdateSyncState,
+    TLBlocksTxs, TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
+    TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResultExt, TLUpdateSyncState,
 };
 use crate::errors::TonlibError;
 use serde::{Deserialize, Serialize};
@@ -42,13 +40,13 @@ pub enum TLResponse {
     TLFullAccountState(TLFullAccountState),
     // tonlib_api.tl_api, line 167
     #[serde(rename = "tvm.cell")]
-    TLTvmCell(TLTvmCell),
+    TLTvmCell(()), // Unsupported
     // tonlib_api.tl_api, line 179
     #[serde(rename = "smc.info")]
     TLSmcInfo(TLSmcInfo),
     // tonlib_api.tl_api, line 184
     #[serde(rename = "smc.runResult")]
-    TLSmcRunResult(TLSmcRunResult),
+    TLSmcRunResult(()), // Unsupported
     // tonlib_api.tl_api, line 187
     #[serde(rename = "smc.libraryResult")]
     TLSmcLibraryResult(SmcLibraryResult),
@@ -81,7 +79,7 @@ pub enum TLResponse {
     TLBlocksHeader(TLBlocksHeader),
     // tonlib_api.tl_api, line 243
     #[serde(rename = "configInfo")]
-    TLConfigInfo(TLConfigInfo),
+    TLConfigInfo(()), // Unsupported
 }
 
 impl TLResponse {

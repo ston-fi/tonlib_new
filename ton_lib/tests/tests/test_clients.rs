@@ -1,5 +1,6 @@
 use crate::tests::utils::{make_lite_client, make_tlj_client_default};
 use std::str::FromStr;
+#[cfg(feature = "sys")]
 use ton_lib::clients::tonlibjson::tlj_client::TLJClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::types::tlb::block_tlb::account::MaybeAccount;

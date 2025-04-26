@@ -1,9 +1,7 @@
 use crate::cell::ton_hash::vec_ton_hash_serde_b64;
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::tl_api::stack::TLTvmStackEntry;
 use crate::clients::tonlibjson::tl_api::tl_types::{
-    TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLSmcMethodId,
-    TLTxId,
+    TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
 use crate::clients::tonlibjson::tl_api::Base64Standard;
 use crate::errors::TonlibError;
@@ -179,11 +177,7 @@ pub enum TLRequest {
 
     // tonlib_api.tl, line 312
     #[serde(rename = "smc.runGetMethod")]
-    SmcRunGetMethod {
-        id: i64,
-        method: TLSmcMethodId,
-        stack: Vec<TLTvmStackEntry>,
-    },
+    SmcRunGetMethod(()), // Unsupported
 
     // tonlib_api.tl, line 314
     #[serde(rename = "smc.getLibraries")]

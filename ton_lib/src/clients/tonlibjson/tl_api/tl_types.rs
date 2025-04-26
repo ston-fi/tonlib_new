@@ -5,7 +5,6 @@ use std::borrow::Cow;
 use std::fmt::Debug;
 
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::tl_api::stack::{TLTvmCell, TLTvmStack};
 use crate::types::ton_address::TonAddress;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -373,13 +372,9 @@ pub enum TLSmcMethodId {
     Name { name: Cow<'static, str> },
 }
 
-// tonlib_api.tl_api, line 184
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLSmcRunResult {
-    pub gas_used: i64,
-    pub stack: TLTvmStack,
-    pub exit_code: i32,
-}
+// tonlib_api.tl_api, line 184 - unsupported
+// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+// pub struct TLSmcRunResult {}
 
 // tonlib_api.tl_api, line 186
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -535,10 +530,8 @@ pub struct TLBlocksHeader {
 }
 
 // tonlib_api.tl_api, line 234
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLConfigInfo {
-    pub config: TLTvmCell,
-}
+// #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+// pub struct TLConfigInfo {}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum TLUpdate {
