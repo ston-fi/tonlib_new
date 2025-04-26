@@ -52,7 +52,6 @@ tonlib-core = "0.24.2"
 criterion = "0.5"
 sha2 = {version = "0.10", features = ["asm"]} # strongly recommend to enable it for your application
 hex = "0.4.3"
-tokio-macros = "2"
 tokio = { version = "1.43", features = ["rt", "macros"] }
 log4rs = "1.3"
 
