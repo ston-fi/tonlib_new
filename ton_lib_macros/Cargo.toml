@@ -1,0 +1,20 @@
+[package]
+name = "ton_lib_macros"
+version = "0.0.6"
+description = "proc-macros for ton_lib crate"
+keywords = ["ton", "the-open-network", "blockchain", "crypto"]
+edition = "2021"
+authors = ["Sild <silddev@icloud.com"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/sild/ton_lib_rs"
+rust-version = "1.81"
+
+[dependencies]
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1"
+deluxe = "0.5.0"
+proc-macro2 = "1.0.94"
+proc-macro-crate = "3"
+
+[lib]
+proc-macro = true
