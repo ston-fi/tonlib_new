@@ -1,0 +1,5 @@
+[workspace]
+packages = [
+  ".",
+  "ton_lib_macros",
+]
