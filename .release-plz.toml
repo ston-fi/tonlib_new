@@ -3,3 +3,4 @@ name = "ton_lib"
 
 [[package]] # the double square brackets define a TOML table array
 name = "ton_lib_macros"
+changelog_path = "ton_lib_macros/CHANGELOG.md"
