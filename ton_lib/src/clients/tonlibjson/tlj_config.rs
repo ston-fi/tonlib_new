@@ -15,7 +15,7 @@ pub struct TLJClientConfig {
     pub max_parallel_requests: usize, // => (max_parallel_requests / connections_count) parallel requests per connection
     pub update_init_block: bool,
     pub update_init_block_timeout_sec: u64,
-    pub sys_verbosity_level: u32,
+    pub tonlib_verbosity_level: u32,
     pub callbacks: TLJCallbacksStore,
 }
 
@@ -42,7 +42,7 @@ impl TLJClientConfig {
             max_parallel_requests: 1000,
             update_init_block: true,
             update_init_block_timeout_sec: 10,
-            sys_verbosity_level: 1,
+            tonlib_verbosity_level: 1,
             callbacks: TLJCallbacksStore::default(),
         }
     }

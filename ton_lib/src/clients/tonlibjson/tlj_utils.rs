@@ -2,12 +2,12 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCell;
 use crate::clients::lite::config::LiteClientConfig;
 use crate::clients::lite::lite_client::LiteClient;
-use crate::clients::tonlibjson::clients_impl::TLClientRaw;
 use crate::clients::tonlibjson::tl_api::tl_types::TLKeyStoreType;
 use crate::clients::tonlibjson::tlj_config::TLJClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::tlb::tlb_type::TLBType;
+use crate::utils::tonlib_set_verbosity_level;
 use futures_util::future::join_all;
 use std::time::Duration;
 use ton_liteapi::tl::response::BlockData;
@@ -22,8 +22,7 @@ pub async fn prepare_client_env(config: &mut TLJClientConfig) -> Result<(), Tonl
     if let TLKeyStoreType::Directory { directory } = &config.init_opts.keystore_type {
         std::fs::create_dir_all(directory)?
     }
-    TLClientRaw::set_verbosity_level(config.sys_verbosity_level);
-
+    tonlib_set_verbosity_level(config.tonlib_verbosity_level);
     Ok(())
 }
 

@@ -35,8 +35,6 @@ impl TLClientRaw {
         }
         unsafe { Some(TLResponse::from_c_str_json(c_str)) }
     }
-
-    pub fn set_verbosity_level(level: u32) { unsafe { tonlib_sys::tonlib_client_set_verbosity_level(level) } }
 }
 
 impl Drop for TLClientRaw {
@@ -50,10 +48,11 @@ unsafe impl Sync for TLClientRaw {}
 mod tests {
     use crate::clients::tonlibjson::clients_impl::client_raw::TLClientRaw;
     use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
+    use crate::utils::tonlib_set_verbosity_level;
 
     #[test]
     fn it_executes_functions() -> anyhow::Result<()> {
-        TLClientRaw::set_verbosity_level(1);
+        tonlib_set_verbosity_level(1);
         let client = TLClientRaw::new("test".to_string());
         client.send(&TLRequest::GetLogVerbosityLevel {}, "test2")?;
         Ok(())

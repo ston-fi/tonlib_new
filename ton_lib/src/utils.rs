@@ -29,6 +29,13 @@ pub fn rewrite_bits(src: &[u8], src_offset_bits: usize, dst: &mut [u8], dst_offs
     true
 }
 
+#[cfg(feature = "sys")]
+pub fn tonlib_set_verbosity_level(level: u32) {
+    unsafe {
+        tonlib_sys::tonlib_client_set_verbosity_level(level);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

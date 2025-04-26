@@ -1,0 +1,90 @@
+use crc::{Crc, CRC_32_ISO_HDLC};
+use std::borrow::Cow;
+use std::fmt::{Debug, Display, Formatter};
+
+const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
+
+#[derive(Clone, Eq, PartialEq, Hash)]
+pub enum TVMMethodId {
+    Number(i32),
+    Name(Cow<'static, str>),
+}
+
+impl TVMMethodId {
+    pub fn from_prototype(prototype: &str) -> TVMMethodId { Self::Number(calc_opcode(prototype)) }
+
+    pub fn as_str(&self) -> Cow<'static, str> {
+        match self {
+            TVMMethodId::Number(num) => Cow::Owned(num.to_string()), // Dynamically allocate for number
+            TVMMethodId::Name(cow) => match cow {
+                Cow::Borrowed(s) => Cow::Borrowed(*s),  // Safe only if already 'static
+                Cow::Owned(s) => Cow::Owned(s.clone()), // Clone the owned String
+            },
+        }
+    }
+
+    pub fn to_id(&self) -> i32 {
+        match self {
+            TVMMethodId::Name(name) => CRC_16_XMODEM.checksum(name.as_bytes()) as i32 | 0x10000,
+            TVMMethodId::Number(id) => *id,
+        }
+    }
+}
+
+impl From<&'static str> for TVMMethodId {
+    fn from(value: &'static str) -> Self { TVMMethodId::Name(Cow::Borrowed(value)) }
+}
+
+impl From<Cow<'_, str>> for TVMMethodId {
+    fn from(value: Cow<'_, str>) -> Self { TVMMethodId::Name(Cow::Owned(value.into_owned())) }
+}
+
+impl From<String> for TVMMethodId {
+    fn from(value: String) -> Self { TVMMethodId::Name(Cow::Owned(value)) }
+}
+
+impl From<i32> for TVMMethodId {
+    fn from(value: i32) -> Self { TVMMethodId::Number(value) }
+}
+
+impl Display for TVMMethodId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TVMMethodId::Number(n) => write!(f, "#{:08x}", n),
+            TVMMethodId::Name(m) => write!(f, "'{}'", m),
+        }
+    }
+}
+
+impl Debug for TVMMethodId {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { Display::fmt(self, f) }
+}
+
+fn calc_opcode(command: &str) -> i32 {
+    let crc = Crc::<u32>::new(&CRC_32_ISO_HDLC);
+    let checksum = crc.checksum(command.as_bytes());
+    (checksum & 0x7fffffff) as i32
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::emulators::tvm_emulator::method_id::TVMMethodId;
+
+    #[test]
+    fn test_hex_format() -> anyhow::Result<()> {
+        let method_id: TVMMethodId = 0x1234beef.into();
+        let s = format!("{}", method_id);
+        assert_eq!(s, "#1234beef");
+        Ok(())
+    }
+
+    #[test]
+    fn test_opcode() -> anyhow::Result<()> {
+        let p = "transfer query_id:uint64 amount:VarUInteger 16 destination:MsgAddress \
+        response_destination:MsgAddress custom_payload:Maybe ^Cell forward_ton_amount:VarUInteger 16 \
+        forward_payload:Either Cell ^Cell = InternalMsgBody";
+        let method_id: TVMMethodId = TVMMethodId::from_prototype(p);
+        assert_eq!(method_id, TVMMethodId::Number(0x0f8a7ea5));
+        Ok(())
+    }
+}

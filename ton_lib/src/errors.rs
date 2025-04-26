@@ -89,8 +89,18 @@ pub enum TonlibError {
     TLJWrongUsage(String),
 
     // TVM
-    #[error("TvmStackError: {0}")]
-    TvmStackError(String),
+    #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]
+    TVMEmulatorSetFailed(&'static str),
+    #[error("TVMEmulatorError: {0}")]
+    TVMEmulatorError(String),
+    #[error("TVMEmulatorResponseParseError: {0}")]
+    TVMResponseParseError(String),
+
+    // TVMStack
+    #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {0}")]
+    TVMStackWrongType(String, String),
+    #[error("TVMStackError: stack is empty")]
+    TVMStackEmpty,
 
     #[error("CustomError: {0}")]
     CustomError(String),
