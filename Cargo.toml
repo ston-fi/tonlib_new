@@ -16,6 +16,12 @@ rust-version = "1.81"
 readme = "README.md"
 publish = false
 
+
+include = [
+    "../resources/**",
+]
+
+
 [profile.bench]
 debug = true
 [profile.release]
