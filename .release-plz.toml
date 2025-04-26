@@ -1,5 +1,5 @@
-[workspace]
-packages = [
-  ".",
-  "ton_lib_macros",
-]
+[[package]] # the double square brackets define a TOML table array
+name = "ton_lib"
+
+[[package]] # the double square brackets define a TOML table array
+name = "ton_lib_macros"
