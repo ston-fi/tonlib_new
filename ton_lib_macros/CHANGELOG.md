@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.6...ton_lib_macros-v0.0.7) - 2025-04-26
+
+### Fixed
+
+- fix package description
+- fix releases
+- fix projects description
+
 ## [0.0.6](https://github.com/Sild/libs_rs/compare/ton_lib_proc_macro-v0.0.5...ton_lib_proc_macro-v0.0.6) - 2025-04-20
 
 ### Fixed
