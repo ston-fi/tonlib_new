@@ -1,11 +1,11 @@
 # TonLib
 
-This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](src/clients/tonlibjson) implementation.
+This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlibjson) implementation.
 
 ## Features
 
-### [cell](src/cell) module
-Build and read custom cells using [TonCell](src/cell/ton_cell.rs), and serialize them to bytes using [BOC](src/cell/boc/mod.rs):
+### [cell](ton_lib/src/cell) module
+Build and read custom cells using [TonCell](ton_lib/src/cell/ton_cell.rs), and serialize them to bytes using [BOC](ton_lib/src/cell/boc/mod.rs):
 
 ```rust
 fn main() -> anyhow::Result<()> {
@@ -21,15 +21,15 @@ fn main() -> anyhow::Result<()> {
 
 ---
 
-### [types](src/types) module
+### [types](ton_lib/src/types) module
 Contains 3 different layers:
 
-1. [tlb](src/types/tlb):  
+1. [tlb](ton_lib/src/types/tlb):  
    The `TLBType` trait allows you to implement `serde` for your objects automatically.  
    It also includes a collection of predefined TLB types.  
    (Apologies for the `Dict` implementation — it's still in progress.)
 
-2. [client_types](src/types/client_types):  
+2. [client_types](ton_lib/src/types/client_types):  
    Additional types for clients. (try don't use them!)
 
 3. The rest:  
@@ -57,12 +57,12 @@ fn main() {
 
 ---
 
-### [clients](src/clients) module
-- [LiteClient](src/clients/lite):  
+### [clients](ton_lib/src/clients) module
+- [LiteClient](ton_lib/src/clients/lite):  
   A "native" lite-node client that uses ADNL.  
   More straightforward to use, but less flexible.
 
-- [TLJClient](src/clients/tonlibjson):  
+- [TLJClient](ton_lib/src/clients/tonlibjson):  
   A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
   A bit tricky to use at times, but offers more features.\
   **Does not support `smc` methods - use `MethodEmulator` instead.**
@@ -85,5 +85,5 @@ async fn main() -> anyhow::Result<()> {
 
 ---
 
-### [emulators](src/emulators) module
+### [emulators](ton_lib/src/emulators) module
 > Work in progress (WIP).
