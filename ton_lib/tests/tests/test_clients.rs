@@ -1,13 +1,13 @@
-use crate::tests::utils::{make_lite_client, make_tlj_client_default};
+use crate::tests::utils::make_lite_client;
 use std::str::FromStr;
-#[cfg(feature = "sys")]
-use ton_lib::clients::tonlibjson::tlj_client::TLJClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::types::tlb::block_tlb::account::MaybeAccount;
 use ton_lib::types::ton_address::TonAddress;
 use ton_lib::unwrap_lite_response;
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::tl::response::Response;
+#[cfg(feature = "sys")]
+use ton_lib::clients::tonlibjson::tlj_client::TLJClient;
 
 #[tokio::test]
 async fn test_lite_client() -> anyhow::Result<()> {
@@ -35,7 +35,7 @@ async fn test_lite_client() -> anyhow::Result<()> {
 #[tokio::test]
 #[cfg(feature = "sys")]
 async fn test_tlj_client_default() -> anyhow::Result<()> {
-    let tlj_client = make_tlj_client_default(true, false).await?;
+    let tlj_client = crate::tests::utils::make_tlj_client_default(true, false).await?;
 
     let mc_info = tlj_client.get_mc_info().await?;
     assert_ne!(mc_info.last.seqno, 0);

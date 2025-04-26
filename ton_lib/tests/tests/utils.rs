@@ -7,7 +7,6 @@ use std::io::Read;
 use std::sync::Once;
 use ton_lib::clients::lite::config::LiteClientConfig;
 use ton_lib::clients::lite::lite_client::LiteClient;
-use ton_lib::clients::tonlibjson::tlj_config::TLJClientConfig;
 use ton_lib::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 static LOG: Once = Once::new();
 
@@ -27,7 +26,7 @@ pub(crate) async fn make_tlj_client_default(
     init_logging();
     log::info!("initializing tlj_client with mainnet={mainnet}...");
     let net_conf = get_net_conf(mainnet)?;
-    let config = TLJClientConfig::new(net_conf, archive_only);
+    let config = ton_lib::clients::tonlibjson::tlj_config::TLJClientConfig::new(net_conf, archive_only);
     Ok(ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault::new(config).await?)
 }
 
