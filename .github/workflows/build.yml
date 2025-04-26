@@ -17,7 +17,10 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libsodium-dev libsecp256k1-dev liblz4-dev
-    - uses: actions/checkout@v4
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
     - uses: Swatinem/rust-cache@v2
     - run: rustup toolchain install nightly
     - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
