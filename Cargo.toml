@@ -4,9 +4,7 @@ members = [
     "ton_lib_macros",
 ]
 
-[package]
-name = "ton_lib"
-version = "0.0.11"
+[workspace.package]
 description = "A collection of types and utilities for interacting with the TON network"
 keywords = ["ton", "the-open-network", "blockchain", "crypto"]
 edition = "2021"
@@ -14,6 +12,18 @@ authors = ["Sild <silddev@icloud.com"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/sild/ton_lib_rs"
 rust-version = "1.81"
+publish = false
+
+[package]
+name = "ton_lib"
+version = "0.0.11"
+description.workspace = true
+keywords.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
 publish = true
 
 [features]

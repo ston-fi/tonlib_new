@@ -1,13 +1,14 @@
 [package]
 name = "ton_lib_macros"
 version = "0.0.6"
-description = "proc-macros for ton_lib crate"
-keywords = ["ton", "the-open-network", "blockchain", "crypto"]
-edition = "2021"
-authors = ["Sild <silddev@icloud.com"]
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/sild/ton_lib_rs"
-rust-version = "1.81"
+description.workspace = true
+keywords.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = true
 
 [dependencies]
 syn = { version = "2.0", features = ["full", "extra-traits"] }
