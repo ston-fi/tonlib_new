@@ -3,8 +3,8 @@ use crate::types::tlb::block_tlb::block::BlockIdExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-pub const TON_NET_CONF_MAINNET: &str = include_str!("../../resources/net_config/mainnet.json");
-pub const TON_NET_CONF_TESTNET: &str = include_str!("../../resources/net_config/testnet.json");
+pub const TON_NET_CONF_MAINNET: &str = include_str!("../resources/net_config/mainnet.json");
+pub const TON_NET_CONF_TESTNET: &str = include_str!("../resources/net_config/testnet.json");
 
 // can't use ConfigLiteServer directly because it doesn't implement Clone
 #[derive(Debug, Clone, Serialize, Deserialize)]

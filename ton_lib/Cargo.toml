@@ -14,15 +14,14 @@ publish = true
 
 include = [
     "Cargo.toml",
-    "src/**",
-    "benches/**",
-    "examples/**",
-    "tests/**",
-    "../resources/**",
+    "src/*",
+    "benches/*",
+    "examples/*",
+    "tests/*",
+    "resources/*",
 ]
 
 [features]
-default = ["sys"]
 sys = ["dep:tonlib-sys"]
 
 
