@@ -18,8 +18,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+#        with:
+#          fetch-depth: 0
       - name: Install libraries
         run: |
           sudo apt-get update
