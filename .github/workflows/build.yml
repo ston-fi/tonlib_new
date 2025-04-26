@@ -13,14 +13,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - run: rustup toolchain install nightly
-    - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
     - name: Install libraries
       run: |
         sudo apt-get update
         sudo apt-get install -y libsodium-dev libsecp256k1-dev liblz4-dev
+    - uses: actions/checkout@v4
+    - uses: Swatinem/rust-cache@v2
+    - run: rustup toolchain install nightly
+    - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
     - run: cargo +nightly fmt --check
     - run: cargo build --all-features --verbose
-    - run: cargo test --all
-    - run: cargo test --all --all-features
+    - run: cargo test --lib --all
+    - run: cargo test --lib --all --all-features
