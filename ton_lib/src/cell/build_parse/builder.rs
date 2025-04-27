@@ -3,8 +3,9 @@ use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
-use bitstream_io::{BigEndian, BitWrite, BitWriter};
+use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
 use std::cmp::min;
+use std::io::Cursor;
 use std::ops::Deref;
 
 pub struct CellBuilder {
@@ -99,6 +100,36 @@ impl CellBuilder {
         self.write_bits(&cell.data, cell.data_bits_len as u32)?;
         for i in 0..cell.refs.len() {
             self.write_ref(cell.refs[i].clone())?;
+        }
+        Ok(())
+    }
+
+    /// Ranges are handled like [start; end) - the same as iterators in c++
+    pub fn write_cell_slice(
+        &mut self,
+        cell: &TonCell,
+        start_bit: u32,
+        end_bit: u32,
+        start_ref: u32,
+        end_ref: u32,
+    ) -> Result<(), TonlibError> {
+        if end_bit > cell.data_bits_len as u32 {
+            return Err(TonlibError::BuilderNotEnoughData {
+                required_bits: end_bit,
+                given: cell.data_bits_len as u32,
+            });
+        }
+        let slice_data_bits_len = end_bit - start_bit;
+        let mut slice_data = vec![0; slice_data_bits_len.div_ceil(8) as usize];
+
+        let cursor = Cursor::new(cell.data.as_slice());
+        let mut data_reader = BitReader::endian(cursor, BigEndian);
+        data_reader.skip(start_bit)?;
+        data_reader.read_bytes(&mut slice_data)?;
+
+        self.write_bits(&slice_data, slice_data_bits_len)?;
+        for ref_pos in start_ref..end_ref {
+            self.write_ref(cell.refs[ref_pos as usize].clone())?;
         }
         Ok(())
     }
@@ -314,6 +345,31 @@ mod tests {
         let cell = cell_builder.build()?;
 
         assert_eq!(cell, cell_with_ref);
+        Ok(())
+    }
+
+    #[test]
+    fn test_builder_write_cell_slice() -> anyhow::Result<()> {
+        let mut builder = CellBuilder::new();
+        builder.write_bits([255, 0, 255, 0], 24)?;
+
+        for i in 0..3 {
+            let mut ref_builder = CellBuilder::new();
+            ref_builder.write_bits([i], 8)?;
+            builder.write_ref(ref_builder.build()?.into_ref())?;
+        }
+
+        let orig_cell = builder.build()?;
+        //
+        let mut slice_cell_builder = CellBuilder::new();
+        slice_cell_builder.write_cell_slice(&orig_cell, 4, 20, 1, 3)?;
+        let slice_cell = slice_cell_builder.build()?;
+
+        assert_eq!(slice_cell.data, vec![0b1111_0000, 0b0000_1111]);
+        assert_eq!(slice_cell.data_bits_len, 16);
+        assert_eq!(slice_cell.refs.len(), 2);
+        assert_eq!(slice_cell.refs[0], orig_cell.refs[1]);
+        assert_eq!(slice_cell.refs[1], orig_cell.refs[2]);
         Ok(())
     }
 

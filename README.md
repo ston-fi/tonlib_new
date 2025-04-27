@@ -86,4 +86,8 @@ async fn main() -> anyhow::Result<()> {
 ---
 
 ### [emulators](ton_lib/src/emulators) module
-> Work in progress (WIP).
+- [TVMEmulator](ton_lib/src/emulators/tvm_emulator.rs):  
+  * `run_get_method`  
+  * `send_int_msg`
+  * `send_ext_msg`\
+Check [tvm_emulator_tests](ton_lib/src/emulators/tvm_emulator/test_tvm_emulator.rs) for usage examples

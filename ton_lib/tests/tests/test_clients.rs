@@ -1,13 +1,13 @@
 use crate::tests::utils::make_lite_client;
 use std::str::FromStr;
+#[cfg(feature = "sys")]
+use ton_lib::clients::tonlibjson::tlj_client::TLJClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::types::tlb::block_tlb::account::MaybeAccount;
 use ton_lib::types::ton_address::TonAddress;
 use ton_lib::unwrap_lite_response;
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::tl::response::Response;
-#[cfg(feature = "sys")]
-use ton_lib::clients::tonlibjson::tlj_client::TLJClient;
 
 #[tokio::test]
 async fn test_lite_client() -> anyhow::Result<()> {

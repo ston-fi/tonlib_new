@@ -54,6 +54,7 @@ serde-aux = "4.7.0"
 base64-serde = "0.8.0"
 async-trait = "0.1.88"
 futures-util = "0.3"
+libc = "0.2"
 
 [dev-dependencies]
 anyhow = "1.0"

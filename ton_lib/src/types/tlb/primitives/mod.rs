@@ -5,6 +5,7 @@ mod bool;
 mod either;
 mod num;
 mod option;
+mod tlb_arc;
 mod tlb_box;
 
 pub use either::*;
