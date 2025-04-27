@@ -1,7 +1,7 @@
 use crate::clients::tonlibjson::tl_api::tl_types::{
-    SmcLibraryResult, TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt,
-    TLBlocksTxs, TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
-    TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResultExt, TLUpdateSyncState,
+    TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
+    TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
+    TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,
 };
 use crate::errors::TonlibError;
 use serde::{Deserialize, Serialize};
@@ -49,7 +49,7 @@ pub enum TLResponse {
     TLSmcRunResult(()), // Unsupported
     // tonlib_api.tl_api, line 187
     #[serde(rename = "smc.libraryResult")]
-    TLSmcLibraryResult(SmcLibraryResult),
+    TLSmcLibraryResult(TLSmcLibraryResult),
     // tonlib_api.tl_api, line 191
     #[serde(rename = "smc.libraryResultExt")]
     TLSmcLibraryResultExt(TLSmcLibraryResultExt),
@@ -79,7 +79,7 @@ pub enum TLResponse {
     TLBlocksHeader(TLBlocksHeader),
     // tonlib_api.tl_api, line 243
     #[serde(rename = "configInfo")]
-    TLConfigInfo(()), // Unsupported
+    TLConfigInfo(TLConfigInfo),
 }
 
 impl TLResponse {

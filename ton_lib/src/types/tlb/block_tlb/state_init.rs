@@ -1,10 +1,6 @@
 use crate::cell::ton_cell::TonCellRef;
-use crate::cell::ton_hash::TonHash;
-use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterTonHash;
-use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::ConstLen;
-use crate::types::tlb::adapters::Dict;
-use std::collections::HashMap;
+use crate::types::tlb::primitives::LibsDict;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L281
@@ -16,8 +12,7 @@ pub struct StateInit {
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    #[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
-    pub library: HashMap<TonHash, TonCellRef>,
+    pub library: LibsDict,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
@@ -33,7 +28,7 @@ impl StateInit {
             tick_tock: None,
             code: Some(code),
             data: Some(data),
-            library: HashMap::new(),
+            library: LibsDict::default(),
         }
     }
 }
@@ -42,8 +37,8 @@ impl StateInit {
 mod tests {
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::block_tlb::state_init::StateInit;
+    use crate::types::tlb::primitives::LibsDict;
     use crate::types::tlb::tlb_type::TLBType;
-    use std::collections::HashMap;
 
     #[test]
     fn test_state_init_regular_contract() -> anyhow::Result<()> {
@@ -56,7 +51,7 @@ mod tests {
         assert_eq!(parsed_state_init.tick_tock, None);
         assert!(parsed_state_init.code.is_some());
         assert!(parsed_state_init.data.is_some());
-        assert_eq!(parsed_state_init.library, HashMap::new());
+        assert_eq!(parsed_state_init.library, LibsDict::default());
 
         let serial_cell = parsed_state_init.to_cell()?;
         assert_eq!(source_cell, serial_cell);

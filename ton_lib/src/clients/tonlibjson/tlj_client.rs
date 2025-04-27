@@ -5,7 +5,7 @@ use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
 use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
 use crate::clients::tonlibjson::tl_api::tl_types::{
     TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards,
-    TLBlocksTxs, TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLTxId,
+    TLBlocksTxs, TLConfigInfo, TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
 };
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
@@ -35,6 +35,7 @@ pub trait TLJClient: Send + Sync {
     }
 
     /// * `mode`: Lookup mode: `1` - by `block_id.seqno`, `2` - by `lt`, `4` - by `utime`.
+    #[allow(clippy::all)]
     async fn lookup_block(
         &self,
         mode: i32,
@@ -69,6 +70,15 @@ pub trait TLJClient: Send + Sync {
         unwrap_tlj_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
+    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
+        let req = TLRequest::GetAccountState {
+            account_address: TLAccountAddress {
+                account_address: address.to_hex(),
+            },
+        };
+        unwrap_tlj_response!(self.exec(&req).await?, TLFullAccountState)
+    }
+
     async fn get_account_state_by_tx(
         &self,
         address: TonAddress,
@@ -83,7 +93,7 @@ pub trait TLJClient: Send + Sync {
         unwrap_tlj_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn raw_get_txs(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
+    async fn get_raw_txs(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
         let req = TLRequest::RawGetTxs {
             account_address: TLAccountAddress {
                 account_address: address.to_hex(),
@@ -116,33 +126,17 @@ pub trait TLJClient: Send + Sync {
         unwrap_tlj_response!(self.exec(&req).await?, TLRawTxs)
     }
 
-    async fn send_raw_message(&self, body: Vec<u8>) -> Result<(), TonlibError> {
-        let req = TLRequest::RawSendMessage { body };
-        unwrap_tlj_response!(self.exec(&req).await?, Ok)
-    }
-
-    async fn send_raw_msg_return_hash(&self, body: Vec<u8>) -> Result<TonHash, TonlibError> {
+    async fn send_msg(&self, body: Vec<u8>) -> Result<TonHash, TonlibError> {
         let req = TLRequest::RawSendMsgReturnHash { body };
         let rsp = unwrap_tlj_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;
         TonHash::from_vec(rsp.hash)
-    }
-
-    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
-        let req = TLRequest::GetAccountState {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
-        };
-        unwrap_tlj_response!(self.exec(&req).await?, TLFullAccountState)
     }
 
     async fn sync(&self) -> Result<TLBlockIdExt, TonlibError> {
         let req = TLRequest::Sync {};
         unwrap_tlj_response!(self.exec(&req).await?, TLBlockIdExt)
     }
-    //
-    //
-    //
+
     // async fn smc_load(
     //     &self,
     //     account_address: &TonAddress,
@@ -188,64 +182,10 @@ pub trait TLJClient: Send + Sync {
     //     }
     // }
     //
-    // async fn smc_forget(&self, id: i64) -> Result<TonResult, TonClientError> {
-    //     let func = TonFunction::SmcForget { id };
-    //     let result = self.invoke(&func).await?;
-    //     Ok(result)
-    // }
-    //
-    // async fn smc_get_code(&self, id: i64) -> Result<TvmCell, TonClientError> {
-    //     let func = TonFunction::SmcGetCode { id };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::TvmCell(cell) => Ok(cell),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::TvmCell,
-    //             r,
-    //         )),
-    //     }
-    // }
-    //
-    // async fn smc_get_data(&self, id: i64) -> Result<TvmCell, TonClientError> {
-    //     let func = TonFunction::SmcGetData { id };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::TvmCell(cell) => Ok(cell),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::TvmCell,
-    //             r,
-    //         )),
-    //     }
-    // }
-    //
-    // async fn smc_get_state(&self, id: i64) -> Result<TvmCell, TonClientError> {
-    //     let func = TonFunction::SmcGetState { id };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::TvmCell(cell) => Ok(cell),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::TvmCell,
-    //             r,
-    //         )),
-    //     }
-    // }
-    //
-    // async fn smc_get_libraries(
-    //     &self,
-    //     library_list: &[TonLibraryId],
-    // ) -> Result<SmcLibraryResult, TonClientError> {
-    //     let func = TonFunction::SmcGetLibraries {
-    //         library_list: library_list.to_vec(),
-    //     };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::SmcLibraryResult(r) => Ok(r),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::SmcLibraryResult,
-    //             r,
-    //         )),
-    //     }
-    // }
+    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<TLSmcLibraryResult, TonlibError> {
+        let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
+        unwrap_tlj_response!(self.exec(&req).await?, TLSmcLibraryResult)
+    }
     //
     // async fn smc_get_libraries_ext(
     //     &self,
@@ -334,42 +274,14 @@ pub trait TLJClient: Send + Sync {
         let req = TLRequest::GetBlockHeader { id: block_id };
         unwrap_tlj_response!(self.exec(&req).await?, TLBlocksHeader)
     }
+
+    async fn get_config_param(&self, mode: u32, param: u32) -> Result<TLConfigInfo, TonlibError> {
+        let req = TLRequest::GetConfigParam { mode, param };
+        unwrap_tlj_response!(self.exec(&req).await?, TLConfigInfo)
+    }
     //
-    // async fn get_config_param(&self, mode: u32, param: u32) -> Result<ConfigInfo, TonClientError> {
-    //     let func = TonFunction::GetConfigParam { mode, param };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::ConfigInfo(result) => Ok(result),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::ConfigInfo,
-    //             r,
-    //         )),
-    //     }
-    // }
-    //
-    // async fn get_config_all(&self, mode: u32) -> Result<ConfigInfo, TonClientError> {
-    //     let func = TonFunction::GetConfigAll { mode };
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::ConfigInfo(result) => Ok(result),
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::ConfigInfo,
-    //             r,
-    //         )),
-    //     }
-    // }
-    //
-    // async fn get_log_verbosity_level(&self) -> Result<u32, TonClientError> {
-    //     let func = TonFunction::GetLogVerbosityLevel {};
-    //     let result = self.invoke(&func).await?;
-    //     match result {
-    //         TonResult::LogVerbosityLevel(log_verbosity_level) => {
-    //             Ok(log_verbosity_level.verbosity_level)
-    //         }
-    //         r => Err(TonClientError::unexpected_ton_result(
-    //             TonResultDiscriminants::OptionsInfo,
-    //             r,
-    //         )),
-    //     }
-    // }
+    async fn get_config_all(&self, mode: u32) -> Result<TLConfigInfo, TonlibError> {
+        let req = TLRequest::GetConfigAll { mode };
+        unwrap_tlj_response!(self.exec(&req).await?, TLConfigInfo)
+    }
 }
