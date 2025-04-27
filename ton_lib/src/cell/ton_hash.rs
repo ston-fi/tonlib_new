@@ -123,12 +123,14 @@ impl Debug for TonHash {
 }
 
 pub mod ton_hash_serde_b64 {
+    use crate::cell::ton_hash::TonHash;
     use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    pub fn serialize<S: Serializer>(hash: &super::TonHash, serializer: S) -> Result<S::Ok, S::Error> {
+
+    pub fn serialize<S: Serializer>(hash: &TonHash, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_str(hash.to_b64().as_str())
     }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<super::TonHash, D::Error> {
-        super::TonHash::from_b64(String::deserialize(deserializer)?).map_err(Error::custom)
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonHash, D::Error> {
+        TonHash::from_b64(String::deserialize(deserializer)?).map_err(Error::custom)
     }
 }
 
@@ -149,6 +151,8 @@ pub mod vec_ton_hash_serde_b64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde::{Deserialize, Serialize};
+    use serde_json::json;
 
     #[test]
     fn test_ton_hash_display() -> anyhow::Result<()> {
@@ -188,6 +192,33 @@ mod tests {
         let data = [255u8; 32];
         let hash = TonHash::from_hex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")?;
         assert_eq!(hash.as_slice(), &data);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_hash_serde() -> anyhow::Result<()> {
+        #[derive(Serialize, Deserialize, Debug, PartialEq)]
+        struct TestStruct {
+            #[serde(with = "ton_hash_serde_b64")]
+            hash: TonHash,
+            #[serde(with = "vec_ton_hash_serde_b64")]
+            hash_vec: Vec<TonHash>,
+        }
+
+        let val = TestStruct {
+            hash: TonHash::from_slice([1u8; 32])?,
+            hash_vec: vec![TonHash::from_slice([2u8; 32])?, TonHash::from_slice([3u8; 32])?],
+        };
+        let val_json = serde_json::to_string(&val)?;
+        let expected = json!({
+            "hash": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=",
+            "hash_vec": [
+                "AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=",
+                "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM="
+            ]
+        })
+        .to_string();
+        assert_eq!(val_json, expected);
         Ok(())
     }
 }

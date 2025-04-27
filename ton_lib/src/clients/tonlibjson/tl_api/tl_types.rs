@@ -96,7 +96,8 @@ pub struct TLRawFullAccountState {
     pub code: Vec<u8>,
     #[serde(with = "Base64Standard")]
     pub data: Vec<u8>,
-    pub last_transaction_id: TLTxId,
+    #[serde(rename = "last_transaction_id")]
+    pub last_tx_id: TLTxId,
     pub block_id: TLBlockIdExt,
     #[serde(with = "Base64Standard")]
     pub frozen_hash: Vec<u8>,
@@ -297,12 +298,12 @@ pub struct TLFullAccountState {
     pub address: TLAccountAddress,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub balance: i64,
-    pub last_transaction_id: TLTxId,
+    #[serde(rename = "last_transaction_id")]
+    pub last_tx_id: TLTxId,
     pub block_id: TLBlockIdExt,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub sync_utime: i64,
     pub account_state: TLAccountState,
-    // TODO: Fix
     pub revision: i32,
 }
 
@@ -380,7 +381,7 @@ pub struct TLSmcLibraryEntry {
 
 // tonlib_api.tl_api, line 187
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct SmcLibraryResult {
+pub struct TLSmcLibraryResult {
     pub result: Vec<TLSmcLibraryEntry>,
 }
 // tonlib_api.tl_api, line 189
@@ -486,6 +487,17 @@ pub struct TLBlocksTransactionsExt {
     pub req_count: i32,
     pub incomplete: bool,
     pub transactions: Vec<TLRawTransaction>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
+pub struct TLConfigInfo {
+    pub config: TLTvmCell,
+}
+
+#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
+pub struct TLTvmCell {
+    #[serde(with = "Base64Standard")]
+    pub bytes: Vec<u8>,
 }
 
 // tonlib_api.tl_api, line 225
