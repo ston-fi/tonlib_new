@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.7...ton_lib_macros-v0.0.8) - 2025-04-27
+
+### Other
+
+- Merge pull request #7 from Sild/add-libs-dict
+
 ## [0.0.7](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.6...ton_lib_macros-v0.0.7) - 2025-04-26
 
 ### Fixed
