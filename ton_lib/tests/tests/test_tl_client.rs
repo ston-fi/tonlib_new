@@ -3,6 +3,7 @@ use ton_lib::clients::tonlib::tl_client::TLClient;
 
 use ton_lib::cell::build_parse::parser::CellParser;
 use ton_lib::cell::ton_cell::TonCell;
+use ton_lib::cell::ton_hash::TonHash;
 use ton_lib::types::tlb::tlb_type::TLBType;
 
 #[tokio::test]
@@ -27,11 +28,11 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     assert_eq!(value, 0x12);
 
     // https://tonviewer.com/EQCGScrZe1xbyWqWDvdI6mzP-GAcAWFv6ZXuaJOuSqemxku4
-    // let lib_id = TonHash::from_hex("A9338ECD624CA15D37E4A8D9BF677DDC9B84F0E98F05F2FB84C7AFE332A281B4")?;
-    // let lib_result = tl_client.get_libs(vec![lib_id.clone()]).await?;
-    // assert_eq!(lib_result.result.len(), 1);
-    // assert_eq!(lib_result.result[0].hash.as_slice(), lib_id.as_slice());
-    // let lib_cell = assert_ok!(TonCell::from_boc(&lib_result.result[0].data));
-    // assert_eq!(lib_cell.hash(), &lib_id);
+    let lib_id = TonHash::from_hex("A9338ECD624CA15D37E4A8D9BF677DDC9B84F0E98F05F2FB84C7AFE332A281B4")?;
+    let lib_result = tl_client.get_libs(vec![lib_id.clone()]).await?;
+    assert_eq!(lib_result.result.len(), 1);
+    assert_eq!(lib_result.result[0].hash.as_slice(), lib_id.as_slice());
+    let lib_cell = assert_ok!(TonCell::from_boc(&lib_result.result[0].data));
+    assert_eq!(lib_cell.hash(), &lib_id);
     Ok(())
 }
