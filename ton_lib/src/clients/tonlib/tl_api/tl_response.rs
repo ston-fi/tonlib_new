@@ -1,4 +1,4 @@
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::tonlib::tl_api::tl_types::{
     TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
     TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
     TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,
@@ -88,7 +88,7 @@ impl TLResponse {
     /// Safe to call if there is a string underline
     pub unsafe fn from_c_str_json(c_str: *const c_char) -> Result<(TLResponse, Option<String>), TonlibError> {
         if c_str.is_null() {
-            return Err(TonlibError::TLJWrongUsage("null pointer passed to TLResponse".to_string()));
+            return Err(TonlibError::TLWrongUsage("null pointer passed to TLResponse".to_string()));
         }
         // No need to free c_str. Tonlib cares about it itself.
         let c_str = unsafe { CStr::from_ptr(c_str) };

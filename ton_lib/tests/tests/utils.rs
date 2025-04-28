@@ -19,15 +19,15 @@ pub(crate) async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient
 }
 
 #[cfg(feature = "sys")]
-pub(crate) async fn make_tlj_client_default(
+pub(crate) async fn make_tl_client_default(
     mainnet: bool,
     archive_only: bool,
-) -> anyhow::Result<ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault> {
+) -> anyhow::Result<ton_lib::clients::tonlib::clients_impl::TLClientDefault> {
     init_logging();
-    log::info!("initializing tlj_client with mainnet={mainnet}...");
+    log::info!("initializing tl_client with mainnet={mainnet}...");
     let net_conf = get_net_conf(mainnet)?;
-    let config = ton_lib::clients::tonlibjson::tlj_config::TLJClientConfig::new(net_conf, archive_only);
-    Ok(ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault::new(config).await?)
+    let config = ton_lib::clients::tonlib::tl_client_config::TLClientConfig::new(net_conf, archive_only);
+    Ok(ton_lib::clients::tonlib::clients_impl::TLClientDefault::new(config).await?)
 }
 
 fn get_net_conf(mainnet: bool) -> anyhow::Result<String> {

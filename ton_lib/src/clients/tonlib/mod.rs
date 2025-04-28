@@ -1,9 +1,9 @@
 #[cfg(feature = "sys")]
 pub mod clients_impl;
 pub mod tl_api;
-pub mod tlj_callback;
+pub mod tl_callback;
 #[cfg(feature = "sys")]
-pub mod tlj_client;
-pub mod tlj_config;
+pub mod tl_client;
+pub mod tl_client_config;
 #[cfg(feature = "sys")]
-pub mod tlj_utils;
+pub mod utils;

@@ -1,6 +1,6 @@
 use crate::cell::ton_hash::ton_hash_serde_b64;
 use crate::cell::ton_hash::vec_ton_hash_serde_b64;
-use crate::clients::tonlibjson::tl_api::Base64Standard;
+use crate::clients::tonlib::tl_api::Base64Standard;
 use std::borrow::Cow;
 use std::fmt::Debug;
 
@@ -540,7 +540,7 @@ pub enum TLUpdate {
 mod tests {
     use std::borrow::Cow;
 
-    use crate::clients::tonlibjson::tl_api::tl_types::TLSmcMethodId;
+    use crate::clients::tonlib::tl_api::tl_types::TLSmcMethodId;
     use tokio_test::assert_err;
     use tonlib_core::{TonTxId, TransactionIdParseError};
 

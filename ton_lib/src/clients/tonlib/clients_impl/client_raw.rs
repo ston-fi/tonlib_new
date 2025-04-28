@@ -1,5 +1,5 @@
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
+use crate::clients::tonlib::tl_api::tl_request::TLRequest;
+use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::errors::TonlibError;
 use tonlib_sys::{
     tonlib_client_json_create, tonlib_client_json_destroy, tonlib_client_json_receive, tonlib_client_json_send,
@@ -46,8 +46,8 @@ unsafe impl Sync for TLClientRaw {}
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::tonlibjson::clients_impl::client_raw::TLClientRaw;
-    use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
+    use crate::clients::tonlib::clients_impl::client_raw::TLClientRaw;
+    use crate::clients::tonlib::tl_api::tl_request::TLRequest;
     use crate::utils::tonlib_set_verbosity_level;
 
     #[test]

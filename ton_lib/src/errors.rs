@@ -77,16 +77,16 @@ pub enum TonlibError {
     LiteClientReqTimeout(Box<(Request, Duration)>),
 
     // TonlibClient
-    #[error("TLJClientWrongResult: expected type: {0}, got: {1}")]
-    TLJClientWrongResponse(String, String),
-    #[error("TLJInvalidArguments: {0}")]
-    TLJInvalidArgs(String),
-    #[error("TLJSendError: fail to send request: {0}")]
-    TLJSendError(String),
-    #[error("TLJInvalidResponse: method: {method}, code: {code}, message: {message}")]
-    TLJExecError { method: String, code: i32, message: String },
-    #[error("TLJWrongExecImplUsage: {0}")]
-    TLJWrongUsage(String),
+    #[error("TLClientWrongResult: expected type: {0}, got: {1}")]
+    TLClientWrongResponse(String, String),
+    #[error("TLInvalidArguments: {0}")]
+    TLInvalidArgs(String),
+    #[error("TLSendError: fail to send request: {0}")]
+    TLSendError(String),
+    #[error("TLInvalidResponse: method: {method}, code: {code}, message: {message}")]
+    TLExecError { method: String, code: i32, message: String },
+    #[error("TLWrongExecImplUsage: {0}")]
+    TLWrongUsage(String),
 
     // TVM
     #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]

@@ -1,6 +1,6 @@
 # TonLib
 
-This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlibjson) implementation.
+This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlib) implementation.
 
 ## Features
 
@@ -62,7 +62,7 @@ fn main() {
   A "native" lite-node client that uses ADNL.  
   More straightforward to use, but less flexible.
 
-- [TLJClient](ton_lib/src/clients/tonlibjson):  
+- [TLClient](ton_lib/src/clients/tonlib):  
   A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
   A bit tricky to use at times, but offers more features.\
   **Does not support `smc` methods - use `MethodEmulator` instead.**
@@ -75,11 +75,11 @@ async fn main() -> anyhow::Result<()> {
     let mc_info = lite_client.get_mc_info().await?;
     let block_id = lite_client.lookup_mc_block(mc_info.last.seqno).await?;
     
-    // TLJClient example
-    let config = TLJClientConfig::new(TON_NET_CONF_MAINNET, archive_only);
-    let tlj_client = TLJClient::new(config).await?;
-    let mc_info = tlj_client.get_mc_info().await?;
-    let block = tlj_client.lookup_mc_block(mc_info.last.seqno - 100).await?;
+    // TLClient example
+    let config = TLClientConfig::new(TON_NET_CONF_MAINNET, archive_only);
+    let tl_client = TLClient::new(config).await?;
+    let mc_info = tl_client.get_mc_info().await?;
+    let block = tl_client.lookup_mc_block(mc_info.last.seqno - 100).await?;
 }
 ```
 

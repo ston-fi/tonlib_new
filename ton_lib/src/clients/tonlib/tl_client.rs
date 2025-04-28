@@ -1,9 +1,9 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::clients_impl::TLJConnection;
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::tonlib::clients_impl::TLConnection;
+use crate::clients::tonlib::tl_api::tl_request::TLRequest;
+use crate::clients::tonlib::tl_api::tl_response::TLResponse;
+use crate::clients::tonlib::tl_api::tl_types::{
     TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards,
     TLBlocksTxs, TLConfigInfo, TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
 };
@@ -12,18 +12,18 @@ use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
 
 #[macro_export]
-macro_rules! unwrap_tlj_response {
+macro_rules! unwrap_tl_response {
     ($result:expr, $variant:ident) => {
         match $result {
             TLResponse::$variant(inner) => Ok(inner),
-            _ => Err(TonlibError::TLJClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
+            _ => Err(TonlibError::TLClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
         }
     };
 }
 
 #[async_trait]
-pub trait TLJClient: Send + Sync {
-    async fn get_connection(&self) -> Result<&TLJConnection, TonlibError>;
+pub trait TLClient: Send + Sync {
+    async fn get_connection(&self) -> Result<&TLConnection, TonlibError>;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         self.get_connection().await?.exec_impl(req).await
@@ -31,7 +31,7 @@ pub trait TLJClient: Send + Sync {
 
     async fn get_mc_info(&self) -> Result<TLBlocksMCInfo, TonlibError> {
         let req = TLRequest::BlocksGetMCInfo {};
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlocksMCInfo)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlocksMCInfo)
     }
 
     /// * `mode`: Lookup mode: `1` - by `block_id.seqno`, `2` - by `lt`, `4` - by `utime`.
@@ -49,7 +49,7 @@ pub trait TLJClient: Send + Sync {
             lt,
             utime,
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlockIdExt)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
     }
 
     async fn lookup_mc_block(&self, seqno: i32) -> Result<TLBlockIdExt, TonlibError> {
@@ -67,7 +67,7 @@ pub trait TLJClient: Send + Sync {
                 account_address: address.to_hex(),
             },
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLRawFullAccountState)
+        unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
     async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
@@ -76,7 +76,7 @@ pub trait TLJClient: Send + Sync {
                 account_address: address.to_hex(),
             },
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLFullAccountState)
+        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
     }
 
     async fn get_account_state_by_tx(
@@ -90,7 +90,7 @@ pub trait TLJClient: Send + Sync {
             },
             transaction_id: tx_id,
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLRawFullAccountState)
+        unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
     async fn get_raw_txs(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
@@ -100,7 +100,7 @@ pub trait TLJClient: Send + Sync {
             },
             from_transaction_id: from_tx_id.clone(),
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLRawTxs)
+        unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
     async fn get_raw_txs_v2(
@@ -111,7 +111,7 @@ pub trait TLJClient: Send + Sync {
         try_decode_msg: bool,
     ) -> Result<TLRawTxs, TonlibError> {
         if count > 16 {
-            return Err(TonlibError::TLJInvalidArgs(format!(
+            return Err(TonlibError::TLInvalidArgs(format!(
                 "get_raw_transactions_v2: count <= 16 supported, got {count}"
             )));
         }
@@ -123,18 +123,18 @@ pub trait TLJClient: Send + Sync {
             count: count as u32,
             try_decode_messages: try_decode_msg,
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLRawTxs)
+        unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
     async fn send_msg(&self, body: Vec<u8>) -> Result<TonHash, TonlibError> {
         let req = TLRequest::RawSendMsgReturnHash { body };
-        let rsp = unwrap_tlj_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;
+        let rsp = unwrap_tl_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;
         TonHash::from_vec(rsp.hash)
     }
 
     async fn sync(&self) -> Result<TLBlockIdExt, TonlibError> {
         let req = TLRequest::Sync {};
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlockIdExt)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
     }
 
     // async fn smc_load(
@@ -184,7 +184,7 @@ pub trait TLJClient: Send + Sync {
     //
     async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<TLSmcLibraryResult, TonlibError> {
         let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
-        unwrap_tlj_response!(self.exec(&req).await?, TLSmcLibraryResult)
+        unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)
     }
     //
     // async fn smc_get_libraries_ext(
@@ -208,7 +208,7 @@ pub trait TLJClient: Send + Sync {
     //
     async fn get_block_shards(&self, block_id: TLBlockIdExt) -> Result<TLBlocksShards, TonlibError> {
         let req = TLRequest::BlocksGetShards { id: block_id.clone() };
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlocksShards)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlocksShards)
     }
 
     /// Returns up to specified number of ids of transactions in specified block.
@@ -232,7 +232,7 @@ pub trait TLJClient: Send + Sync {
             count,
             after,
         };
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlocksTxs)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlocksTxs)
     }
     //
     // async fn get_block_transactions_ext(
@@ -272,16 +272,16 @@ pub trait TLJClient: Send + Sync {
     //
     async fn get_block_header(&self, block_id: TLBlockIdExt) -> Result<TLBlocksHeader, TonlibError> {
         let req = TLRequest::GetBlockHeader { id: block_id };
-        unwrap_tlj_response!(self.exec(&req).await?, TLBlocksHeader)
+        unwrap_tl_response!(self.exec(&req).await?, TLBlocksHeader)
     }
 
     async fn get_config_param(&self, mode: u32, param: u32) -> Result<TLConfigInfo, TonlibError> {
         let req = TLRequest::GetConfigParam { mode, param };
-        unwrap_tlj_response!(self.exec(&req).await?, TLConfigInfo)
+        unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)
     }
     //
     async fn get_config_all(&self, mode: u32) -> Result<TLConfigInfo, TonlibError> {
         let req = TLRequest::GetConfigAll { mode };
-        unwrap_tlj_response!(self.exec(&req).await?, TLConfigInfo)
+        unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)
     }
 }
