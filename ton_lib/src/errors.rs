@@ -1,5 +1,5 @@
 use hex::FromHexError;
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use std::time::Duration;
 use thiserror::Error;
 use ton_liteapi::tl::request::Request;
@@ -101,6 +101,12 @@ pub enum TonlibError {
     TVMStackWrongType(String, String),
     #[error("TVMStackError: stack is empty")]
     TVMStackEmpty,
+
+    // TonActiveContract
+    #[error("TonContractNotActive: contract is not active")]
+    TonContractNotActive,
+    #[error("TonContractUnexpectedValue: positive int expected, got {0}")]
+    TonContractUnexpectedValue(BigInt),
 
     #[error("CustomError: {0}")]
     CustomError(String),

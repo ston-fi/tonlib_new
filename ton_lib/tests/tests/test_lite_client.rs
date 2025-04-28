@@ -1,5 +1,7 @@
-use crate::tests::utils::make_lite_client;
+use crate::tests::utils::{get_net_conf, init_logging};
 use std::str::FromStr;
+use ton_lib::clients::lite::config::LiteClientConfig;
+use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::types::tlb::block_tlb::account::MaybeAccount;
 use ton_lib::types::ton_address::TonAddress;
@@ -28,4 +30,12 @@ async fn test_lite_client() -> anyhow::Result<()> {
     assert!(matches!(account_boc, MaybeAccount::Some(_)));
 
     Ok(())
+}
+
+pub async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient> {
+    init_logging();
+    log::info!("initializing lite_client with mainnet={mainnet}...");
+    let net_conf = get_net_conf(mainnet)?;
+    let config = LiteClientConfig::new(&net_conf)?;
+    Ok(LiteClient::new(config)?)
 }

@@ -27,9 +27,9 @@ pub struct TVMEmulator {
 const DEFAULT_TVM_LOG_VERBOSITY: u32 = 1;
 
 impl TVMEmulator {
-    pub fn new<T: AsRef<[u8]>>(code: T, data: T) -> Result<Self, TonlibError> {
-        let code = CString::new(STANDARD.encode(code.as_ref()))?;
-        let data = CString::new(STANDARD.encode(data.as_ref()))?;
+    pub fn new<T: AsRef<[u8]>>(code_boc: T, data_boc: T) -> Result<Self, TonlibError> {
+        let code = CString::new(STANDARD.encode(code_boc.as_ref()))?;
+        let data = CString::new(STANDARD.encode(data_boc.as_ref()))?;
         let ptr = unsafe { tvm_emulator_create(code.as_ptr(), data.as_ptr(), DEFAULT_TVM_LOG_VERBOSITY) };
         Ok(TVMEmulator { ptr })
     }

@@ -12,7 +12,7 @@ use std::sync::Arc;
 impl TLBType for TonCell {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let bits_left = parser.data_bits_left()?;
-        if parser.cell.data_bits_len == bits_left as usize && parser.next_ref_pos == 0 {
+        if parser.cell.data_bits_len == bits_left && parser.next_ref_pos == 0 {
             let _data = parser.read_bits(bits_left)?; // drain data
             parser.next_ref_pos = parser.cell.refs.len(); // drain refs
             Ok(parser.cell.clone())
@@ -20,11 +20,11 @@ impl TLBType for TonCell {
             let data = parser.read_bits(bits_left)?;
             let refs = Vec::from(&parser.cell.refs[parser.next_ref_pos..]);
             parser.next_ref_pos = parser.cell.refs.len(); // drain refs
-            let meta = CellMeta::new(CellType::Ordinary, &data, bits_left as usize, &refs)?;
+            let meta = CellMeta::new(CellType::Ordinary, &data, bits_left, &refs)?;
             Ok(Self {
                 meta,
                 data,
-                data_bits_len: bits_left as usize,
+                data_bits_len: bits_left,
                 refs,
             })
         }

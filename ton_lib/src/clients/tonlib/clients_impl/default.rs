@@ -6,15 +6,16 @@ use crate::errors::TonlibError;
 use async_trait::async_trait;
 use rand::prelude::{IndexedRandom, StdRng};
 use rand::SeedableRng;
-use std::ops::DerefMut;
+use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use tokio::sync::{Mutex, Semaphore};
 
-/// Simple client with many connections
+/// Simple client with many connectionse
+#[derive(Clone)]
 pub struct TLClientDefault(Arc<Inner>);
 
 impl TLClientDefault {
-    pub async fn new(mut config: TLClientConfig) -> Result<Self, TonlibError> {
+    pub async fn new(mut config: TLClientConfig) -> Result<impl TLClient, TonlibError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));

@@ -1,6 +1,7 @@
 use tokio_test::assert_ok;
 use ton_lib::clients::tonlib::tl_client::TLClient;
 
+use crate::tests::utils::{get_net_conf, init_logging};
 use ton_lib::cell::build_parse::parser::CellParser;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
@@ -8,7 +9,7 @@ use ton_lib::types::tlb::tlb_type::TLBType;
 
 #[tokio::test]
 async fn test_tl_client_default() -> anyhow::Result<()> {
-    let tl_client = crate::tests::utils::make_tl_client_default(true, false).await?;
+    let tl_client = make_tl_client_default(true, false).await?;
     // ton_lib::utils::tonlib_set_verbosity_level(4);
 
     let mc_info = tl_client.get_mc_info().await?;
@@ -35,4 +36,12 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     let lib_cell = assert_ok!(TonCell::from_boc(&lib_result.result[0].data));
     assert_eq!(lib_cell.hash(), &lib_id);
     Ok(())
+}
+
+pub async fn make_tl_client_default(mainnet: bool, archive_only: bool) -> anyhow::Result<impl TLClient> {
+    init_logging();
+    log::info!("initializing tl_client with mainnet={mainnet}...");
+    let net_conf = get_net_conf(mainnet)?;
+    let config = ton_lib::clients::tonlib::tl_client_config::TLClientConfig::new(net_conf, archive_only);
+    Ok(ton_lib::clients::tonlib::clients_impl::TLClientDefault::new(config).await?)
 }

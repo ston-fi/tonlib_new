@@ -22,7 +22,7 @@ macro_rules! unwrap_tl_response {
 }
 
 #[async_trait]
-pub trait TLClient: Send + Sync {
+pub trait TLClient: Send + Sync + Clone + 'static {
     async fn get_connection(&self) -> Result<&TLConnection, TonlibError>;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
