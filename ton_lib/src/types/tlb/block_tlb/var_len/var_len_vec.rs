@@ -4,7 +4,7 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::var_len::VarLen;
 use crate::types::tlb::tlb_type::TLBType;
 
-impl<const BITS_LEN_LEN: u32, const BL: bool> TLBType for VarLen<Vec<u8>, BITS_LEN_LEN, BL> {
+impl<const BITS_LEN_LEN: usize, const BL: bool> TLBType for VarLen<Vec<u8>, BITS_LEN_LEN, BL> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let len = parser.read_num(BITS_LEN_LEN)?;
         let bits_len = if BL { len * 8 } else { len };

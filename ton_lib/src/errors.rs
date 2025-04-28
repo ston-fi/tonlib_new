@@ -13,23 +13,23 @@ pub enum TonlibError {
 
     // cell_parser
     #[error("ParserError: Requested {req} bits, but only {left} left")]
-    ParserDataUnderflow { req: u32, left: u32 },
+    ParserDataUnderflow { req: usize, left: usize },
     #[error("ParserError: New position is {new_pos}, but data_bits_len is {bits_len}")]
-    ParserBadPosition { new_pos: i32, bits_len: u32 },
+    ParserBadPosition { new_pos: i32, bits_len: usize },
     #[error("ParserError: No ref with index={req}")]
     ParserRefsUnderflow { req: usize },
     #[error("ParserError: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]
-    ParserCellNotEmpty { bits_left: u32, refs_left: usize },
+    ParserCellNotEmpty { bits_left: usize, refs_left: usize },
 
     // cell_builder
     #[error("BuilderError: Can't write {req} bits: only {left} free bits available")]
-    BuilderDataOverflow { req: u32, left: u32 },
+    BuilderDataOverflow { req: usize, left: usize },
     #[error("BuilderError: Can't write ref - 4 refs are written already")]
     BuilderRefsOverflow,
     #[error("BuilderError: Can't extract {required_bits} bits from {given} bytes")]
-    BuilderNotEnoughData { required_bits: u32, given: u32 },
+    BuilderNotEnoughData { required_bits: usize, given: usize },
     #[error("BuilderError: Can't write number {number} as {bits} bits")]
-    BuilderNumberBitsMismatch { number: String, bits: u32 },
+    BuilderNumberBitsMismatch { number: String, bits: usize },
     #[error("BuilderError: Cell validation error: {0}")]
     BuilderMeta(String),
 
@@ -48,8 +48,8 @@ pub enum TonlibError {
     TLBWrongPrefix {
         exp: u128,
         given: u128,
-        bits_exp: u32,
-        bits_left: u32,
+        bits_exp: usize,
+        bits_left: usize,
     },
     #[error("TLBEnum: Out of options")]
     TLBEnumOutOfOptions, // TODO collect errors from all options

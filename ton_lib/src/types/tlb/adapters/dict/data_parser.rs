@@ -66,7 +66,7 @@ impl DictDataParser {
             }
             LabelType::Long => {
                 let prefix_len_len = self.remain_suffix_bit_len();
-                let prefix_len = parser.read_num::<u32>(prefix_len_len)?;
+                let prefix_len = parser.read_num::<usize>(prefix_len_len)?;
                 if prefix_len_len != 0 {
                     let val = parser.read_num::<BigUint>(prefix_len)?;
                     self.cur_key_prefix <<= prefix_len;
@@ -104,9 +104,9 @@ impl DictDataParser {
         Ok(label)
     }
 
-    fn remain_suffix_bit_len(&self) -> u32 {
+    fn remain_suffix_bit_len(&self) -> usize {
         // add 2 because cur_prefix contains leading bit
         let prefix_len_left = self.key_bits_len - self.cur_key_prefix.bits() as usize + 2;
-        (prefix_len_left as f32).log2().ceil() as u32
+        (prefix_len_left as f32).log2().ceil() as usize
     }
 }

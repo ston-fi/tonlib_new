@@ -106,10 +106,10 @@ pub trait TLBType: Sized {
 #[derive(Debug, Clone, PartialEq)]
 pub struct TLBPrefix {
     pub value: u128,
-    pub bits_len: u32,
+    pub bits_len: usize,
 }
 
 impl TLBPrefix {
     pub const NULL: TLBPrefix = TLBPrefix::new(0, 0);
-    pub const fn new(value: u128, bits_len: u32) -> Self { TLBPrefix { value, bits_len } }
+    pub const fn new(value: u128, bits_len: usize) -> Self { TLBPrefix { value, bits_len } }
 }

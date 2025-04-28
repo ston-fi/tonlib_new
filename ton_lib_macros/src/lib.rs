@@ -12,7 +12,7 @@ use syn::Data;
 #[deluxe(attributes(tlb_derive))]
 struct TLBHeaderAttrs {
     prefix: Option<u128>,       // use 0 as default
-    bits_len: Option<u32>,      // use 0 as default
+    bits_len: Option<usize>,    // use 0 as default
     ensure_empty: Option<bool>, // use false as default
 }
 

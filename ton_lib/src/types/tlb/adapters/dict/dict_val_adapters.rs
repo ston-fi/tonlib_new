@@ -10,14 +10,14 @@ pub trait DictValAdapter<T> {
 }
 
 pub struct DictValAdapterTLB;
-pub struct DictValAdapterNum<const BITS_LEN: u32>;
+pub struct DictValAdapterNum<const BITS_LEN: usize>;
 
 impl<T: TLBType> DictValAdapter<T> for DictValAdapterTLB {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> { val.write(builder) }
     fn read(parser: &mut CellParser) -> Result<T, TonlibError> { T::read(parser) }
 }
 
-impl<T: TonCellNum, const BITS_LEN: u32> DictValAdapter<T> for DictValAdapterNum<BITS_LEN> {
+impl<T: TonCellNum, const BITS_LEN: usize> DictValAdapter<T> for DictValAdapterNum<BITS_LEN> {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> { builder.write_num(val, BITS_LEN) }
     fn read(parser: &mut CellParser) -> Result<T, TonlibError> { parser.read_num(BITS_LEN) }
 }

@@ -10,17 +10,17 @@ use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 pub struct VMCellSlice {
     pub value: TonCellRef, // is not part of TLB
     pub cell_original: TonCellRef,
-    pub start_bit: u32,
-    pub end_bit: u32,
-    pub start_ref: u32,
-    pub end_ref: u32,
+    pub start_bit: usize,
+    pub end_bit: usize,
+    pub start_ref: usize,
+    pub end_ref: usize,
 }
 
 impl VMCellSlice {
     pub fn from_cell(cell: TonCell) -> Self {
         let cell_original = cell.clone().into_ref();
-        let end_bit = cell.data_bits_len as u32;
-        let end_ref = cell.refs.len() as u32;
+        let end_bit = cell.data_bits_len;
+        let end_ref = cell.refs.len();
         Self {
             value: cell.into_ref(),
             cell_original,

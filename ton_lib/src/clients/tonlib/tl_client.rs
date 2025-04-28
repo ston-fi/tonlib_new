@@ -35,7 +35,6 @@ pub trait TLClient: Send + Sync {
     }
 
     /// * `mode`: Lookup mode: `1` - by `block_id.seqno`, `2` - by `lt`, `4` - by `utime`.
-    #[allow(clippy::all)]
     async fn lookup_block(
         &self,
         mode: i32,
@@ -61,7 +60,7 @@ pub trait TLClient: Send + Sync {
         self.lookup_block(1, block_id, 0, 0).await
     }
 
-    async fn get_raw_full_account_state(&self, address: TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
+    async fn get_account_state_raw(&self, address: TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
         let req = TLRequest::RawGetAccountState {
             account_address: TLAccountAddress {
                 account_address: address.to_hex(),
@@ -70,16 +69,7 @@ pub trait TLClient: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
-        let req = TLRequest::GetAccountState {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
-        };
-        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
-    }
-
-    async fn get_account_state_by_tx(
+    async fn get_account_state_raw_by_tx(
         &self,
         address: TonAddress,
         tx_id: TLTxId,
@@ -93,7 +83,16 @@ pub trait TLClient: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_raw_txs(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
+    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
+        let req = TLRequest::GetAccountState {
+            account_address: TLAccountAddress {
+                account_address: address.to_hex(),
+            },
+        };
+        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
+    }
+
+    async fn get_txs_raw(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
         let req = TLRequest::RawGetTxs {
             account_address: TLAccountAddress {
                 account_address: address.to_hex(),
@@ -103,7 +102,7 @@ pub trait TLClient: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
-    async fn get_raw_txs_v2(
+    async fn get_txs_raw_v2(
         &self,
         address: &TonAddress,
         from_tx: TLTxId,

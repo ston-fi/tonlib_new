@@ -3,8 +3,8 @@ mod var_len_vec;
 
 use std::ops::{Deref, DerefMut};
 
-pub type VarLenBits<T, const BITS_LEN: u32> = VarLen<T, BITS_LEN, false>;
-pub type VarLenBytes<T, const BITS_LEN: u32> = VarLen<T, BITS_LEN, true>;
+pub type VarLenBits<T, const BITS_LEN: usize> = VarLen<T, BITS_LEN, false>;
+pub type VarLenBytes<T, const BITS_LEN: usize> = VarLen<T, BITS_LEN, true>;
 
 /// VarLen: store data len, and then data itself
 ///
@@ -12,13 +12,13 @@ pub type VarLenBytes<T, const BITS_LEN: u32> = VarLen<T, BITS_LEN, true>;
 ///
 /// LEN_IN_BYTES - if true, data len is specified in bytes. Otherwise - in bits
 #[derive(Debug, Clone, PartialEq)]
-pub struct VarLen<T, const BITS_LEN: u32, const LEN_IN_BYTES: bool = false> {
+pub struct VarLen<T, const BITS_LEN: usize, const LEN_IN_BYTES: bool = false> {
     pub data: T,
-    pub len: u32,
+    pub len: usize,
 }
 
-impl<T, const L: u32, const LEN_IN_BYTES: bool> VarLen<T, L, LEN_IN_BYTES> {
-    pub fn new<D: Into<T>>(data: D, bits_len: u32) -> Self {
+impl<T, const L: usize, const LEN_IN_BYTES: bool> VarLen<T, L, LEN_IN_BYTES> {
+    pub fn new<D: Into<T>>(data: D, bits_len: usize) -> Self {
         Self {
             data: data.into(),
             len: if LEN_IN_BYTES { bits_len.div_ceil(8) } else { bits_len },
@@ -26,12 +26,12 @@ impl<T, const L: u32, const LEN_IN_BYTES: bool> VarLen<T, L, LEN_IN_BYTES> {
     }
 }
 
-impl<T, const L: u32, const BL: bool> Deref for VarLen<T, L, BL> {
+impl<T, const L: usize, const BL: bool> Deref for VarLen<T, L, BL> {
     type Target = T;
     fn deref(&self) -> &Self::Target { &self.data }
 }
 
-impl<T, const L: u32, const BL: bool> DerefMut for VarLen<T, L, BL> {
+impl<T, const L: usize, const BL: bool> DerefMut for VarLen<T, L, BL> {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.data }
 }
 

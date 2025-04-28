@@ -52,16 +52,16 @@ impl CellBuilder {
     pub fn write_bits_with_offset<T: AsRef<[u8]>>(
         &mut self,
         data: T,
-        mut bits_len: u32,
-        mut bits_offset: u32,
+        mut bits_len: usize,
+        mut bits_offset: usize,
     ) -> Result<(), TonlibError> {
         self.ensure_capacity(bits_len)?;
         let mut data_ref = data.as_ref();
 
-        if (bits_len + bits_offset).div_ceil(8) > data_ref.len() as u32 {
+        if (bits_len + bits_offset).div_ceil(8) > data_ref.len() {
             return Err(TonlibError::BuilderNotEnoughData {
                 required_bits: bits_len + bits_offset,
-                given: data_ref.len() as u32,
+                given: data_ref.len(),
             });
         }
 
@@ -70,7 +70,7 @@ impl CellBuilder {
         }
 
         // skip bytes_offset, adjust borders
-        data_ref = &data_ref[bits_offset as usize / 8..];
+        data_ref = &data_ref[bits_offset / 8..];
         bits_offset %= 8;
 
         let first_byte_bits_len = min(bits_len, 8 - bits_offset);
@@ -78,26 +78,26 @@ impl CellBuilder {
         if first_byte_bits_len == bits_len {
             first_byte_val >>= 8 - bits_offset - bits_len
         }
-        self.data_writer.write_var(first_byte_bits_len, first_byte_val)?;
+        self.data_writer.write_var(first_byte_bits_len as u32, first_byte_val)?;
 
         data_ref = &data_ref[1..];
         bits_len -= first_byte_bits_len;
 
-        let full_bytes = bits_len as usize / 8;
+        let full_bytes = bits_len / 8;
         self.data_writer.write_bytes(&data_ref[0..full_bytes])?;
         let rest_bits_len = bits_len % 8;
         if rest_bits_len != 0 {
-            self.data_writer.write_var(rest_bits_len, data_ref[full_bytes] >> (8 - rest_bits_len))?;
+            self.data_writer.write_var(rest_bits_len as u32, data_ref[full_bytes] >> (8 - rest_bits_len))?;
         }
         Ok(())
     }
 
-    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: u32) -> Result<(), TonlibError> {
+    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: usize) -> Result<(), TonlibError> {
         self.write_bits_with_offset(data, bits_len, 0)
     }
 
     pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonlibError> {
-        self.write_bits(&cell.data, cell.data_bits_len as u32)?;
+        self.write_bits(&cell.data, cell.data_bits_len)?;
         for i in 0..cell.refs.len() {
             self.write_ref(cell.refs[i].clone())?;
         }
@@ -108,28 +108,28 @@ impl CellBuilder {
     pub fn write_cell_slice(
         &mut self,
         cell: &TonCell,
-        start_bit: u32,
-        end_bit: u32,
-        start_ref: u32,
-        end_ref: u32,
+        start_bit: usize,
+        end_bit: usize,
+        start_ref: usize,
+        end_ref: usize,
     ) -> Result<(), TonlibError> {
-        if end_bit > cell.data_bits_len as u32 {
+        if end_bit > cell.data_bits_len {
             return Err(TonlibError::BuilderNotEnoughData {
                 required_bits: end_bit,
-                given: cell.data_bits_len as u32,
+                given: cell.data_bits_len,
             });
         }
         let slice_data_bits_len = end_bit - start_bit;
-        let mut slice_data = vec![0; slice_data_bits_len.div_ceil(8) as usize];
+        let mut slice_data = vec![0; slice_data_bits_len.div_ceil(8)];
 
         let cursor = Cursor::new(cell.data.as_slice());
         let mut data_reader = BitReader::endian(cursor, BigEndian);
-        data_reader.skip(start_bit)?;
+        data_reader.skip(start_bit as u32)?;
         data_reader.read_bytes(&mut slice_data)?;
 
         self.write_bits(&slice_data, slice_data_bits_len)?;
         for ref_pos in start_ref..end_ref {
-            self.write_ref(cell.refs[ref_pos as usize].clone())?;
+            self.write_ref(cell.refs[ref_pos].clone())?;
         }
         Ok(())
     }
@@ -145,7 +145,7 @@ impl CellBuilder {
     pub fn write_num<N: TonCellNum, B: Deref<Target = N>>(
         &mut self,
         data: B,
-        bits_len: u32,
+        bits_len: usize,
     ) -> Result<(), TonlibError> {
         self.ensure_capacity(bits_len)?;
         let data_ref = data.deref();
@@ -163,7 +163,7 @@ impl CellBuilder {
         }
 
         if let Some(unsigned) = data_ref.tcn_to_unsigned_primitive() {
-            self.data_writer.write_var(bits_len, unsigned)?;
+            self.data_writer.write_var(bits_len as u32, unsigned)?;
             return Ok(());
         }
 
@@ -181,24 +181,24 @@ impl CellBuilder {
             _ => 0,
         };
         let padding_bits_len = bits_len.saturating_sub(min_bits_len);
-        let padding_to_write = vec![padding_val; (padding_bits_len as usize).div_ceil(8)];
+        let padding_to_write = vec![padding_val; padding_bits_len.div_ceil(8)];
         self.write_bits(padding_to_write, padding_bits_len)?;
 
-        let bits_offset = (data_bytes.len() as u32 * 8).saturating_sub(min_bits_len);
+        let bits_offset = (data_bytes.len() * 8).saturating_sub(min_bits_len);
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
-    pub fn data_bits_left(&self) -> u32 { CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len as u32 }
+    pub fn data_bits_left(&self) -> usize { CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len }
 
-    fn ensure_capacity(&mut self, bits_len: u32) -> Result<(), TonlibError> {
-        let new_bits_len = self.data_bits_len as u32 + bits_len;
+    fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TonlibError> {
+        let new_bits_len = self.data_bits_len + bits_len;
         if new_bits_len <= CellMeta::CELL_MAX_DATA_BITS_LEN {
-            self.data_bits_len = new_bits_len as usize;
+            self.data_bits_len = new_bits_len;
             return Ok(());
         }
         Err(TonlibError::BuilderDataOverflow {
             req: bits_len,
-            left: CellMeta::CELL_MAX_DATA_BITS_LEN - bits_len,
+            left: CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len,
         })
     }
 }
@@ -454,12 +454,12 @@ mod tests {
     #[test]
     fn test_builder_build_cell_library() -> anyhow::Result<()> {
         let mut builder = CellBuilder::new_with_type(CellType::Library);
-        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN as u32)?;
+        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         assert_err!(builder.build()); // no ton_lib prefix
 
         let mut builder = CellBuilder::new_with_type(CellType::Library);
         builder.write_num(&2, 8)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
-        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN as u32)?;
+        builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         let lib_cell = assert_ok!(builder.build());
 
         let expected_hash = TonHash::from_hex("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;
@@ -488,7 +488,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_bigint() -> anyhow::Result<()> {
-        let prepare_cell = |num_str: &str, bits_len: u32| {
+        let prepare_cell = |num_str: &str, bits_len: usize| {
             let number = num_bigint::BigInt::from_str(num_str)?;
             let mut builder = CellBuilder::new();
             builder.write_bits([0], 7)?; // for pretty printing
@@ -527,7 +527,7 @@ mod tests {
         Ok(())
     }
 
-    fn prepare_cell_big_uint(num_str: &str, bits_len: u32) -> anyhow::Result<TonCell> {
+    fn prepare_cell_big_uint(num_str: &str, bits_len: usize) -> anyhow::Result<TonCell> {
         let number = num_bigint::BigUint::from_str(num_str)?;
         let mut builder = CellBuilder::new();
         builder.write_bits([0], 7)?; // for pretty printing
@@ -538,7 +538,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_biguint() -> anyhow::Result<()> {
-        let prepare_cell = |num_str: &str, bits_len: u32| {
+        let prepare_cell = |num_str: &str, bits_len: usize| {
             let number = num_bigint::BigUint::from_str(num_str)?;
             let mut builder = CellBuilder::new();
             builder.write_bits([0], 7)?; // for pretty printing

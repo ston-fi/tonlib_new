@@ -31,7 +31,7 @@ impl TLBType for TonCell {
     }
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
-        builder.write_bits(&self.data, self.data_bits_len as u32)?;
+        builder.write_bits(&self.data, self.data_bits_len)?;
         self.refs.iter().cloned().try_for_each(|r| builder.write_ref(r))
     }
 
@@ -56,11 +56,11 @@ impl TLBType for TonCellRef {
 
 impl TLBType for TonHash {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        TonHash::from_vec(parser.read_bits(TonHash::BITS_LEN as u32)?)
+        TonHash::from_vec(parser.read_bits(TonHash::BITS_LEN)?)
     }
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
-        builder.write_bits(self.as_slice(), TonHash::BITS_LEN as u32)
+        builder.write_bits(self.as_slice(), TonHash::BITS_LEN)
     }
 }
 

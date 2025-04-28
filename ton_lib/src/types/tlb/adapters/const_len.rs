@@ -9,12 +9,12 @@ use std::marker::PhantomData;
 /// Usage: `#[tlb_derive(adapter="ConstLen::<{TYPE}>::new({BITS_LEN})")]`
 /// OR:    `#[tlb_derive(bits_len={BITS_LEN})]`
 pub struct ConstLen<T> {
-    bits_len: u32,
+    bits_len: usize,
     _phantom: PhantomData<T>,
 }
 
 impl<T> ConstLen<T> {
-    pub fn new(bits_len: u32) -> Self {
+    pub fn new(bits_len: usize) -> Self {
         Self {
             bits_len,
             _phantom: PhantomData,

@@ -218,7 +218,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
         None => return Ok(TonAddress::new(wc, TonHash::from_slice(addr)?)),
     };
 
-    if bits_len < anycast.rewrite_pfx.len {
+    if bits_len < anycast.rewrite_pfx.len as u32 {
         let err_msg = format!("rewrite_pfx has {} bits, but address has only {bits_len} bits", anycast.rewrite_pfx.len);
         let ext_addr_str = format!("address: {msg_address:?}, anycast: {:?}", anycast);
         raise_address_error(&ext_addr_str, err_msg)?
@@ -226,7 +226,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 
     let new_prefix = anycast.rewrite_pfx.as_slice();
 
-    let bits = anycast.rewrite_pfx.len as usize;
+    let bits = anycast.rewrite_pfx.len;
     let mut addr_mutable = addr.to_vec();
 
     if !rewrite_bits(new_prefix, 0, addr_mutable.as_mut_slice(), 0, bits) {

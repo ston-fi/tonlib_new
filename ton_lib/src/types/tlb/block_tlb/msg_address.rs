@@ -65,7 +65,7 @@ impl TLBType for MsgAddressIntVar {
         let anycast = TLBType::read(parser)?;
         let addr_bits_len = ConstLen::<u32>::new(9).read(parser)?;
         let workchain = TLBType::read(parser)?;
-        let address = parser.read_bits(addr_bits_len)?;
+        let address = parser.read_bits(addr_bits_len as usize)?;
         Ok(Self {
             anycast,
             addr_bits_len,
@@ -78,7 +78,7 @@ impl TLBType for MsgAddressIntVar {
         self.anycast.write(builder)?;
         ConstLen::<u32>::new(9).write(builder, &self.addr_bits_len)?;
         self.workchain.write(builder)?;
-        builder.write_bits(&self.address, self.addr_bits_len)?;
+        builder.write_bits(&self.address, self.addr_bits_len as usize)?;
         Ok(())
     }
 }
@@ -107,7 +107,7 @@ pub struct Anycast {
 impl Anycast {
     pub fn new(depth: u32, rewrite_pfx: Vec<u8>) -> Self {
         Self {
-            rewrite_pfx: VarLenBits::new(rewrite_pfx, depth),
+            rewrite_pfx: VarLenBits::new(rewrite_pfx, depth as usize),
         }
     }
 }
