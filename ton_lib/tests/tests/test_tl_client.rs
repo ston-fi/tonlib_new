@@ -1,19 +1,19 @@
 use std::str::FromStr;
 use tokio_test::assert_ok;
-use ton_lib::clients::tonlib::TLClient;
+use ton_lib::clients::tonlib::{TLClient, TLClientDefault};
 
 use crate::tests::utils::{get_net_conf, init_logging};
 use ton_lib::cell::build_parse::parser::CellParser;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
-use ton_lib::clients::tonlib::tl_api::tl_response::TLResponse::TLFullAccountState;
-use ton_lib::clients::tonlib::tl_api::tl_types::{TLAccountState, TLTxId};
+use ton_lib::clients::tonlib::tl_api::tl_types::TLAccountState;
+use ton_lib::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
 use ton_lib::types::tlb::tlb_type::TLBType;
 use ton_lib::types::ton_address::TonAddress;
 
 #[tokio::test]
 async fn test_tl_client_default() -> anyhow::Result<()> {
-    let tl_client = make_tl_client_default(true, false).await?;
+    let tl_client = make_tl_client_default(true, true).await?;
 
     let mc_info = tl_client.get_mc_info().await?;
     assert_ne!(mc_info.last.seqno, 0);
@@ -34,7 +34,7 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     // ===================
 
     // https://tonviewer.com/EQCGScrZe1xbyWqWDvdI6mzP-GAcAWFv6ZXuaJOuSqemxku4
-    let lib_id = TonHash::from_hex("A9338ECD624CA15D37E4A8D9BF677DDC9B84F0E98F05F2FB84C7AFE332A281B4")?;
+    let lib_id = TonHash::from_str("A9338ECD624CA15D37E4A8D9BF677DDC9B84F0E98F05F2FB84C7AFE332A281B4")?;
     let lib_result = tl_client.get_libs(vec![lib_id.clone()]).await?;
     assert_eq!(lib_result.result.len(), 1);
     assert_eq!(lib_result.result[0].hash.as_slice(), lib_id.as_slice());
@@ -54,13 +54,25 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     let usdt_state_raw = tl_client.get_account_state_raw(&usdt_master).await?;
     assert_eq!(TonCell::from_boc(&usdt_state_raw.code)?, expected_code);
 
-    let mut usdt_state_raw_by_tx =
-        tl_client.get_account_state_raw_by_tx(&usdt_master, usdt_state_raw.last_tx_id.clone()).await?;
+    let mut usdt_by_tx = tl_client.get_account_state_raw_by_tx(&usdt_master, usdt_state_raw.last_tx_id.clone()).await?;
     // these field doesn't relate to the state
-    usdt_state_raw_by_tx.sync_utime = usdt_state_raw.sync_utime;
-    usdt_state_raw_by_tx.block_id = usdt_state_raw.block_id.clone();
-    assert_eq!(usdt_state_raw, usdt_state_raw_by_tx);
+    usdt_by_tx.sync_utime = usdt_state_raw.sync_utime;
+    usdt_by_tx.block_id = usdt_state_raw.block_id.clone();
+    assert_eq!(usdt_state_raw, usdt_by_tx);
     // =========================
+
+    // === get_txs ===
+    let raw_txs = tl_client.get_txs(&usdt_master, usdt_state_raw.last_tx_id.clone()).await?;
+    assert!(!raw_txs.txs.is_empty());
+    assert_eq!(raw_txs.txs[0].tx_id, usdt_state_raw.last_tx_id);
+
+    let raw_txs_v2 = tl_client.get_txs_v2(&usdt_master, usdt_state_raw.last_tx_id.clone(), 1, false).await?;
+    assert!(!raw_txs_v2.txs.is_empty());
+    assert_eq!(raw_txs_v2.txs[0].tx_id, usdt_state_raw.last_tx_id);
+
+    // let raw_txs_v2 = tl_client.get_txs_v2(&usdt_master, TLTxId::ZERO, 10, false).await?;
+    // assert!(raw_txs_v2.txs.len() > 0);
+    // =================
 
     Ok(())
 }
@@ -70,5 +82,8 @@ pub async fn make_tl_client_default(mainnet: bool, archive_only: bool) -> anyhow
     log::info!("initializing tl_client with mainnet={mainnet}...");
     let net_conf = get_net_conf(mainnet)?;
     let config = ton_lib::clients::tonlib::TLClientConfig::new(net_conf, archive_only);
-    Ok(ton_lib::clients::tonlib::TLClientDefault::new(config).await?)
+    let client = TLClientDefault::new(config).await?;
+    sys_tonlib_set_verbosity_level(0);
+    sys_tonlib_client_set_verbosity_level(0);
+    Ok(client)
 }

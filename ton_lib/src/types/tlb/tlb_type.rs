@@ -1,6 +1,7 @@
 use crate::cell::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
+use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
@@ -39,17 +40,13 @@ pub trait TLBType: Sized {
         Self::from_cell(BOC::from_bytes(boc)?.single_root()?.deref())
     }
 
-    fn from_boc_hex<T: AsRef<[u8]>>(boc_hex: T) -> Result<Self, TonlibError> {
-        Self::from_boc(&hex::decode(boc_hex.as_ref())?)
-    }
+    fn from_boc_hex(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&hex::decode(boc)?) }
 
-    fn from_boc_b64<T: AsRef<[u8]>>(boc_b64: T) -> Result<Self, TonlibError> {
-        Self::from_boc(&BASE64_STANDARD.decode(boc_b64.as_ref())?)
-    }
+    fn from_boc_b64(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&BASE64_STANDARD.decode(boc)?) }
 
     /// Writing
     fn to_cell(&self) -> Result<TonCell, TonlibError> {
-        let mut builder = CellBuilder::new();
+        let mut builder = CellBuilder::new_with_type(self.cell_type());
         self.write(&mut builder)?;
         builder.build()
     }
@@ -103,6 +100,11 @@ pub trait TLBType: Sized {
         }
         Ok(())
     }
+
+    // when we write an object, we have to idea of it's type - including writing TonCell itself
+    // so for all types except TonCell & TonCellRef we return Ordinary, but for them we return proper type
+    // it's required to build proper BOC
+    fn cell_type(&self) -> CellType { CellType::Ordinary }
 }
 
 #[derive(Debug, Clone, PartialEq)]

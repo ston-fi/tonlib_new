@@ -1,5 +1,4 @@
 use crate::emulators::tvm_emulator::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm_emulator::method_id::TVMMethodId;
 use crate::emulators::tvm_emulator::TVMEmulator;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::types::tlb::block_tlb::tvm::VMStack;
@@ -10,7 +9,7 @@ use std::ops::Deref;
 use std::str::FromStr;
 use tokio_test::assert_ok;
 
-const BC_CONFIG_HEX: &'static str = include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex");
+const BC_CONFIG_HEX: &str = include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex");
 
 #[test]
 fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {

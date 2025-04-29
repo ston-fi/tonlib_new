@@ -36,13 +36,13 @@ pub enum TonlibError {
 
     // boc
     #[error("CellType: Unexpected CellType tag: {0}")]
-    CellTypeTag(u8),
+    BOCWrongTypeTag(u8),
     #[error("BOCError: Expected 1 root, got {0}")]
-    BocSingleRoot(usize),
+    BOCSingleRoot(usize),
     #[error("BOCError: Unexpected magic: {0}")]
-    BocWrongMagic(u32),
+    BOCWrongMagic(u32),
     #[error("BOCError: {0}")]
-    BocCustom(String),
+    BOCCustom(String),
 
     // tlb
     #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={bits_exp}, left_bits={bits_left}")]

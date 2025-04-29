@@ -98,10 +98,7 @@ impl CellBuilder {
 
     pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonlibError> {
         self.write_bits(&cell.data, cell.data_bits_len)?;
-        for i in 0..cell.refs.len() {
-            self.write_ref(cell.refs[i].clone())?;
-        }
-        Ok(())
+        cell.refs.iter().cloned().try_for_each(|r| self.write_ref(r))
     }
 
     /// Ranges are handled like [start; end) - the same as iterators in c++
@@ -443,7 +440,7 @@ mod tests {
         assert_eq!(cell0.data_bits_len, 17);
         assert_eq!(cell0.data, vec![0b1000_0000, 0b1000_0001, 0b1000_0000]);
 
-        let exp_hash = TonHash::from_hex("5d64a52c76eb32a63a393345a69533f095f945f2d30f371a1f323ac10102c395")?;
+        let exp_hash = TonHash::from_str("5d64a52c76eb32a63a393345a69533f095f945f2d30f371a1f323ac10102c395")?;
         for level in 0..4 {
             assert_eq!(cell0.hash_for_level(LevelMask::new(level)), &exp_hash);
             assert_eq!(cell0.meta.depths[level as usize], 3);
@@ -462,7 +459,7 @@ mod tests {
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         let lib_cell = assert_ok!(builder.build());
 
-        let expected_hash = TonHash::from_hex("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;
+        let expected_hash = TonHash::from_str("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;
         for level in 0..4 {
             assert_eq!(lib_cell.hash_for_level(LevelMask::new(level)), &expected_hash);
             assert_eq!(lib_cell.meta.depths[level as usize], 0);

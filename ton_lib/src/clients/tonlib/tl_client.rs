@@ -4,8 +4,8 @@ use crate::clients::tonlib::clients_impl::TLConnection;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::clients::tonlib::tl_api::tl_types::{
-    TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards,
-    TLBlocksTxs, TLConfigInfo, TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
+    TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
+    TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
 };
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
@@ -64,7 +64,7 @@ pub trait TLClient: Send + Sync + Clone + 'static {
         let req = TLRequest::GetAccountState {
             account_address: address.into(),
         };
-        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
+        Ok(*unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)?)
     }
 
     async fn get_account_state_raw(&self, address: &TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
@@ -86,15 +86,15 @@ pub trait TLClient: Send + Sync + Clone + 'static {
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_txs_raw(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
+    async fn get_txs(&self, address: &TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TonlibError> {
         let req = TLRequest::RawGetTxs {
             account_address: address.into(),
-            from_transaction_id: from_tx_id.clone(),
+            from_transaction_id: from_tx,
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
-    async fn get_txs_raw_v2(
+    async fn get_txs_v2(
         &self,
         address: &TonAddress,
         from_tx: TLTxId,

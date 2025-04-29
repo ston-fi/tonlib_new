@@ -24,15 +24,15 @@
 //     }
 // }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test() {
-        let vec = Vec::from("123");
-        let hex = "ab16d92db235c410bb794753493b578d3e456e31bad97a8dc46bf6422c36e96d";
-        let bytes = hex::decode(hex).unwrap();
-        let b64 = base64::encode(&bytes);
-        println!("{}", b64);
-        assert!(false)
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     #[test]
+//     fn test() {
+//         let vec = Vec::from("123");
+//         let hex = "ab16d92db235c410bb794753493b578d3e456e31bad97a8dc46bf6422c36e96d";
+//         let bytes = hex::decode(hex).unwrap();
+//         let b64 = base64::encode(&bytes);
+//         println!("{}", b64);
+//         assert!(false)
+//     }
+// }

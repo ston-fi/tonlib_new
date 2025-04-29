@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::VMStack;
 use crate::types::tlb::tlb_type::TLBType;

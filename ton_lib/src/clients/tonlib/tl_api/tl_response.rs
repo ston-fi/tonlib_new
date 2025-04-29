@@ -37,7 +37,7 @@ pub enum TLResponse {
     TLRawExtMessageInfo(TLRawExtMessageInfo),
     // tonlib_api.tl_api, line 90
     #[serde(rename = "fullAccountState")]
-    TLFullAccountState(TLFullAccountState),
+    TLFullAccountState(Box<TLFullAccountState>),
     // tonlib_api.tl_api, line 167
     #[serde(rename = "tvm.cell")]
     TLTvmCell(()), // Unsupported

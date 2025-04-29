@@ -90,7 +90,7 @@ mod tests {
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::tlb_type::TLBType;
     use crate::types::ton_address::TonAddress;
-    use std::str::FromStr;
+
     use tokio_test::assert_ok;
 
     #[test]

@@ -13,7 +13,7 @@ impl BOCRaw {
             let mut refs = Vec::with_capacity(cell_raw.refs_positions.len());
             for ref_index in &cell_raw.refs_positions {
                 if *ref_index <= cell_index {
-                    return Err(TonlibError::BocCustom("refs to previous cells are not supported".to_string()));
+                    return Err(TonlibError::BOCCustom("refs to previous cells are not supported".to_string()));
                 }
                 refs.push(cells[num_cells - 1 - ref_index].clone());
             }

@@ -20,7 +20,7 @@ pub struct Block {
     pub extra: BlockExtra,
 }
 
-const GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
+const _GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x9bc7a987, bits_len = 32)]

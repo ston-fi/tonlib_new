@@ -79,6 +79,13 @@ pub struct TLTxId {
     pub hash: TonHash,
 }
 
+impl TLTxId {
+    pub const ZERO: TLTxId = TLTxId {
+        lt: 0,
+        hash: TonHash::ZERO,
+    };
+}
+
 // tonlib_api.tl_api, line 50
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlockId {
@@ -139,13 +146,14 @@ pub struct TLRawMessage {
 
 // tonlib_api.tl_api, line 55
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLRawTransaction {
+pub struct TLRawTx {
     pub address: TLAccountAddress,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub utime: i64,
     #[serde(with = "Base64Standard")]
     pub data: Vec<u8>,
-    pub transaction_id: TLTxId,
+    #[serde(rename = "transaction_id")]
+    pub tx_id: TLTxId,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub fee: i64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -160,8 +168,10 @@ pub struct TLRawTransaction {
 // tonlib_api.tl_api, line 56
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLRawTxs {
-    pub transactions: Vec<TLRawTransaction>,
-    pub previous_transaction_id: TLTxId,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLRawTx>,
+    #[serde(rename = "previous_transaction_id")]
+    pub prev_tx_id: TLTxId,
 }
 // tonlib_api.tl_api, line 58
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -491,7 +501,8 @@ pub struct TLBlocksTxs {
     pub id: TLBlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
-    pub transactions: Vec<TLBlocksShortTxId>,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLBlocksShortTxId>,
 }
 
 // tonlib_api.tl_api, line 224
@@ -500,18 +511,19 @@ pub struct TLBlocksTransactionsExt {
     pub id: TLBlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
-    pub transactions: Vec<TLRawTransaction>,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLRawTx>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
-pub(crate) struct TLConfigInfo {
-    pub(crate) config: TLTvmCell,
+pub struct TLConfigInfo {
+    pub config: TLTvmCell,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
-pub(crate) struct TLTvmCell {
+pub struct TLTvmCell {
     #[serde(with = "Base64Standard")]
-    pub(crate) bytes: Vec<u8>,
+    pub bytes: Vec<u8>,
 }
 
 // tonlib_api.tl_api, line 225

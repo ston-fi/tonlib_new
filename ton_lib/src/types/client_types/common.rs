@@ -29,7 +29,7 @@ mod liteapi_serde {
     use ton_liteapi::tl::common::Int256;
 
     impl From<Int256> for TonHash {
-        fn from(value: Int256) -> Self { TonHash::from_slice_sized(&value.0) }
+        fn from(value: Int256) -> Self { TonHash::from_slice(&value.0) }
     }
 
     impl From<TonHash> for Int256 {
