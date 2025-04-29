@@ -7,10 +7,12 @@ use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::tvm::{VMCellSlice, VMStack};
 use num_bigint::BigInt;
 use std::collections::HashMap;
+use std::fmt::{Debug, Display, Formatter};
+use std::ops::Deref;
 use std::sync::Arc;
 use ton_lib_macros::TLBDerive;
 
-#[derive(Clone, Debug, TLBDerive)]
+#[derive(Clone, TLBDerive)]
 pub enum VMStackValue {
     Null(VMStackNull),
     TinyInt(VMTinyInt),
@@ -33,8 +35,9 @@ pub struct VMTinyInt {
     pub value: i64,
 }
 
+// vm_stk_int#0201_ value:int257 = VmStackValue; means 0x0201 without latest bit ==> 0000001000000000
 #[derive(Debug, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x0201, bits_len = 16)]
+#[tlb_derive(prefix = 0x0100, bits_len = 15)]
 pub struct VMInt {
     #[tlb_derive(bits_len = 257)]
     pub value: BigInt,
@@ -204,4 +207,24 @@ pub struct VMTupleRefSingle {
 pub struct VMTupleRefAny {
     #[tlb_derive(adapter = "TLBRef")]
     pub tuple_ref: Arc<VMTuple>,
+}
+
+impl Debug for VMStackValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
+}
+
+impl Display for VMStackValue {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VMStackValue::Null(_) => write!(f, "Null"),
+            VMStackValue::TinyInt(v) => write!(f, "TinyInt({})", v.value),
+            VMStackValue::Int(v) => write!(f, "Int({})", v.value),
+            VMStackValue::Nan(_) => write!(f, "Nan"),
+            VMStackValue::Cell(v) => write!(f, "Cell({})", v.value.deref()),
+            VMStackValue::CellSlice(v) => write!(f, "CellSlice({})", v.value.deref()),
+            VMStackValue::Builder(_) => write!(f, "Builder"),
+            VMStackValue::Cont(_) => write!(f, "Cont"),
+            VMStackValue::Tuple(_) => write!(f, "Tuple"),
+        }
+    }
 }

@@ -17,13 +17,12 @@ pub struct VMCellSlice {
 }
 
 impl VMCellSlice {
-    pub fn from_cell(cell: TonCell) -> Self {
-        let cell_original = cell.clone().into_ref();
+    pub fn from_cell(cell: TonCellRef) -> Self {
         let end_bit = cell.data_bits_len;
         let end_ref = cell.refs.len();
         Self {
-            value: cell.into_ref(),
-            cell_original,
+            value: cell.clone(),
+            cell_original: cell,
             start_bit: 0,
             end_bit,
             start_ref: 0,

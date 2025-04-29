@@ -48,10 +48,9 @@ impl TLBType for TonCell {
 
 impl TLBType for TonCellRef {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_next_ref().cloned() }
-
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> { builder.write_ref(self.clone()) }
-
     fn cell_hash(&self) -> Result<TonHash, TonlibError> { Ok(self.hash().clone()) }
+    fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.clone()) }
 }
 
 impl TLBType for TonHash {

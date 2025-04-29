@@ -60,43 +60,35 @@ pub trait TLClient: Send + Sync + Clone + 'static {
         self.lookup_block(1, block_id, 0, 0).await
     }
 
-    async fn get_account_state_raw(&self, address: TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
+    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
+        let req = TLRequest::GetAccountState {
+            account_address: address.into(),
+        };
+        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
+    }
+
+    async fn get_account_state_raw(&self, address: &TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
         let req = TLRequest::RawGetAccountState {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
+            account_address: address.into(),
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
     async fn get_account_state_raw_by_tx(
         &self,
-        address: TonAddress,
+        address: &TonAddress,
         tx_id: TLTxId,
     ) -> Result<TLRawFullAccountState, TonlibError> {
         let req = TLRequest::RawGetAccountStateByTx {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
+            account_address: address.into(),
             transaction_id: tx_id,
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
-        let req = TLRequest::GetAccountState {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
-        };
-        unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)
-    }
-
     async fn get_txs_raw(&self, address: &TonAddress, from_tx_id: &TLTxId) -> Result<TLRawTxs, TonlibError> {
         let req = TLRequest::RawGetTxs {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
+            account_address: address.into(),
             from_transaction_id: from_tx_id.clone(),
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
@@ -115,9 +107,7 @@ pub trait TLClient: Send + Sync + Clone + 'static {
             )));
         }
         let req = TLRequest::RawGetTxsV2 {
-            account_address: TLAccountAddress {
-                account_address: address.to_hex(),
-            },
+            account_address: address.into(),
             from_transaction_id: from_tx.clone(),
             count: count as u32,
             try_decode_messages: try_decode_msg,

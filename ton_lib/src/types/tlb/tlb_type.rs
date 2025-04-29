@@ -1,7 +1,7 @@
 use crate::cell::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCell;
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;
@@ -53,6 +53,8 @@ pub trait TLBType: Sized {
         self.write(&mut builder)?;
         builder.build()
     }
+
+    fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.to_cell()?.into_ref()) }
 
     fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         let mut builder = CellBuilder::new();

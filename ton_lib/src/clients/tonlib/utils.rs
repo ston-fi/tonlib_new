@@ -5,9 +5,9 @@ use crate::clients::lite::lite_client::LiteClient;
 use crate::clients::tonlib::tl_api::tl_types::TLKeyStoreType;
 use crate::clients::tonlib::tl_client_config::TLClientConfig;
 use crate::errors::TonlibError;
+use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::tlb::tlb_type::TLBType;
-use crate::utils::tonlib_set_verbosity_level;
 use futures_util::future::join_all;
 use std::time::Duration;
 use ton_liteapi::tl::response::BlockData;
@@ -22,7 +22,7 @@ pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), Tonli
     if let TLKeyStoreType::Directory { directory } = &config.init_opts.keystore_type {
         std::fs::create_dir_all(directory)?
     }
-    tonlib_set_verbosity_level(config.tonlib_verbosity_level);
+    sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
     Ok(())
 }
 

@@ -16,7 +16,7 @@ impl<T: TLBType> TLBRef<T> {
     pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> { T::from_cell(parser.read_next_ref()?) }
 
     pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> {
-        builder.write_ref(val.to_cell()?.into_ref())
+        builder.write_ref(val.to_cell_ref()?)
     }
 }
 

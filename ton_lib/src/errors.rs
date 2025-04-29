@@ -1,5 +1,6 @@
 use hex::FromHexError;
 use num_bigint::{BigInt, BigUint};
+use std::env::VarError;
 use std::time::Duration;
 use thiserror::Error;
 use ton_liteapi::tl::request::Request;
@@ -89,6 +90,8 @@ pub enum TonlibError {
     TLWrongUsage(String),
 
     // TVM
+    #[error("TVMEmulatorCreationFailed: fail to create TVM emulator")]
+    TVMEmulatorCreationFailed,
     #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]
     TVMEmulatorSetFailed(&'static str),
     #[error("TVMEmulatorError: {0}")]
@@ -97,7 +100,7 @@ pub enum TonlibError {
     TVMResponseParseError(String),
 
     // TVMStack
-    #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {0}")]
+    #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]
     TVMStackWrongType(String, String),
     #[error("TVMStackError: stack is empty")]
     TVMStackEmpty,
@@ -137,6 +140,8 @@ pub enum TonlibError {
     ParseBigIntError(#[from] num_bigint::ParseBigIntError),
     #[error("{0}")]
     RecvError(#[from] tokio::sync::oneshot::error::RecvError),
+    #[error("{0}")]
+    VarError(#[from] VarError),
 }
 
 impl<T> From<TonlibError> for Result<T, TonlibError> {

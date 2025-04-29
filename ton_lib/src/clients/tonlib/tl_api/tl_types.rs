@@ -1,5 +1,6 @@
-use crate::cell::ton_hash::ton_hash_serde_b64;
-use crate::cell::ton_hash::vec_ton_hash_serde_b64;
+use crate::clients::tonlib::tl_api::serial::serde_ton_address_hex;
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_b64;
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_vec_b64;
 use crate::clients::tonlib::tl_api::Base64Standard;
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -53,7 +54,20 @@ pub struct TLOptionsInfo {
 // tonlib_api.tl_api, line 44
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLAccountAddress {
-    pub account_address: String,
+    #[serde(rename = "account_address", with = "serde_ton_address_hex")]
+    pub address: TonAddress,
+}
+
+impl From<&TonAddress> for TLAccountAddress {
+    fn from(address: &TonAddress) -> Self {
+        TLAccountAddress {
+            address: address.clone(),
+        }
+    }
+}
+
+impl From<TLAccountAddress> for TonAddress {
+    fn from(tl_address: TLAccountAddress) -> Self { tl_address.address }
 }
 
 // tonlib_api.tl_api, line 48
@@ -61,7 +75,7 @@ pub struct TLAccountAddress {
 pub struct TLTxId {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
-    #[serde(with = "ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_b64")]
     pub hash: TonHash,
 }
 
@@ -390,7 +404,7 @@ pub struct TLSmcLibraryResult {
 pub enum TLSmcLibraryQueryExt {
     #[serde(rename = "smc.libraryQueryExt.one")]
     One {
-        #[serde(with = "ton_hash_serde_b64")]
+        #[serde(with = "serde_ton_hash_b64")]
         hash: TonHash,
     },
 
@@ -407,9 +421,9 @@ pub enum TLSmcLibraryQueryExt {
 pub struct TLSmcLibraryResultExt {
     #[serde(with = "Base64Standard")]
     pub dict_boc: Vec<u8>,
-    #[serde(with = "vec_ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_vec_b64")]
     pub libs_ok: Vec<TonHash>,
-    #[serde(with = "vec_ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_vec_b64")]
     pub libs_not_found: Vec<TonHash>,
 }
 

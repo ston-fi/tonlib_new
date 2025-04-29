@@ -1,5 +1,5 @@
-use crate::cell::ton_hash::vec_ton_hash_serde_b64;
 use crate::cell::ton_hash::TonHash;
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_vec_b64;
 use crate::clients::tonlib::tl_api::tl_types::{
     TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
@@ -181,7 +181,7 @@ pub enum TLRequest {
     // tonlib_api.tl, line 314
     #[serde(rename = "smc.getLibraries")]
     SmcGetLibraries {
-        #[serde(with = "vec_ton_hash_serde_b64")]
+        #[serde(with = "serde_ton_hash_vec_b64")]
         library_list: Vec<TonHash>,
     },
 

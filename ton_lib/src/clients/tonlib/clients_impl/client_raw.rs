@@ -48,11 +48,11 @@ unsafe impl Sync for TLClientRaw {}
 mod tests {
     use crate::clients::tonlib::clients_impl::client_raw::TLClientRaw;
     use crate::clients::tonlib::tl_api::tl_request::TLRequest;
-    use crate::utils::tonlib_set_verbosity_level;
+    use crate::sys_utils::sys_tonlib_set_verbosity_level;
 
     #[test]
     fn it_executes_functions() -> anyhow::Result<()> {
-        tonlib_set_verbosity_level(1);
+        sys_tonlib_set_verbosity_level(1);
         let client = TLClientRaw::new("test".to_string());
         client.send(&TLRequest::GetLogVerbosityLevel {}, "test2")?;
         Ok(())

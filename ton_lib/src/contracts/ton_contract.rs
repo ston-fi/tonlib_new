@@ -23,8 +23,8 @@ pub trait TonContract<T: TLClient>: Sized {
     async fn update_state(&mut self, tx_id: Option<TLTxId>) -> Result<(), TonlibError> {
         let address = self.get_address().clone();
         let raw_account = match tx_id {
-            Some(tx_id) => self.get_client().get_account_state_raw_by_tx(address, tx_id).await?,
-            None => self.get_client().get_account_state_raw(address).await?,
+            Some(tx_id) => self.get_client().get_account_state_raw_by_tx(&address, tx_id).await?,
+            None => self.get_client().get_account_state_raw(&address).await?,
         };
         self.set_state(raw_account);
         Ok(())
