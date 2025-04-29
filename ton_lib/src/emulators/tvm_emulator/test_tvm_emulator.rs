@@ -27,7 +27,7 @@ fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {
 
     let mut emulator = TVMEmulator::new(master_code, master_data)?;
     emulator.set_c7(&c7)?;
-    let response = emulator.run_get_method(&method, &stack.to_boc(false)?)?;
+    let response = emulator.run_method(method, &stack.to_boc(false)?)?;
 
     let mut result = response.into_result()?;
     let wallet_address = TonAddress::from_cell(result.stack.pop_cell_slice()?.deref())?;

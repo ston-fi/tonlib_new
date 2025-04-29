@@ -3,7 +3,7 @@ mod test_tvm_emulator;
 
 use crate::emulators::tvm_emulator::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm_emulator::method_id::TVMMethodId;
-use crate::emulators::tvm_emulator::tvm_response::{TVMRunGetMethodResponse, TVMSendIntMsgResponse};
+use crate::emulators::tvm_emulator::tvm_response::{TVMRunMethodResponse, TVMSendIntMsgResponse};
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -104,19 +104,16 @@ impl TVMEmulator {
         Ok(serde_json::from_str(&json_str)?)
     }
 
-    pub fn run_get_method<T: AsRef<[u8]>>(
-        &mut self,
-        method: &TVMMethodId,
-        stack_boc: T,
-    ) -> Result<TVMRunGetMethodResponse, TonlibError> {
+    pub fn run_method<M: Into<TVMMethodId>, T: AsRef<[u8]>>(&mut self, method: M, stack_boc: T) -> Result<TVMRunMethodResponse, TonlibError> {
+        let tvm_method = method.into();
         let stack_boc_ref = stack_boc.as_ref();
-        log::trace!("[TVMEmulator][run_get_method]: method: {method}, stack: {stack_boc_ref:?}");
+        log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack: {stack_boc_ref:?}");
         let stack = CString::new(STANDARD.encode(stack_boc_ref))?;
         let json_str = unsafe {
-            let c_str = tvm_emulator_run_get_method(self.ptr, method.to_id(), stack.into_raw());
+            let c_str = tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.into_raw());
             convert_emulator_response(c_str)?
         };
-        log::trace!("[TVMEmulator][run_get_method]: method: {method}, stack_boc: {stack_boc_ref:?}, rsp: {json_str}");
+        log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc_ref:?}, rsp: {json_str}");
         Ok(serde_json::from_str(&json_str)?)
     }
 }

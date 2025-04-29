@@ -78,7 +78,7 @@ impl TVMRunGetMethodSuccess {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct TVMRunGetMethodResponse {
+pub struct TVMRunMethodResponse {
     success: bool,
     vm_log: Option<String>,
     vm_exit_code: Option<i32>,
@@ -88,7 +88,7 @@ pub struct TVMRunGetMethodResponse {
     error: Option<String>,
 }
 
-impl TVMRunGetMethodResponse {
+impl TVMRunMethodResponse {
     pub fn into_result(self) -> Result<TVMRunGetMethodSuccess, TonlibError> {
         if !self.success {
             let error = unwrap_opt(self.error, "error is None")?;

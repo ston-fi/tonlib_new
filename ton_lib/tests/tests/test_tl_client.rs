@@ -1,5 +1,5 @@
 use tokio_test::assert_ok;
-use ton_lib::clients::tonlib::tl_client::TLClient;
+use ton_lib::clients::tonlib::TLClient;
 
 use crate::tests::utils::{get_net_conf, init_logging};
 use ton_lib::cell::build_parse::parser::CellParser;
@@ -19,11 +19,11 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     let block = tl_client.lookup_mc_block(mc_info.last.seqno - 100).await?;
     assert_eq!(block.seqno, mc_info.last.seqno - 100);
 
-    let config = tl_client.get_config_all(0).await?;
-    assert_ok!(TonCell::from_boc(&config.config.bytes));
+    let config = tl_client.get_config_boc_all(0).await?;
+    assert_ok!(TonCell::from_boc(&config));
 
-    let config = tl_client.get_config_param(0, 34).await?;
-    let cell = assert_ok!(TonCell::from_boc(&config.config.bytes));
+    let config = tl_client.get_config_boc_param(0, 34).await?;
+    let cell = assert_ok!(TonCell::from_boc(&config));
     let mut parser = CellParser::new(&cell);
     let value: u8 = TLBType::read(&mut parser)?;
     assert_eq!(value, 0x12);
@@ -42,6 +42,6 @@ pub async fn make_tl_client_default(mainnet: bool, archive_only: bool) -> anyhow
     init_logging();
     log::info!("initializing tl_client with mainnet={mainnet}...");
     let net_conf = get_net_conf(mainnet)?;
-    let config = ton_lib::clients::tonlib::tl_client_config::TLClientConfig::new(net_conf, archive_only);
-    Ok(ton_lib::clients::tonlib::clients_impl::TLClientDefault::new(config).await?)
+    let config = ton_lib::clients::tonlib::TLClientConfig::new(net_conf, archive_only);
+    Ok(ton_lib::clients::tonlib::TLClientDefault::new(config).await?)
 }

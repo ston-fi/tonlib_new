@@ -274,13 +274,13 @@ pub trait TLClient: Send + Sync + Clone + 'static {
         unwrap_tl_response!(self.exec(&req).await?, TLBlocksHeader)
     }
 
-    async fn get_config_param(&self, mode: u32, param: u32) -> Result<TLConfigInfo, TonlibError> {
+    async fn get_config_boc_param(&self, mode: u32, param: u32) -> Result<Vec<u8>, TonlibError> {
         let req = TLRequest::GetConfigParam { mode, param };
-        unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)
+        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
     }
-    //
-    async fn get_config_all(&self, mode: u32) -> Result<TLConfigInfo, TonlibError> {
+    // TODO find out about mode. Use 0 by default - it works well
+    async fn get_config_boc_all(&self, mode: u32) -> Result<Vec<u8>, TonlibError> {
         let req = TLRequest::GetConfigAll { mode };
-        unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)
+        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
     }
 }

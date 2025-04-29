@@ -490,14 +490,14 @@ pub struct TLBlocksTransactionsExt {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
-pub struct TLConfigInfo {
-    pub config: TLTvmCell,
+pub(crate) struct TLConfigInfo {
+    pub(crate) config: TLTvmCell,
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TLTvmCell {
+pub(crate) struct TLTvmCell {
     #[serde(with = "Base64Standard")]
-    pub bytes: Vec<u8>,
+    pub(crate) bytes: Vec<u8>,
 }
 
 // tonlib_api.tl_api, line 225

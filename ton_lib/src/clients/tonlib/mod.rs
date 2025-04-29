@@ -1,9 +1,16 @@
 #[cfg(feature = "sys")]
-pub mod clients_impl;
+mod clients_impl;
 pub mod tl_api;
-pub mod tl_callback;
+mod tl_callback;
 #[cfg(feature = "sys")]
-pub mod tl_client;
-pub mod tl_client_config;
+mod tl_client;
+mod tl_client_config;
 #[cfg(feature = "sys")]
 pub mod utils;
+
+#[cfg(feature = "sys")]
+pub use clients_impl::*;
+pub use tl_callback::*;
+#[cfg(feature = "sys")]
+pub use tl_client::*;
+pub use tl_client_config::*;

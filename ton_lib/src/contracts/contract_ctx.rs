@@ -1,5 +1,5 @@
 use crate::clients::tonlib::tl_api::tl_types::{TLRawFullAccountState, TLTxId};
-use crate::clients::tonlib::tl_client::TLClient;
+use crate::clients::tonlib::TLClient;
 use crate::contracts::ton_contract::TonContract;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;

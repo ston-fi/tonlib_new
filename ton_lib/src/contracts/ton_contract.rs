@@ -1,6 +1,6 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::clients::tonlib::tl_api::tl_types::{TLRawFullAccountState, TLTxId};
-use crate::clients::tonlib::tl_client::TLClient;
+use crate::clients::tonlib::TLClient;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::account::{Account, AccountState, AccountStateActive, MaybeAccount};
 use crate::types::tlb::block_tlb::coins::Coins;
