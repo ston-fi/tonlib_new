@@ -10,6 +10,7 @@ pub struct TonContractState<T: TLClient> {
     client: T,
 }
 
+#[async_trait::async_trait]
 impl<T: TLClient> TonContract<T> for TonContractState<T> {
     async fn new(address: TonAddress, client: T, tx_id: Option<TLTxId>) -> Result<Self, TonlibError> {
         let mut contract = Self {

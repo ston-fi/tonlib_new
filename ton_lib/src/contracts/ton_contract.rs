@@ -7,6 +7,7 @@ use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::ton_address::TonAddress;
 
+#[async_trait::async_trait]
 pub trait TonContract<T: TLClient>: Sized {
     // init contract with
     async fn new(address: TonAddress, client: T, tx_id: Option<TLTxId>) -> Result<Self, TonlibError>;
