@@ -1,9 +1,6 @@
-#[cfg(test)]
-mod test_tvm_emulator;
-
-use crate::emulators::tvm_emulator::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm_emulator::method_id::TVMMethodId;
-use crate::emulators::tvm_emulator::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
+use crate::emulators::tvm::c7_register::TVMEmulatorC7;
+use crate::emulators::tvm::method_id::TVMMethodId;
+use crate::emulators::tvm::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -13,11 +10,6 @@ use tonlib_sys::{
     tvm_emulator_send_internal_message, tvm_emulator_set_c7, tvm_emulator_set_debug_enabled,
     tvm_emulator_set_gas_limit, tvm_emulator_set_libraries,
 };
-
-pub mod c7_register;
-pub mod method_id;
-pub mod tvm_response;
-pub mod utils;
 
 #[derive(Debug)]
 pub struct TVMEmulator {
