@@ -14,6 +14,7 @@ use crate::clients::tonlib::tl_callback::{TLCallback, TLCallbacksStore};
 use crate::clients::tonlib::tl_client::TLClient;
 use crate::clients::tonlib::tl_client_config::{LiteNodeFilter, TLClientConfig};
 use crate::errors::TonlibError;
+use crate::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
 use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
@@ -49,8 +50,10 @@ async fn new_connection_checked(
     config: &TLClientConfig,
     semaphore: Arc<Semaphore>,
 ) -> Result<TLConnection, TonlibError> {
-    loop {
+    let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
+        sys_tonlib_set_verbosity_level(0);
+        sys_tonlib_client_set_verbosity_level(0);
         match config.connection_check {
             LiteNodeFilter::Health => match conn.get_mc_info().await {
                 Ok(info) => match conn.get_block_header(info.last).await {
@@ -75,8 +78,11 @@ async fn new_connection_checked(
                     Err(err) => log::info!("Dropping connection to unhealthy node: {:?}", err),
                 }
             }
-        }
-    }
+        };
+    };
+    sys_tonlib_set_verbosity_level(1);
+    sys_tonlib_client_set_verbosity_level(1);
+    conn
 }
 
 async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {

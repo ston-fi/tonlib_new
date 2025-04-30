@@ -78,7 +78,15 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn make_tl_client_default(mainnet: bool, archive_only: bool) -> anyhow::Result<impl TLClient> {
+#[tokio::test]
+async fn test_tl_client_default_async_context() -> anyhow::Result<()> {
+    let tl_client = make_tl_client_default(true, true).await?;
+    let res = async { tl_client.get_mc_info().await }.await?;
+    assert_ne!(res.last.seqno, 0);
+    Ok(())
+}
+
+pub async fn make_tl_client_default(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClientDefault> {
     init_logging();
     log::info!("initializing tl_client with mainnet={mainnet}...");
     let net_conf = get_net_conf(mainnet)?;

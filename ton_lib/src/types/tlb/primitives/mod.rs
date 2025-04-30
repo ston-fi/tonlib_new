@@ -6,8 +6,7 @@ mod either;
 mod libs_dict;
 mod num;
 mod option;
-mod tlb_arc;
-mod tlb_box;
+mod tlb_ptr;
 
 pub use either::*;
 pub use libs_dict::*;

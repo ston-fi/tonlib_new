@@ -1,6 +1,8 @@
-mod var_len_num;
-mod var_len_vec;
-
+use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_cell_num::TonCellNum;
+use crate::errors::TonlibError;
+use crate::types::tlb::tlb_type::TLBType;
 use std::ops::{Deref, DerefMut};
 
 pub type VarLenBits<T, const BITS_LEN: usize> = VarLen<T, BITS_LEN, false>;
@@ -33,6 +35,40 @@ impl<T, const L: usize, const BL: bool> Deref for VarLen<T, L, BL> {
 
 impl<T, const L: usize, const BL: bool> DerefMut for VarLen<T, L, BL> {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.data }
+}
+
+// TonNum impl
+impl<T: TonCellNum, const L: usize, const LEN_IN_BYTES: bool> TLBType for VarLen<T, L, LEN_IN_BYTES> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
+        let len = parser.read_num(L)?;
+        let bits_len = if LEN_IN_BYTES { len * 8 } else { len };
+        let data = parser.read_num(bits_len)?;
+        Ok(Self { data, len })
+    }
+
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
+        builder.write_num(&self.len, L)?;
+        let bits_len = if LEN_IN_BYTES { self.len * 8 } else { self.len };
+        builder.write_num(&self.data, bits_len)?;
+        Ok(())
+    }
+}
+
+// Vec impl
+impl<const BITS_LEN_LEN: usize, const BL: bool> TLBType for VarLen<Vec<u8>, BITS_LEN_LEN, BL> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
+        let len = parser.read_num(BITS_LEN_LEN)?;
+        let bits_len = if BL { len * 8 } else { len };
+        let data = parser.read_bits(bits_len)?;
+        Ok(Self { data, len })
+    }
+
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
+        builder.write_num(&self.len, BITS_LEN_LEN)?;
+        let bits_len = if BL { self.len * 8 } else { self.len };
+        builder.write_bits(&self.data, bits_len)?;
+        Ok(())
+    }
 }
 
 #[cfg(test)]

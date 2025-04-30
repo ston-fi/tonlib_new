@@ -10,7 +10,9 @@ use crate::types::tlb::tlb_type::TLBType;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
-/// Contains dict itself: key part is in root cell already
+/// Contains dict itself, not 'present' marker in root cell
+/// Add TLBDict adapter to use in in TLB structs
+/// Consider using `Option<TonCellRef>` instead, if libraries itself are not important
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LibsDict(HashMap<TonHash, TonCellRef>);
 
