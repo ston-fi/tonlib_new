@@ -10,12 +10,12 @@ use std::ops::DerefMut;
 use std::sync::Arc;
 use tokio::sync::{Mutex, Semaphore};
 
-/// Simple client with many connectionse
+/// Simple client with many connections
 #[derive(Clone)]
 pub struct TLClientDefault(Arc<Inner>);
 
 impl TLClientDefault {
-    pub async fn new(mut config: TLClientConfig) -> Result<impl TLClient, TonlibError> {
+    pub async fn new(mut config: TLClientConfig) -> Result<Self, TonlibError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));

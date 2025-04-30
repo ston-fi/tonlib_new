@@ -60,6 +60,8 @@ pub enum TonlibError {
     TLBSnakeFormatUnsupportedBitsLen(u32),
     #[error("TLBDictWrongKeyLen: Wrong key_bits_len: exp={exp}, got={got} for key={key}")]
     TLBDictWrongKeyLen { exp: usize, got: usize, key: BigUint },
+    #[error("TLBDictEmpty: empty dict can't be written")]
+    TLBDictEmpty,
 
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),
@@ -97,7 +99,9 @@ pub enum TonlibError {
     #[error("TVMEmulatorError: {0}")]
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
-    TVMResponseParseError(String),
+    TVMEmulatorResponseParseError(String),
+    #[error("TVMEmulatorRunMethodError: {0}")]
+    TVMEmulatorRunMethodError(String),
 
     // TVMStack
     #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]

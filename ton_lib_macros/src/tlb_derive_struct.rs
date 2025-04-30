@@ -59,7 +59,7 @@ fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (
         let ident = field.ident.as_ref().unwrap();
         if let Some(adapter) = &field.attrs.adapter {
             let adapter_ident: TokenStream = syn::parse_str(adapter).unwrap();
-            read_tokens.push(quote!(let #ident = #adapter_ident.read(parser)?;));
+            read_tokens.push(quote!(let #ident = #adapter_ident.read(parser)?.into();));
             init_tokens.push(quote!(#ident,));
             write_tokens.push(quote!(#adapter_ident.write(builder, &self.#ident)?;));
             continue;

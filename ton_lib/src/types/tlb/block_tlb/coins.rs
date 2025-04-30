@@ -1,7 +1,10 @@
 use crate::errors::TonlibError;
+use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
+use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
+use crate::types::tlb::adapters::TLBDict;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use crate::types::tlb::primitives::LibsDict;
 use num_bigint::BigUint;
+use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 use ton_lib_macros::TLBDerive;
@@ -18,7 +21,8 @@ pub type Coins = Grams;
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct CurrencyCollection {
     pub grams: Grams,
-    pub other: LibsDict,
+    #[tlb_derive(adapter = "TLBDict::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
+    pub other: HashMap<u32, VarLenBytes<BigUint, 32>>,
 }
 
 impl Grams {
@@ -34,7 +38,7 @@ impl CurrencyCollection {
     pub fn new<T: Into<BigUint>>(grams: T) -> Self {
         Self {
             grams: Grams::new(grams),
-            other: LibsDict::default(),
+            other: Default::default(),
         }
     }
 }

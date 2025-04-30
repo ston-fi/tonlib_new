@@ -66,9 +66,9 @@ impl DictDataParser {
             }
             LabelType::Long => {
                 let prefix_len_len = self.remain_suffix_bit_len();
-                let prefix_len = parser.read_num::<usize>(prefix_len_len)?;
+                let prefix_len: usize = parser.read_num(prefix_len_len)?;
                 if prefix_len_len != 0 {
-                    let val = parser.read_num::<BigUint>(prefix_len)?;
+                    let val: BigUint = parser.read_num(prefix_len)?;
                     self.cur_key_prefix <<= prefix_len;
                     self.cur_key_prefix |= val;
                 }
