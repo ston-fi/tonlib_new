@@ -62,4 +62,23 @@ mod tests {
         assert_eq!(lib_ids, vec![expected_lib_id.clone()]);
         Ok(())
     }
+
+    #[test]
+    fn test_extract_lib_ids_stonfi_pton() -> Result<(), TonlibError> {
+        // https://tonviewer.com/EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S
+        let code = TonCell::from_boc_hex(
+            "b5ee9c7201010101002300084202d29017573b8132be742e9c02dabe2311fb3df9f077e661d3ee24d431058b8830",
+        )?;
+        let data = TonCell::from_boc_hex("b5ee9c7201010301005d000208000000000102084202cd88e6f3c2a9cf01bb003a2837ec0d92c19685ed1dbfffd94a545dcfdf0a14d900600168747470733a2f2f7374617469632e73746f6e2e66692f6a6574746f6e2f746f6e2d70726f78792d76322e6a736f6e")?;
+        let cells = vec![&code, &data];
+        let lib_ids = TonCellUtils::extract_lib_ids(cells)?.into_iter().collect::<HashSet<_>>();
+        assert_eq!(
+            lib_ids,
+            HashSet::from([
+                TonHash::from_str("CD88E6F3C2A9CF01BB003A2837EC0D92C19685ED1DBFFFD94A545DCFDF0A14D9")?,
+                TonHash::from_str("D29017573B8132BE742E9C02DABE2311FB3DF9F077E661D3EE24D431058B8830")?
+            ])
+        );
+        Ok(())
+    }
 }

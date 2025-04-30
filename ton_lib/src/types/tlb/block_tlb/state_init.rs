@@ -1,5 +1,6 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::ConstLen;
+use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::primitives::LibsDict;
 use ton_lib_macros::TLBDerive;
 
@@ -12,7 +13,8 @@ pub struct StateInit {
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    pub library: LibsDict,
+    #[tlb_derive(adapter = "TLBRef")]
+    pub library: Option<LibsDict>,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
@@ -28,7 +30,7 @@ impl StateInit {
             tick_tock: None,
             code: Some(code),
             data: Some(data),
-            library: LibsDict::default(),
+            library: None,
         }
     }
 }
@@ -51,7 +53,7 @@ mod tests {
         assert_eq!(parsed_state_init.tick_tock, None);
         assert!(parsed_state_init.code.is_some());
         assert!(parsed_state_init.data.is_some());
-        assert_eq!(parsed_state_init.library, LibsDict::default());
+        assert_eq!(parsed_state_init.library, None);
 
         let serial_cell = parsed_state_init.to_cell()?;
         assert_eq!(source_cell, serial_cell);

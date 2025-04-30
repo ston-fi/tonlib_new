@@ -3,6 +3,7 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::VMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use serde::{Deserialize, Serialize};
+use std::ops::{Deref, DerefMut};
 
 #[derive(Debug)]
 pub struct TVMSendMsgSuccess {
@@ -64,16 +65,11 @@ impl TVMSendMsgResponse {
 }
 
 #[derive(Debug)]
-pub struct TVMRunGetMethodSuccess {
-    pub vm_log: Option<String>,
+pub struct TVMRunMethodSuccess {
     pub vm_exit_code: i32,
+    pub vm_log: Option<String>,
     pub stack: VMStack,
-    pub missing_library: Option<String>,
     pub gas_used: i32,
-}
-
-impl TVMRunGetMethodSuccess {
-    pub fn exit_success(&self) -> bool { self.vm_exit_code == 0 || self.vm_exit_code == 1 }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -89,28 +85,28 @@ pub struct TVMRunMethodResponse {
 }
 
 impl TVMRunMethodResponse {
-    pub fn into_result(self) -> Result<TVMRunGetMethodSuccess, TonlibError> {
+    pub fn into_success(self) -> Result<TVMRunMethodSuccess, TonlibError> {
         if !self.success {
-            let error = unwrap_opt(self.error, "error is None")?;
-            return Err(TonlibError::TVMEmulatorError(error));
+            return Err(TonlibError::TVMEmulatorError(unwrap_opt(self.error, "error is None")?));
+        }
+        let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
+        if vm_exit_code != 0 && vm_exit_code != 1 {
+            return Err(TonlibError::TVMEmulatorError(serde_json::to_string(&self)?));
         }
 
         let vm_log = self.vm_log;
-        let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
         let stack = unwrap_opt(self.stack, "stack")?;
-        let missing_library = self.missing_library;
         let gas_used = unwrap_opt(self.gas_used, "gas_used")?.parse::<i32>()?;
 
-        Ok(TVMRunGetMethodSuccess {
+        Ok(TVMRunMethodSuccess {
             vm_log,
             vm_exit_code,
             stack: TLBType::from_boc_b64(&stack)?,
-            missing_library,
             gas_used,
         })
     }
 }
 
 fn unwrap_opt<T>(val: Option<T>, field: &'static str) -> Result<T, TonlibError> {
-    val.ok_or(TonlibError::TVMResponseParseError(format!("{field} is None")))
+    val.ok_or(TonlibError::TVMEmulatorResponseParseError(format!("{field} is None")))
 }

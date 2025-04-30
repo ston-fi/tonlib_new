@@ -1,4 +1,5 @@
 use crate::errors::TonlibError;
+use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
 use crate::types::tlb::primitives::LibsDict;
 use num_bigint::BigUint;
@@ -18,7 +19,8 @@ pub type Coins = Grams;
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct CurrencyCollection {
     pub grams: Grams,
-    pub other: LibsDict,
+    #[tlb_derive(adapter = "TLBRef")]
+    pub other: Option<LibsDict>,
 }
 
 impl Grams {
@@ -34,7 +36,7 @@ impl CurrencyCollection {
     pub fn new<T: Into<BigUint>>(grams: T) -> Self {
         Self {
             grams: Grams::new(grams),
-            other: LibsDict::default(),
+            other: None,
         }
     }
 }

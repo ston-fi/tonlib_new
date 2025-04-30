@@ -7,12 +7,12 @@ pub trait DictKeyAdapter<K> {
     fn extract_key(dict_key: &BigUint) -> Result<K, TonlibError>;
 }
 
-pub struct DictKeyAdapterTonHash; // TODO is not covered by tests
+pub struct DictKeyAdapterTonHash; // properly tested in LibsDict
 pub struct DictKeyAdapterInto;
 pub struct DictKeyAdapterString; // TODO is not covered by tests
 
 impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
-    fn make_key(src_key: &TonHash) -> Result<BigUint, TonlibError> { Ok(BigUint::from_bytes_le(src_key.as_slice())) }
+    fn make_key(src_key: &TonHash) -> Result<BigUint, TonlibError> { Ok(BigUint::from_bytes_be(src_key.as_slice())) }
 
     fn extract_key(dict_key: &BigUint) -> Result<TonHash, TonlibError> {
         let mut hash_bytes = vec![0; TonHash::BYTES_LEN];
@@ -53,5 +53,26 @@ impl DictKeyAdapter<String> for DictKeyAdapterString {
     fn extract_key(dict_key: &BigUint) -> Result<String, TonlibError> {
         let bytes = dict_key.to_bytes_le();
         Ok(String::from_utf8(bytes)?)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::str::FromStr;
+
+    #[test]
+    fn test_dict_key_adapter_ton_hash() -> anyhow::Result<()> {
+        let dict_key = DictKeyAdapterTonHash::make_key(&TonHash::ZERO)?;
+        assert_eq!(dict_key, 0u32.into());
+        assert_eq!(DictKeyAdapterTonHash::extract_key(&dict_key)?, TonHash::ZERO);
+
+        let dict_key = DictKeyAdapterTonHash::make_key(&TonHash::from([0b1010_1010; 32]))?;
+        assert_eq!(
+            dict_key,
+            BigUint::from_str("77194726158210796949047323339125271902179989777093709359638389338608753093290")?
+        );
+        assert_eq!(DictKeyAdapterTonHash::extract_key(&dict_key)?, TonHash::from([0b1010_1010; 32]));
+        Ok(())
     }
 }
