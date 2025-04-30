@@ -5,34 +5,34 @@ use std::thread;
 use std::time::Instant;
 
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::clients::tonlibjson::clients_impl::client_raw::TLClientRaw;
-use crate::clients::tonlibjson::tl_api::tl_req_ctx::TLRequestCtx;
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
-use crate::clients::tonlibjson::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsInfo};
-use crate::clients::tonlibjson::tlj_callback::{TLJCallback, TLJCallbacksStore};
-use crate::clients::tonlibjson::tlj_client::TLJClient;
-use crate::clients::tonlibjson::tlj_config::{LiteNodeFilter, TLJClientConfig};
+use crate::clients::tonlib::clients_impl::client_raw::TLClientRaw;
+use crate::clients::tonlib::tl_api::tl_req_ctx::TLRequestCtx;
+use crate::clients::tonlib::tl_api::tl_request::TLRequest;
+use crate::clients::tonlib::tl_api::tl_response::TLResponse;
+use crate::clients::tonlib::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsInfo};
+use crate::clients::tonlib::tl_callback::{TLCallback, TLCallbacksStore};
+use crate::clients::tonlib::tl_client::TLClient;
+use crate::clients::tonlib::tl_client_config::{LiteNodeFilter, TLClientConfig};
 use crate::errors::TonlibError;
-use crate::unwrap_tlj_response;
+use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
 
 static CONNECTION_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone)]
-pub struct TLJConnection {
+pub struct TLConnection {
     inner: Arc<Inner>,
 }
 
-impl TLJConnection {
-    pub async fn new(config: &TLJClientConfig, semaphore: Arc<Semaphore>) -> Result<TLJConnection, TonlibError> {
+impl TLConnection {
+    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
         new_connection_checked(config, semaphore).await
     }
 
     async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonlibError> {
         let req = TLRequest::Init { options };
-        unwrap_tlj_response!(self.exec_impl(&req).await?, TLOptionsInfo)
+        unwrap_tl_response!(self.exec_impl(&req).await?, TLOptionsInfo)
     }
 
     pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
@@ -41,14 +41,14 @@ impl TLJConnection {
 }
 
 #[async_trait]
-impl TLJClient for TLJConnection {
-    async fn get_connection(&self) -> Result<&TLJConnection, TonlibError> { Ok(self) }
+impl TLClient for TLConnection {
+    async fn get_connection(&self) -> Result<&TLConnection, TonlibError> { Ok(self) }
 }
 
 async fn new_connection_checked(
-    config: &TLJClientConfig,
+    config: &TLClientConfig,
     semaphore: Arc<Semaphore>,
-) -> Result<TLJConnection, TonlibError> {
+) -> Result<TLConnection, TonlibError> {
     loop {
         let conn = new_connection(config, semaphore.clone()).await?;
         match config.connection_check {
@@ -79,7 +79,7 @@ async fn new_connection_checked(
     }
 }
 
-async fn new_connection(config: &TLJClientConfig, semaphore: Arc<Semaphore>) -> Result<TLJConnection, TonlibError> {
+async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 
@@ -96,7 +96,7 @@ async fn new_connection(config: &TLJClientConfig, semaphore: Arc<Semaphore>) -> 
     let callbacks = config.callbacks.clone();
     let _join_handle = thread_builder.spawn(|| run_loop(tag, inner_weak, callbacks))?;
 
-    let conn = TLJConnection { inner: inner_arc };
+    let conn = TLConnection { inner: inner_arc };
     let _info = conn.init(config.init_opts.clone()).await?;
     Ok(conn)
 }
@@ -106,7 +106,7 @@ struct Inner {
     active_requests: Mutex<HashMap<u64, TLRequestCtx>>,
     semaphore: Arc<Semaphore>,
     next_request_id: AtomicU64,
-    callbacks: TLJCallbacksStore,
+    callbacks: TLCallbacksStore,
 }
 
 impl Inner {
@@ -136,8 +136,8 @@ impl Inner {
     }
 }
 
-// receiving updates from tonlibjson
-fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLJCallbacksStore) {
+// receiving updates from tonlib
+fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLCallbacksStore) {
     callbacks.on_loop_enter(&tag);
     while let Some(inner) = weak_inner.upgrade() {
         let tag = inner.client_raw.tag();

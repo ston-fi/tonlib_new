@@ -1,5 +1,6 @@
 use hex::FromHexError;
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
+use std::env::VarError;
 use std::time::Duration;
 use thiserror::Error;
 use ton_liteapi::tl::request::Request;
@@ -13,43 +14,43 @@ pub enum TonlibError {
 
     // cell_parser
     #[error("ParserError: Requested {req} bits, but only {left} left")]
-    ParserDataUnderflow { req: u32, left: u32 },
+    ParserDataUnderflow { req: usize, left: usize },
     #[error("ParserError: New position is {new_pos}, but data_bits_len is {bits_len}")]
-    ParserBadPosition { new_pos: i32, bits_len: u32 },
+    ParserBadPosition { new_pos: i32, bits_len: usize },
     #[error("ParserError: No ref with index={req}")]
     ParserRefsUnderflow { req: usize },
     #[error("ParserError: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]
-    ParserCellNotEmpty { bits_left: u32, refs_left: usize },
+    ParserCellNotEmpty { bits_left: usize, refs_left: usize },
 
     // cell_builder
     #[error("BuilderError: Can't write {req} bits: only {left} free bits available")]
-    BuilderDataOverflow { req: u32, left: u32 },
+    BuilderDataOverflow { req: usize, left: usize },
     #[error("BuilderError: Can't write ref - 4 refs are written already")]
     BuilderRefsOverflow,
     #[error("BuilderError: Can't extract {required_bits} bits from {given} bytes")]
-    BuilderNotEnoughData { required_bits: u32, given: u32 },
+    BuilderNotEnoughData { required_bits: usize, given: usize },
     #[error("BuilderError: Can't write number {number} as {bits} bits")]
-    BuilderNumberBitsMismatch { number: String, bits: u32 },
+    BuilderNumberBitsMismatch { number: String, bits: usize },
     #[error("BuilderError: Cell validation error: {0}")]
     BuilderMeta(String),
 
     // boc
     #[error("CellType: Unexpected CellType tag: {0}")]
-    CellTypeTag(u8),
+    BOCWrongTypeTag(u8),
     #[error("BOCError: Expected 1 root, got {0}")]
-    BocSingleRoot(usize),
+    BOCSingleRoot(usize),
     #[error("BOCError: Unexpected magic: {0}")]
-    BocWrongMagic(u32),
+    BOCWrongMagic(u32),
     #[error("BOCError: {0}")]
-    BocCustom(String),
+    BOCCustom(String),
 
     // tlb
     #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
     TLBWrongPrefix {
         exp: u128,
         given: u128,
-        bits_exp: u32,
-        bits_left: u32,
+        bits_exp: usize,
+        bits_left: usize,
     },
     #[error("TLBEnum: Out of options")]
     TLBEnumOutOfOptions, // TODO collect errors from all options
@@ -77,18 +78,20 @@ pub enum TonlibError {
     LiteClientReqTimeout(Box<(Request, Duration)>),
 
     // TonlibClient
-    #[error("TLJClientWrongResult: expected type: {0}, got: {1}")]
-    TLJClientWrongResponse(String, String),
-    #[error("TLJInvalidArguments: {0}")]
-    TLJInvalidArgs(String),
-    #[error("TLJSendError: fail to send request: {0}")]
-    TLJSendError(String),
-    #[error("TLJInvalidResponse: method: {method}, code: {code}, message: {message}")]
-    TLJExecError { method: String, code: i32, message: String },
-    #[error("TLJWrongExecImplUsage: {0}")]
-    TLJWrongUsage(String),
+    #[error("TLClientWrongResult: expected type: {0}, got: {1}")]
+    TLClientWrongResponse(String, String),
+    #[error("TLInvalidArguments: {0}")]
+    TLInvalidArgs(String),
+    #[error("TLSendError: fail to send request: {0}")]
+    TLSendError(String),
+    #[error("TLInvalidResponse: method: {method}, code: {code}, message: {message}")]
+    TLExecError { method: String, code: i32, message: String },
+    #[error("TLWrongExecImplUsage: {0}")]
+    TLWrongUsage(String),
 
     // TVM
+    #[error("TVMEmulatorCreationFailed: fail to create TVM emulator")]
+    TVMEmulatorCreationFailed,
     #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]
     TVMEmulatorSetFailed(&'static str),
     #[error("TVMEmulatorError: {0}")]
@@ -97,10 +100,16 @@ pub enum TonlibError {
     TVMResponseParseError(String),
 
     // TVMStack
-    #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {0}")]
+    #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]
     TVMStackWrongType(String, String),
     #[error("TVMStackError: stack is empty")]
     TVMStackEmpty,
+
+    // TonActiveContract
+    #[error("TonContractNotActive: contract is not active")]
+    TonContractNotActive,
+    #[error("TonContractUnexpectedValue: positive int expected, got {0}")]
+    TonContractUnexpectedValue(BigInt),
 
     #[error("CustomError: {0}")]
     CustomError(String),
@@ -131,6 +140,8 @@ pub enum TonlibError {
     ParseBigIntError(#[from] num_bigint::ParseBigIntError),
     #[error("{0}")]
     RecvError(#[from] tokio::sync::oneshot::error::RecvError),
+    #[error("{0}")]
+    VarError(#[from] VarError),
 }
 
 impl<T> From<TonlibError> for Result<T, TonlibError> {

@@ -73,8 +73,7 @@ impl TonAddress {
 
     pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TonlibError> {
         if self != &TonAddress::ZERO {
-            let err_str = format!("Can't convert non-zero address={self} to MsgAddressNone");
-            return Err(TonlibError::CustomError(err_str));
+            return Err(TonlibError::CustomError(format!("Can't convert non-zero address={self} to MsgAddressNone")));
         }
         Ok(MsgAddressNone {})
     }
@@ -193,7 +192,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonlibError> {
 
     let address = TonAddress {
         wc: bytes[1] as i8 as i32,
-        hash: TonHash::from_slice(&bytes[2..34])?,
+        hash: TonHash::from_bytes(&bytes[2..34])?,
     };
     Ok(address)
 }
@@ -215,10 +214,10 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 
     let anycast = match anycast {
         Some(anycast) => anycast,
-        None => return Ok(TonAddress::new(wc, TonHash::from_slice(addr)?)),
+        None => return Ok(TonAddress::new(wc, TonHash::from_bytes(addr)?)),
     };
 
-    if bits_len < anycast.rewrite_pfx.len {
+    if bits_len < anycast.rewrite_pfx.len as u32 {
         let err_msg = format!("rewrite_pfx has {} bits, but address has only {bits_len} bits", anycast.rewrite_pfx.len);
         let ext_addr_str = format!("address: {msg_address:?}, anycast: {:?}", anycast);
         raise_address_error(&ext_addr_str, err_msg)?
@@ -226,7 +225,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 
     let new_prefix = anycast.rewrite_pfx.as_slice();
 
-    let bits = anycast.rewrite_pfx.len as usize;
+    let bits = anycast.rewrite_pfx.len;
     let mut addr_mutable = addr.to_vec();
 
     if !rewrite_bits(new_prefix, 0, addr_mutable.as_mut_slice(), 0, bits) {
@@ -252,7 +251,7 @@ mod tests {
 
     #[test]
     fn test_ton_address_to_string() -> anyhow::Result<()> {
-        let bytes = TonHash::from_hex("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?;
+        let bytes = TonHash::from_str("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?;
         let addr = TonAddress::new(0, bytes);
         assert_eq!(addr.to_hex(), "0:e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76");
         assert_eq!(addr.to_b64(true, true, true), "EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR");
@@ -263,7 +262,7 @@ mod tests {
 
     #[test]
     fn test_ton_address_from_str() -> anyhow::Result<()> {
-        let bytes = TonHash::from_hex("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?;
+        let bytes = TonHash::from_str("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?;
         let addr = TonAddress::new(0, bytes);
         assert_eq!(TonAddress::from_str("0:e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?, addr);
         assert_eq!(TonAddress::from_str("EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR")?, addr);
@@ -318,7 +317,7 @@ mod tests {
         let expected = MsgAddressIntStd {
             anycast: None,
             workchain: 0,
-            address: TonHash::from_hex("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?,
+            address: TonHash::from_str("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?,
         }
         .into();
         assert_eq!(msg_addr, expected);

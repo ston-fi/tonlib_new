@@ -119,10 +119,10 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         }
         let all_bits_same = all_bits_same(label);
 
-        let label_len = label.bits() as u32 - 1;
-        let label_len_len = (self.key_bits_len_left as f32 + 1.0).log2().ceil() as u32;
+        let label_len = label.bits() as usize - 1;
+        let label_len_len = (self.key_bits_len_left as f32 + 1.0).log2().ceil() as usize;
         let fair_label = remove_leading_bit(label);
-        let same_label_len = if all_bits_same { 3 + label_len_len } else { u32::MAX };
+        let same_label_len = if all_bits_same { 3 + label_len_len } else { usize::MAX };
         let short_label_len = 2 + label_len * 2;
         let long_label_len = 2 + label_len_len + label_len;
 

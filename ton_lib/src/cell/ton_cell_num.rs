@@ -17,8 +17,8 @@ pub trait TonCellNum: Display + Sized + Clone {
     fn tcn_to_unsigned_primitive(&self) -> Option<Self::UnsignedPrimitive>;
 
     fn tcn_is_zero(&self) -> bool;
-    fn tcn_min_bits_len(&self) -> u32; // must includes sign bit if SIGNED=true
-    fn tcn_shr(&self, bits: u32) -> Self;
+    fn tcn_min_bits_len(&self) -> usize; // must includes sign bit if SIGNED=true
+    fn tcn_shr(&self, bits: usize) -> Self;
 }
 
 // Implementation for primitive types
@@ -36,8 +36,8 @@ macro_rules! ton_cell_num_primitive_impl {
             fn tcn_to_unsigned_primitive(&self) -> Option<Self::UnsignedPrimitive> { Some(*self as $unsign) }
 
             fn tcn_is_zero(&self) -> bool { *self == 0 }
-            fn tcn_min_bits_len(&self) -> u32 { unreachable!() }
-            fn tcn_shr(&self, _bits: u32) -> Self { unreachable!() }
+            fn tcn_min_bits_len(&self) -> usize { unreachable!() }
+            fn tcn_shr(&self, _bits: usize) -> Self { unreachable!() }
         }
     };
 }
@@ -66,8 +66,8 @@ impl TonCellNum for usize {
     fn tcn_to_unsigned_primitive(&self) -> Option<Self::UnsignedPrimitive> { Some(*self as u128) }
 
     fn tcn_is_zero(&self) -> bool { *self == 0 }
-    fn tcn_min_bits_len(&self) -> u32 { unreachable!() } // extra bit for sign
-    fn tcn_shr(&self, _bits: u32) -> Self { unreachable!() }
+    fn tcn_min_bits_len(&self) -> usize { unreachable!() } // extra bit for sign
+    fn tcn_shr(&self, _bits: usize) -> Self { unreachable!() }
 }
 
 // Implementation for BigInt and BigUint
@@ -82,8 +82,8 @@ impl TonCellNum for BigInt {
     fn tcn_to_unsigned_primitive(&self) -> Option<Self::UnsignedPrimitive> { None }
 
     fn tcn_is_zero(&self) -> bool { Zero::is_zero(self) }
-    fn tcn_min_bits_len(&self) -> u32 { self.bits() as u32 + 1 } // extra bit for sign
-    fn tcn_shr(&self, bits: u32) -> Self { self >> bits }
+    fn tcn_min_bits_len(&self) -> usize { self.bits() as usize + 1 } // extra bit for sign
+    fn tcn_shr(&self, bits: usize) -> Self { self >> bits }
 }
 
 impl TonCellNum for BigUint {
@@ -97,6 +97,6 @@ impl TonCellNum for BigUint {
     fn tcn_to_unsigned_primitive(&self) -> Option<Self::UnsignedPrimitive> { None }
 
     fn tcn_is_zero(&self) -> bool { Zero::is_zero(self) }
-    fn tcn_min_bits_len(&self) -> u32 { self.bits() as u32 }
-    fn tcn_shr(&self, bits: u32) -> Self { self >> bits }
+    fn tcn_min_bits_len(&self) -> usize { self.bits() as usize }
+    fn tcn_shr(&self, bits: usize) -> Self { self >> bits }
 }

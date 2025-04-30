@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::tvm::{VMCellSlice, VMInt, VMStackValue, VMTinyInt};
+use crate::types::tlb::block_tlb::tvm::{VMCell, VMCellSlice, VMInt, VMStackValue, VMTinyInt};
 use crate::types::tlb::tlb_type::TLBType;
 use num_bigint::BigInt;
 use std::ops::{Deref, DerefMut};
@@ -12,7 +12,7 @@ macro_rules! extract_stack_val {
         match $maybe_result {
             None => Err(TonlibError::TVMStackEmpty),
             Some(VMStackValue::$variant(val)) => Ok(val.value),
-            _ => Err(TonlibError::TVMStackWrongType(stringify!($variant).to_string(), format!("{:?}", $maybe_result))),
+            Some(rest) => Err(TonlibError::TVMStackWrongType(stringify!($variant).to_string(), format!("{rest:?}"))),
         }
     };
 }
@@ -36,12 +36,14 @@ impl VMStack {
 
     pub fn push_tiny_int(&mut self, value: i64) { self.push(VMStackValue::TinyInt(VMTinyInt { value })); }
     pub fn push_int(&mut self, value: BigInt) { self.push(VMStackValue::Int(VMInt { value })); }
-    pub fn push_cell_slice(&mut self, cell: TonCell) {
+    pub fn push_cell(&mut self, value: TonCellRef) { self.push(VMStackValue::Cell(VMCell { value })); }
+    pub fn push_cell_slice(&mut self, cell: TonCellRef) {
         self.push(VMStackValue::CellSlice(VMCellSlice::from_cell(cell)));
     }
 
     pub fn pop_tiny_int(&mut self) -> Result<i64, TonlibError> { extract_stack_val!(self.pop(), TinyInt) }
     pub fn pop_int(&mut self) -> Result<BigInt, TonlibError> { extract_stack_val!(self.pop(), Int) }
+    pub fn pop_cell(&mut self) -> Result<TonCellRef, TonlibError> { extract_stack_val!(self.pop(), Cell) }
     pub fn pop_cell_slice(&mut self) -> Result<TonCellRef, TonlibError> { extract_stack_val!(self.pop(), CellSlice) }
 }
 
@@ -88,6 +90,7 @@ mod tests {
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::tlb_type::TLBType;
     use crate::types::ton_address::TonAddress;
+
     use tokio_test::assert_ok;
 
     #[test]
@@ -129,9 +132,8 @@ mod tests {
     #[test]
     fn test_vm_stack_cell_slice() -> anyhow::Result<()> {
         let mut stack = VMStack::new(vec![]);
-        stack.push_cell_slice(TonAddress::ZERO.to_cell()?);
+        stack.push_cell_slice(TonAddress::ZERO.to_cell_ref()?);
         let stack_cell = stack.to_cell()?;
-        println!("{stack_cell}");
 
         let mut parser = CellParser::new(&stack_cell);
         let depth: u32 = parser.read_num(24)?;
@@ -155,7 +157,7 @@ mod tests {
         let mut stack = VMStack::new(vec![]);
         stack.push_tiny_int(1);
         stack.push_int(2.into());
-        stack.push_cell_slice(TonAddress::ZERO.to_cell()?);
+        stack.push_cell_slice(TonAddress::ZERO.to_cell_ref()?);
         let stack_cell = stack.to_cell()?;
 
         let mut deep1_parser = CellParser::new(&stack_cell);

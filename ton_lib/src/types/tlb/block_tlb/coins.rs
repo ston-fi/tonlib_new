@@ -1,6 +1,6 @@
-use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
+use crate::types::tlb::primitives::LibsDict;
 use num_bigint::BigUint;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -18,14 +18,14 @@ pub type Coins = Grams;
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct CurrencyCollection {
     pub grams: Grams,
-    pub other: Option<TonCellRef>, // dict, but it's equal to Option<TonCellRef> in tlb format
+    pub other: LibsDict,
 }
 
 impl Grams {
     pub fn new<T: Into<BigUint>>(amount: T) -> Self {
         let amount = amount.into();
-        let bits_len = amount.bits() as u32;
-        Self(VarLenBytes::new(amount, bits_len))
+        let bits_len = amount.bits();
+        Self(VarLenBytes::new(amount, bits_len as usize))
     }
     pub fn zero() -> Self { Grams::new(0u32) }
 }
@@ -34,7 +34,7 @@ impl CurrencyCollection {
     pub fn new<T: Into<BigUint>>(grams: T) -> Self {
         Self {
             grams: Grams::new(grams),
-            other: None,
+            other: LibsDict::default(),
         }
     }
 }
@@ -50,6 +50,15 @@ impl Deref for Grams {
 }
 impl DerefMut for Grams {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+}
+
+impl<T: Into<BigUint>> From<T> for Grams {
+    fn from(value: T) -> Self { Grams::new(value) }
+}
+
+impl FromStr for Grams {
+    type Err = TonlibError;
+    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
 }
 
 #[cfg(test)]

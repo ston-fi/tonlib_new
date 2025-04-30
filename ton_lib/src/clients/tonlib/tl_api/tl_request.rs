@@ -1,9 +1,9 @@
-use crate::cell::ton_hash::vec_ton_hash_serde_b64;
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_vec_b64;
+use crate::clients::tonlib::tl_api::serial::Base64Standard;
+use crate::clients::tonlib::tl_api::tl_types::{
     TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
-use crate::clients::tonlibjson::tl_api::Base64Standard;
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -181,7 +181,7 @@ pub enum TLRequest {
     // tonlib_api.tl, line 314
     #[serde(rename = "smc.getLibraries")]
     SmcGetLibraries {
-        #[serde(with = "vec_ton_hash_serde_b64")]
+        #[serde(with = "serde_ton_hash_vec_b64")]
         library_list: Vec<TonHash>,
     },
 
@@ -258,7 +258,7 @@ impl TLRequest {
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
+    use crate::clients::tonlib::tl_api::tl_request::TLRequest;
     use std::ffi::CString;
 
     #[test]

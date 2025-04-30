@@ -3,6 +3,7 @@ use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::fmt::{Debug, Display, UpperHex};
 use std::hash::Hash;
+use std::str::FromStr;
 
 #[derive(Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 pub struct TonHash(TonHashData);
@@ -22,27 +23,17 @@ impl TonHash {
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]));
 
-    pub fn from_slice<T: AsRef<[u8]>>(data: T) -> Result<Self, TonlibError> {
+    pub fn from_bytes<T: AsRef<[u8]>>(data: T) -> Result<Self, TonlibError> {
         let bytes = data.as_ref();
         check_bytes_len(bytes)?;
         Ok(Self(TonHashData::Slice(bytes[..32].try_into().unwrap())))
     }
 
-    pub fn from_slice_sized(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
+    pub fn from_slice(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
 
     pub fn from_vec(data: Vec<u8>) -> Result<Self, TonlibError> {
         check_bytes_len(&data)?;
         Ok(Self(TonHashData::Vec(data)))
-    }
-
-    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
-        let bytes = hex::decode(hex)?;
-        check_bytes_len(&bytes)?;
-        Ok(Self(TonHashData::Vec(bytes)))
-    }
-
-    pub fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<Self, TonlibError> {
-        Self::from_vec(BASE64_STANDARD.decode(b64)?)
     }
 
     pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
@@ -72,6 +63,16 @@ impl TonHash {
     }
 }
 
+impl FromStr for TonHash {
+    type Err = TonlibError;
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if s.len() == 64 {
+            return from_hex(s);
+        }
+        from_b64(s)
+    }
+}
+
 impl TonHashData {
     fn as_slice(&self) -> &[u8] {
         match self {
@@ -80,6 +81,14 @@ impl TonHashData {
         }
     }
 }
+
+fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<TonHash, TonlibError> {
+    let bytes = hex::decode(hex)?;
+    check_bytes_len(&bytes)?;
+    Ok(TonHash(TonHashData::Vec(bytes)))
+}
+
+fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<TonHash, TonlibError> { TonHash::from_vec(BASE64_STANDARD.decode(b64)?) }
 
 fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {
     if bytes.len() != TonHash::BYTES_LEN {
@@ -122,37 +131,9 @@ impl Debug for TonHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") }
 }
 
-pub mod ton_hash_serde_b64 {
-    use crate::cell::ton_hash::TonHash;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-
-    pub fn serialize<S: Serializer>(hash: &TonHash, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_b64().as_str())
-    }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonHash, D::Error> {
-        TonHash::from_b64(String::deserialize(deserializer)?).map_err(Error::custom)
-    }
-}
-
-pub mod vec_ton_hash_serde_b64 {
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-
-    pub fn serialize<S: Serializer>(data: &[super::TonHash], serializer: S) -> Result<S::Ok, S::Error> {
-        let b64_strings: Vec<String> = data.iter().map(|h| h.to_b64()).collect();
-        b64_strings.serialize(serializer)
-    }
-
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<super::TonHash>, D::Error> {
-        let b64_vec: Vec<String> = Vec::deserialize(deserializer)?;
-        b64_vec.into_iter().map(|s| super::TonHash::from_b64(&s).map_err(serde::de::Error::custom)).collect()
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
-    use serde::{Deserialize, Serialize};
-    use serde_json::json;
 
     #[test]
     fn test_ton_hash_display() -> anyhow::Result<()> {
@@ -174,7 +155,7 @@ mod tests {
     #[test]
     fn test_ton_hash_from_bytes() -> anyhow::Result<()> {
         let data = [1u8; 32];
-        let hash = TonHash::from_slice(data)?;
+        let hash = TonHash::from_bytes(data)?;
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }
@@ -182,7 +163,7 @@ mod tests {
     #[test]
     fn test_ton_hash_from_vec() -> anyhow::Result<()> {
         let data = [1u8; 32];
-        let hash = TonHash::from_slice(data)?;
+        let hash = TonHash::from_bytes(data)?;
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }
@@ -190,35 +171,8 @@ mod tests {
     #[test]
     fn test_ton_hash_from_hex() -> anyhow::Result<()> {
         let data = [255u8; 32];
-        let hash = TonHash::from_hex("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")?;
+        let hash = TonHash::from_str("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")?;
         assert_eq!(hash.as_slice(), &data);
-        Ok(())
-    }
-
-    #[test]
-    fn test_ton_hash_serde() -> anyhow::Result<()> {
-        #[derive(Serialize, Deserialize, Debug, PartialEq)]
-        struct TestStruct {
-            #[serde(with = "ton_hash_serde_b64")]
-            hash: TonHash,
-            #[serde(with = "vec_ton_hash_serde_b64")]
-            hash_vec: Vec<TonHash>,
-        }
-
-        let val = TestStruct {
-            hash: TonHash::from_slice([1u8; 32])?,
-            hash_vec: vec![TonHash::from_slice([2u8; 32])?, TonHash::from_slice([3u8; 32])?],
-        };
-        let val_json = serde_json::to_string(&val)?;
-        let expected = json!({
-            "hash": "AQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQE=",
-            "hash_vec": [
-                "AgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgI=",
-                "AwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwM="
-            ]
-        })
-        .to_string();
-        assert_eq!(val_json, expected);
         Ok(())
     }
 }

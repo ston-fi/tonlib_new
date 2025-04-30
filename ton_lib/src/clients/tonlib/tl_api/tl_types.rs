@@ -1,6 +1,7 @@
-use crate::cell::ton_hash::ton_hash_serde_b64;
-use crate::cell::ton_hash::vec_ton_hash_serde_b64;
-use crate::clients::tonlibjson::tl_api::Base64Standard;
+use crate::clients::tonlib::tl_api::serial::serde_ton_address_hex;
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_b64;
+use crate::clients::tonlib::tl_api::serial::serde_ton_hash_vec_b64;
+use crate::clients::tonlib::tl_api::serial::Base64Standard;
 use std::borrow::Cow;
 use std::fmt::Debug;
 
@@ -53,7 +54,20 @@ pub struct TLOptionsInfo {
 // tonlib_api.tl_api, line 44
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLAccountAddress {
-    pub account_address: String,
+    #[serde(rename = "account_address", with = "serde_ton_address_hex")]
+    pub address: TonAddress,
+}
+
+impl From<&TonAddress> for TLAccountAddress {
+    fn from(address: &TonAddress) -> Self {
+        TLAccountAddress {
+            address: address.clone(),
+        }
+    }
+}
+
+impl From<TLAccountAddress> for TonAddress {
+    fn from(tl_address: TLAccountAddress) -> Self { tl_address.address }
 }
 
 // tonlib_api.tl_api, line 48
@@ -61,8 +75,15 @@ pub struct TLAccountAddress {
 pub struct TLTxId {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
-    #[serde(with = "ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_b64")]
     pub hash: TonHash,
+}
+
+impl TLTxId {
+    pub const ZERO: TLTxId = TLTxId {
+        lt: 0,
+        hash: TonHash::ZERO,
+    };
 }
 
 // tonlib_api.tl_api, line 50
@@ -125,13 +146,14 @@ pub struct TLRawMessage {
 
 // tonlib_api.tl_api, line 55
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLRawTransaction {
+pub struct TLRawTx {
     pub address: TLAccountAddress,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub utime: i64,
     #[serde(with = "Base64Standard")]
     pub data: Vec<u8>,
-    pub transaction_id: TLTxId,
+    #[serde(rename = "transaction_id")]
+    pub tx_id: TLTxId,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub fee: i64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -146,8 +168,10 @@ pub struct TLRawTransaction {
 // tonlib_api.tl_api, line 56
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLRawTxs {
-    pub transactions: Vec<TLRawTransaction>,
-    pub previous_transaction_id: TLTxId,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLRawTx>,
+    #[serde(rename = "previous_transaction_id")]
+    pub prev_tx_id: TLTxId,
 }
 // tonlib_api.tl_api, line 58
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -390,7 +414,7 @@ pub struct TLSmcLibraryResult {
 pub enum TLSmcLibraryQueryExt {
     #[serde(rename = "smc.libraryQueryExt.one")]
     One {
-        #[serde(with = "ton_hash_serde_b64")]
+        #[serde(with = "serde_ton_hash_b64")]
         hash: TonHash,
     },
 
@@ -407,9 +431,9 @@ pub enum TLSmcLibraryQueryExt {
 pub struct TLSmcLibraryResultExt {
     #[serde(with = "Base64Standard")]
     pub dict_boc: Vec<u8>,
-    #[serde(with = "vec_ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_vec_b64")]
     pub libs_ok: Vec<TonHash>,
-    #[serde(with = "vec_ton_hash_serde_b64")]
+    #[serde(with = "serde_ton_hash_vec_b64")]
     pub libs_not_found: Vec<TonHash>,
 }
 
@@ -477,7 +501,8 @@ pub struct TLBlocksTxs {
     pub id: TLBlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
-    pub transactions: Vec<TLBlocksShortTxId>,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLBlocksShortTxId>,
 }
 
 // tonlib_api.tl_api, line 224
@@ -486,7 +511,8 @@ pub struct TLBlocksTransactionsExt {
     pub id: TLBlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
-    pub transactions: Vec<TLRawTransaction>,
+    #[serde(rename = "transactions")]
+    pub txs: Vec<TLRawTx>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Hash, Eq, PartialEq)]
@@ -540,7 +566,7 @@ pub enum TLUpdate {
 mod tests {
     use std::borrow::Cow;
 
-    use crate::clients::tonlibjson::tl_api::tl_types::TLSmcMethodId;
+    use crate::clients::tonlib::tl_api::tl_types::TLSmcMethodId;
     use tokio_test::assert_err;
     use tonlib_core::{TonTxId, TransactionIdParseError};
 

@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Other
 
-- add LiteClient, TonlibjsonClient (TLJClient)
+- add LiteClient, TonlibClient (TLClient)
 
 ## [0.0.10](https://github.com/Sild/libs_rs/compare/ton_lib-v0.0.9...ton_lib-v0.0.10) - 2025-04-20
 

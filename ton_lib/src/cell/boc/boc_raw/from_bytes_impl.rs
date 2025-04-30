@@ -13,7 +13,7 @@ impl BOCRaw {
         let magic = reader.read::<u32>()?;
 
         if magic != GENERIC_BOC_MAGIC {
-            return Err(TonlibError::BocWrongMagic(magic));
+            return Err(TonlibError::BOCWrongMagic(magic));
         };
 
         let (has_idx, has_crc32c, _has_cache_bits, size) = {
@@ -94,7 +94,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
         // see https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/BitString.js#L302
         let num_zeros = data[data_len - 1].trailing_zeros();
         if num_zeros >= 8 {
-            return Err(TonlibError::BocCustom(
+            return Err(TonlibError::BOCCustom(
                 "Last byte of binary must not be zero if full_byte flag is not set".to_string(),
             ));
         }
@@ -112,7 +112,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     let cell_type = match is_exotic {
         true => {
             if data.is_empty() {
-                return Err(TonlibError::BocCustom("Exotic cell must have at least 1 byte".to_string()));
+                return Err(TonlibError::BOCCustom("Exotic cell must have at least 1 byte".to_string()));
             }
             CellType::new_exotic(data[0])?
         }

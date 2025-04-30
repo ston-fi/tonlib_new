@@ -106,6 +106,7 @@ mod tests {
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::block_tlb::msg_address::MsgAddressIntStd;
     use crate::types::tlb::tlb_type::TLBType;
+    use std::str::FromStr;
 
     #[test]
     fn test_account_some() -> anyhow::Result<()> {
@@ -118,7 +119,7 @@ mod tests {
                 MsgAddressIntStd {
                     anycast: None,
                     workchain: 0,
-                    address: TonHash::from_hex("B113A994B5024A16719F69139328EB759596C38A25F59028B146FECDC3621DFE")?,
+                    address: TonHash::from_str("B113A994B5024A16719F69139328EB759596C38A25F59028B146FECDC3621DFE")?,
                 }
                 .into()
             );
@@ -133,7 +134,7 @@ mod tests {
                 println!("{}", code.hash());
                 assert_eq!(
                     code.hash(),
-                    &TonHash::from_hex("18d5b6e780ff0bb451254c2c760d09d6e485638cd1407abb97078752c3c1c9ee")?
+                    &TonHash::from_str("18d5b6e780ff0bb451254c2c760d09d6e485638cd1407abb97078752c3c1c9ee")?
                 );
             }
         } else {

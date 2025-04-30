@@ -5,32 +5,10 @@ use log4rs::Config;
 use std::fs::{exists, File};
 use std::io::Read;
 use std::sync::Once;
-use ton_lib::clients::lite::config::LiteClientConfig;
-use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 static LOG: Once = Once::new();
 
-pub(crate) async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient> {
-    init_logging();
-    log::info!("initializing lite_client with mainnet={mainnet}...");
-    let net_conf = get_net_conf(mainnet)?;
-    let config = LiteClientConfig::new(&net_conf)?;
-    Ok(LiteClient::new(config)?)
-}
-
-#[cfg(feature = "sys")]
-pub(crate) async fn make_tlj_client_default(
-    mainnet: bool,
-    archive_only: bool,
-) -> anyhow::Result<ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault> {
-    init_logging();
-    log::info!("initializing tlj_client with mainnet={mainnet}...");
-    let net_conf = get_net_conf(mainnet)?;
-    let config = ton_lib::clients::tonlibjson::tlj_config::TLJClientConfig::new(net_conf, archive_only);
-    Ok(ton_lib::clients::tonlibjson::clients_impl::TLJClientDefault::new(config).await?)
-}
-
-fn get_net_conf(mainnet: bool) -> anyhow::Result<String> {
+pub fn get_net_conf(mainnet: bool) -> anyhow::Result<String> {
     let mut net_conf = match mainnet {
         true => TON_NET_CONF_MAINNET.to_string(),
         false => TON_NET_CONF_TESTNET.to_string(),

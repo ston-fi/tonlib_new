@@ -1,2 +1,3 @@
+pub mod block_stream;
 pub mod lite;
-pub mod tonlibjson;
+pub mod tonlib;

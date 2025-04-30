@@ -41,6 +41,17 @@ pub struct TonNetConfig {
 
 impl TonNetConfig {
     pub fn new(json: &str) -> Result<Self, TonlibError> { Ok(serde_json::from_str(json)?) }
+    pub fn from_env_path(env_var: &str, fallback: &str) -> Result<Self, TonlibError> {
+        let path = match std::env::var(env_var).ok() {
+            Some(path) => path,
+            None => return TonNetConfig::new(fallback),
+        };
+        if !std::path::Path::new(&path).exists() {
+            log::warn!("TonNetConfig env_var {env_var} is set to {path}, but file does not exist. Using fallback");
+            return TonNetConfig::new(fallback);
+        }
+        TonNetConfig::new(&std::fs::read_to_string(path)?)
+    }
 
     pub fn to_json(&self) -> Result<String, serde_json::Error> { serde_json::to_string(self) }
 

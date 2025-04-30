@@ -123,6 +123,6 @@ fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>)
     let hash = cell.hash();
     call_by_hash
         .get(hash)
-        .ok_or_else(|| TonlibError::BocCustom(format!("cell with hash {hash:?} not found in available hashes")))
+        .ok_or_else(|| TonlibError::BOCCustom(format!("cell with hash {hash:?} not found in available hashes")))
         .map(|indexed_cell| *indexed_cell.index.borrow().deref())
 }

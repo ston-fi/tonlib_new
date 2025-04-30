@@ -7,7 +7,7 @@ use std::ops::{Deref, DerefMut};
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L33
 // Optimized implementation
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct Unary(pub u32);
+pub struct Unary(pub usize);
 
 impl TLBType for Unary {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
@@ -27,7 +27,7 @@ impl TLBType for Unary {
 }
 
 impl Deref for Unary {
-    type Target = u32;
+    type Target = usize;
 
     fn deref(&self) -> &Self::Target { &self.0 }
 }

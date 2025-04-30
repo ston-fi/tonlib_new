@@ -68,7 +68,7 @@ impl<T: TLBType> TLBType for EitherRef<T> {
             EitherRefLayout::ToCell => EitherRefLayout::ToCell,
             EitherRefLayout::ToRef => EitherRefLayout::ToRef,
             EitherRefLayout::Native => {
-                if cell.data_bits_len < builder.data_bits_left() as usize {
+                if cell.data_bits_len < builder.data_bits_left() {
                     EitherRefLayout::ToCell
                 } else {
                     EitherRefLayout::ToRef
