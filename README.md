@@ -44,8 +44,8 @@ pub struct StateInit {
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    #[tlb_derive(adapter = "Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
-    pub library: HashMap<TonHash, TonCellRef>,
+    #[tlb_derive(adapter = "TLBDict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
+    pub library: LibsDict,
 }
 
 fn main() {
@@ -59,8 +59,7 @@ fn main() {
 
 ### [clients](ton_lib/src/clients) module
 - [LiteClient](ton_lib/src/clients/lite):  
-  A "native" lite-node client that uses ADNL.  
-  More straightforward to use, but less flexible.
+  A "native" lite-node client that uses ADNL. More straightforward to use, but less flexible.
 
 - [TLClient](ton_lib/src/clients/tonlib):  
   A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
@@ -77,7 +76,7 @@ async fn main() -> anyhow::Result<()> {
     
     // TLClient example
     let config = TLClientConfig::new(TON_NET_CONF_MAINNET, archive_only);
-    let tl_client = TLClient::new(config).await?;
+    let tl_client = TLClientDefault::new(config).await?;
     let mc_info = tl_client.get_mc_info().await?;
     let block = tl_client.lookup_mc_block(mc_info.last.seqno - 100).await?;
 }
@@ -86,8 +85,6 @@ async fn main() -> anyhow::Result<()> {
 ---
 
 ### [emulators](ton_lib/src/emulators) module
-- [TVMEmulator](ton_lib/src/emulators/tvm_emulator.rs):  
-  * `run_get_method`  
-  * `send_int_msg`
-  * `send_ext_msg`\
-Check [tvm_emulator_tests](ton_lib/src/emulators/tvm_emulator/test_tvm_emulator.rs) for usage examples
+- [TVMEmulator](ton_lib/src/emulators/tvm/tvm_emulator.rs): `run_method`, `send_int_msg`, `send_ext_msg`\
+Check [tvm_emulator_tests](ton_lib/src/emulators/tvm/test_tvm_emulator.rs) for usage examples
+- [TXEmulator](ton_lib/src/emulators/tx/tx_emulator.rs): WIP

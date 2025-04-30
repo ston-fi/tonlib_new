@@ -1,6 +1,6 @@
 use crate::cell::ton_cell::TonCellRef;
-use crate::emulators::tvm_emulator::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm_emulator::TVMEmulator;
+use crate::emulators::tvm::c7_register::TVMEmulatorC7;
+use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::types::tlb::block_tlb::tvm::VMStack;
 use crate::types::tlb::primitives::LibsDict;
