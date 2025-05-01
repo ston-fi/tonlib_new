@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.10](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.9...ton_lib_macros-v0.0.10) - 2025-05-01
+
+### Other
+
+- don't run coverage on MR
+
 ## [0.0.9](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.8...ton_lib_macros-v0.0.9) - 2025-04-30
 
 ### Other
