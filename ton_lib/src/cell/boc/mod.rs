@@ -27,7 +27,11 @@ impl BOC {
     }
 
     pub fn from_bytes<T: AsRef<[u8]>>(bytes: T) -> Result<Self, TonlibError> {
-        let raw = BOCRaw::from_bytes(bytes.as_ref())?;
+        let bytes_ref = bytes.as_ref();
+        if bytes_ref.is_empty() {
+            return Err(TonlibError::BOCEmpty);
+        }
+        let raw = BOCRaw::from_bytes(bytes_ref)?;
         Ok(Self {
             roots: raw.into_roots()?,
             _phantom: PhantomData,

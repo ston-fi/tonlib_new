@@ -91,20 +91,19 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 
-    let inner = Inner {
+    let inner = Arc::new(Inner {
         client_raw: TLClientRaw::new(tag.clone()),
         active_requests: Mutex::new(HashMap::new()),
         semaphore,
         next_request_id: AtomicU64::new(0),
         callbacks: config.callbacks.clone(),
-    };
-    let inner_arc = Arc::new(inner);
-    let inner_weak = Arc::downgrade(&inner_arc);
-    let thread_builder = thread::Builder::new().name(tag.clone());
-    let callbacks = config.callbacks.clone();
-    let _join_handle = thread_builder.spawn(|| run_loop(tag, inner_weak, callbacks))?;
+    });
 
-    let conn = TLConnDefault { inner: inner_arc };
+    let inner_weak = Arc::downgrade(&inner);
+    let callbacks = config.callbacks.clone();
+    let _join_handle = thread::Builder::new().name(tag.clone()).spawn(|| run_loop(tag, inner_weak, callbacks))?;
+
+    let conn = TLConnDefault { inner };
     let _info = conn.init(config.init_opts.clone()).await?;
     Ok(conn)
 }
@@ -174,5 +173,5 @@ fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLCallbacksStore) {
             }
         }
     }
-    callbacks.on_loop_enter(&tag);
+    callbacks.on_loop_exit(&tag);
 }

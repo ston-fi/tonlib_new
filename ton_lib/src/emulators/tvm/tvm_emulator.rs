@@ -1,6 +1,7 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm::method_id::TVMMethodId;
 use crate::emulators::tvm::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
+use crate::emulators::tvm::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -95,7 +96,7 @@ impl TVMEmulator {
         Ok(serde_json::from_str(&json_str)?)
     }
 
-    pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodResponse, TonlibError>
+    pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodSuccess, TonlibError>
     where
         T: Into<TVMMethodId>,
     {
@@ -107,7 +108,7 @@ impl TVMEmulator {
             convert_emulator_response(c_str)?
         };
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
-        Ok(serde_json::from_str(&json_str)?)
+        serde_json::from_str::<TVMRunMethodResponse>(&json_str)?.into_success()
     }
 }
 

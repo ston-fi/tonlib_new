@@ -1,18 +1,14 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlib::clients_impl::TLConnDefault;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::clients::tonlib::tl_api::tl_types::{
     TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
     TLFullAccountState, TLOptions, TLOptionsInfo, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
 };
-use crate::clients::tonlib::TLClientConfig;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
-use std::sync::Arc;
-use tokio::sync::Semaphore;
 
 #[macro_export]
 macro_rules! unwrap_tl_response {

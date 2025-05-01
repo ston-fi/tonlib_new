@@ -1,3 +1,4 @@
+use crate::emulators::tvm::TVMRunMethodResponse;
 use hex::FromHexError;
 use num_bigint::{BigInt, BigUint};
 use std::env::VarError;
@@ -35,6 +36,8 @@ pub enum TonlibError {
     BuilderMeta(String),
 
     // boc
+    #[error("BOCEmpty: can't parse BOC from empty slice")]
+    BOCEmpty,
     #[error("CellType: Unexpected CellType tag: {0}")]
     BOCWrongTypeTag(u8),
     #[error("BOCError: Expected 1 root, got {0}")]
@@ -100,8 +103,8 @@ pub enum TonlibError {
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
     TVMEmulatorResponseParseError(String),
-    #[error("TVMEmulatorRunMethodError: {0}")]
-    TVMEmulatorRunMethodError(String),
+    #[error("TVMRunMethodError: {0:?}")]
+    TVMRunMethodError(Box<TVMRunMethodResponse>),
 
     // TVMStack
     #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]

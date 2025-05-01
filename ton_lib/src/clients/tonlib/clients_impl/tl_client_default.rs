@@ -16,7 +16,7 @@ use tokio::sync::{Mutex, Semaphore};
 pub struct TLClientDefault(Arc<Inner>);
 
 impl TLClientDefault {
-    pub async fn new(mut config: TLClientConfig) -> Result<Self, TonlibError> {
+    pub async fn new(mut config: TLClientConfig) -> Result<impl TLClient, TonlibError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));

@@ -3,7 +3,6 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::VMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use serde::{Deserialize, Serialize};
-use std::ops::{Deref, DerefMut};
 
 #[derive(Debug)]
 pub struct TVMSendMsgSuccess {
@@ -76,22 +75,22 @@ pub struct TVMRunMethodSuccess {
 #[serde(rename_all = "snake_case")]
 pub struct TVMRunMethodResponse {
     pub success: bool,
-    pub vm_log: Option<String>,
     pub vm_exit_code: Option<i32>,
+    pub vm_log: Option<String>,
     pub stack: Option<String>,
-    pub missing_library: Option<String>,
     pub gas_used: Option<String>,
+    pub missing_library: Option<String>,
     pub error: Option<String>,
 }
 
 impl TVMRunMethodResponse {
     pub fn into_success(self) -> Result<TVMRunMethodSuccess, TonlibError> {
         if !self.success {
-            return Err(TonlibError::TVMEmulatorError(unwrap_opt(self.error, "error is None")?));
+            return Err(TonlibError::TVMRunMethodError(self.into()));
         }
         let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TonlibError::TVMEmulatorError(serde_json::to_string(&self)?));
+            return Err(TonlibError::TVMRunMethodError(self.into()));
         }
 
         let vm_log = self.vm_log;
