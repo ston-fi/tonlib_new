@@ -13,6 +13,7 @@ use crate::clients::tonlib::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsIn
 use crate::clients::tonlib::tl_callback::{TLCallback, TLCallbacksStore};
 use crate::clients::tonlib::tl_client::TLClient;
 use crate::clients::tonlib::tl_client_config::{LiteNodeFilter, TLClientConfig};
+use crate::clients::tonlib::TLConnection;
 use crate::errors::TonlibError;
 use crate::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
 use crate::unwrap_tl_response;
@@ -22,34 +23,35 @@ use tokio::sync::{oneshot, Mutex, Semaphore};
 static CONNECTION_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone)]
-pub struct TLConnection {
+pub struct TLConnDefault {
     inner: Arc<Inner>,
 }
 
-impl TLConnection {
-    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
+impl TLConnDefault {
+    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnDefault, TonlibError> {
         new_connection_checked(config, semaphore).await
     }
+}
 
+#[async_trait]
+impl TLClient for TLConnDefault {
+    async fn get_connection(&self) -> Result<&dyn TLConnection, TonlibError> { Ok(self) }
+}
+
+#[async_trait]
+impl TLConnection for TLConnDefault {
     async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonlibError> {
         let req = TLRequest::Init { options };
         unwrap_tl_response!(self.exec_impl(&req).await?, TLOptionsInfo)
     }
 
-    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
-        self.inner.exec_impl(req).await
-    }
-}
-
-#[async_trait]
-impl TLClient for TLConnection {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError> { Ok(self) }
+    async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> { self.inner.exec_impl(req).await }
 }
 
 async fn new_connection_checked(
     config: &TLClientConfig,
     semaphore: Arc<Semaphore>,
-) -> Result<TLConnection, TonlibError> {
+) -> Result<TLConnDefault, TonlibError> {
     let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
         sys_tonlib_set_verbosity_level(0);
@@ -85,7 +87,7 @@ async fn new_connection_checked(
     conn
 }
 
-async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
+async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnDefault, TonlibError> {
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 
@@ -102,7 +104,7 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let callbacks = config.callbacks.clone();
     let _join_handle = thread_builder.spawn(|| run_loop(tag, inner_weak, callbacks))?;
 
-    let conn = TLConnection { inner: inner_arc };
+    let conn = TLConnDefault { inner: inner_arc };
     let _info = conn.init(config.init_opts.clone()).await?;
     Ok(conn)
 }

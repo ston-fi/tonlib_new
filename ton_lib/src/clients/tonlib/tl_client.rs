@@ -1,15 +1,18 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlib::clients_impl::TLConnection;
+use crate::clients::tonlib::clients_impl::TLConnDefault;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::clients::tonlib::tl_api::tl_types::{
     TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
-    TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
+    TLFullAccountState, TLOptions, TLOptionsInfo, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
 };
+use crate::clients::tonlib::TLClientConfig;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
+use std::sync::Arc;
+use tokio::sync::Semaphore;
 
 #[macro_export]
 macro_rules! unwrap_tl_response {
@@ -22,8 +25,14 @@ macro_rules! unwrap_tl_response {
 }
 
 #[async_trait]
+pub trait TLConnection: Send + Sync + 'static {
+    async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonlibError>;
+    async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError>;
+}
+
+#[async_trait]
 pub trait TLClient: Send + Sync + Clone + 'static {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError>;
+    async fn get_connection(&self) -> Result<&dyn TLConnection, TonlibError>;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         self.get_connection().await?.exec_impl(req).await
