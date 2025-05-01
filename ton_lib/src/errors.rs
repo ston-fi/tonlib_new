@@ -113,7 +113,7 @@ pub enum TonlibError {
     TVMStackEmpty,
 
     // TonActiveContract
-    #[error("TonContractNotActive: contract is not active")]
+    #[error("TonContractNotActive: caching is not active")]
     TonContractNotActive,
     #[error("TonContractUnexpectedValue: positive int expected, got {0}")]
     TonContractUnexpectedValue(BigInt),

@@ -56,6 +56,7 @@ async-trait = "0.1.88"
 futures-util = "0.3"
 libc = "0.2"
 async-recursion = "1.1.1"
+moka = { version = "0.12.10", features = ["async-lock", "future"] }
 
 [dev-dependencies]
 anyhow = "1.0"

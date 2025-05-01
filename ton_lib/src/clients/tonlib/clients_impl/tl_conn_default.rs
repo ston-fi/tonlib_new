@@ -5,13 +5,13 @@ use std::thread;
 use std::time::Instant;
 
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::clients::tonlib::clients_impl::client_raw::TLClientRaw;
+use crate::clients::tonlib::clients_impl::tl_client_raw::TLClientRaw;
 use crate::clients::tonlib::tl_api::tl_req_ctx::TLRequestCtx;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::clients::tonlib::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsInfo};
 use crate::clients::tonlib::tl_callback::{TLCallback, TLCallbacksStore};
-use crate::clients::tonlib::tl_client::TLClient;
+use crate::clients::tonlib::tl_client::TLClientTrait;
 use crate::clients::tonlib::tl_client_config::{LiteNodeFilter, TLClientConfig};
 use crate::clients::tonlib::TLConnection;
 use crate::errors::TonlibError;
@@ -34,7 +34,7 @@ impl TLConnDefault {
 }
 
 #[async_trait]
-impl TLClient for TLConnDefault {
+impl TLClientTrait for TLConnDefault {
     async fn get_connection(&self) -> Result<&dyn TLConnection, TonlibError> { Ok(self) }
 }
 
