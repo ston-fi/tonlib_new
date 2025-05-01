@@ -22,7 +22,6 @@ pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), Tonli
     if let TLKeyStoreType::Directory { directory } = &config.init_opts.keystore_type {
         std::fs::create_dir_all(directory)?
     }
-    sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
     Ok(())
 }
 

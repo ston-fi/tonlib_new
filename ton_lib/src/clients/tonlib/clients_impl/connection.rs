@@ -80,8 +80,8 @@ async fn new_connection_checked(
             }
         };
     };
-    sys_tonlib_set_verbosity_level(1);
-    sys_tonlib_client_set_verbosity_level(1);
+    sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
+    sys_tonlib_client_set_verbosity_level(config.tonlib_verbosity_level);
     conn
 }
 
