@@ -3,7 +3,6 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::VMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use serde::{Deserialize, Serialize};
-use std::ops::{Deref, DerefMut};
 
 #[derive(Debug)]
 pub struct TVMSendMsgSuccess {
@@ -70,28 +69,43 @@ pub struct TVMRunMethodSuccess {
     pub vm_log: Option<String>,
     pub stack: VMStack,
     pub gas_used: i32,
+    pub raw_response: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TVMRunMethodResponse {
     pub success: bool,
-    pub vm_log: Option<String>,
     pub vm_exit_code: Option<i32>,
+    pub vm_log: Option<String>,
     pub stack: Option<String>,
-    pub missing_library: Option<String>,
     pub gas_used: Option<String>,
+    pub missing_library: Option<String>,
     pub error: Option<String>,
+    #[serde(skip)]
+    pub raw_response: String,
 }
 
 impl TVMRunMethodResponse {
+    pub fn from_json(json: String) -> Result<Self, TonlibError> {
+        let mut value: Self = serde_json::from_str(&json)?;
+        value.raw_response = json;
+        Ok(value)
+    }
+
     pub fn into_success(self) -> Result<TVMRunMethodSuccess, TonlibError> {
         if !self.success {
-            return Err(TonlibError::TVMEmulatorError(unwrap_opt(self.error, "error is None")?));
+            return Err(TonlibError::TVMRunMethodError {
+                vm_exit_code: self.vm_exit_code,
+                response_raw: self.raw_response,
+            });
         }
         let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TonlibError::TVMEmulatorError(serde_json::to_string(&self)?));
+            return Err(TonlibError::TVMRunMethodError {
+                vm_exit_code: self.vm_exit_code,
+                response_raw: self.raw_response,
+            });
         }
 
         let vm_log = self.vm_log;
@@ -103,6 +117,7 @@ impl TVMRunMethodResponse {
             vm_exit_code,
             stack: TLBType::from_boc_b64(&stack)?,
             gas_used,
+            raw_response: self.raw_response,
         })
     }
 }

@@ -1,15 +1,19 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlib::clients_impl::TLConnection;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::clients::tonlib::tl_api::tl_types::{
     TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
-    TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLSmcLibraryResult, TLTxId,
+    TLFullAccountState, TLOptions, TLOptionsInfo, TLRawFullAccountState, TLRawTxs, TLTxId,
 };
 use crate::errors::TonlibError;
+use crate::types::tlb::primitives::LibsDict;
+use crate::types::tlb::tlb_type::TLBType;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
+use std::ops::Deref;
+use std::sync::Arc;
 
 #[macro_export]
 macro_rules! unwrap_tl_response {
@@ -21,9 +25,27 @@ macro_rules! unwrap_tl_response {
     };
 }
 
+#[derive(Clone)]
+pub struct TLClient(Arc<dyn TLClientTrait>);
+
+impl Deref for TLClient {
+    type Target = dyn TLClientTrait;
+    fn deref(&self) -> &Self::Target { self.0.as_ref() }
+}
+
+impl TLClient {
+    pub fn new(client: Arc<dyn TLClientTrait>) -> Self { TLClient(client) }
+}
+
 #[async_trait]
-pub trait TLClient: Send + Sync + Clone + 'static {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError>;
+pub trait TLConnection: Send + Sync + 'static {
+    async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonlibError>;
+    async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError>;
+}
+
+#[async_trait]
+pub trait TLClientTrait: Send + Sync + 'static {
+    async fn get_connection(&self) -> Result<&dyn TLConnection, TonlibError>;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         self.get_connection().await?.exec_impl(req).await
@@ -171,9 +193,14 @@ pub trait TLClient: Send + Sync + Clone + 'static {
     //     }
     // }
     //
-    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<TLSmcLibraryResult, TonlibError> {
+    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<LibsDict, TonlibError> {
         let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
-        unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)
+        let result = unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)?;
+        let mut libs_dict = LibsDict::default();
+        for lib in result.result {
+            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
+        }
+        Ok(libs_dict)
     }
     //
     // async fn smc_get_libraries_ext(

@@ -1,12 +1,13 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm::method_id::TVMMethodId;
 use crate::emulators::tvm::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
+use crate::emulators::tvm::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use std::ffi::CString;
 use tonlib_sys::{
-    tvm_emulator_create, tvm_emulator_run_get_method, tvm_emulator_send_external_message,
+    tvm_emulator_create, tvm_emulator_destroy, tvm_emulator_run_get_method, tvm_emulator_send_external_message,
     tvm_emulator_send_internal_message, tvm_emulator_set_c7, tvm_emulator_set_debug_enabled,
     tvm_emulator_set_gas_limit, tvm_emulator_set_libraries,
 };
@@ -95,7 +96,7 @@ impl TVMEmulator {
         Ok(serde_json::from_str(&json_str)?)
     }
 
-    pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodResponse, TonlibError>
+    pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodSuccess, TonlibError>
     where
         T: Into<TVMMethodId>,
     {
@@ -107,8 +108,12 @@ impl TVMEmulator {
             convert_emulator_response(c_str)?
         };
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
-        Ok(serde_json::from_str(&json_str)?)
+        TVMRunMethodResponse::from_json(json_str)?.into_success()
     }
+}
+
+impl Drop for TVMEmulator {
+    fn drop(&mut self) { unsafe { tvm_emulator_destroy(self.ptr) }; }
 }
 
 unsafe fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {

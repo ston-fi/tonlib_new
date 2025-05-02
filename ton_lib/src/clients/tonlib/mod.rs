@@ -11,6 +11,5 @@ pub mod utils;
 #[cfg(feature = "sys")]
 pub use clients_impl::*;
 pub use tl_callback::*;
-#[cfg(feature = "sys")]
 pub use tl_client::*;
 pub use tl_client_config::*;

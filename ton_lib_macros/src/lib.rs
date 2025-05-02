@@ -6,7 +6,7 @@ use crate::tlb_derive_struct::tlb_derive_struct;
 use proc_macro::TokenStream;
 use proc_macro_crate::{crate_name, FoundCrate};
 use quote::{format_ident, quote};
-use syn::Data;
+use syn::{parse_macro_input, Data, ItemStruct};
 
 #[derive(deluxe::ExtractAttributes)]
 #[deluxe(attributes(tlb_derive))]
@@ -73,4 +73,52 @@ pub fn tlb_derive(input: TokenStream) -> TokenStream {
         }
     }
     .into()
+}
+
+#[proc_macro_attribute]
+pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    let input = parse_macro_input!(item as ItemStruct);
+    let struct_name = &input.ident;
+    let vis = &input.vis;
+    let attrs = &input.attrs;
+    let generics = &input.generics;
+    let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
+
+    let mut new_fields = input.fields.clone();
+    if let syn::Fields::Named(fields) = &mut new_fields {
+        fields.named.push(syn::parse_quote! {
+            pub contract_ctx: ContractCtx
+        });
+    } else {
+        return syn::Error::new_spanned(
+            &input.ident,
+            "with_contract_ctx can only be used on structs with named fields",
+        )
+        .to_compile_error()
+        .into();
+    }
+
+    let output = quote! {
+        #(#attrs)*
+        #vis struct #struct_name #generics #new_fields
+
+        impl #impl_generics TonContract for #struct_name #ty_generics #where_clause {
+            fn ctx(&self) -> &ContractCtx {
+                &self.contract_ctx
+            }
+
+            fn ctx_mut(&mut self) -> &mut ContractCtx {
+                &mut self.contract_ctx
+            }
+
+            fn from_ctx(ctx: ContractCtx) -> Self {
+                Self {
+                    contract_ctx: ctx,
+                }
+            }
+        }
+    };
+    println!("{}", output);
+
+    output.into()
 }

@@ -4,7 +4,7 @@ use crate::clients::tonlib::tl_api::tl_response::TLResponse;
 use crate::errors::TonlibError;
 use std::sync::Arc;
 
-/// Check connection.rs (mostly `run_loop` method) for method execution flow
+/// Check tl_conn_default (mostly `run_loop` method) for method execution flow
 #[allow(unused)]
 pub trait TLCallback: Send + Sync {
     fn on_loop_enter(&self, tag: &str);

@@ -35,6 +35,8 @@ pub enum TonlibError {
     BuilderMeta(String),
 
     // boc
+    #[error("BOCEmpty: can't parse BOC from empty slice")]
+    BOCEmpty,
     #[error("CellType: Unexpected CellType tag: {0}")]
     BOCWrongTypeTag(u8),
     #[error("BOCError: Expected 1 root, got {0}")]
@@ -100,8 +102,11 @@ pub enum TonlibError {
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
     TVMEmulatorResponseParseError(String),
-    #[error("TVMEmulatorRunMethodError: {0}")]
-    TVMEmulatorRunMethodError(String),
+    #[error("TVMRunMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
+    TVMRunMethodError {
+        vm_exit_code: Option<i32>,
+        response_raw: String,
+    },
 
     // TVMStack
     #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]
@@ -110,7 +115,7 @@ pub enum TonlibError {
     TVMStackEmpty,
 
     // TonActiveContract
-    #[error("TonContractNotActive: contract is not active")]
+    #[error("TonContractNotActive: caching is not active")]
     TonContractNotActive,
     #[error("TonContractUnexpectedValue: positive int expected, got {0}")]
     TonContractUnexpectedValue(BigInt),

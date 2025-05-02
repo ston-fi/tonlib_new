@@ -5,7 +5,7 @@ use crate::errors::TonlibError;
 use std::collections::{HashSet, VecDeque};
 use std::ops::Deref;
 
-pub struct TonCellUtils {}
+pub struct TonCellUtils;
 
 impl TonCellUtils {
     /// Result vector will contains only unique hashes
