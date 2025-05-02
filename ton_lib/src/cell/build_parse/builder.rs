@@ -1,11 +1,11 @@
+use crate::cell::build_parse::parser::CellParser;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
-use bitstream_io::{BigEndian, BitRead, BitReader, BitWrite, BitWriter};
+use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use std::cmp::min;
-use std::io::Cursor;
 use std::ops::Deref;
 
 pub struct CellBuilder {
@@ -116,17 +116,18 @@ impl CellBuilder {
                 given: cell.data_bits_len,
             });
         }
+
+        // prepare parser
+        let mut parser = CellParser::new(cell);
+        parser.read_bits(start_bit)?;
+        for _ in 0..start_ref {
+            parser.read_next_ref()?;
+        }
         let slice_data_bits_len = end_bit - start_bit;
-        let mut slice_data = vec![0; slice_data_bits_len.div_ceil(8)];
-
-        let cursor = Cursor::new(cell.data.as_slice());
-        let mut data_reader = BitReader::endian(cursor, BigEndian);
-        data_reader.skip(start_bit as u32)?;
-        data_reader.read_bytes(&mut slice_data)?;
-
+        let slice_data = parser.read_bits(slice_data_bits_len)?;
         self.write_bits(&slice_data, slice_data_bits_len)?;
-        for ref_pos in start_ref..end_ref {
-            self.write_ref(cell.refs[ref_pos].clone())?;
+        for _ in start_ref..end_ref {
+            self.write_ref(parser.read_next_ref()?.clone())?;
         }
         Ok(())
     }

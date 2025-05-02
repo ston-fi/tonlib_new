@@ -25,6 +25,7 @@ impl TLClientTrait for TLClientCaching {
 
 struct Inner {
     tl_client: TLClient,
+    #[allow(unused)]
     libs_cache: moka::future::Cache<TonHash, TonCellRef>,
 }
 

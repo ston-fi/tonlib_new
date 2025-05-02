@@ -4,7 +4,7 @@ use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::adapters::Dict;
 use crate::types::tlb::adapters::TLBRef;
-use crate::types::tlb::block_tlb::tvm::{VMCellSlice, VMStack};
+use crate::types::tlb::block_tlb::tvm::{VMCellSlice, VMStack, VMTuple};
 use num_bigint::BigInt;
 use std::collections::HashMap;
 use std::fmt::{Debug, Display, Formatter};
@@ -22,7 +22,7 @@ pub enum VMStackValue {
     CellSlice(VMCellSlice),
     Builder(VMBuilder), // TODO is not tested
     Cont(VMCont),       // TODO is not tested
-    Tuple(VMTuple),     // TODO is not tested
+    Tuple(VMTuple),
 }
 
 #[derive(Debug, Clone, TLBDerive)]
@@ -170,45 +170,6 @@ pub struct VMContPushInt {
     pub next: Arc<VMCont>,
 }
 
-#[derive(Debug, Clone, TLBDerive)]
-pub enum VMTuple {
-    Cons(VMTupleCons),
-    Nil(VMTupleNil),
-}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub struct VMTupleNil {}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub struct VMTupleCons {
-    #[tlb_derive(adapter = "TLBRef")]
-    pub head: Arc<VMTuple>,
-    #[tlb_derive(adapter = "TLBRef")]
-    pub tail: Arc<VMStackValue>,
-}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub enum VMTupleRef {
-    Nil(VMTupleRefNil),
-    Single(VMTupleRefSingle),
-    Any(VMTupleRefAny),
-}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub struct VMTupleRefNil {}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub struct VMTupleRefSingle {
-    #[tlb_derive(adapter = "TLBRef")]
-    pub entry: Arc<VMStackValue>,
-}
-
-#[derive(Debug, Clone, TLBDerive)]
-pub struct VMTupleRefAny {
-    #[tlb_derive(adapter = "TLBRef")]
-    pub tuple_ref: Arc<VMTuple>,
-}
-
 impl Debug for VMStackValue {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
 }
@@ -224,7 +185,7 @@ impl Display for VMStackValue {
             VMStackValue::CellSlice(v) => write!(f, "CellSlice({})", v.value.deref()),
             VMStackValue::Builder(_) => write!(f, "Builder"),
             VMStackValue::Cont(_) => write!(f, "Cont"),
-            VMStackValue::Tuple(_) => write!(f, "Tuple"),
+            VMStackValue::Tuple(v) => write!(f, "Tuple[{v:?}"),
         }
     }
 }

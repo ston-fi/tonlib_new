@@ -7,7 +7,7 @@ use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use std::ffi::CString;
 use tonlib_sys::{
-    tvm_emulator_create, tvm_emulator_run_get_method, tvm_emulator_send_external_message,
+    tvm_emulator_create, tvm_emulator_destroy, tvm_emulator_run_get_method, tvm_emulator_send_external_message,
     tvm_emulator_send_internal_message, tvm_emulator_set_c7, tvm_emulator_set_debug_enabled,
     tvm_emulator_set_gas_limit, tvm_emulator_set_libraries,
 };
@@ -108,8 +108,12 @@ impl TVMEmulator {
             convert_emulator_response(c_str)?
         };
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
-        serde_json::from_str::<TVMRunMethodResponse>(&json_str)?.into_success()
+        TVMRunMethodResponse::from_json(json_str)?.into_success()
     }
+}
+
+impl Drop for TVMEmulator {
+    fn drop(&mut self) { unsafe { tvm_emulator_destroy(self.ptr) }; }
 }
 
 unsafe fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {

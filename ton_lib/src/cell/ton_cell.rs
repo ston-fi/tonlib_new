@@ -74,20 +74,20 @@ fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize
         // Compact format for cells without references
         writeln!(
             f,
-            "{}Cell {{Type: {:?}, data: [{}], bit_len: {}}}",
-            indent, cell.meta.cell_type, data_display, cell.data_bits_len,
+            "{indent}Cell {{Type: {:?}, data: [{data_display}], bit_len: {}}}",
+            cell.meta.cell_type, cell.data_bits_len
         )
     } else {
         // Full format for cells with references
         writeln!(
             f,
-            "{}Cell x{{Type: {:?}, data: [{}], bit_len: {}, references: [",
-            indent, cell.meta.cell_type, data_display, cell.data_bits_len
+            "{indent}Cell x{{Type: {:?}, data: [{data_display}], bit_len: {}, references: [",
+            cell.meta.cell_type, cell.data_bits_len
         )?;
         for i in 0..cell.refs.len() {
             write_cell_display(f, cell.refs[i].deref(), indent_level + 1)?;
         }
-        writeln!(f, "{}]}}", indent)
+        writeln!(f, "{indent}]}}")
     }
 }
 

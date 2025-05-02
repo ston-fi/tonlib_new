@@ -22,24 +22,24 @@ pub trait TonContract: Send + Sync + Sized {
     fn from_ctx(ctx: ContractCtx) -> Self;
 
     async fn new(address: TonAddress, tl_client: TLClient, tx_id: Option<TLTxId>) -> Result<Self, TonlibError> {
-        let state = match tx_id {
+        let state_raw = match tx_id {
             Some(tx_id) => tl_client.get_account_state_raw_by_tx(&address, tx_id).await?,
             None => tl_client.get_account_state_raw(&address).await?,
         };
         Ok(Self::from_ctx(ContractCtx {
             address,
-            state_raw: state,
+            state_raw,
             tl_client,
         }))
     }
 
     async fn update(&mut self, tx_id: Option<TLTxId>) -> Result<(), TonlibError> {
         let ctx = self.ctx_mut();
-        let state = match tx_id {
+        let state_raw = match tx_id {
             Some(tx_id) => ctx.tl_client.get_account_state_raw_by_tx(&ctx.address, tx_id).await?,
             None => ctx.tl_client.get_account_state_raw(&ctx.address).await?,
         };
-        ctx.state_raw = state;
+        ctx.state_raw = state_raw;
         Ok(())
     }
 

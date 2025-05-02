@@ -27,6 +27,7 @@ impl TLClientTrait for TLClientDefault {
 }
 
 impl TLClientDefault {
+    #[allow(clippy::new_ret_no_self)]
     pub async fn new(mut config: TLClientConfig) -> Result<TLClient, TonlibError> {
         prepare_client_env(&mut config).await?;
 

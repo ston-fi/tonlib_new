@@ -6,7 +6,7 @@ use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L873
 // really tricky to implement with current design,
-#[derive(Clone, Debug)]
+#[derive(Clone, PartialEq, Debug)]
 pub struct VMCellSlice {
     pub value: TonCellRef, // is not part of TLB
     pub cell_original: TonCellRef,

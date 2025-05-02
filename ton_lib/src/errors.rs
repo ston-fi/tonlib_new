@@ -1,4 +1,3 @@
-use crate::emulators::tvm::TVMRunMethodResponse;
 use hex::FromHexError;
 use num_bigint::{BigInt, BigUint};
 use std::env::VarError;
@@ -103,8 +102,11 @@ pub enum TonlibError {
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
     TVMEmulatorResponseParseError(String),
-    #[error("TVMRunMethodError: {0:?}")]
-    TVMRunMethodError(Box<TVMRunMethodResponse>),
+    #[error("TVMRunMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
+    TVMRunMethodError {
+        vm_exit_code: Option<i32>,
+        response_raw: String,
+    },
 
     // TVMStack
     #[error("TVMStackError: fail to pop specified type. expected: {0}, got: {1}")]

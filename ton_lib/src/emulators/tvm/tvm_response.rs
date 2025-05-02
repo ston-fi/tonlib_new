@@ -69,6 +69,7 @@ pub struct TVMRunMethodSuccess {
     pub vm_log: Option<String>,
     pub stack: VMStack,
     pub gas_used: i32,
+    pub raw_response: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -81,16 +82,30 @@ pub struct TVMRunMethodResponse {
     pub gas_used: Option<String>,
     pub missing_library: Option<String>,
     pub error: Option<String>,
+    #[serde(skip)]
+    pub raw_response: String,
 }
 
 impl TVMRunMethodResponse {
+    pub fn from_json(json: String) -> Result<Self, TonlibError> {
+        let mut value: Self = serde_json::from_str(&json)?;
+        value.raw_response = json;
+        Ok(value)
+    }
+
     pub fn into_success(self) -> Result<TVMRunMethodSuccess, TonlibError> {
         if !self.success {
-            return Err(TonlibError::TVMRunMethodError(self.into()));
+            return Err(TonlibError::TVMRunMethodError {
+                vm_exit_code: self.vm_exit_code,
+                response_raw: self.raw_response,
+            });
         }
         let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TonlibError::TVMRunMethodError(self.into()));
+            return Err(TonlibError::TVMRunMethodError {
+                vm_exit_code: self.vm_exit_code,
+                response_raw: self.raw_response,
+            });
         }
 
         let vm_log = self.vm_log;
@@ -102,6 +117,7 @@ impl TVMRunMethodResponse {
             vm_exit_code,
             stack: TLBType::from_boc_b64(&stack)?,
             gas_used,
+            raw_response: self.raw_response,
         })
     }
 }
