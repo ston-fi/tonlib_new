@@ -87,7 +87,7 @@ pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
     let mut new_fields = input.fields.clone();
     if let syn::Fields::Named(fields) = &mut new_fields {
         fields.named.push(syn::parse_quote! {
-            pub contract_ctx: ContractCtx
+            contract_ctx: ContractCtx
         });
     } else {
         return syn::Error::new_spanned(&input.ident, "ton_contract works only for structs named fields")

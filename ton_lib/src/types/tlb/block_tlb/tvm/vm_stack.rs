@@ -44,8 +44,15 @@ impl VMStack {
 
     pub fn pop_tiny_int(&mut self) -> Result<i64, TonlibError> { extract_stack_val!(self.pop(), TinyInt) }
     pub fn pop_int(&mut self) -> Result<BigInt, TonlibError> { extract_stack_val!(self.pop(), Int) }
-    pub fn pop_cell(&mut self) -> Result<TonCellRef, TonlibError> { extract_stack_val!(self.pop(), Cell) }
-    pub fn pop_cell_slice(&mut self) -> Result<TonCellRef, TonlibError> { extract_stack_val!(self.pop(), CellSlice) }
+    // extract cell & cell_slice
+    pub fn pop_cell(&mut self) -> Result<TonCellRef, TonlibError> {
+        match self.pop() {
+            None => Err(TonlibError::TVMStackEmpty),
+            Some(VMStackValue::Cell(cell)) => Ok(cell.value),
+            Some(VMStackValue::CellSlice(slice)) => Ok(slice.value),
+            _ => Err(TonlibError::TVMStackWrongType("Cell".to_string(), format!("{:?}", self))),
+        }
+    }
 }
 
 impl TLBType for VMStack {
@@ -64,7 +71,6 @@ impl TLBType for VMStack {
             vm_stack.push(TLBType::read(&mut rest_parser)?); // then read "item" itself
             rest = new_rest;
         }
-        vm_stack.reverse();
         Ok(vm_stack)
     }
 
@@ -158,7 +164,7 @@ mod tests {
 
         let mut stack_parsed = VMStack::from_cell(&stack_cell)?;
         assert_eq!(stack_parsed.len(), 1);
-        assert_eq!(stack_parsed.pop_cell_slice()?.deref(), &TonAddress::ZERO.to_cell()?);
+        assert_eq!(stack_parsed.pop_cell()?.deref(), &TonAddress::ZERO.to_cell()?);
         Ok(())
     }
 
@@ -199,7 +205,7 @@ mod tests {
 
         let mut stack_parsed = VMStack::from_cell(&stack_cell)?;
         assert_eq!(stack_parsed.len(), 3);
-        assert_eq!(stack_parsed.pop_cell_slice()?.deref(), &TonAddress::ZERO.to_cell()?);
+        assert_eq!(stack_parsed.pop_cell()?.deref(), &TonAddress::ZERO.to_cell()?);
         assert_eq!(stack_parsed.pop_int()?, 2.into());
         assert_eq!(stack_parsed.pop_tiny_int()?, 1);
         Ok(())

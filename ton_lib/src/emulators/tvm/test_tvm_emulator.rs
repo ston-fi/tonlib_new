@@ -32,7 +32,7 @@ fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {
 
     let mut emulated = emulator.run_method("get_wallet_address", &stack.to_boc(false)?)?;
 
-    let emulated_addr = TonAddress::from_cell(emulated.stack.pop_cell_slice()?.deref())?;
+    let emulated_addr = TonAddress::from_cell(emulated.stack.pop_cell()?.deref())?;
     assert_eq!(emulated_addr, TonAddress::from_str("EQCGY3OVLtD9KRcOsP2ldQDtuY0FMzV7wPoxjrFbayBXc23c")?);
 
     // USDT
@@ -48,7 +48,7 @@ fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {
 
     let mut emulated = emulator.run_method("get_wallet_address", &stack.to_boc(false)?)?;
 
-    let emulated_addr = TonAddress::from_cell(emulated.stack.pop_cell_slice()?.deref())?;
+    let emulated_addr = TonAddress::from_cell(emulated.stack.pop_cell()?.deref())?;
     assert_eq!(
         emulated_addr,
         TonAddress::from_str("0:89c154a4225ebfa810891236ba01975f1f8860d2b090be3036fa05c36b53c77c")?
@@ -109,7 +109,7 @@ fn test_tvm_emulator_with_libs() -> anyhow::Result<()> {
     emulator.set_libs(&emulator_libs_boc)?;
 
     let mut emulated_result = emulator.run_method("get_wallet_address", &stack.to_boc(false)?)?;
-    let emulated_addr = TonAddress::from_cell(emulated_result.stack.pop_cell_slice()?.deref())?;
+    let emulated_addr = TonAddress::from_cell(emulated_result.stack.pop_cell()?.deref())?;
 
     assert_eq!(emulated_addr, expected_address);
     Ok(())

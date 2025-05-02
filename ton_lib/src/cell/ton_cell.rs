@@ -72,9 +72,9 @@ fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize
 
     if cell.refs.is_empty() {
         // Compact format for cells without references
-        writeln!(
+        write!(
             f,
-            "{indent}Cell {{Type: {:?}, data: [{data_display}], bit_len: {}}}",
+            "{indent}Cell {{Type: {:?}, data: [{data_display}], bit_len: {}, refs: []}}",
             cell.meta.cell_type, cell.data_bits_len
         )
     } else {

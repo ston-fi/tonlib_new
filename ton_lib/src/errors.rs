@@ -119,9 +119,8 @@ pub enum TonlibError {
     // TonActiveContract
     #[error("TonContractNotActive: caching is not active")]
     TonContractNotActive,
-    #[error("TonContractUnexpectedValue: positive int expected, got {0}")]
-    TonContractUnexpectedValue(BigInt),
-
+    #[error("TonContractUnexpectedValue: expected: {expected}, actual: {actual}")]
+    TonContractUnexpectedValue { expected: String, actual: String },
     #[error("CustomError: {0}")]
     CustomError(String),
     #[error("UnexpectedError: {0}")]
