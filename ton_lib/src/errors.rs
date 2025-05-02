@@ -82,6 +82,8 @@ pub enum TonlibError {
     LiteClientReqTimeout(Box<(Request, Duration)>),
 
     // TonlibClient
+    #[error("TLClientCreationFailed: tonlib_client_json_create returns null")]
+    TLClientCreationFailed,
     #[error("TLClientWrongResult: expected type: {0}, got: {1}")]
     TLClientWrongResponse(String, String),
     #[error("TLInvalidArguments: {0}")]
@@ -94,7 +96,7 @@ pub enum TonlibError {
     TLWrongUsage(String),
 
     // TVM
-    #[error("TVMEmulatorCreationFailed: fail to create TVM emulator")]
+    #[error("TVMEmulatorCreationFailed: tvm_emulator_create returns null")]
     TVMEmulatorCreationFailed,
     #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]
     TVMEmulatorSetFailed(&'static str),

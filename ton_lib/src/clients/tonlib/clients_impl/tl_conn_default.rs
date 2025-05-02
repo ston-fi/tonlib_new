@@ -54,8 +54,6 @@ async fn new_connection_checked(
 ) -> Result<TLConnDefault, TonlibError> {
     let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
-        sys_tonlib_set_verbosity_level(0);
-        sys_tonlib_client_set_verbosity_level(0);
         match config.connection_check {
             LiteNodeFilter::Health => match conn.get_mc_info().await {
                 Ok(info) => match conn.get_block_header(info.last).await {
@@ -92,12 +90,18 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let tag = format!("ton-conn-{conn_id}");
 
     let inner = Arc::new(Inner {
-        client_raw: TLClientRaw::new(tag.clone()),
+        client_raw: TLClientRaw::new(tag.clone())?,
         active_requests: Mutex::new(HashMap::new()),
         semaphore,
         next_request_id: AtomicU64::new(0),
         callbacks: config.callbacks.clone(),
     });
+    let init_log_level = match config.tonlib_verbosity_level {
+        4 => 1,
+        _ => 0,
+    };
+    sys_tonlib_set_verbosity_level(init_log_level);
+    sys_tonlib_client_set_verbosity_level(init_log_level);
 
     let inner_weak = Arc::downgrade(&inner);
     let callbacks = config.callbacks.clone();

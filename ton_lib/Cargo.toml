@@ -59,12 +59,12 @@ async-recursion = "1.1.1"
 moka = { version = "0.12.10", features = ["async-lock", "future"] }
 
 [dev-dependencies]
+ton_lib = { path = "../ton_lib", features = ["sys"] }
+tonlib-core = "0.25.2"
 anyhow = "1.0"
 tokio-test = "0.4"
-tonlib-core = "0.24.2"
 criterion = "0.5"
 sha2 = {version = "0.10", features = ["asm"]} # strongly recommend to enable it for your application
-hex = "0.4.3"
 tokio = { version = "1.43", features = ["rt", "macros"] }
 log4rs = "1.3"
 

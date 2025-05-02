@@ -14,7 +14,6 @@ use ton_lib::types::ton_address::TonAddress;
 #[tokio::test]
 async fn test_tl_client_default() -> anyhow::Result<()> {
     let tl_client = make_tl_client_default(true, true).await?;
-
     let mc_info = tl_client.get_mc_info().await?;
     assert_ne!(mc_info.last.seqno, 0);
 

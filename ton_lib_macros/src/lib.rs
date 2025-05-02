@@ -90,12 +90,9 @@ pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
             pub contract_ctx: ContractCtx
         });
     } else {
-        return syn::Error::new_spanned(
-            &input.ident,
-            "with_contract_ctx can only be used on structs with named fields",
-        )
-        .to_compile_error()
-        .into();
+        return syn::Error::new_spanned(&input.ident, "ton_contract works only for structs named fields")
+            .to_compile_error()
+            .into();
     }
 
     let output = quote! {
@@ -118,7 +115,5 @@ pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
             }
         }
     };
-    println!("{}", output);
-
     output.into()
 }
