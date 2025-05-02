@@ -4,7 +4,7 @@ use tonlib_core::cell::CellBuilder as TonlibCellBuilder;
 
 const ITERATIONS_COUNT: usize = 100;
 
-fn build_empty_cell_ton_lib() {
+fn build_empty_cell_tonlib() {
     for _ in 0..ITERATIONS_COUNT {
         let mut builder = CellBuilder::new();
         builder.write_ref(CellBuilder::new().build().unwrap().into_ref()).unwrap();
@@ -22,7 +22,7 @@ fn build_empty_cell_tonlib_core() {
     }
 }
 
-fn build_full_cell_ton_lib() {
+fn build_full_cell_tonlib() {
     for _ in 0..ITERATIONS_COUNT {
         let mut builder1 = CellBuilder::new();
         builder1.write_bits([1, 2, 3], 24).unwrap();
@@ -65,10 +65,10 @@ fn build_full_cell_tonlib_core() {
 }
 
 fn benchmark_functions(c: &mut Criterion) {
-    c.bench_function("build_empty_cell_ton_lib", |b| b.iter(build_empty_cell_ton_lib));
+    c.bench_function("build_empty_cell_tonlib", |b| b.iter(build_empty_cell_tonlib));
     c.bench_function("build_empty_cell_tonlib_core", |b| b.iter(build_empty_cell_tonlib_core));
 
-    c.bench_function("build_full_cell_ton_lib", |b| b.iter(build_full_cell_ton_lib));
+    c.bench_function("build_full_cell_tonlib", |b| b.iter(build_full_cell_tonlib));
     c.bench_function("build_full_cell_tonlib_core", |b| b.iter(build_full_cell_tonlib_core));
 }
 

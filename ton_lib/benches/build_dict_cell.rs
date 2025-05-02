@@ -19,7 +19,7 @@ static DICT_DATA: LazyLock<HashMap<usize, usize>> = LazyLock::new(|| {
     dict
 });
 
-fn build_dict_ton_lib() {
+fn build_dict_tonlib() {
     for _ in 0..ITERATIONS_COUNT {
         let mut builder = CellBuilder::new();
         let data_clone = DICT_DATA.clone(); // must do it to compare with tonlib_core
@@ -40,7 +40,7 @@ fn build_dict_tonlib_core() {
 }
 
 fn benchmark_functions(c: &mut Criterion) {
-    c.bench_function("build_dict_ton_lib", |b| b.iter(build_dict_ton_lib));
+    c.bench_function("build_dict_tonlib", |b| b.iter(build_dict_tonlib));
     c.bench_function("build_dict_tonlib_core", |b| b.iter(build_dict_tonlib_core));
 }
 
