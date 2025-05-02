@@ -55,10 +55,7 @@ impl VMTuple {
 }
 
 impl TLBType for VMTuple {
-    const PREFIX: TLBPrefix = TLBPrefix {
-        value: 0x07,
-        bits_len: 8,
-    };
+    const PREFIX: TLBPrefix = TLBPrefix::new(0x07, 8);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let len: usize = parser.read_num(16)?;
