@@ -8,7 +8,7 @@ use ton_lib::contracts::ton_contract::TonContract;
 use ton_lib::types::ton_address::TonAddress;
 
 #[tokio::test]
-async fn test_all() -> anyhow::Result<()> {
+async fn test_contracts_all() -> anyhow::Result<()> {
     let tl_client = make_tl_client_default(true, false).await?;
     assert_jetton_wallet(&tl_client).await?;
     Ok(())
