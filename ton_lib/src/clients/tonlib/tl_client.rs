@@ -38,13 +38,13 @@ impl TLClient {
 }
 
 #[async_trait]
-pub trait TLConnection: Send + Sync + 'static {
+pub trait TLConnection: Send + Sync {
     async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonlibError>;
     async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError>;
 }
 
 #[async_trait]
-pub trait TLClientTrait: Send + Sync + 'static {
+pub trait TLClientTrait: Send + Sync {
     async fn get_connection(&self) -> Result<&dyn TLConnection, TonlibError>;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
@@ -192,15 +192,21 @@ pub trait TLClientTrait: Send + Sync + 'static {
     //         )),
     //     }
     // }
-    //
-    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<LibsDict, TonlibError> {
+
+    /// May return less libraries when requested
+    /// Check it on user side if you need it
+    /// If no libraries found, returns None
+    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<Option<LibsDict>, TonlibError> {
         let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
         let result = unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)?;
+        if result.result.is_empty() {
+            return Ok(None);
+        }
         let mut libs_dict = LibsDict::default();
         for lib in result.result {
             libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
         }
-        Ok(libs_dict)
+        Ok(Some(libs_dict))
     }
     //
     // async fn smc_get_libraries_ext(
