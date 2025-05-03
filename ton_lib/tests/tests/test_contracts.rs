@@ -8,7 +8,7 @@ use ton_lib::contracts::jetton_wallet::JettonWallet;
 use ton_lib::contracts::methods::get_jetton_data::GetJettonData;
 use ton_lib::contracts::methods::get_wallet_address::GetWalletAddress;
 use ton_lib::contracts::methods::get_wallet_data::GetWalletData;
-use ton_lib::contracts::ton_contract::TonContract;
+use ton_lib::contracts::ton_contract::TonContractTrait;
 use ton_lib::contracts::ton_wallet::WalletContract;
 use ton_lib::types::ton_address::TonAddress;
 

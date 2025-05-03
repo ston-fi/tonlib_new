@@ -99,7 +99,7 @@ pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
         #(#attrs)*
         #vis struct #struct_name #generics #new_fields
 
-        impl #impl_generics TonContract for #struct_name #ty_generics #where_clause {
+        impl #impl_generics TonContractTrait for #struct_name #ty_generics #where_clause {
             fn ctx(&self) -> &ContractCtx {
                 &self.contract_ctx
             }

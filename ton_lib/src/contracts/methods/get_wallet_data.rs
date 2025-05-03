@@ -1,5 +1,5 @@
 use crate::cell::ton_cell::TonCellRef;
-use crate::contracts::ton_contract::TonContract;
+use crate::contracts::ton_contract::TonContractTrait;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::tvm::VMStack;
@@ -9,9 +9,9 @@ use async_trait::async_trait;
 use std::ops::Deref;
 
 #[async_trait]
-pub trait GetWalletData: TonContract {
+pub trait GetWalletData: TonContractTrait {
     async fn get_wallet_data(&self) -> Result<GetWalletDataResult, TonlibError> {
-        let mut run_result = self.run_method("get_wallet_data", &VMStack::default()).await?;
+        let mut run_result = self.run_method("get_wallet_data", &VMStack::default(), None).await?;
         GetWalletDataResult::from_stack(&mut run_result.stack)
     }
 }

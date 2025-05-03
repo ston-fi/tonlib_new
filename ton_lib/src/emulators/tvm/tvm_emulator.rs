@@ -20,18 +20,14 @@ pub struct TVMEmulator {
 const DEFAULT_TVM_LOG_VERBOSITY: u32 = 1;
 
 impl TVMEmulator {
-    pub fn new(code_boc: &[u8], data_boc: &[u8]) -> Result<Self, TonlibError> {
+    pub fn new(code_boc: &[u8], data_boc: &[u8], c7: &TVMEmulatorC7) -> Result<Self, TonlibError> {
         let code = CString::new(STANDARD.encode(code_boc.as_ref()))?;
         let data = CString::new(STANDARD.encode(data_boc.as_ref()))?;
         let ptr = unsafe { tvm_emulator_create(code.as_ptr(), data.as_ptr(), DEFAULT_TVM_LOG_VERBOSITY) };
         if ptr.is_null() {
             return Err(TonlibError::TVMEmulatorCreationFailed);
         }
-        Ok(TVMEmulator { ptr })
-    }
-
-    pub fn new_with_c7(code_boc: &[u8], data_boc: &[u8], c7: &TVMEmulatorC7) -> Result<Self, TonlibError> {
-        let mut emulator = TVMEmulator::new(code_boc, data_boc)?;
+        let mut emulator = TVMEmulator { ptr };
         emulator.set_c7(c7)?;
         Ok(emulator)
     }
@@ -115,6 +111,10 @@ impl TVMEmulator {
 impl Drop for TVMEmulator {
     fn drop(&mut self) { unsafe { tvm_emulator_destroy(self.ptr) }; }
 }
+
+// no multithread access to internal pointer => it's safe
+unsafe impl Send for TVMEmulator {}
+unsafe impl Sync for TVMEmulator {}
 
 unsafe fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {
     let json_str = std::ffi::CStr::from_ptr(c_str).to_str()?.to_string();

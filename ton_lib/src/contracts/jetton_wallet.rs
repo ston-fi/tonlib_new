@@ -1,6 +1,6 @@
 use crate::contracts::methods::get_wallet_data::GetWalletData;
 use crate::contracts::ton_contract::ContractCtx;
-use crate::contracts::ton_contract::TonContract;
+use crate::contracts::ton_contract::TonContractTrait;
 use ton_lib_macros::ton_contract;
 
 #[ton_contract]
