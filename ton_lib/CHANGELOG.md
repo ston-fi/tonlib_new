@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.16](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.15...ton_lib-v0.0.16) - 2025-05-03
+
+### Other
+
+- add jetton_master, jetton_wallet contract support
+
 ## [0.0.15](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.14...ton_lib-v0.0.15) - 2025-05-01
 
 ### Other
