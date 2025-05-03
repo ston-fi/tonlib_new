@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::tvm::{VMCell, VMCellSlice, VMInt, VMStackValue, VMTinyInt};
+use crate::types::tlb::block_tlb::tvm::{VMCell, VMCellSlice, VMInt, VMStackValue, VMTinyInt, VMTuple};
 use crate::types::tlb::tlb_type::TLBType;
 use num_bigint::BigInt;
 use std::fmt::Display;
@@ -41,6 +41,7 @@ impl VMStack {
     pub fn push_cell_slice(&mut self, cell: TonCellRef) {
         self.push(VMStackValue::CellSlice(VMCellSlice::from_cell(cell)));
     }
+    pub fn push_tuple(&mut self, tuple: VMTuple) { self.push(VMStackValue::Tuple(tuple)); }
 
     pub fn pop_tiny_int(&mut self) -> Result<i64, TonlibError> { extract_stack_val!(self.pop(), TinyInt) }
     pub fn pop_int(&mut self) -> Result<BigInt, TonlibError> { extract_stack_val!(self.pop(), Int) }
@@ -51,6 +52,13 @@ impl VMStack {
             Some(VMStackValue::Cell(cell)) => Ok(cell.value),
             Some(VMStackValue::CellSlice(slice)) => Ok(slice.value),
             _ => Err(TonlibError::TVMStackWrongType("Cell".to_string(), format!("{:?}", self))),
+        }
+    }
+    pub fn pop_tuple(&mut self) -> Result<VMTuple, TonlibError> {
+        match self.pop() {
+            None => Err(TonlibError::TVMStackEmpty),
+            Some(VMStackValue::Tuple(tuple)) => Ok(tuple),
+            Some(rest) => Err(TonlibError::TVMStackWrongType("Tuple".to_string(), format!("{rest:?}"))),
         }
     }
 }
