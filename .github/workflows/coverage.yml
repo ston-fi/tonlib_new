@@ -18,7 +18,7 @@ jobs:
       - name: Install libraries
         run: |
           sudo apt-get update
-          sudo apt-get install -y libsodium-dev libsecp256k1-dev liblz4-dev
+          sudo apt-get install -y libsodium-dev libsecp256k1-dev liblz4-dev zlib1g-dev
       - uses: actions/checkout@v4
       - name: Install tarpaulin
         run: cargo install cargo-tarpaulin
