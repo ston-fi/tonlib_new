@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.12](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.11...ton_lib_macros-v0.0.12) - 2025-05-03
+
+### Other
+
+- update contract signature, handle no-libs in tl-response properly
+
 ## [0.0.11](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.10...ton_lib_macros-v0.0.11) - 2025-05-03
 
 ### Other
