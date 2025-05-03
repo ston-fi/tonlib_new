@@ -9,7 +9,7 @@ pub struct JettonWalletContract {}
 
 impl JettonWalletContract {
     pub async fn get_wallet_data(&self) -> Result<GetWalletDataResult, TonlibError> {
-        let run_result = self.run_method("get_wallet_data", &VMStack::default()).await?;
-        GetWalletDataResult::from_stack(run_result.stack)
+        let mut run_result = self.run_method("get_wallet_data", &VMStack::default()).await?;
+        GetWalletDataResult::from_stack(&mut run_result.stack)
     }
 }

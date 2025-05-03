@@ -1,5 +1,5 @@
 use hex::FromHexError;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
 use std::env::VarError;
 use std::time::Duration;
 use thiserror::Error;
@@ -116,11 +116,13 @@ pub enum TonlibError {
     #[error("TVMStackError: stack is empty")]
     TVMStackEmpty,
 
+    // General errors
+    #[error("UnexpectedValue: expected: {expected}, actual: {actual}")]
+    UnexpectedValue { expected: String, actual: String },
+
     // TonActiveContract
     #[error("TonContractNotActive: caching is not active")]
     TonContractNotActive,
-    #[error("TonContractUnexpectedValue: expected: {expected}, actual: {actual}")]
-    TonContractUnexpectedValue { expected: String, actual: String },
     #[error("CustomError: {0}")]
     CustomError(String),
     #[error("UnexpectedError: {0}")]

@@ -3,7 +3,7 @@ use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::TLBDict;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use num_bigint::BigUint;
+use num_bigint::{BigInt, BigUint};
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -32,6 +32,19 @@ impl Grams {
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
     pub fn zero() -> Self { Grams::new(0u32) }
+    pub fn from_signed<T: Into<BigInt>>(amount: T) -> Result<Self, TonlibError> {
+        let amount = amount.into();
+        let unsigned = match amount.to_biguint() {
+            Some(amount) => amount,
+            None => {
+                return Err(TonlibError::UnexpectedValue {
+                    expected: "positive int".to_string(),
+                    actual: format!("{amount}"),
+                })
+            }
+        };
+        Ok(Self::new(unsigned))
+    }
 }
 
 impl CurrencyCollection {
