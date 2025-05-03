@@ -1,3 +1,4 @@
+/// it's not types itself, but functions that helps read/write rust types to TonCell
 mod const_len;
 mod dict;
 mod tlb_ref;
