@@ -9,7 +9,7 @@ use pbkdf2::password_hash::Output;
 use pbkdf2::{pbkdf2_hmac, Params};
 use sha2::Sha512;
 
-const WORDLIST_EN: &str = include_str!("../../../../resources/mnemonics/wordlist_en.txt");
+const WORDLIST_EN: &str = include_str!("../../../resources/mnemonics/wordlist_en.txt");
 const PBKDF_ITERATIONS: u32 = 100000;
 
 lazy_static! {
