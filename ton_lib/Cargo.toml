@@ -58,6 +58,10 @@ futures-util = "0.3"
 libc = "0.2"
 async-recursion = "1.1.1"
 moka = { version = "0.12.10", features = ["async-lock", "future"] }
+hmac = "0.12.1"
+lazy_static = "1.5.0"
+pbkdf2 = { version = "0.12.2", features = ["simple"] }
+nacl = "0.5.3"
 
 [dev-dependencies]
 ton_lib = { path = "../ton_lib", features = ["sys"] }

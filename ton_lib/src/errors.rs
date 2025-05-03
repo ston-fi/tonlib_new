@@ -1,4 +1,5 @@
 use hex::FromHexError;
+use hmac::digest::crypto_common;
 use num_bigint::BigUint;
 use std::env::VarError;
 use std::time::Duration;
@@ -116,6 +117,18 @@ pub enum TonlibError {
     #[error("TVMStackError: stack is empty")]
     TVMStackEmpty,
 
+    // Mnemonic
+    #[error("MnemonicUnexpectedWordCount: expected 24 words, got {0}")]
+    MnemonicUnexpectedWordCount(usize),
+    #[error("MnemonicInvalidWord: {0}")]
+    MnemonicInvalidWord(String),
+    #[error("MnemonicInvalidFirstByte: {0}")]
+    MnemonicInvalidFirstByte(u8),
+    #[error("MnemonicInvalidPasslessFirstByte: {0}")]
+    MnemonicInvalidPasslessFirstByte(u8),
+    #[error("MnemonicPassHashError: {0}")]
+    MnemonicPassHashError(String),
+
     // General errors
     #[error("UnexpectedValue: expected: {expected}, actual: {actual}")]
     UnexpectedValue { expected: String, actual: String },
@@ -154,6 +167,8 @@ pub enum TonlibError {
     RecvError(#[from] tokio::sync::oneshot::error::RecvError),
     #[error("{0}")]
     VarError(#[from] VarError),
+    #[error("{0}")]
+    HmacInvalidLen(#[from] crypto_common::InvalidLength),
 }
 
 impl<T> From<TonlibError> for Result<T, TonlibError> {
