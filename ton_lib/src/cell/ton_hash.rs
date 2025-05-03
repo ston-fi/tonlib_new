@@ -1,3 +1,4 @@
+use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
@@ -34,6 +35,16 @@ impl TonHash {
     pub fn from_vec(data: Vec<u8>) -> Result<Self, TonlibError> {
         check_bytes_len(&data)?;
         Ok(Self(TonHashData::Vec(data)))
+    }
+
+    pub fn from_num<T: TonCellNum>(num: &T) -> Result<Self, TonlibError> {
+        if T::IS_PRIMITIVE {
+            return Err(TonlibError::TonHashWrongLen {
+                exp: TonHash::BYTES_LEN,
+                given: 128, // max primitive size
+            });
+        }
+        Self::from_bytes(num.tcn_to_bytes())
     }
 
     pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
