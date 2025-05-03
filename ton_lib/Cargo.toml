@@ -22,6 +22,7 @@ include = [
 ]
 
 [features]
+default = ["sys"]
 sys = ["dep:tonlib-sys"]
 
 
