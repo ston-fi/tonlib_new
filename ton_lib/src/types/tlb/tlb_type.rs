@@ -85,7 +85,7 @@ pub trait TLBType: Sized {
         }
 
         // we handle cell_underflow above - all other errors can be rethrown
-        let actual_val: u128 = reader.read_num(Self::PREFIX.bits_len)?;
+        let actual_val: usize = reader.read_num(Self::PREFIX.bits_len)?;
 
         if actual_val != Self::PREFIX.value {
             reader.seek_bits(-(Self::PREFIX.bits_len as i32))?; // revert reader position
@@ -109,11 +109,11 @@ pub trait TLBType: Sized {
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct TLBPrefix {
-    pub value: u128,
+    pub value: usize,
     pub bits_len: usize,
 }
 
 impl TLBPrefix {
     pub const NULL: TLBPrefix = TLBPrefix::new(0, 0);
-    pub const fn new(value: u128, bits_len: usize) -> Self { TLBPrefix { value, bits_len } }
+    pub const fn new(value: usize, bits_len: usize) -> Self { TLBPrefix { value, bits_len } }
 }

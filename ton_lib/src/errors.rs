@@ -50,8 +50,8 @@ pub enum TonlibError {
     // tlb
     #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
     TLBWrongPrefix {
-        exp: u128,
-        given: u128,
+        exp: usize,
+        given: usize,
         bits_exp: usize,
         bits_left: usize,
     },

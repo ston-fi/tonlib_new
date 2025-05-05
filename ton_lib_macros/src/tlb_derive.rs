@@ -8,7 +8,7 @@ use syn::Data;
 #[derive(deluxe::ExtractAttributes)]
 #[deluxe(attributes(tlb_derive))]
 pub(crate) struct TLBHeaderAttrs {
-    pub(crate) prefix: Option<u128>,       // use 0 as default
+    pub(crate) prefix: Option<usize>,      // use 0 as default
     pub(crate) bits_len: Option<usize>,    // use 0 as default
     pub(crate) ensure_empty: Option<bool>, // use false as default
 }

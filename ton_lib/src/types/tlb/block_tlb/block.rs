@@ -6,6 +6,8 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use std::str::FromStr;
+use std::sync::LazyLock;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Debug, Clone, TLBDerive)]
@@ -84,16 +86,25 @@ pub struct BlockIdExt {
     pub file_hash: TonHash,
 }
 
+impl BlockIdExt {
+    pub const ZERO_BLOCK_ID: LazyLock<BlockIdExt> = LazyLock::new(|| BlockIdExt {
+        shard_id: ShardIdent {
+            workchain: TON_MASTERCHAIN_ID,
+            shard: TON_SHARD_FULL,
+        },
+        seqno: 0,
+        root_hash: TonHash::from_str("17a3a92992aabea785a7a090985a265cd31f323d849da51239737e321fb05569").unwrap(),
+        file_hash: TonHash::from_str("5e994fcf4d425c0a6ce6a792594b7173205f740a39cd56f537defd28b48a0f6e").unwrap(),
+    });
+}
+
 impl ShardIdent {
     pub fn new(workchain: i32, shard: u64) -> Self { Self { workchain, shard } }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
 }
 
 impl TLBType for ShardIdent {
-    const PREFIX: TLBPrefix = TLBPrefix {
-        value: 0b00,
-        bits_len: 2,
-    };
+    const PREFIX: TLBPrefix = TLBPrefix::new(0b00, 2);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let prefix_len: u32 = parser.read_num(6)?;
