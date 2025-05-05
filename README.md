@@ -12,13 +12,14 @@ Build and read custom cells using [TonCell](ton_lib/src/cell/ton_cell.rs), and s
 
 ```rust
 fn main() -> anyhow::Result<()> {
-    let mut builder = ton_lib::cell::build_parse::builder::CellBuilder::new();
-    builder.write_bit(true)?;
-    builder.write_bits([1, 2, 3], 24)?;
-    builder.write_num(&42, 32)?;
-    let cell = builder.build()?;
-    let boc = BOC::new(cell);
-    let boc_b64 = boc.to_b64()?;
+    use ton_lib::cell::ton_cell::TonCell;
+    let mut builder = TonCell::builder();
+    builder.write_bits([1,2,3], 24).unwrap();
+    let cell = builder.build().unwrap();
+    assert_eq!(cell.data, vec![1, 2, 3]);
+    let mut parser = cell.parser();
+    let data = parser.read_bits(24).unwrap();
+    assert_eq!(data, [1, 2, 3]);
 }
 ```
 

@@ -35,7 +35,7 @@ impl JettonTransferMsg {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cell::build_parse::builder::CellBuilder;
+
     use crate::types::tlb::primitives::EitherRefLayout;
     use crate::types::tlb::tlb_type::TLBType;
     use crate::types::ton_address::TonAddress;
@@ -47,7 +47,7 @@ mod tests {
         let msg_boc = "b5ee9c720101020100650001b40f8a7ea55ecf57d735066d2460246139ca800800f52547902494daa24c332ecb41067ee9b6bae7b244a68ce0c5007ddc22f4b01f001f5d9cc275e5514e8386836ef59caa82e043c006d404f512ab7ee893e38f5f8d8847868c0101000be8e8e46c0020";
         let msg = JettonTransferMsg::from_boc_hex(msg_boc)?;
 
-        let mut pl_builder = CellBuilder::new();
+        let mut pl_builder = TonCell::builder();
         pl_builder.write_bits([232, 232, 228, 108, 0, 0], 42)?;
         let payload = pl_builder.build()?;
 

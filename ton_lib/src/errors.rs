@@ -18,6 +18,8 @@ pub enum TonlibError {
     ParserDataUnderflow { req: usize, left: usize },
     #[error("ParserError: New position is {new_pos}, but data_bits_len is {bits_len}")]
     ParserBadPosition { new_pos: i32, bits_len: usize },
+    #[error("ParserWrongSlicePosition: expecting bit_pos=0, next_ref_pos=0. Got bit_position={bit_pos}, next_ref_position={next_ref_pos}")]
+    ParserWrongSlicePosition { bit_pos: usize, next_ref_pos: usize },
     #[error("ParserError: No ref with index={req}")]
     ParserRefsUnderflow { req: usize },
     #[error("ParserError: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]

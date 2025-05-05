@@ -1,24 +1,19 @@
-use std::collections::HashMap;
-use std::{cmp, fmt};
-
 use crate::errors::TonlibError;
 use hmac::{Hmac, Mac};
-use lazy_static::lazy_static;
 use nacl::sign::generate_keypair;
 use pbkdf2::password_hash::Output;
 use pbkdf2::{pbkdf2_hmac, Params};
 use sha2::Sha512;
+use std::collections::HashSet;
+use std::sync::LazyLock;
+use std::{cmp, fmt};
 
 const WORDLIST_EN: &str = include_str!("../../../resources/mnemonics/wordlist_en.txt");
 const PBKDF_ITERATIONS: u32 = 100000;
 
-lazy_static! {
-    pub static ref WORDLIST_EN_SET: HashMap<&'static str, usize> = {
-        let words: HashMap<&'static str, usize> =
-            WORDLIST_EN.split('\n').filter(|w| !w.is_empty()).enumerate().map(|(i, w)| (w.trim(), i)).collect();
-        words
-    };
-}
+pub static WORDLIST_EN_SET: LazyLock<HashSet<&'static str>> =
+    LazyLock::new(|| WORDLIST_EN.split('\n').filter(|w| !w.is_empty()).collect());
+
 pub struct Mnemonic {
     words: Vec<String>,
     password: Option<String>,
@@ -48,7 +43,7 @@ impl Mnemonic {
             return Err(TonlibError::MnemonicUnexpectedWordCount(normalized_words.len()));
         }
         for word in &normalized_words {
-            if !WORDLIST_EN_SET.contains_key(word.as_str()) {
+            if !WORDLIST_EN_SET.contains(word.as_str()) {
                 return Err(TonlibError::MnemonicInvalidWord(word.clone()));
             }
         }

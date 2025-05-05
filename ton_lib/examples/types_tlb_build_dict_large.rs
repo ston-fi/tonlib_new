@@ -1,6 +1,6 @@
 use num_bigint::BigUint;
 use std::collections::HashMap;
-use ton_lib::cell::build_parse::builder::CellBuilder;
+use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use ton_lib::types::tlb::adapters::dict_val_adapters::DictValAdapterNum;
 use ton_lib::types::tlb::adapters::Dict;
@@ -13,7 +13,7 @@ fn main() -> anyhow::Result<()> {
     for i in 0..ITEMS_COUNT {
         data.insert(i, BigUint::from(i));
     }
-    let mut builder = CellBuilder::new();
+    let mut builder = TonCell::builder();
     Dict::<DictKeyAdapterInto, DictValAdapterNum<256>, _, _>::new(256).write(&mut builder, &data)?;
     let cell = builder.build()?;
     println!("{}", cell.hash());

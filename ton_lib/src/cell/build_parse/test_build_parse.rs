@@ -1,9 +1,9 @@
-use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_cell::TonCell;
 
 #[test]
 fn test_build_parse_bit() -> anyhow::Result<()> {
-    let mut writer = CellBuilder::new();
+    let mut writer = TonCell::builder();
     writer.write_bit(true)?;
     writer.write_bit(false)?;
     writer.write_bit(true)?;
@@ -20,7 +20,7 @@ fn test_build_parse_bit() -> anyhow::Result<()> {
 
 #[test]
 fn test_build_parse_bits() -> anyhow::Result<()> {
-    let mut writer = CellBuilder::new();
+    let mut writer = TonCell::builder();
     writer.write_bit(true)?;
     writer.write_bits([0b1010_1010], 8)?;
     writer.write_bits([0b0101_0101], 4)?;
@@ -37,7 +37,7 @@ fn test_build_parse_bits() -> anyhow::Result<()> {
 
 #[test]
 fn test_build_parse_num() -> anyhow::Result<()> {
-    let mut writer = CellBuilder::new();
+    let mut writer = TonCell::builder();
     writer.write_num(&1u8, 4)?;
     writer.write_num(&2u16, 5)?;
     writer.write_num(&5u32, 10)?;
@@ -58,8 +58,9 @@ fn test_build_parse_num() -> anyhow::Result<()> {
 
 #[cfg(test)]
 mod bignum {
-    use crate::cell::build_parse::builder::CellBuilder;
+
     use crate::cell::build_parse::parser::CellParser;
+    use crate::cell::ton_cell::TonCell;
     use num_bigint::{BigInt, BigUint};
     use std::str::FromStr;
 
@@ -76,7 +77,7 @@ mod bignum {
             (BigInt::from_str("97887266651548624282413032824435501549503168134499591480902563623927645013201")?, 257),
         ];
 
-        let mut writer = CellBuilder::new();
+        let mut writer = TonCell::builder();
         for (value, bits) in &values {
             writer.write_num(value, *bits)?;
         }
@@ -97,7 +98,7 @@ mod bignum {
             (BigUint::from(1u32), 10),
         ];
 
-        let mut writer = CellBuilder::new();
+        let mut writer = TonCell::builder();
         for (value, bits) in &values {
             writer.write_num(value, *bits)?;
         }

@@ -34,7 +34,7 @@ pub trait TLBType: Sized {
     fn cell_hash(&self) -> Result<TonHash, TonlibError> { Ok(self.to_cell()?.hash().clone()) }
 
     /// Reading
-    fn from_cell(cell: &TonCell) -> Result<Self, TonlibError> { Self::read(&mut CellParser::new(cell)) }
+    fn from_cell(cell: &TonCell) -> Result<Self, TonlibError> { Self::read(&mut cell.parser()) }
 
     fn from_boc(boc: &[u8]) -> Result<Self, TonlibError> {
         Self::from_cell(BOC::from_bytes(boc)?.single_root()?.deref())
@@ -46,7 +46,7 @@ pub trait TLBType: Sized {
 
     /// Writing
     fn to_cell(&self) -> Result<TonCell, TonlibError> {
-        let mut builder = CellBuilder::new_with_type(self.cell_type());
+        let mut builder = TonCell::builder_typed(self.cell_type());
         self.write(&mut builder)?;
         builder.build()
     }
@@ -54,7 +54,7 @@ pub trait TLBType: Sized {
     fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.to_cell()?.into_ref()) }
 
     fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         self.write(&mut builder)?;
         BOC::new(builder.build()?.into_ref()).to_bytes(add_crc32)
     }

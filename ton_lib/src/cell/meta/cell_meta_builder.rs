@@ -52,7 +52,7 @@ impl<'a> CellMetaBuilder<'a> {
     }
 
     fn validate_ordinary(&self) -> Result<(), TonlibError> {
-        if self.data_bits_len > CellMeta::CELL_MAX_DATA_BITS_LEN {
+        if self.data_bits_len > TonCell::MAX_DATA_BITS_LEN {
             return Err(TonlibError::BuilderMeta("Ordinary cell data bits length is too big".to_owned()));
         }
         Ok(())

@@ -7,6 +7,7 @@ pub mod leading_bit_utils;
 
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_cell::TonCell;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::dict::data_builder::DictDataBuilder;
 use crate::types::tlb::adapters::dict::data_parser::DictDataParser;
@@ -79,7 +80,7 @@ where
         if !parser.read_bit()? {
             return Ok(HashMap::new());
         }
-        self.0.read(&mut CellParser::new(parser.read_next_ref()?))
+        self.0.read(&mut parser.read_next_ref()?.parser())
     }
 
     pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TonlibError> {
@@ -88,7 +89,7 @@ where
             return Ok(());
         }
         builder.write_bit(true)?;
-        let mut dict_data_builder = CellBuilder::new();
+        let mut dict_data_builder = TonCell::builder();
         self.0.write(&mut dict_data_builder, data)?;
         builder.write_ref(dict_data_builder.build()?.into_ref())
     }
@@ -96,8 +97,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::cell::build_parse::builder::CellBuilder;
-    use crate::cell::build_parse::parser::CellParser;
+
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::adapters::dict::dict_key_adapters::DictKeyAdapterInto;
     use crate::types::tlb::adapters::dict::dict_val_adapters::DictValAdapterNum;
@@ -115,12 +115,12 @@ mod tests {
         ]);
         let boc_hex = "b5ee9c7241010601005a000119c70d3ca5000d99b931ea4e8cc0010201cd020302012004050027400000000000000000000001325178b51d9180200026000000000000000000000168585a65986be8000026000000000000000000000047cb18538782e000353c80b9";
         let dict_cell = TonCell::from_boc_hex(boc_hex)?;
-        let mut parser = CellParser::new(&dict_cell);
+        let mut parser = dict_cell.parser();
         let some_data = parser.read_bits(96)?;
 
         let parsed_data = TLBDict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(8).read(&mut parser)?;
         assert_eq!(expected_data, parsed_data);
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits(&some_data, 96)?;
         TLBDict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(8).write(&mut builder, &expected_data)?;
         let constructed_cell = builder.build()?;
@@ -139,11 +139,11 @@ mod tests {
         ]);
 
         for key_len_bits in [8u32, 16, 32, 64, 111] {
-            let mut builder = CellBuilder::new();
+            let mut builder = TonCell::builder();
             TLBDict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(key_len_bits)
                 .write(&mut builder, &data)?;
             let dict_cell = builder.build()?;
-            let mut parser = CellParser::new(&dict_cell);
+            let mut parser = dict_cell.parser();
             let parsed =
                 TLBDict::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(key_len_bits).read(&mut parser)?;
             assert_eq!(data, parsed, "key_len_bits: {}", key_len_bits);

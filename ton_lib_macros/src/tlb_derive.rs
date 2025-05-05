@@ -25,7 +25,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
     // Extract a description, modifying `input.attrs` to remove the matched attributes.
     let header_attrs: TLBHeaderAttrs = match deluxe::extract_attributes(&mut input) {
         Ok(desc) => desc,
-        Err(e) => return e.into_compile_error().into(),
+        Err(e) => return e.into_compile_error(),
     };
 
     let found_crate = crate_name("ton_lib").expect("ton_lib crate not found");
@@ -64,5 +64,4 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
             }
         }
     }
-        .into()
 }

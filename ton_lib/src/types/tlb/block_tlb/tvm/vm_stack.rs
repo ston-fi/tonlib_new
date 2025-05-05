@@ -74,7 +74,7 @@ impl TLBType for VMStack {
         let mut rest = parser.read_next_ref()?.clone();
         vm_stack.push(TLBType::read(parser)?);
         for _ in 1..depth {
-            let mut rest_parser = CellParser::new(&rest);
+            let mut rest_parser = rest.parser();
             let new_rest = rest_parser.read_next_ref()?.clone(); // read "rest" first
             vm_stack.push(TLBType::read(&mut rest_parser)?); // then read "item" itself
             rest = new_rest;
@@ -91,7 +91,7 @@ impl TLBType for VMStack {
         let mut cur_rest = TonCell::EMPTY;
         // we fill cell chain from the end
         for item in self.0.iter() {
-            let mut rest_builder = CellBuilder::new();
+            let mut rest_builder = TonCell::builder();
             rest_builder.write_ref(cur_rest.into_ref())?; // write "rest" first
             item.write(&mut rest_builder)?; // then write "item" itself
             cur_rest = rest_builder.build()?
@@ -123,7 +123,7 @@ mod tests {
     fn test_vm_stack_empty() -> anyhow::Result<()> {
         let stack = VMStack::default();
         let cell = stack.to_cell()?;
-        let mut parser = CellParser::new(&cell);
+        let mut parser = cell.parser();
         let depth: u32 = parser.read_num(24)?;
         assert_eq!(depth, 0);
         assert_ok!(parser.ensure_empty());
@@ -139,7 +139,7 @@ mod tests {
         stack.push_tiny_int(1);
         let stack_cell = stack.to_cell()?;
 
-        let mut parser = CellParser::new(&stack_cell);
+        let mut parser = stack_cell.parser();
         let depth: u32 = parser.read_num(24)?;
         assert_eq!(depth, 1);
         assert_eq!(parser.read_next_ref()?.deref(), &TonCell::EMPTY);
@@ -161,7 +161,7 @@ mod tests {
         stack.push_cell_slice(TonAddress::ZERO.to_cell_ref()?);
         let stack_cell = stack.to_cell()?;
 
-        let mut parser = CellParser::new(&stack_cell);
+        let mut parser = stack_cell.parser();
         let depth: u32 = parser.read_num(24)?;
         assert_eq!(depth, 1);
         assert_eq!(parser.read_next_ref()?.deref(), &TonCell::EMPTY);
@@ -185,7 +185,7 @@ mod tests {
         stack.push_cell_slice(TonAddress::ZERO.to_cell_ref()?);
         let stack_cell = stack.to_cell()?;
 
-        let mut deep1_parser = CellParser::new(&stack_cell);
+        let mut deep1_parser = stack_cell.parser();
         let depth: u32 = deep1_parser.read_num(24)?;
         assert_eq!(depth, 3);
 
@@ -195,14 +195,14 @@ mod tests {
             _ => panic!("Expected CellSlice"),
         }
 
-        let mut deep2_parser = CellParser::new(&rest1);
+        let mut deep2_parser = rest1.parser();
         let rest2 = deep2_parser.read_next_ref()?.clone();
         match VMStackValue::read(&mut deep2_parser)? {
             VMStackValue::Int(val) => assert_eq!(val.value, 2.into()),
             _ => panic!("Expected Int"),
         }
 
-        let mut deep3_parser = CellParser::new(&rest2);
+        let mut deep3_parser = rest2.parser();
         let rest3 = deep3_parser.read_next_ref()?.clone();
         match VMStackValue::read(&mut deep3_parser)? {
             VMStackValue::TinyInt(val) => assert_eq!(val.value, 1),
