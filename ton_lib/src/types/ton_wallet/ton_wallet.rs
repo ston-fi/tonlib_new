@@ -1,6 +1,6 @@
 use crate::errors::TonlibError;
+use crate::types::tlb::wallet::constants::{DEFAULT_TON_WALLET_ID, DEFAULT_TON_WALLET_ID_V5R1};
 use crate::types::ton_address::TonAddress;
-use crate::types::ton_wallet::constants::{DEFAULT_USER_WALLET_ID, DEFAULT_USER_WALLET_ID_V5R1};
 use crate::types::ton_wallet::mnemonic::KeyPair;
 use crate::types::ton_wallet::version_helper::VersionHelper;
 use crate::types::ton_wallet::versions::UserWalletVersion;
@@ -16,8 +16,8 @@ pub struct TonWallet {
 impl TonWallet {
     pub fn new(version: UserWalletVersion, key_pair: KeyPair) -> Result<Self, TonlibError> {
         let wallet_id = match version {
-            UserWalletVersion::V5R1 => DEFAULT_USER_WALLET_ID_V5R1,
-            _ => DEFAULT_USER_WALLET_ID,
+            UserWalletVersion::V5R1 => DEFAULT_TON_WALLET_ID_V5R1,
+            _ => DEFAULT_TON_WALLET_ID,
         };
         Self::new_with_params(version, key_pair, 0, wallet_id)
     }

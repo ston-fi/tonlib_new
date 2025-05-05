@@ -6,8 +6,6 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
-use std::str::FromStr;
-use std::sync::LazyLock;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Debug, Clone, TLBDerive)]
@@ -87,15 +85,21 @@ pub struct BlockIdExt {
 }
 
 impl BlockIdExt {
-    pub const ZERO_BLOCK_ID: LazyLock<BlockIdExt> = LazyLock::new(|| BlockIdExt {
+    pub const ZERO_BLOCK_ID: BlockIdExt = BlockIdExt {
         shard_id: ShardIdent {
             workchain: TON_MASTERCHAIN_ID,
             shard: TON_SHARD_FULL,
         },
         seqno: 0,
-        root_hash: TonHash::from_str("17a3a92992aabea785a7a090985a265cd31f323d849da51239737e321fb05569").unwrap(),
-        file_hash: TonHash::from_str("5e994fcf4d425c0a6ce6a792594b7173205f740a39cd56f537defd28b48a0f6e").unwrap(),
-    });
+        root_hash: TonHash::from_slice(&[
+            23u8, 163, 169, 41, 146, 170, 190, 167, 133, 167, 160, 144, 152, 90, 38, 92, 211, 31, 50, 61, 132, 157,
+            165, 18, 57, 115, 126, 50, 31, 176, 85, 105,
+        ]),
+        file_hash: TonHash::from_slice(&[
+            94, 153, 79, 207, 77, 66, 92, 10, 108, 230, 167, 146, 89, 75, 113, 115, 32, 95, 116, 10, 57, 205, 86, 245,
+            55, 222, 253, 40, 180, 138, 15, 110,
+        ]),
+    };
 }
 
 impl ShardIdent {

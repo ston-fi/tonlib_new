@@ -24,13 +24,13 @@ impl TonHash {
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]));
 
+    pub const fn from_slice(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
+
     pub fn from_bytes<T: AsRef<[u8]>>(data: T) -> Result<Self, TonlibError> {
         let bytes = data.as_ref();
         check_bytes_len(bytes)?;
         Ok(Self(TonHashData::Slice(bytes[..32].try_into().unwrap())))
     }
-
-    pub fn from_slice(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
 
     pub fn from_vec(data: Vec<u8>) -> Result<Self, TonlibError> {
         check_bytes_len(&data)?;

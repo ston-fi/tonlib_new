@@ -1,4 +1,3 @@
-pub mod constants;
 pub mod mnemonic;
 #[allow(clippy::module_inception)]
 pub mod ton_wallet;
