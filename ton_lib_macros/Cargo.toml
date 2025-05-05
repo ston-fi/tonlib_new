@@ -20,3 +20,6 @@ proc-macro-crate = "3"
 
 [lib]
 proc-macro = true
+
+[dev-dependencies]
+ton_lib = {path = "../ton_lib", default-features = false}

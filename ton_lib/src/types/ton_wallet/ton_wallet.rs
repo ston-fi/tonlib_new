@@ -1,19 +1,19 @@
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
-use crate::types::user_wallet::constants::{DEFAULT_USER_WALLET_ID, DEFAULT_USER_WALLET_ID_V5R1};
-use crate::types::user_wallet::mnemonic::KeyPair;
-use crate::types::user_wallet::version_helper::VersionHelper;
-use crate::types::user_wallet::versions::UserWalletVersion;
+use crate::types::ton_wallet::constants::{DEFAULT_USER_WALLET_ID, DEFAULT_USER_WALLET_ID_V5R1};
+use crate::types::ton_wallet::mnemonic::KeyPair;
+use crate::types::ton_wallet::version_helper::VersionHelper;
+use crate::types::ton_wallet::versions::UserWalletVersion;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
-pub struct UserWallet {
+pub struct TonWallet {
     pub version: UserWalletVersion,
     pub key_pair: KeyPair,
     pub address: TonAddress,
     pub wallet_id: i32,
 }
 
-impl UserWallet {
+impl TonWallet {
     pub fn new(version: UserWalletVersion, key_pair: KeyPair) -> Result<Self, TonlibError> {
         let wallet_id = match version {
             UserWalletVersion::V5R1 => DEFAULT_USER_WALLET_ID_V5R1,
@@ -32,7 +32,7 @@ impl UserWallet {
         let code = VersionHelper::get_code(version)?.clone();
         let address = TonAddress::derive(workchain, code, data)?;
 
-        Ok(UserWallet {
+        Ok(TonWallet {
             key_pair,
             version,
             address,
@@ -135,7 +135,7 @@ impl UserWallet {
 //     }
 //
 //     use crate::wallet::mnemonic::{KeyPair, Mnemonic};
-//     use crate::wallet::ton_wallet::{TonWallet, WalletVersion};
+//     use crate::wallet::wallet::{TonWallet, WalletVersion};
 //     use crate::wallet::versioned::v3::WalletExtMsgBodyV3;
 //     use crate::wallet::versioned::v4::WalletExtMsgBodyV4;
 //     use crate::wallet::versioned::v5::WalletExtMsgBodyV5;
