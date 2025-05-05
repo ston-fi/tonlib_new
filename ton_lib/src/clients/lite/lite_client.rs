@@ -1,8 +1,8 @@
 use super::connection::Connection;
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
+use crate::clients::client_types::common::MasterchainInfo;
 use crate::clients::lite::config::LiteClientConfig;
 use crate::errors::TonlibError;
-use crate::types::client_types::common::MasterchainInfo;
 use crate::types::tlb::block_tlb::account::MaybeAccount;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::tlb::tlb_type::TLBType;
