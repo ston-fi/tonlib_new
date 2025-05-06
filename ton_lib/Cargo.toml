@@ -64,7 +64,6 @@ pbkdf2 = { version = "0.12.2", features = ["simple"] }
 nacl = "0.5.3"
 
 [dev-dependencies]
-ton_lib = { path = "../ton_lib", features = ["sys"] }
 tonlib-core = "0.25.2"
 anyhow = "1.0"
 tokio-test = "0.4"
