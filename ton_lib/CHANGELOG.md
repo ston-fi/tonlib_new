@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.18](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.17...ton_lib-v0.0.18) - 2025-05-06
+
+### Other
+
+- add test for new_with_creds
+- cleanup ton_wallet signatures, add test for create_ext_in_msg
+- don't enable sys in tests by default
+- up sys dep
+- cleanup feature=sys deps, finish TonWallet support
+- support wallet_msg_body v1-v5 & OutList, OutAction
+- moveout client_types to client
+- hide Builder & Parser consturctors behind TonCell methods
+- add zero_block_id, zero_config as constants
+- cleanup macros, init ton_wallet support
+
 ## [0.0.17](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.16...ton_lib-v0.0.17) - 2025-05-03
 
 ### Other
