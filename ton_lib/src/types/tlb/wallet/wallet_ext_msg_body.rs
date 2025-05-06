@@ -8,10 +8,8 @@ use crate::types::tlb::wallet::wallet_ext_msg_utils::{
 };
 
 // Important!!!
-// This types are not consistent - during parsing we skip signature
-// And during the writing we don't write any signature (we just don't have it)
-// So if you want to ser/de this type, you need to handle signature manually
-// (read it yourself, and then write it back)
+// TLBType implementation assumes there is no signature in cell
+// To read signed cell, use read_signed method
 
 /// https://docs.ton.org/participate/wallets/contracts#wallet-v2
 #[derive(Debug, PartialEq, Clone)]
@@ -61,7 +59,6 @@ pub struct WalletV5ExtMsgBody {
 
 impl TLBType for WalletV2ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let _signature = parser.read_bits(512)?;
         let msg_seqno = TLBType::read(parser)?;
         let valid_until = TLBType::read(parser)?;
         let (msgs_modes, msgs) = read_up_to_4_msgs(parser)?;
@@ -81,9 +78,15 @@ impl TLBType for WalletV2ExtMsgBody {
     }
 }
 
+impl WalletV2ExtMsgBody {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonlibError> {
+        let signature = parser.read_bits(512)?;
+        Ok((Self::read(parser)?, signature))
+    }
+}
+
 impl TLBType for WalletV3ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let _signature = parser.read_bits(512)?;
         let subwallet_id = TLBType::read(parser)?;
         let valid_until = TLBType::read(parser)?;
         let msg_seqno = TLBType::read(parser)?;
@@ -106,9 +109,15 @@ impl TLBType for WalletV3ExtMsgBody {
     }
 }
 
+impl WalletV3ExtMsgBody {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonlibError> {
+        let signature = parser.read_bits(512)?;
+        Ok((Self::read(parser)?, signature))
+    }
+}
+
 impl TLBType for WalletV4ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let _signature = parser.read_bits(512)?;
         let subwallet_id = TLBType::read(parser)?;
         let valid_until = TLBType::read(parser)?;
         let msg_seqno = TLBType::read(parser)?;
@@ -140,6 +149,13 @@ impl TLBType for WalletV4ExtMsgBody {
     }
 }
 
+impl WalletV4ExtMsgBody {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonlibError> {
+        let signature = parser.read_bits(512)?;
+        Ok((Self::read(parser)?, signature))
+    }
+}
+
 impl TLBType for WalletV5ExtMsgBody {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x7369676e, 32);
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
@@ -148,7 +164,6 @@ impl TLBType for WalletV5ExtMsgBody {
         let msg_seqno = TLBType::read(parser)?;
         let inner_request = InnerRequest::read(parser)?;
         let (msgs, msgs_modes) = parse_inner_request(inner_request)?;
-        let _signature = parser.read_bits(512)?;
         Ok(Self {
             wallet_id,
             valid_until,
@@ -168,11 +183,19 @@ impl TLBType for WalletV5ExtMsgBody {
     }
 }
 
+impl WalletV5ExtMsgBody {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonlibError> {
+        let body = Self::read(parser)?;
+        let signature = parser.read_bits(512)?;
+        Ok((body, signature))
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::wallet::constants::{DEFAULT_TON_WALLET_ID, DEFAULT_TON_WALLET_ID_V5R1};
+    use crate::types::tlb::wallet::constants::{WALLET_DEFAULT_ID, WALLET_V5R1_DEFAULT_ID};
 
     #[test]
     fn test_wallet_ext_msg_body_v3() -> anyhow::Result<()> {
@@ -182,8 +205,8 @@ mod test {
         parser.read_bits(512)?;
         let body_no_sign = parser.read_cell()?;
 
-        let body = WalletV3ExtMsgBody::from_cell(&body_signed_cell)?;
-        assert_eq!(body.subwallet_id, DEFAULT_TON_WALLET_ID);
+        let body = WalletV3ExtMsgBody::read_signed(&mut body_signed_cell.parser())?.0;
+        assert_eq!(body.subwallet_id, WALLET_DEFAULT_ID);
         assert_eq!(body.msg_seqno, 0);
         assert_eq!(body.valid_until, 4294967295);
         assert_eq!(body.msgs_modes, vec![3]);
@@ -202,8 +225,8 @@ mod test {
         parser.read_bits(512)?;
         let body_no_sign = parser.read_cell()?;
 
-        let body = WalletV4ExtMsgBody::from_cell(&body_signed_cell)?;
-        assert_eq!(body.subwallet_id, DEFAULT_TON_WALLET_ID);
+        let body = WalletV4ExtMsgBody::read_signed(&mut body_signed_cell.parser())?.0;
+        assert_eq!(body.subwallet_id, WALLET_DEFAULT_ID);
         assert_eq!(body.valid_until, 1739403913);
         assert_eq!(body.msg_seqno, 19);
         assert_eq!(body.opcode, 0);
@@ -219,15 +242,13 @@ mod test {
     fn test_wallet_ext_msg_body_v5() -> anyhow::Result<()> {
         // https://tonviewer.com/transaction/b4c5eddc52d0e23dafb2da6d022a5b6ae7eba52876fa75d32b2a95fa30c7e2f0
         let body_signed_cell = TonCell::from_boc_hex("b5ee9c720101040100940001a17369676e7fffff11ffffffff00000000bc04889cb28b36a3a00810e363a413763ec34860bf0fce552c5d36e37289fafd442f1983d740f92378919d969dd530aec92d258a0779fb371d4659f10ca1b3826001020a0ec3c86d030302006642007847b4630eb08d9f486fe846d5496878556dfd5a084f82a9a3fb01224e67c84c187a1200000000000000000000000000000000")?;
-        println!("{}", body_signed_cell);
-
         let mut parser = body_signed_cell.parser();
         parser.read_bits(body_signed_cell.data_bits_len - 512)?;
         let sign = parser.read_bits(512)?;
 
-        let body = WalletV5ExtMsgBody::from_cell(&body_signed_cell)?;
+        let body = WalletV5ExtMsgBody::read_signed(&mut body_signed_cell.parser())?.0;
 
-        assert_eq!(body.wallet_id, DEFAULT_TON_WALLET_ID_V5R1);
+        assert_eq!(body.wallet_id, WALLET_V5R1_DEFAULT_ID);
         assert_eq!(body.valid_until, 4294967295);
         assert_eq!(body.msg_seqno, 0);
         assert_eq!(body.msgs_modes, vec![3]);

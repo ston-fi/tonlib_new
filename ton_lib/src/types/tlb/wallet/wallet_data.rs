@@ -98,8 +98,8 @@ impl WalletHLV2R2Data {
 mod test {
     use super::*;
     use crate::types::tlb::tlb_type::TLBType;
-    use crate::types::tlb::wallet::constants::DEFAULT_TON_WALLET_ID;
-    use crate::types::tlb::wallet::constants::{DEFAULT_TON_WALLET_ID_V5R1, DEFAULT_TON_WALLET_ID_V5R1_TESTNET};
+    use crate::types::tlb::wallet::constants::WALLET_DEFAULT_ID;
+    use crate::types::tlb::wallet::constants::{WALLET_V5R1_DEFAULT_ID, WALLET_V5R1_DEFAULT_ID_TESTNET};
     use core::str::FromStr;
 
     #[test]
@@ -108,7 +108,7 @@ mod test {
         let src_boc_hex = "b5ee9c7241010101002a0000500000000129a9a317cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f4b6de3f10";
         let wallet_data = WalletV3Data::from_boc_hex(src_boc_hex)?;
         assert_eq!(wallet_data.seqno, 1);
-        assert_eq!(wallet_data.wallet_id, DEFAULT_TON_WALLET_ID);
+        assert_eq!(wallet_data.wallet_id, WALLET_DEFAULT_ID);
         assert_eq!(
             wallet_data.public_key,
             TonHash::from_str("cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f4")?
@@ -125,7 +125,7 @@ mod test {
         let src_boc_hex = "b5ee9c7241010101002b0000510000001429a9a317cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f440a6c9f37d";
         let wallet_data = WalletV4Data::from_boc_hex(src_boc_hex)?;
         assert_eq!(wallet_data.seqno, 20);
-        assert_eq!(wallet_data.wallet_id, DEFAULT_TON_WALLET_ID);
+        assert_eq!(wallet_data.wallet_id, WALLET_DEFAULT_ID);
         assert_eq!(
             wallet_data.public_key,
             TonHash::from_str("cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f4")?
@@ -144,7 +144,7 @@ mod test {
         let src_boc_hex = "b5ee9c7241010101002b00005180000000bfffff88e5f9bbe4db9b026385fb9a446ee75d0a7bb1dd77956387b468eb01950900a4fa20cbe13a2a";
         let wallet_data = WalletV5Data::from_boc_hex(src_boc_hex)?;
         assert_eq!(wallet_data.seqno, 1);
-        assert_eq!(wallet_data.wallet_id, DEFAULT_TON_WALLET_ID_V5R1);
+        assert_eq!(wallet_data.wallet_id, WALLET_V5R1_DEFAULT_ID);
         assert_eq!(
             wallet_data.public_key,
             TonHash::from_str("cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f4")?
@@ -163,7 +163,7 @@ mod test {
         let src_boc_hex = "b5ee9c7201010101002b000051800000013ffffffed2b31b23dbe5144a626b9d5d1d4208e36d97e4adb472d42c073bfff85b3107e4a0";
         let wallet_data = WalletV5Data::from_boc_hex(src_boc_hex)?;
         assert_eq!(wallet_data.seqno, 2);
-        assert_eq!(wallet_data.wallet_id, DEFAULT_TON_WALLET_ID_V5R1_TESTNET);
+        assert_eq!(wallet_data.wallet_id, WALLET_V5R1_DEFAULT_ID_TESTNET);
         Ok(())
     }
 }

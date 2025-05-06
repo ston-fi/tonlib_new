@@ -5,7 +5,6 @@ use std::thread;
 use std::time::Instant;
 
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::clients::tonlib::clients_impl::tl_client_raw::TLClientRaw;
 use crate::clients::tonlib::tl_api::tl_req_ctx::TLRequestCtx;
 use crate::clients::tonlib::tl_api::tl_request::TLRequest;
 use crate::clients::tonlib::tl_api::tl_response::TLResponse;
@@ -13,6 +12,7 @@ use crate::clients::tonlib::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsIn
 use crate::clients::tonlib::tl_callback::{TLCallback, TLCallbacksStore};
 use crate::clients::tonlib::tl_client::TLClientTrait;
 use crate::clients::tonlib::tl_client_config::{LiteNodeFilter, TLClientConfig};
+use crate::clients::tonlib::tonlibjson_impl::tl_client_raw::TLClientRaw;
 use crate::clients::tonlib::TLConnection;
 use crate::errors::TonlibError;
 use crate::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};

@@ -47,8 +47,8 @@ unsafe impl Sync for TLClientRaw {}
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::tonlib::clients_impl::tl_client_raw::TLClientRaw;
     use crate::clients::tonlib::tl_api::tl_request::TLRequest;
+    use crate::clients::tonlib::tonlibjson_impl::tl_client_raw::TLClientRaw;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
 
     #[test]

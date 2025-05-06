@@ -1,7 +1,5 @@
 #[cfg(feature = "sys")]
-mod clients_impl;
-#[cfg(feature = "sys")]
-pub use clients_impl::*;
+pub mod tonlibjson_impl;
 
 pub mod tl_api;
 pub mod utils;

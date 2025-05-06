@@ -20,14 +20,15 @@ jobs:
     name: Release-plz
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-#        with:
-#          fetch-depth: 0
       - name: Install libraries
         run: |
           sudo apt-get update
           sudo apt-get install -y libsodium-dev libsecp256k1-dev liblz4-dev
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Swatinem/rust-cache@v2
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
       - name: Run release-plz
@@ -35,5 +36,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_REGISTRY_TOKEN }}
-#        with:
-#          config: ".release-plz.toml"

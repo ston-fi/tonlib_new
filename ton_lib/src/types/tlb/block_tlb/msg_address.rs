@@ -6,6 +6,7 @@ use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::block_tlb::var_len::VarLenBits;
 use crate::types::tlb::tlb_type::TLBPrefix;
 use crate::types::tlb::tlb_type::TLBType;
+use std::convert::Into;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L100
@@ -59,7 +60,7 @@ pub struct MsgAddressIntVar {
 
 impl TLBType for MsgAddressIntVar {
     #[rustfmt::skip]
-    const PREFIX: TLBPrefix = TLBPrefix { value: 0b11, bits_len: 2};
+    const PREFIX: TLBPrefix = TLBPrefix::new(0b11, 2);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let anycast = TLBType::read(parser)?;
@@ -80,6 +81,19 @@ impl TLBType for MsgAddressIntVar {
         self.workchain.write(builder)?;
         builder.write_bits(&self.address, self.addr_bits_len as usize)?;
         Ok(())
+    }
+}
+
+impl MsgAddress {
+    pub const NONE: MsgAddress = MsgAddress::Ext(MsgAddressExt::NONE);
+}
+
+impl MsgAddressExt {
+    pub const NONE: MsgAddressExt = MsgAddressExt::None(MsgAddressNone {});
+    pub fn new<T: Into<Vec<u8>>>(address: T, bits_len: usize) -> Self {
+        MsgAddressExt::Extern(MsgAddressExtern {
+            address: VarLenBits::new(address, bits_len),
+        })
     }
 }
 

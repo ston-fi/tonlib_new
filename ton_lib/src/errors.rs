@@ -171,6 +171,8 @@ pub enum TonlibError {
     VarError(#[from] VarError),
     #[error("{0}")]
     HmacInvalidLen(#[from] crypto_common::InvalidLength),
+    #[error("{0:?}")]
+    SignerError(nacl::Error),
 }
 
 impl<T> From<TonlibError> for Result<T, TonlibError> {

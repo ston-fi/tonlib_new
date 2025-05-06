@@ -2,7 +2,7 @@ use super::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt};
 use crate::cell::ton_cell::TonCell;
 use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
 use crate::types::tlb::block_tlb::state_init::StateInit;
-use crate::types::tlb::primitives::EitherRef;
+use crate::types::tlb::primitives::{EitherRef, EitherRefLayout};
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L157
@@ -51,6 +51,19 @@ pub struct ExtOutMsgInfo {
     pub dest: MsgAddressExt,
     pub created_lt: u64,
     pub created_at: u32,
+}
+
+impl Message {
+    pub fn new(info: CommonMsgInfo, body: TonCell) -> Self {
+        Self {
+            info,
+            init: None,
+            body: EitherRef {
+                value: body,
+                layout: EitherRefLayout::ToRef,
+            },
+        }
+    }
 }
 
 #[cfg(test)]

@@ -1,11 +1,12 @@
 use std::str::FromStr;
 use tokio_test::assert_ok;
-use ton_lib::clients::tonlib::{TLClient, TLClientDefault};
+use ton_lib::clients::tonlib::TLClient;
 
 use crate::tests::utils::{get_net_conf, init_logging};
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
 use ton_lib::clients::tonlib::tl_api::tl_types::TLAccountState;
+use ton_lib::clients::tonlib::tonlibjson_impl::TLClientDefault;
 use ton_lib::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
 use ton_lib::types::tlb::tlb_type::TLBType;
 use ton_lib::types::ton_address::TonAddress;
