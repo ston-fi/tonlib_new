@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.13](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.12...ton_lib_macros-v0.0.13) - 2025-05-06
+
+### Other
+
+- hide Builder & Parser consturctors behind TonCell methods
+- add zero_block_id, zero_config as constants
+- cleanup macros, init ton_wallet support
+
 ## [0.0.12](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.11...ton_lib_macros-v0.0.12) - 2025-05-03
 
 ### Other
