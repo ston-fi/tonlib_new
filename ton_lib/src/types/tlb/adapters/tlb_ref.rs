@@ -27,17 +27,18 @@ impl<T: TLBType> Default for TLBRef<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cell::ton_cell::TonCell;
     use ton_lib_macros::TLBDerive;
 
     #[test]
     fn test_tlb_ref() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         TLBRef::<bool>::new().write(&mut builder, &true)?;
         let cell = builder.build()?;
         assert_eq!(cell.refs.len(), 1);
         assert_eq!(cell.refs[0].data, vec![0b10000000]);
 
-        let parsed = TLBRef::<bool>::new().read(&mut CellParser::new(&cell))?;
+        let parsed = TLBRef::<bool>::new().read(&mut cell.parser())?;
         assert!(parsed);
         Ok(())
     }

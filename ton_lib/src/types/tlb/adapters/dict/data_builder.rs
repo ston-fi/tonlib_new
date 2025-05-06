@@ -37,7 +37,7 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
     }
 
     pub(crate) fn build(mut self) -> Result<TonCell, TonlibError> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         if self.keys_sorted.is_empty() {
             return builder.build();
         }
@@ -86,11 +86,11 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         }
 
         self.key_bits_len_left -= common_prefix_len + 1; // branch consumes 1 more bit
-        let mut left_builder = CellBuilder::new();
+        let mut left_builder = TonCell::builder();
         self.fill_cell(&mut left_builder, left_keys)?;
         builder.write_ref(left_builder.build()?.into_ref())?;
 
-        let mut right_builder = CellBuilder::new();
+        let mut right_builder = TonCell::builder();
         self.fill_cell(&mut right_builder, right_keys)?;
         builder.write_ref(right_builder.build()?.into_ref())?;
 

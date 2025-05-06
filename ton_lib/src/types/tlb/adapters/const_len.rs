@@ -73,16 +73,17 @@ impl ConstLen<Option<Vec<u8>>> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::tlb_type::TLBType;
     use ton_lib_macros::TLBDerive;
 
     #[test]
     fn test_const_len() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         ConstLen::<u32>::new(24).write(&mut builder, &1u32)?;
         let cell = builder.build()?;
         assert_eq!(&cell.data, &[0, 0, 1]);
-        let parsed = ConstLen::<u32>::new(24).read(&mut CellParser::new(&cell))?;
+        let parsed = ConstLen::<u32>::new(24).read(&mut cell.parser())?;
         assert_eq!(parsed, 1u32);
         Ok(())
     }
@@ -95,11 +96,11 @@ mod tests {
 
     #[test]
     fn test_cont_len_bits_len() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         TestType { a: 1 }.write(&mut builder)?;
         let cell = builder.build()?;
         assert_eq!(&cell.data, &[0b00010000]);
-        let parsed = TestType::read(&mut CellParser::new(&cell))?;
+        let parsed = TestType::read(&mut cell.parser())?;
         assert_eq!(parsed.a, 1u32);
         Ok(())
     }

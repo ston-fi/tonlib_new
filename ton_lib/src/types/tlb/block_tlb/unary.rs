@@ -39,19 +39,18 @@ impl DerefMut for Unary {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cell::build_parse::builder::CellBuilder;
-    use crate::cell::build_parse::parser::CellParser;
+
+    use crate::cell::ton_cell::TonCell;
 
     #[test]
     fn test_unary() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         let unary = Unary(5);
         unary.write(&mut builder)?;
         let cell = builder.build()?;
         assert_eq!(cell.data_bits_len, 6);
         assert_eq!(cell.data, vec![0b11111000]);
-        let mut parser = CellParser::new(&cell);
-        let parsed_unary = Unary::read(&mut parser)?;
+        let parsed_unary = Unary::read(&mut cell.parser())?;
         assert_eq!(parsed_unary, unary);
         Ok(())
     }

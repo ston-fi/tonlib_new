@@ -3,7 +3,6 @@ use tokio_test::assert_ok;
 use ton_lib::clients::tonlib::{TLClient, TLClientDefault};
 
 use crate::tests::utils::{get_net_conf, init_logging};
-use ton_lib::cell::build_parse::parser::CellParser;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
 use ton_lib::clients::tonlib::tl_api::tl_types::TLAccountState;
@@ -27,7 +26,7 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
 
     let config = tl_client.get_config_boc_param(0, 34).await?;
     let cell = assert_ok!(TonCell::from_boc(&config));
-    let mut parser = CellParser::new(&cell);
+    let mut parser = cell.parser();
     let value: u8 = TLBType::read(&mut parser)?;
     assert_eq!(value, 0x12);
     // ===================

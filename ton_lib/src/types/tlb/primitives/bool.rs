@@ -11,10 +11,11 @@ impl TLBType for bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::cell::ton_cell::TonCell;
 
     #[test]
     fn test_bool() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         true.write(&mut builder)?;
         false.write(&mut builder)?;
         let cell = builder.build()?;

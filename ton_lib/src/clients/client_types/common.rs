@@ -24,7 +24,7 @@ pub struct MasterchainInfo {
 
 mod liteapi_serde {
     use crate::cell::ton_hash::TonHash;
-    use crate::types::client_types::common::{BlockId, MasterchainInfo, ZeroStateIdExt};
+    use crate::clients::client_types::common::{BlockId, MasterchainInfo, ZeroStateIdExt};
     use crate::types::tlb::block_tlb::block::{BlockIdExt, ShardIdent};
     use ton_liteapi::tl::common::Int256;
 

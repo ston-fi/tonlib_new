@@ -4,6 +4,7 @@ pub mod coins;
 pub mod hash_update;
 pub mod msg;
 pub mod msg_address;
+pub mod out_action;
 pub mod state_init;
 pub mod tvm;
 pub mod tx;

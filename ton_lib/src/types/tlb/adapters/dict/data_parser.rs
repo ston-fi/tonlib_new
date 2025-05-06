@@ -81,11 +81,11 @@ impl DictDataParser {
         } else {
             let left_ref = parser.read_next_ref()?;
             self.cur_key_prefix <<= 1;
-            self.parse_impl::<T, VA>(&mut CellParser::new(left_ref), dst)?;
+            self.parse_impl::<T, VA>(&mut left_ref.parser(), dst)?;
 
             let right_ref = parser.read_next_ref()?;
             self.cur_key_prefix += BigUint::one();
-            self.parse_impl::<T, VA>(&mut CellParser::new(right_ref), dst)?;
+            self.parse_impl::<T, VA>(&mut right_ref.parser(), dst)?;
         }
         self.cur_key_prefix >>= self.cur_key_prefix.bits() - origin_key_prefix_len;
         Ok(())

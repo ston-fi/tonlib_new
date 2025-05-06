@@ -77,7 +77,7 @@ mod tests {
 
     #[test]
     fn test_tlb_cell() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_num(&3u32, 32)?;
         let cell = builder.build()?;
         let parsed = TonCell::from_cell(&cell)?;
@@ -87,11 +87,11 @@ mod tests {
 
     #[test]
     fn test_tlb_cell_ref() -> anyhow::Result<()> {
-        let mut ref_builder = CellBuilder::new();
+        let mut ref_builder = TonCell::builder();
         ref_builder.write_num(&3u32, 32)?;
         let cell_ref = ref_builder.build()?.into_ref();
 
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_ref(cell_ref.clone())?;
         let cell = cell_builder.build()?;
         let parsed = TonCellRef::from_cell(&cell)?;
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn test_tlb_cell_boc() -> anyhow::Result<()> {
-        let mut cell = CellBuilder::new();
+        let mut cell = TonCell::builder();
         cell.write_num(&3u32, 32)?;
         let cell_ref = cell.build()?.into_ref();
         let boc = cell_ref.to_boc(false)?;
@@ -126,7 +126,7 @@ mod tests {
         assert_eq!(lib_cell.to_boc_hex(false)?, lib_hex);
 
         // now library is a second cell
-        let mut cell = CellBuilder::new();
+        let mut cell = TonCell::builder();
         cell.write_ref(lib_cell_ref.clone())?;
         let lib_child_hex = cell.build()?.to_boc_hex(false)?;
 

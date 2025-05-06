@@ -1,4 +1,3 @@
-use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCell;
 use crate::clients::lite::config::LiteClientConfig;
 use crate::clients::lite::lite_client::LiteClient;
@@ -69,7 +68,7 @@ fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TonlibError> {
         return Err(TonlibError::CustomError("No refs in block cell".to_string()));
         // TODO make proper block parser
     }
-    let mut parser = CellParser::new(&block_cell.refs[0]);
+    let mut parser = block_cell.refs[0].parser();
     let tag: u32 = parser.read_num(32)?;
     if tag != BLOCK_INFO_TAG {
         return Err(TonlibError::CustomError("Invalid block tag".to_string())); // TODO make proper block parser

@@ -57,7 +57,7 @@ impl DerefMut for LibsDict {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cell::build_parse::parser::CellParser;
+
     use crate::types::tlb::tlb_type::TLBType;
     use std::str::FromStr;
 
@@ -68,7 +68,7 @@ mod tests {
         assert_eq!(lib_cell.hash(), &lib_id);
         let libs_dict = LibsDict::new([lib_cell.clone()]);
         let dict_cell = libs_dict.to_cell()?;
-        let mut parser = CellParser::new(&dict_cell);
+        let mut parser = dict_cell.parser();
         assert_eq!(parser.read_num::<u32>(2)?, 0b10); // LabelType::Long
         assert_eq!(parser.read_num::<u32>(9)?, 256); // label_len
         let parsed_key = parser.read_bits(256)?;

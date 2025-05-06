@@ -41,9 +41,7 @@ impl TLBType for VMCellSlice {
         let start_ref = parser.read_num(3)?;
         let end_ref = parser.read_num(3)?;
 
-        let mut value_builder = CellBuilder::new();
-        value_builder.write_cell_slice(&cell_original, start_bit, end_bit, start_ref, end_ref)?;
-        let value = value_builder.build()?.into_ref();
+        let value = cell_original.parser().read_cell_slice(start_bit, end_bit, start_ref, end_ref)?.into_ref();
         Ok(Self {
             value,
             cell_original,

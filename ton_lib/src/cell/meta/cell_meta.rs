@@ -17,8 +17,6 @@ pub struct CellMeta {
 
 impl CellMeta {
     pub const DEPTH_BYTES: usize = 2;
-    pub const CELL_MAX_DATA_BITS_LEN: usize = 1023;
-    pub const CELL_MAX_REFS_COUNT: usize = 4;
 
     pub const EMPTY_CELL_META: CellMeta = CellMeta {
         cell_type: CellType::Ordinary,

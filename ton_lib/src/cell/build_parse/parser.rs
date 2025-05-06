@@ -1,4 +1,3 @@
-use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
@@ -13,7 +12,7 @@ pub struct CellParser<'a> {
 }
 
 impl<'a> CellParser<'a> {
-    pub fn new(cell: &'a TonCell) -> Self {
+    pub(in crate::cell) fn new(cell: &'a TonCell) -> Self {
         let cursor = Cursor::new(cell.data.as_slice());
         let data_reader = BitReader::endian(cursor, BigEndian);
 
@@ -71,11 +70,38 @@ impl<'a> CellParser<'a> {
         let bits_left = self.data_bits_left()?;
         let data = self.read_bits(bits_left)?;
 
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits(data, bits_left)?;
 
         while let Ok(cell_ref) = self.read_next_ref() {
             builder.write_ref(cell_ref.clone())?;
+        }
+        builder.build()
+    }
+
+    /// Ranges are handled like [start; end) - the same as iterators in c++
+    pub fn read_cell_slice(
+        &mut self,
+        start_bit: usize,
+        end_bit: usize,
+        start_ref: usize,
+        end_ref: usize,
+    ) -> Result<TonCell, TonlibError> {
+        if self.data_reader.position_in_bits()? != 0 && self.next_ref_pos != 0 {
+            return Err(TonlibError::ParserWrongSlicePosition {
+                bit_pos: self.data_reader.position_in_bits()? as usize,
+                next_ref_pos: self.next_ref_pos,
+            });
+        }
+        self.read_bits(start_bit)?; // skip
+        let slice_data_bits_len = end_bit - start_bit;
+        let mut builder = TonCell::builder();
+        builder.write_bits(self.read_bits(slice_data_bits_len)?, slice_data_bits_len)?;
+        for _ in 0..start_ref {
+            self.read_next_ref()?; // skip
+        }
+        for _ in start_ref..end_ref {
+            builder.write_ref(self.read_next_ref()?.clone())?;
         }
         builder.build()
     }
@@ -134,12 +160,11 @@ impl<'a> CellParser<'a> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::cell::build_parse::builder::CellBuilder;
     use num_bigint::{BigInt, BigUint};
     use tokio_test::{assert_err, assert_ok};
 
     fn make_test_cell(data: &[u8], bits_len: usize) -> anyhow::Result<TonCell> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits(data, bits_len)?;
         Ok(builder.build()?)
     }
@@ -208,11 +233,11 @@ mod tests {
 
     #[test]
     fn test_parser_read_ref() -> anyhow::Result<()> {
-        let mut ref_builder = CellBuilder::new();
+        let mut ref_builder = TonCell::builder();
         ref_builder.write_num(&0b11110000, 8)?;
         let cell_ref = ref_builder.build()?.into_ref();
 
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_ref(cell_ref.clone())?;
         cell_builder.write_ref(cell_ref.clone())?;
         let cell = cell_builder.build()?.into_ref();
@@ -270,6 +295,28 @@ mod tests {
     }
 
     #[test]
+    fn test_builder_write_cell_slice() -> anyhow::Result<()> {
+        let mut builder = TonCell::builder();
+        builder.write_bits([255, 0, 255, 0], 24)?;
+
+        for i in 0..3 {
+            let mut ref_builder = TonCell::builder();
+            ref_builder.write_bits([i], 8)?;
+            builder.write_ref(ref_builder.build()?.into_ref())?;
+        }
+
+        let orig_cell = builder.build()?;
+        let cell_slice = orig_cell.parser().read_cell_slice(4, 20, 1, 3)?;
+
+        assert_eq!(cell_slice.data, vec![0b1111_0000, 0b0000_1111]);
+        assert_eq!(cell_slice.data_bits_len, 16);
+        assert_eq!(cell_slice.refs.len(), 2);
+        assert_eq!(cell_slice.refs[0], orig_cell.refs[1]);
+        assert_eq!(cell_slice.refs[1], orig_cell.refs[2]);
+        Ok(())
+    }
+
+    #[test]
     fn test_parser_read_bigint() -> anyhow::Result<()> {
         let cell_slice = make_test_cell(&[0b111_01010, 0b01101011, 0b10000000, 0b00000001], 32)?;
         let mut parser = CellParser::new(&cell_slice);
@@ -311,7 +358,7 @@ mod tests {
     #[test]
     fn test_parser_ensure_empty() -> anyhow::Result<()> {
         let cell_ref = make_test_cell(&[0b10101010, 0b01010101], 16)?;
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_ref(cell_ref.into_ref())?;
         builder.write_num(&3, 3)?;
         let cell = builder.build()?;

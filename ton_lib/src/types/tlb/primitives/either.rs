@@ -135,12 +135,12 @@ mod tests {
             layout: EitherRefLayout::Native,
         };
 
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         obj1.write(&mut builder)?;
         obj2.write(&mut builder)?;
         obj3.write(&mut builder)?;
         let cell = builder.build()?;
-        let mut parser = CellParser::new(&cell);
+        let mut parser = cell.parser();
         let parsed_obj1 = EitherRef::<TestType1>::read(&mut parser)?;
         let parsed_obj2 = EitherRef::<TestType2>::read(&mut parser)?;
         let parsed_obj3 = EitherRef::<TestType1>::read(&mut parser)?;
@@ -158,18 +158,18 @@ mod tests {
     fn test_either() -> anyhow::Result<()> {
         let obj1: Either<TestType1, TestType2> = Either::Left(TestType1 { value: 1 });
         let obj2: Either<TestType1, TestType2> = Either::Right(TestType2 { value: 2 });
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         obj1.write(&mut builder)?;
         obj2.write(&mut builder)?;
         let cell = builder.build()?;
-        let mut parser = CellParser::new(&cell);
+        let mut parser = cell.parser();
         let parsed_obj1 = TLBType::read(&mut parser)?;
         let parsed_obj2 = TLBType::read(&mut parser)?;
         assert_eq!(obj1, parsed_obj1);
         assert_eq!(obj2, parsed_obj2);
 
         // check raw data
-        let mut parser = CellParser::new(&cell);
+        let mut parser = cell.parser();
         assert!(!parser.read_bit()?);
         assert_ok!(parser.read_bits(32)); // skipping
         assert!(parser.read_bit()?);

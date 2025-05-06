@@ -1,4 +1,3 @@
-use crate::cell::build_parse::parser::CellParser;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
@@ -15,14 +14,8 @@ pub struct CellBuilder {
     refs: TonCellRefsStore,
 }
 
-impl Default for CellBuilder {
-    fn default() -> Self { Self::new() }
-}
-
 impl CellBuilder {
-    pub fn new() -> Self { Self::new_with_type(CellType::Ordinary) }
-
-    pub fn new_with_type(cell_type: CellType) -> Self {
+    pub(in crate::cell) fn new(cell_type: CellType) -> Self {
         Self {
             cell_type,
             data_writer: BitWriter::endian(vec![], BigEndian),
@@ -101,39 +94,8 @@ impl CellBuilder {
         cell.refs.iter().cloned().try_for_each(|r| self.write_ref(r))
     }
 
-    /// Ranges are handled like [start; end) - the same as iterators in c++
-    pub fn write_cell_slice(
-        &mut self,
-        cell: &TonCell,
-        start_bit: usize,
-        end_bit: usize,
-        start_ref: usize,
-        end_ref: usize,
-    ) -> Result<(), TonlibError> {
-        if end_bit > cell.data_bits_len {
-            return Err(TonlibError::BuilderNotEnoughData {
-                required_bits: end_bit,
-                given: cell.data_bits_len,
-            });
-        }
-
-        // prepare parser
-        let mut parser = CellParser::new(cell);
-        parser.read_bits(start_bit)?;
-        for _ in 0..start_ref {
-            parser.read_next_ref()?;
-        }
-        let slice_data_bits_len = end_bit - start_bit;
-        let slice_data = parser.read_bits(slice_data_bits_len)?;
-        self.write_bits(&slice_data, slice_data_bits_len)?;
-        for _ in start_ref..end_ref {
-            self.write_ref(parser.read_next_ref()?.clone())?;
-        }
-        Ok(())
-    }
-
     pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TonlibError> {
-        if self.refs.len() >= CellMeta::CELL_MAX_REFS_COUNT {
+        if self.refs.len() >= TonCell::MAX_REFS_COUNT {
             return Err(TonlibError::BuilderRefsOverflow);
         }
         self.refs.push(cell);
@@ -186,17 +148,17 @@ impl CellBuilder {
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
-    pub fn data_bits_left(&self) -> usize { CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len }
+    pub fn data_bits_left(&self) -> usize { TonCell::MAX_DATA_BITS_LEN - self.data_bits_len }
 
     fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TonlibError> {
         let new_bits_len = self.data_bits_len + bits_len;
-        if new_bits_len <= CellMeta::CELL_MAX_DATA_BITS_LEN {
+        if new_bits_len <= TonCell::MAX_DATA_BITS_LEN {
             self.data_bits_len = new_bits_len;
             return Ok(());
         }
         Err(TonlibError::BuilderDataOverflow {
             req: bits_len,
-            left: CellMeta::CELL_MAX_DATA_BITS_LEN - self.data_bits_len,
+            left: TonCell::MAX_DATA_BITS_LEN - self.data_bits_len,
         })
     }
 }
@@ -223,7 +185,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bit() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bit(true)?;
         cell_builder.write_bit(false)?;
         cell_builder.write_bit(true)?;
@@ -236,7 +198,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bits_with_offset() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bits_with_offset([0b1010_1010], 8, 0)?;
         cell_builder.write_bits_with_offset([0b0000_1111], 4, 4)?;
         cell_builder.write_bits_with_offset([0b1111_0011], 3, 4)?;
@@ -244,7 +206,7 @@ mod tests {
         assert_eq!(cell.data, vec![0b1010_1010, 0b1111_0010]);
         assert_eq!(cell.data_bits_len, 15);
 
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bits_with_offset([0b1010_1010, 0b0000_1111], 3, 10)?;
         let cell = cell_builder.build()?;
         assert_eq!(cell.data, vec![0b0010_0000]);
@@ -254,7 +216,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bits() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bit(true)?;
         cell_builder.write_bits([0b1010_1010], 8)?;
         cell_builder.write_bits([0b0101_0101], 4)?;
@@ -266,9 +228,9 @@ mod tests {
 
     #[test]
     fn test_builder_write_data_overflow() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bit(true)?;
-        assert!(cell_builder.write_bits([0b1010_1010], CellMeta::CELL_MAX_DATA_BITS_LEN).is_err());
+        assert!(cell_builder.write_bits([0b1010_1010], TonCell::MAX_DATA_BITS_LEN).is_err());
         let cell = cell_builder.build()?;
         assert_eq!(cell.data, vec![0b1000_0000]);
         Ok(())
@@ -276,7 +238,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_positive() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_num(&0b1010_1010, 8)?;
         cell_builder.write_num(&0b0000_0101, 4)?;
         let cell = cell_builder.build()?;
@@ -286,14 +248,14 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_in_many_bits() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         assert_err!(cell_builder.write_num(&0b1010_1010u8, 16));
         Ok(())
     }
 
     #[test]
     fn test_builder_write_num_positive_unaligned() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_num(&1u8, 4)?;
         cell_builder.write_num(&2u16, 5)?;
         cell_builder.write_num(&5u32, 10)?;
@@ -305,7 +267,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_negative() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         assert!(cell_builder.write_num(&-3i32, 3).is_err());
         assert!(cell_builder.write_num(&-3i32, 31).is_err());
         cell_builder.write_num(&-3i16, 16)?;
@@ -317,7 +279,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_num_negative_unaligned() -> anyhow::Result<()> {
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_bit(false)?;
         cell_builder.write_num(&-3i16, 16)?;
         cell_builder.write_num(&-3i8, 8)?;
@@ -328,17 +290,17 @@ mod tests {
 
     #[test]
     fn test_builder_write_cell() -> anyhow::Result<()> {
-        let mut ref_builder = CellBuilder::new();
+        let mut ref_builder = TonCell::builder();
         ref_builder.write_bit(true)?;
         ref_builder.write_bits([1, 2, 3], 24)?;
         let ref_cell = ref_builder.build()?.into_ref();
 
-        let mut cell_with_ref_builder = CellBuilder::new();
+        let mut cell_with_ref_builder = TonCell::builder();
         cell_with_ref_builder.write_bit(true)?;
         cell_with_ref_builder.write_ref(ref_cell.clone())?;
         let cell_with_ref = cell_with_ref_builder.build()?;
 
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_cell(&cell_with_ref)?;
         let cell = cell_builder.build()?;
 
@@ -347,36 +309,11 @@ mod tests {
     }
 
     #[test]
-    fn test_builder_write_cell_slice() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
-        builder.write_bits([255, 0, 255, 0], 24)?;
-
-        for i in 0..3 {
-            let mut ref_builder = CellBuilder::new();
-            ref_builder.write_bits([i], 8)?;
-            builder.write_ref(ref_builder.build()?.into_ref())?;
-        }
-
-        let orig_cell = builder.build()?;
-        //
-        let mut slice_cell_builder = CellBuilder::new();
-        slice_cell_builder.write_cell_slice(&orig_cell, 4, 20, 1, 3)?;
-        let slice_cell = slice_cell_builder.build()?;
-
-        assert_eq!(slice_cell.data, vec![0b1111_0000, 0b0000_1111]);
-        assert_eq!(slice_cell.data_bits_len, 16);
-        assert_eq!(slice_cell.refs.len(), 2);
-        assert_eq!(slice_cell.refs[0], orig_cell.refs[1]);
-        assert_eq!(slice_cell.refs[1], orig_cell.refs[2]);
-        Ok(())
-    }
-
-    #[test]
     fn test_builder_write_refs() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits([0b1111_0000], 4)?;
         let cell_ref = builder.build()?.into_ref();
-        let mut cell_builder = CellBuilder::new();
+        let mut cell_builder = TonCell::builder();
         cell_builder.write_ref(cell_ref.clone())?;
         cell_builder.write_ref(cell_ref.clone())?;
         let cell = cell_builder.build()?;
@@ -388,7 +325,7 @@ mod tests {
 
     #[test]
     fn test_builder_build_cell_ordinary_empty() -> anyhow::Result<()> {
-        let cell_builder = CellBuilder::new();
+        let cell_builder = TonCell::builder();
         let cell = cell_builder.build()?;
         assert_eq!(cell, TonCell::EMPTY);
         for level in 0..4 {
@@ -406,30 +343,30 @@ mod tests {
         //    3 4
         //   /
         //  5
-        let mut builder5 = CellBuilder::new();
+        let mut builder5 = TonCell::builder();
         builder5.write_num(&0x05, 8)?;
         let cell5 = builder5.build()?;
 
-        let mut builder3 = CellBuilder::new();
+        let mut builder3 = TonCell::builder();
         builder3.write_num(&0x03, 8)?;
         builder3.write_ref(cell5.clone().into_ref())?;
         let cell3 = builder3.build()?;
 
-        let mut builder4 = CellBuilder::new();
+        let mut builder4 = TonCell::builder();
         builder4.write_num(&0x04, 8)?;
         let cell4 = builder4.build()?;
 
-        let mut builder2 = CellBuilder::new();
+        let mut builder2 = TonCell::builder();
         builder2.write_num(&0x02, 8)?;
         let cell2 = builder2.build()?;
 
-        let mut builder1 = CellBuilder::new();
+        let mut builder1 = TonCell::builder();
         builder1.write_num(&0x01, 8)?;
         builder1.write_ref(cell3.clone().into_ref())?;
         builder1.write_ref(cell4.clone().into_ref())?;
         let cell1 = builder1.build()?;
 
-        let mut builder0 = CellBuilder::new();
+        let mut builder0 = TonCell::builder();
         builder0.write_bit(true)?;
         builder0.write_num(&0b0000_0001, 8)?;
         builder0.write_num(&0b0000_0011, 8)?;
@@ -451,11 +388,11 @@ mod tests {
 
     #[test]
     fn test_builder_build_cell_library() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new_with_type(CellType::Library);
+        let mut builder = TonCell::builder_typed(CellType::Library);
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         assert_err!(builder.build()); // no ton_lib prefix
 
-        let mut builder = CellBuilder::new_with_type(CellType::Library);
+        let mut builder = TonCell::builder_typed(CellType::Library);
         builder.write_num(&2, 8)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         let lib_cell = assert_ok!(builder.build());
@@ -470,7 +407,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bits_not_enough() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         let data = vec![1u8; 2];
         assert_err!(builder.write_bits(&data, 32));
         Ok(())
@@ -478,7 +415,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bits_not_enough_unaligned() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         let data = vec![1u8; 2];
         assert_err!(builder.write_bits(&data, 33));
         Ok(())
@@ -488,7 +425,7 @@ mod tests {
     fn test_builder_write_num_bigint() -> anyhow::Result<()> {
         let prepare_cell = |num_str: &str, bits_len: usize| {
             let number = num_bigint::BigInt::from_str(num_str)?;
-            let mut builder = CellBuilder::new();
+            let mut builder = TonCell::builder();
             builder.write_bits([0], 7)?; // for pretty printing
             builder.write_num(&number, bits_len)?;
             let cell = builder.build()?;
@@ -527,7 +464,7 @@ mod tests {
 
     fn prepare_cell_big_uint(num_str: &str, bits_len: usize) -> anyhow::Result<TonCell> {
         let number = num_bigint::BigUint::from_str(num_str)?;
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits([0], 7)?; // for pretty printing
         builder.write_num(&number, bits_len)?;
         let cell = builder.build()?;
@@ -538,7 +475,7 @@ mod tests {
     fn test_builder_write_num_biguint() -> anyhow::Result<()> {
         let prepare_cell = |num_str: &str, bits_len: usize| {
             let number = num_bigint::BigUint::from_str(num_str)?;
-            let mut builder = CellBuilder::new();
+            let mut builder = TonCell::builder();
             builder.write_bits([0], 7)?; // for pretty printing
             builder.write_num(&number, bits_len)?;
             let cell = builder.build()?;
@@ -561,7 +498,7 @@ mod tests {
             ]
         );
 
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_num(&num_bigint::BigUint::from_u64(117146891372).unwrap(), 257)?;
         let cell = builder.build()?;
         assert_eq!(
@@ -577,13 +514,13 @@ mod tests {
     #[test]
     fn test_builder_write_bignum_zero() -> anyhow::Result<()> {
         let number = num_bigint::BigInt::from_str("0")?;
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         assert_ok!(builder.write_num(&number, 0));
         assert_ok!(builder.write_num(&number, 1));
         assert_ok!(builder.write_num(&number, 2));
 
         let number = num_bigint::BigUint::from_str("0")?;
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         assert_ok!(builder.write_num(&number, 0));
         assert_ok!(builder.write_num(&number, 1));
         assert_ok!(builder.write_num(&number, 2));
@@ -593,7 +530,7 @@ mod tests {
 
     #[test]
     fn test_builder_write_bits_with_offset_proper_data_bits_len() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         let data = vec![0b1010_1010, 0b0000_1111];
         builder.write_bits_with_offset(&data, 8, 0)?;
         assert_eq!(builder.data_bits_len, 8);
@@ -606,11 +543,11 @@ mod tests {
 
     #[test]
     fn test_builder_data_bits_left() -> anyhow::Result<()> {
-        let mut builder = CellBuilder::new();
+        let mut builder = TonCell::builder();
         builder.write_bits([0b1010_1010], 8)?;
-        assert_eq!(builder.data_bits_left(), CellMeta::CELL_MAX_DATA_BITS_LEN - 8);
+        assert_eq!(builder.data_bits_left(), TonCell::MAX_DATA_BITS_LEN - 8);
         builder.write_bits([0b0000_1111], 4)?;
-        assert_eq!(builder.data_bits_left(), CellMeta::CELL_MAX_DATA_BITS_LEN - 12);
+        assert_eq!(builder.data_bits_left(), TonCell::MAX_DATA_BITS_LEN - 12);
         Ok(())
     }
 }
