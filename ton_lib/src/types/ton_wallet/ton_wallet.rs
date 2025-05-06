@@ -59,7 +59,7 @@ impl TonWallet {
         expire_at: u32,
         add_state_init: bool,
     ) -> Result<TonCell, TonlibError> {
-        let body = self.create_ext_in_body(expire_at, seqno, int_msgs)?;
+        let body = self.create_ext_in_body(int_msgs, seqno, expire_at)?;
         let signed = self.sign_ext_in_body(&body)?;
         let external = self.create_ext_in_msg_from_body(signed, add_state_init)?;
         Ok(external)
@@ -67,9 +67,9 @@ impl TonWallet {
 
     pub fn create_ext_in_body(
         &self,
-        expire_at: u32,
-        seqno: u32,
         int_msgs: Vec<TonCellRef>,
+        seqno: u32,
+        expire_at: u32,
     ) -> Result<TonCell, TonlibError> {
         VersionHelper::build_ext_in_body(self.version, expire_at, seqno, self.wallet_id, int_msgs)
     }
@@ -110,6 +110,7 @@ mod tests {
     use super::*;
     use crate::types::tlb::wallet::wallet_ext_msg_body::{WalletV3ExtMsgBody, WalletV4ExtMsgBody, WalletV5ExtMsgBody};
     use crate::types::ton_wallet::ton_wallet::TonAddress;
+
     use std::str::FromStr;
 
     const MNEMONIC_STR: &str = "fancy carpet hello mandate penalty trial consider property top vicious exit rebuild tragic profit urban major total month holiday sudden rib gather media vicious";
@@ -163,13 +164,13 @@ mod tests {
     }
 
     #[test]
-    fn test_ton_wallet_create_external_msg_v3() -> anyhow::Result<()> {
+    fn test_ton_wallet_v3_create_ext_in_body() -> anyhow::Result<()> {
         let key_pair = make_keypair(MNEMONIC_STR);
         let wallet = TonWallet::new(WalletVersion::V3R1, key_pair)?;
 
         let int_msg = TonCell::builder().build()?.into_ref();
 
-        let ext_body_cell = wallet.create_ext_in_body(13, 7, vec![int_msg.clone()])?;
+        let ext_body_cell = wallet.create_ext_in_body(vec![int_msg.clone()], 13, 7)?;
         let body = WalletV3ExtMsgBody::from_cell(&ext_body_cell)?;
         let expected = WalletV3ExtMsgBody {
             subwallet_id: WALLET_DEFAULT_ID,
@@ -183,13 +184,34 @@ mod tests {
     }
 
     #[test]
-    fn test_ton_wallet_create_external_msg_v4() -> anyhow::Result<()> {
+    fn test_ton_wallet_create_ext_in_msg() -> anyhow::Result<()> {
+        let key_pair = make_keypair(MNEMONIC_STR);
+        let wallet = TonWallet::new(WalletVersion::V3R1, key_pair)?;
+
+        let int_msg = TonCell::builder().build()?.into_ref();
+
+        let msg_cell = wallet.create_ext_in_msg(vec![int_msg.clone()], 7, 13, true)?;
+        let message = Message::from_cell(&msg_cell)?;
+        let body = WalletV3ExtMsgBody::read_signed(&mut message.body.parser())?.0;
+        let expected = WalletV3ExtMsgBody {
+            subwallet_id: WALLET_DEFAULT_ID,
+            msg_seqno: 7,
+            valid_until: 13,
+            msgs_modes: vec![3],
+            msgs: vec![int_msg.clone()],
+        };
+        assert_eq!(body, expected);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_wallet_v4_create_ext_in_msg_body() -> anyhow::Result<()> {
         let key_pair = make_keypair(MNEMONIC_STR);
         let wallet = TonWallet::new(WalletVersion::V4R1, key_pair)?;
 
         let int_msg = TonCell::builder().build()?.into_ref();
 
-        let ext_body_cell = wallet.create_ext_in_body(13, 7, vec![int_msg.clone()])?;
+        let ext_body_cell = wallet.create_ext_in_body(vec![int_msg.clone()], 13, 7)?;
         let body = WalletV4ExtMsgBody::from_cell(&ext_body_cell)?;
         let expected = WalletV4ExtMsgBody {
             subwallet_id: WALLET_DEFAULT_ID,
@@ -204,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ton_wallet_create_external_msg_v5() -> anyhow::Result<()> {
+    fn test_ton_wallet_v5_create_ext_in_msg_body() -> anyhow::Result<()> {
         let key_pair = make_keypair(MNEMONIC_STR_V5);
         let wallet = TonWallet::new(WalletVersion::V5R1, key_pair)?;
 
@@ -217,7 +239,7 @@ mod tests {
         }
         TonCell::builder().build()?.into_ref();
 
-        let ext_body_cell = wallet.create_ext_in_body(13, 7, int_msgs.clone())?;
+        let ext_body_cell = wallet.create_ext_in_body(int_msgs.clone(), 13, 7)?;
         let body = WalletV5ExtMsgBody::from_cell(&ext_body_cell)?;
         let expected = WalletV5ExtMsgBody {
             wallet_id: WALLET_V5R1_DEFAULT_ID,
@@ -243,7 +265,7 @@ mod tests {
         let msg = builder.build()?.into_ref();
 
         for wallet in [wallet_v3, wallet_v5] {
-            let body = wallet.create_ext_in_body(1, 3, vec![msg.clone()])?;
+            let body = wallet.create_ext_in_body(vec![msg.clone()], 1, 3)?;
             let signed_msg = wallet.sign_ext_in_body(&body)?;
 
             let mut parser = signed_msg.parser();
