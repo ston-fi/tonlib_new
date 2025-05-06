@@ -6,7 +6,7 @@ use std::marker::PhantomData;
 
 /// TLBRef - allows to save object in a reference cell.
 ///
-/// use `#[tlb_derive(adapter="TLBRef")]` to apply in automatically in TLBDerive macro
+/// use `#[tlb_derive(adapter="TLBRef")]` to apply it automatically in TLBDerive macro
 #[derive(Debug, Clone, PartialEq)]
 pub struct TLBRef<T: TLBType>(PhantomData<T>);
 

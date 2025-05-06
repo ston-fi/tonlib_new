@@ -73,10 +73,9 @@ impl TVMEmulator {
     pub fn send_int_msg(&mut self, msg_boc: &[u8], amount: u64) -> Result<TVMSendMsgResponse, TonlibError> {
         log::trace!("[TVMEmulator][send_int_msg]: msg_boc: {msg_boc:?}, amount: {amount}");
         let msg = CString::new(STANDARD.encode(msg_boc))?;
-        let json_str = unsafe {
-            let c_str = tvm_emulator_send_internal_message(self.ptr, msg.as_ptr(), amount);
-            convert_emulator_response(c_str)?
-        };
+
+        let c_str = unsafe { tvm_emulator_send_internal_message(self.ptr, msg.as_ptr(), amount) };
+        let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][send_int_msg]: msg_boc: {msg_boc:?}, amount: {amount}, rsp: {json_str}");
         Ok(serde_json::from_str(&json_str)?)
     }
@@ -84,10 +83,9 @@ impl TVMEmulator {
     pub fn send_ext_msg(&mut self, msg_boc: &[u8]) -> Result<TVMSendMsgResponse, TonlibError> {
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}");
         let msg = CString::new(STANDARD.encode(msg_boc))?;
-        let json_str = unsafe {
-            let c_str = tvm_emulator_send_external_message(self.ptr, msg.as_ptr());
-            convert_emulator_response(c_str)?
-        };
+
+        let c_str = unsafe { tvm_emulator_send_external_message(self.ptr, msg.as_ptr()) };
+        let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}, rsp: {json_str}");
         Ok(serde_json::from_str(&json_str)?)
     }
@@ -99,10 +97,9 @@ impl TVMEmulator {
         let tvm_method = method.into();
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack: {stack_boc:?}");
         let stack = CString::new(STANDARD.encode(stack_boc))?;
-        let json_str = unsafe {
-            let c_str = tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr());
-            convert_emulator_response(c_str)?
-        };
+
+        let c_str = unsafe { tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr()) };
+        let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
         TVMRunMethodResponse::from_json(json_str)?.into_success()
     }
@@ -116,8 +113,11 @@ impl Drop for TVMEmulator {
 unsafe impl Send for TVMEmulator {}
 unsafe impl Sync for TVMEmulator {}
 
-unsafe fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {
-    let json_str = std::ffi::CStr::from_ptr(c_str).to_str()?.to_string();
-    libc::free(c_str as *mut std::ffi::c_void); // emulator doesn't free the string
+fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {
+    let json_str = unsafe {
+        let json_str = std::ffi::CStr::from_ptr(c_str).to_str()?.to_string();
+        libc::free(c_str as *mut std::ffi::c_void); // emulator doesn't free the string
+        json_str
+    };
     Ok(json_str)
 }

@@ -88,8 +88,11 @@ pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(Vec<TonCellR
 }
 
 pub(super) fn build_inner_request(msgs: &[TonCellRef], msgs_modes: &[u8]) -> Result<InnerRequest, TonlibError> {
+    if msgs.is_empty() {
+        return Ok(InnerRequest { out_actions: None });
+    }
+
     validate_msgs_count(msgs, msgs_modes, 255)?;
-    // TODO suboptimal - can be done in 1 pass, but here we have 1 loop pass + recursion in OutList
     let mut actions = vec![];
     for (msg, mode) in msgs.iter().zip(msgs_modes.iter()) {
         let action = OutActionSendMsg {
@@ -101,10 +104,9 @@ pub(super) fn build_inner_request(msgs: &[TonCellRef], msgs_modes: &[u8]) -> Res
 
     let out_list = OutList::new(actions);
 
-    let req = InnerRequest {
+    Ok(InnerRequest {
         out_actions: Some(out_list),
-    };
-    Ok(req)
+    })
 }
 
 #[cfg(test)]

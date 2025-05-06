@@ -1,6 +1,6 @@
-use crate::clients::tonlib::clients_impl::TLConnDefault;
 use crate::clients::tonlib::tl_client::TLClientTrait;
 use crate::clients::tonlib::tl_client_config::TLClientConfig;
+use crate::clients::tonlib::tonlibjson_impl::TLConnDefault;
 use crate::clients::tonlib::utils::prepare_client_env;
 use crate::clients::tonlib::{TLClient, TLConnection};
 use crate::errors::TonlibError;

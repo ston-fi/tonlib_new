@@ -1,7 +1,6 @@
-// re-export
-pub use ton_lib_macros;
+pub use ton_lib_macros; // re-export
 #[cfg(feature = "sys")]
-pub use tonlib_sys;
+pub use tonlib_sys; // re-export
 
 pub mod bc_constants;
 pub mod cell;

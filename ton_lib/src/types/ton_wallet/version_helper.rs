@@ -1,19 +1,26 @@
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::wallet::versions::WalletVersion;
+use crate::types::tlb::wallet::versions::WalletVersion::*;
 use crate::types::tlb::wallet::wallet_data::{
     WalletHLV2R2Data, WalletV1V2Data, WalletV3Data, WalletV4Data, WalletV5Data,
 };
+use crate::types::tlb::wallet::wallet_ext_msg_body::{
+    WalletV2ExtMsgBody, WalletV3ExtMsgBody, WalletV4ExtMsgBody, WalletV5ExtMsgBody,
+};
 use crate::types::ton_wallet::mnemonic::KeyPair;
-use crate::types::ton_wallet::versions::UserWalletVersion;
-use crate::types::ton_wallet::versions::UserWalletVersion::*;
 use crate::types::ton_wallet::wallet_code::TON_WALLET_CODE_BY_VERSION;
 
-pub struct VersionHelper;
+pub(super) struct VersionHelper;
 
 impl VersionHelper {
-    pub fn get_data(version: UserWalletVersion, key_pair: &KeyPair, wallet_id: i32) -> Result<TonCellRef, TonlibError> {
+    pub(super) fn get_data(
+        version: WalletVersion,
+        key_pair: &KeyPair,
+        wallet_id: i32,
+    ) -> Result<TonCellRef, TonlibError> {
         let public_key = TonHash::from_bytes(&key_pair.public_key)?;
         match version {
             V1R1 | V1R2 | V1R3 | V2R1 | V2R2 => WalletV1V2Data::new(public_key).to_cell_ref(),
@@ -27,81 +34,71 @@ impl VersionHelper {
         }
     }
 
-    pub fn get_code(version: UserWalletVersion) -> Result<&'static TonCellRef, TonlibError> {
+    pub fn get_code(version: WalletVersion) -> Result<&'static TonCellRef, TonlibError> {
         TON_WALLET_CODE_BY_VERSION
             .get(&version)
             .ok_or_else(|| TonlibError::CustomError(format!("No code found for {version:?}")))
     }
 
-    // pub fn build_ext_msg<T: AsRef<[ArcCell]>>(
-    //     version: WalletVersion,
-    //     valid_until: u32,
-    //     msg_seqno: u32,
-    //     wallet_id: i32,
-    //     msgs_refs: T,
-    // ) -> Result<Cell, TonCellError> {
-    //     let msgs: Vec<ArcCell> = msgs_refs.as_ref().to_vec();
-    //
-    //     match version {
-    //         WalletVersion::V2R1 | WalletVersion::V2R2 => WalletExtMsgBodyV2 {
-    //             msg_seqno,
-    //             valid_until,
-    //             msgs_modes: vec![3u8; msgs.len()],
-    //             msgs,
-    //         }
-    //             .to_cell(),
-    //         WalletVersion::V3R1 | WalletVersion::V3R2 => WalletExtMsgBodyV3 {
-    //             subwallet_id: wallet_id,
-    //             msg_seqno,
-    //             valid_until,
-    //             msgs_modes: vec![3u8; msgs.len()],
-    //             msgs,
-    //         }
-    //             .to_cell(),
-    //         WalletVersion::V4R1 | WalletVersion::V4R2 => WalletExtMsgBodyV4 {
-    //             subwallet_id: wallet_id,
-    //             valid_until,
-    //             msg_seqno,
-    //             opcode: 0,
-    //             msgs_modes: vec![3u8; msgs.len()],
-    //             msgs,
-    //         }
-    //             .to_cell(),
-    //         WalletVersion::V5R1 => WalletExtMsgBodyV5 {
-    //             wallet_id,
-    //             valid_until,
-    //             msg_seqno,
-    //             msgs_modes: vec![3u8; msgs.len()],
-    //             msgs,
-    //         }
-    //             .to_cell(),
-    //         _ => {
-    //             let err_str = format!("build_ext_msg for {version:?} is unsupported");
-    //             Err(TonCellError::InternalError(err_str))
-    //         }
-    //     }
-    // }
-    //
-    // pub fn sign_msg(
-    //     version: WalletVersion,
-    //     msg_cell: &Cell,
-    //     sign: &[u8],
-    // ) -> Result<Cell, TonCellError> {
-    //     let signed_cell = match version {
-    //         // different order
-    //         WalletVersion::V5R1 => {
-    //             let mut builder = CellBuilder::new();
-    //             builder.store_cell(msg_cell)?;
-    //             builder.store_slice(sign)?;
-    //             builder.build()?
-    //         }
-    //         _ => {
-    //             let mut builder = CellBuilder::new();
-    //             builder.store_slice(sign)?;
-    //             builder.store_cell(msg_cell)?;
-    //             builder.build()?
-    //         }
-    //     };
-    //     Ok(signed_cell)
-    // }
+    pub fn build_ext_in_body(
+        version: WalletVersion,
+        valid_until: u32,
+        msg_seqno: u32,
+        wallet_id: i32,
+        msgs: Vec<TonCellRef>,
+    ) -> Result<TonCell, TonlibError> {
+        match version {
+            V2R1 | V2R2 => WalletV2ExtMsgBody {
+                msg_seqno,
+                valid_until,
+                msgs_modes: vec![3u8; msgs.len()],
+                msgs,
+            }
+            .to_cell(),
+            V3R1 | V3R2 => WalletV3ExtMsgBody {
+                subwallet_id: wallet_id,
+                msg_seqno,
+                valid_until,
+                msgs_modes: vec![3u8; msgs.len()],
+                msgs,
+            }
+            .to_cell(),
+            V4R1 | V4R2 => WalletV4ExtMsgBody {
+                subwallet_id: wallet_id,
+                valid_until,
+                msg_seqno,
+                opcode: 0,
+                msgs_modes: vec![3u8; msgs.len()],
+                msgs,
+            }
+            .to_cell(),
+            V5R1 => WalletV5ExtMsgBody {
+                wallet_id,
+                valid_until,
+                msg_seqno,
+                msgs_modes: vec![3u8; msgs.len()],
+                msgs,
+            }
+            .to_cell(),
+            _ => Err(TonlibError::CustomError(format!("build_ext_in_body for {version:?} is unsupported"))),
+        }
+    }
+
+    pub(super) fn sign_msg(version: WalletVersion, msg_cell: &TonCell, sign: &[u8]) -> Result<TonCell, TonlibError> {
+        match version {
+            // different order
+            V5R1 => {
+                let mut builder = TonCell::builder();
+                builder.write_cell(msg_cell)?;
+                builder.write_bits(sign, sign.len() * 8)?;
+                builder.build()
+            }
+            _ => {
+                let mut builder = TonCell::builder();
+                builder.write_bits(sign, sign.len() * 8)?;
+                builder.write_cell(msg_cell)?;
+                builder.build()
+            }
+        }
+    }
 }

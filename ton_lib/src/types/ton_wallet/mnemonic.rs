@@ -35,7 +35,7 @@ impl fmt::Debug for KeyPair {
 }
 
 impl Mnemonic {
-    pub fn new(words: Vec<&str>, password: &Option<String>) -> Result<Mnemonic, TonlibError> {
+    pub fn new(words: Vec<&str>, password: Option<String>) -> Result<Mnemonic, TonlibError> {
         let normalized_words: Vec<String> = words.iter().map(|w| w.trim().to_lowercase()).collect();
 
         // Check words
@@ -49,22 +49,22 @@ impl Mnemonic {
         }
 
         // Check password validity
-        match password {
+        match &password {
             Some(s) if !s.is_empty() => {
-                let passless_entropy = to_entropy(&normalized_words, &None)?;
+                let passless_entropy = to_entropy(&normalized_words, None)?;
                 let seed = pbkdf2_sha512(passless_entropy, "TON fast seed version", 1, 64)?;
                 if seed[0] != 1 {
                     return Err(TonlibError::MnemonicInvalidFirstByte(seed[0]));
                 }
                 // Make that this also is not a valid passwordless mnemonic
-                let entropy = to_entropy(&normalized_words, password)?;
+                let entropy = to_entropy(&normalized_words, password.as_ref())?;
                 let seed = pbkdf2_sha512(entropy, "TON seed version", cmp::max(1, PBKDF_ITERATIONS / 256), 64)?;
                 if seed[0] == 0 {
                     return Err(TonlibError::MnemonicInvalidFirstByte(seed[0]));
                 }
             }
             _ => {
-                let entropy = to_entropy(&normalized_words, &None)?;
+                let entropy = to_entropy(&normalized_words, None)?;
                 let seed = pbkdf2_sha512(entropy, "TON seed version", cmp::max(1, PBKDF_ITERATIONS / 256), 64)?;
                 if seed[0] != 0 {
                     return Err(TonlibError::MnemonicInvalidPasslessFirstByte(seed[0]));
@@ -74,17 +74,17 @@ impl Mnemonic {
 
         Ok(Mnemonic {
             words: normalized_words,
-            password: password.clone(),
+            password,
         })
     }
 
-    pub fn from_str(s: &str, password: &Option<String>) -> Result<Mnemonic, TonlibError> {
+    pub fn from_str(s: &str, password: Option<String>) -> Result<Mnemonic, TonlibError> {
         let words: Vec<&str> = s.split(' ').map(|w| w.trim()).filter(|w| !w.is_empty()).collect();
         Mnemonic::new(words, password)
     }
 
     pub fn to_key_pair(&self) -> Result<KeyPair, TonlibError> {
-        let entropy = to_entropy(&self.words, &self.password)?;
+        let entropy = to_entropy(&self.words, self.password.as_ref())?;
         let seed = pbkdf2_sha512(entropy, "TON default seed", PBKDF_ITERATIONS, 64)?;
         let key_pair = generate_keypair(&seed.as_slice()[0..32]);
         Ok(KeyPair {
@@ -94,7 +94,7 @@ impl Mnemonic {
     }
 }
 
-fn to_entropy(words: &[String], password: &Option<String>) -> Result<Vec<u8>, TonlibError> {
+fn to_entropy(words: &[String], password: Option<&String>) -> Result<Vec<u8>, TonlibError> {
     let mut mac = Hmac::<Sha512>::new_from_slice(words.join(" ").as_bytes())?;
     if let Some(s) = password {
         mac.update(s.as_bytes());
@@ -126,13 +126,13 @@ mod tests {
     #[test]
     fn mnemonic_parse_works() -> anyhow::Result<()> {
         let words = "dose ice enrich trigger test dove century still betray gas diet dune use other base gym mad law immense village world example praise game";
-        let mnemonic = Mnemonic::from_str(words, &None);
+        let mnemonic = Mnemonic::from_str(words, None);
         assert!(mnemonic.is_ok());
 
         let words = " dose ice enrich trigger test dove \
         century still betray gas diet       dune use other base gym mad law \
         immense village world example praise game ";
-        let mnemonic = Mnemonic::from_str(words, &None);
+        let mnemonic = Mnemonic::from_str(words, None);
         assert!(mnemonic.is_ok());
         Ok(())
     }
@@ -143,10 +143,10 @@ mod tests {
             vec![
                 "dose", "ice", "enrich", "trigger", "test", "dove", "century", "still", "betray", "gas", "diet", "dune",
             ],
-            &None,
+            None,
         );
         assert!(mnemonic.is_err());
-        let mnemonic = Mnemonic::new(vec!["a"], &None);
+        let mnemonic = Mnemonic::new(vec!["a"], None);
         assert!(mnemonic.is_err());
         Ok(())
     }
@@ -159,7 +159,7 @@ mod tests {
                 "dune", "use", "other", "base", "gym", "mad", "law", "immense", "village", "world", "example",
                 "praise", "game",
             ],
-            &None,
+            None,
         )?;
         let expected = "119dcf2840a3d56521d260b2f125eedc0d4f3795b9e627269a4b5a6dca8257bdc04ad1885c127fe863abb00752fa844e6439bb04f264d70de7cea580b32637ab";
 

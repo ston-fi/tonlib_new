@@ -94,7 +94,7 @@ impl<T> EitherRef<T> {
     pub fn new(value: T) -> Self {
         Self {
             value,
-            layout: EitherRefLayout::Native,
+            layout: EitherRefLayout::ToRef,
         }
     }
 }
