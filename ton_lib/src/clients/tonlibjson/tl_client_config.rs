@@ -1,5 +1,5 @@
-use crate::clients::tonlib::tl_api::tl_types::{TLConfig, TLKeyStoreType, TLOptions};
-use crate::clients::tonlib::tl_callback::TLCallbacksStore;
+use crate::clients::tonlibjson::tl_api::tl_types::{TLConfig, TLKeyStoreType, TLOptions};
+use crate::clients::tonlibjson::tl_callback::TLCallbacksStore;
 use crate::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 
 #[derive(Debug, PartialEq)]

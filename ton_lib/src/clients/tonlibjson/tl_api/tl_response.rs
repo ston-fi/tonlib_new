@@ -1,4 +1,4 @@
-use crate::clients::tonlib::tl_api::tl_types::{
+use crate::clients::tonlibjson::tl_api::tl_types::{
     TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
     TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
     TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,

@@ -1,4 +1,4 @@
-use crate::clients::tonlib::tl_api::tl_response::TLResponse;
+use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
 use crate::errors::TonlibError;
 use std::fmt::Display;
 use std::time::Instant;

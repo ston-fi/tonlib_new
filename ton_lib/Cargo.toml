@@ -22,9 +22,11 @@ include = [
 ]
 
 [features]
-default = ["sys"]
-sys = ["dep:tonlib-sys"] # enables emulators, contracts, tonlibjson_impl client implementations
-serde_scylla = ["dep:scylla"] # enables serde for TonHash, TonAddress
+default = ["contracts", "tonlibjson", "emulator", "serde_scylla"]
+contracts = []
+tonlibjson = ["dep:tonlib-sys"] # add tonlibjson client implementations
+emulator = ["dep:tonlib-sys"] # add tvm/tx emulators
+serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
 
 
 [dependencies]

@@ -3,7 +3,7 @@
 // use std::sync::atomic::AtomicBool;
 // use async_recursion::async_recursion;
 // use crate::clients::lite::lite_client::LiteClient;
-// use crate::clients::tonlib::tl_client::TLClient;
+// use crate::clients::tonlibjson::tl_client::TLClient;
 // use crate::errors::TonlibError;
 // use crate::types::tlb::block_tlb::block::{Block, BlockIdExt};
 //

@@ -1,7 +1,7 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_cell_utils::TonCellUtils;
-use crate::clients::tonlib::tl_api::tl_types::{TLRawFullAccountState, TLTxId};
-use crate::clients::tonlib::TLClient;
+use crate::clients::tonlibjson::tl_api::tl_types::{TLRawFullAccountState, TLTxId};
+use crate::clients::tonlibjson::TLClient;
 use crate::emulators::tvm::{TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
@@ -13,7 +13,7 @@ use ton_lib_macros::ton_contract;
 
 pub struct ContractCtx {
     pub address: TonAddress,
-    pub tl_client: TLClient,
+    pub contract_client: Contract,
     pub code_cell: TonCellRef,
     pub data_cell: TonCellRef,
     pub state_raw: TLRawFullAccountState,

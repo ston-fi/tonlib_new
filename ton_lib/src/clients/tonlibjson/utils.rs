@@ -1,8 +1,8 @@
 use crate::cell::ton_cell::TonCell;
 use crate::clients::lite::config::LiteClientConfig;
 use crate::clients::lite::lite_client::LiteClient;
-use crate::clients::tonlib::tl_api::tl_types::TLKeyStoreType;
-use crate::clients::tonlib::tl_client_config::TLClientConfig;
+use crate::clients::tonlibjson::tl_api::tl_types::TLKeyStoreType;
+use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::tlb::tlb_type::TLBType;

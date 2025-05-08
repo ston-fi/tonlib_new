@@ -2,7 +2,7 @@ use crate::tests::test_tl_client::make_tl_client_default;
 use std::str::FromStr;
 use tokio_test::assert_ok;
 use ton_lib::cell::ton_hash::TonHash;
-use ton_lib::clients::tonlib::TLClient;
+use ton_lib::clients::tonlibjson::TLClient;
 use ton_lib::contracts::jetton_master::JettonMaster;
 use ton_lib::contracts::jetton_wallet::JettonWallet;
 use ton_lib::contracts::methods::get_jetton_data::GetJettonData;
