@@ -3,7 +3,7 @@ use crate::emulators::tvm::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::errors::TonlibError;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
-use crate::types::tlb::block_tlb::tvm::VMStack;
+use crate::types::tlb::block_tlb::tvm::TVMStack;
 use crate::types::tlb::primitives::LibsDict;
 use crate::types::tlb::tep_0074::jetton_transfer_msg::JettonTransferMsg;
 use crate::types::tlb::tlb_type::TLBType;
@@ -27,7 +27,7 @@ fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {
     let c7 = TVMEmulatorC7::new(master_address, hex::decode(BC_CONFIG_HEX)?)?;
     let mut emulator = TVMEmulator::new(&master_code, &master_data, &c7)?;
 
-    let mut stack = VMStack::default();
+    let mut stack = TVMStack::default();
     stack.push_cell_slice(owner_address.to_cell_ref()?);
 
     let mut emulated = emulator.run_method("get_wallet_address", &stack.to_boc(false)?)?;
@@ -43,7 +43,7 @@ fn test_tvm_emulator_get_wallet_address() -> anyhow::Result<()> {
     let c7 = TVMEmulatorC7::new(master_address, hex::decode(BC_CONFIG_HEX)?)?;
     let mut emulator = TVMEmulator::new(&master_code, &master_data, &c7)?;
 
-    let mut stack = VMStack::default();
+    let mut stack = TVMStack::default();
     stack.push_cell_slice(owner_address.to_cell_ref()?);
 
     let mut emulated = emulator.run_method("get_wallet_address", &stack.to_boc(false)?)?;
@@ -66,7 +66,7 @@ fn test_tvm_emulator_get_pool_full_data() -> anyhow::Result<()> {
     let c7 = TVMEmulatorC7::new(address, hex::decode(BC_CONFIG_HEX)?)?;
     let mut emulator = TVMEmulator::new(&master_code, &master_data, &c7)?;
 
-    let emulated = assert_ok!(emulator.run_method("get_pool_full_data", &VMStack::default().to_boc(false)?));
+    let emulated = assert_ok!(emulator.run_method("get_pool_full_data", &TVMStack::default().to_boc(false)?));
     assert_eq!(emulated.vm_exit_code, 0);
     Ok(())
 }
@@ -87,7 +87,7 @@ fn test_tvm_emulator_with_libs() -> anyhow::Result<()> {
     let c7 = TVMEmulatorC7::new(master_address, hex::decode(BC_CONFIG_HEX)?)?;
     let mut emulator = TVMEmulator::new(&code_boc, &data_boc, &c7)?;
 
-    let mut stack = VMStack::default();
+    let mut stack = TVMStack::default();
     stack.push_cell_slice(owner_address.to_cell_ref()?);
 
     // no libs - should fail

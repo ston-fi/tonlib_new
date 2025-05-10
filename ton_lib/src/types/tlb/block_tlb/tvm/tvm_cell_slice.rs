@@ -7,7 +7,7 @@ use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L873
 // really tricky to implement with current design,
 #[derive(Clone, PartialEq, Debug)]
-pub struct VMCellSlice {
+pub struct TVMCellSlice {
     pub value: TonCellRef, // is not part of TLB
     pub cell_original: TonCellRef,
     pub start_bit: usize,
@@ -16,7 +16,7 @@ pub struct VMCellSlice {
     pub end_ref: usize,
 }
 
-impl VMCellSlice {
+impl TVMCellSlice {
     pub fn from_cell(cell: TonCellRef) -> Self {
         let end_bit = cell.data_bits_len;
         let end_ref = cell.refs.len();
@@ -31,7 +31,7 @@ impl VMCellSlice {
     }
 }
 
-impl TLBType for VMCellSlice {
+impl TLBType for TVMCellSlice {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x04, 8);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {

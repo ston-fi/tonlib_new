@@ -6,11 +6,11 @@ use std::borrow::Cow;
 use std::fmt::Debug;
 
 use crate::cell::ton_hash::TonHash;
+use crate::clients::client_types::{TxId, TxIdLTHash};
+use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
-use crate::clients::client_types::TxId;
-use crate::errors::TonlibError;
 
 // tonlib_api.tl_api, line 23
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -55,24 +55,31 @@ pub struct TLOptionsInfo {
 
 // tonlib_api.tl_api, line 44
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-struct TLAccountAddress {
+pub struct TLAccountAddress {
     #[serde(rename = "account_address", with = "serde_ton_address_hex")]
     address: TonAddress,
 }
 
 impl From<TonAddress> for TLAccountAddress {
-    fn from(address: TonAddress) -> Self {
-        TLAccountAddress { address }
-    }
+    fn from(address: TonAddress) -> Self { TLAccountAddress { address } }
 }
 
 impl From<TLAccountAddress> for TonAddress {
     fn from(tl_address: TLAccountAddress) -> Self { tl_address.address }
 }
 
+// tonlib_api.tl_api, line 50
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+pub struct TLBlockId {
+    pub workchain: i32,
+    #[serde(deserialize_with = "deserialize_number_from_string")]
+    pub shard: i64,
+    pub seqno: i32,
+}
+
 // tonlib_api.tl_api, line 48
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
-struct TLTxId {
+pub struct TLTxId {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
     #[serde(with = "serde_ton_hash_b64")]
@@ -83,7 +90,10 @@ impl TryFrom<TxId> for TLTxId {
     type Error = TonlibError;
     fn try_from(tx_id: TxId) -> Result<Self, Self::Error> {
         match tx_id {
-            TxId::LTHash(lt, hash) => Ok(Self { lt, hash }),
+            TxId::LTHash(id) => Ok(Self {
+                lt: id.lt,
+                hash: id.hash,
+            }),
             rest => Err(TonlibError::TLInvalidArgs(format!("tl_client doesn't support {rest:?} as tx_id"))),
         }
     }
@@ -91,10 +101,12 @@ impl TryFrom<TxId> for TLTxId {
 
 impl From<TLTxId> for TxId {
     fn from(tl_tx_id: TLTxId) -> Self {
-        TxId::LTHash{ lt: tl_tx_id.lt, hash: tl_tx_id.hash, }
+        TxId::LTHash(TxIdLTHash {
+            lt: tl_tx_id.lt,
+            hash: tl_tx_id.hash,
+        })
     }
 }
-
 
 // tonlib_api.tl_api, line 51
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]

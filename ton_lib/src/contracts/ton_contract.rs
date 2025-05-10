@@ -1,26 +1,20 @@
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_cell_utils::TonCellUtils;
-use crate::clients::tonlibjson::tl_api::tl_types::{TLRawFullAccountState, TLTxId};
-use crate::clients::tonlibjson::TLClient;
+use crate::clients::client_types::TxId;
+use crate::contracts::contract_client::types::ContractState;
+use crate::contracts::contract_client::ContractClient;
 use crate::emulators::tvm::{TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::coins::Coins;
-use crate::types::tlb::block_tlb::tvm::VMStack;
+use crate::types::tlb::block_tlb::tvm::TVMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use crate::types::ton_address::TonAddress;
-use std::ops::Deref;
-use ton_lib_macros::ton_contract;
+use std::sync::Arc;
 
 pub struct ContractCtx {
+    pub client: ContractClient,
     pub address: TonAddress,
-    pub contract_client: Contract,
-    pub code_cell: TonCellRef,
-    pub data_cell: TonCellRef,
-    pub state_raw: TLRawFullAccountState,
+    pub tx_id: Option<TxId>,
 }
-
-#[ton_contract]
-pub struct TonContract {}
 
 #[async_trait::async_trait]
 pub trait TonContractTrait: Send + Sync + Sized {
@@ -28,73 +22,56 @@ pub trait TonContractTrait: Send + Sync + Sized {
     fn ctx_mut(&mut self) -> &mut ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    async fn new(address: TonAddress, tl_client: TLClient, tx_id: Option<TLTxId>) -> Result<Self, TonlibError> {
-        let state_raw = match tx_id {
-            Some(tx_id) => tl_client.get_account_state_raw_by_tx(&address, tx_id).await?,
-            None => tl_client.get_account_state_raw(&address).await?,
-        };
-        let code_cell = TonCellRef::from_boc(&state_raw.code)?;
-        let data_cell = TonCellRef::from_boc(&state_raw.data)?;
-        Ok(Self::from_ctx(ContractCtx {
-            address,
-            tl_client,
-            code_cell,
-            data_cell,
-            state_raw,
-        }))
+    async fn new(client: ContractClient, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TonlibError> {
+        Ok(Self::from_ctx(ContractCtx { client, address, tx_id }))
     }
 
-    async fn update(&mut self, tx_id: Option<TLTxId>) -> Result<(), TonlibError> {
-        let ctx = self.ctx_mut();
-        let state_raw = match tx_id {
-            Some(tx_id) => {
-                if tx_id == ctx.state_raw.last_tx_id {
-                    return Ok(());
-                }
-                ctx.tl_client.get_account_state_raw_by_tx(&ctx.address, tx_id).await?
-            }
-            None => ctx.tl_client.get_account_state_raw(&ctx.address).await?,
-        };
-        ctx.state_raw = state_raw;
-        ctx.code_cell = TonCellRef::from_boc(&ctx.state_raw.code)?;
-        ctx.data_cell = TonCellRef::from_boc(&ctx.state_raw.data)?;
-        Ok(())
-    }
-
-    async fn run_method<M>(
-        &self,
-        method: M,
-        stack: &VMStack,
-        c7: Option<&TVMEmulatorC7>,
-    ) -> Result<TVMRunMethodSuccess, TonlibError>
+    async fn run_method<M>(&self, method: M, stack: &TVMStack) -> Result<TVMRunMethodSuccess, TonlibError>
     where
         M: Into<TVMMethodId> + Send,
     {
-        self.make_emulator(c7).await?.run_method(method, &stack.to_boc(false)?)
+        let ctx = self.ctx();
+        ctx.client.run_method(&ctx.address, method, stack).await
     }
 
-    fn send_int_msg(&self, _msg_boc: &[u8], _amount: Coins) -> Result<(), TonlibError> { todo!() }
+    async fn get_state(&self) -> Result<Arc<ContractState>, TonlibError> {
+        let ctx = self.ctx();
+        ctx.client.get_state(&ctx.address, ctx.tx_id.as_ref()).await
+    }
 
-    fn send_ext_msg(&self, _msg_boc: &[u8]) -> Result<(), TonlibError> { todo!() }
+    async fn get_parsed_data<D: TLBType>(&self) -> Result<D, TonlibError> {
+        match &self.get_state().await?.data_boc {
+            Some(data_boc) => D::from_boc(&data_boc),
+            None => Err(TonlibError::TonContractNotActive {
+                address: self.ctx().address.clone(),
+                tx_id: self.ctx().tx_id.clone(),
+            }),
+        }
+    }
 
-    fn parse_data<D: TLBType>(&self) -> Result<D, TonlibError> { D::from_cell(&self.ctx().data_cell) }
-
+    #[cfg(feature = "emulator")]
     async fn make_emulator(&self, c7: Option<&TVMEmulatorC7>) -> Result<TVMEmulator, TonlibError> {
         let ctx = self.ctx();
+        let state = self.get_state().await?;
+        let code_boc = state.code_boc.as_ref().map(|x| x.as_slice()).unwrap_or(&[]);
+        let code_cell = state.code_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
+
+        let data_boc = state.data_boc.as_ref().map(|x| x.as_slice()).unwrap_or(&[]);
+        let data_cell = state.data_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
 
         let mut emulator = match c7 {
-            Some(c7) => TVMEmulator::new(&ctx.state_raw.code, &ctx.state_raw.data, c7)?,
+            Some(c7) => TVMEmulator::new(code_boc, data_boc, c7)?,
             None => {
-                let bc_config = ctx.tl_client.get_config_boc_all(0).await?;
+                let bc_config = ctx.client.get_config_boc(None).await?;
                 let c7 = TVMEmulatorC7::new(ctx.address.clone(), bc_config)?;
-                TVMEmulator::new(&ctx.state_raw.code, &ctx.state_raw.data, &c7)?
+                TVMEmulator::new(code_boc, data_boc, &c7)?
             }
         };
-
-        let lib_ids = TonCellUtils::extract_lib_ids([ctx.code_cell.deref(), ctx.code_cell.deref()])?;
+        let cells = [code_cell.as_ref(), data_cell.as_ref()].into_iter().flatten();
+        let lib_ids = TonCellUtils::extract_lib_ids(cells)?;
         if !lib_ids.is_empty() {
-            if let Some(libs_dict) = ctx.tl_client.get_libs(lib_ids).await? {
-                emulator.set_libs(&libs_dict.to_boc(false)?)?;
+            if let Some(libs_boc) = ctx.client.get_libs_boc(&lib_ids).await? {
+                emulator.set_libs(&libs_boc)?;
             }
         }
         Ok(emulator)

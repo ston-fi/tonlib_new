@@ -5,14 +5,14 @@ use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
 use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
 use crate::clients::tonlibjson::tl_api::tl_types::{
     TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
-    TLFullAccountState, TLOptions, TLOptionsInfo, TLRawFullAccountState, TLRawTxs, TLTxId,
+    TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLTxId,
 };
+use crate::clients::tonlibjson::tl_connection::TLConnection;
 use crate::errors::TonlibError;
 use crate::types::tlb::primitives::LibsDict;
 use crate::types::tlb::tlb_type::TLBType;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
-use crate::clients::tonlibjson::tl_connection::TLConnection;
 
 #[macro_export]
 macro_rules! unwrap_tl_response {
@@ -63,14 +63,14 @@ pub trait TLClientTrait: Send + Sync {
         self.lookup_block(1, block_id, 0, 0).await
     }
 
-    async fn get_account_state(&self, address: &TonAddress) -> Result<TLFullAccountState, TonlibError> {
+    async fn get_account_state(&self, address: TonAddress) -> Result<TLFullAccountState, TonlibError> {
         let req = TLRequest::GetAccountState {
             account_address: address.into(),
         };
         Ok(*unwrap_tl_response!(self.exec(&req).await?, TLFullAccountState)?)
     }
 
-    async fn get_account_state_raw(&self, address: &TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
+    async fn get_account_state_raw(&self, address: TonAddress) -> Result<TLRawFullAccountState, TonlibError> {
         let req = TLRequest::RawGetAccountState {
             account_address: address.into(),
         };
@@ -79,7 +79,7 @@ pub trait TLClientTrait: Send + Sync {
 
     async fn get_account_state_raw_by_tx(
         &self,
-        address: &TonAddress,
+        address: TonAddress,
         tx_id: TLTxId,
     ) -> Result<TLRawFullAccountState, TonlibError> {
         let req = TLRequest::RawGetAccountStateByTx {
@@ -89,7 +89,7 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_txs(&self, address: &TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TonlibError> {
+    async fn get_txs(&self, address: TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TonlibError> {
         let req = TLRequest::RawGetTxs {
             account_address: address.into(),
             from_transaction_id: from_tx,
@@ -99,7 +99,7 @@ pub trait TLClientTrait: Send + Sync {
 
     async fn get_txs_v2(
         &self,
-        address: &TonAddress,
+        address: TonAddress,
         from_tx: TLTxId,
         count: usize,
         try_decode_msg: bool,

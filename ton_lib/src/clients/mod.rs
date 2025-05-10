@@ -1,6 +1,5 @@
 pub mod block_stream;
-pub mod lite;
-#[cfg(feature = "sys")]
-pub mod tonlibjson;
-pub mod contract_client;
 pub mod client_types;
+pub mod lite;
+#[cfg(feature = "tonlibjson")]
+pub mod tonlibjson;

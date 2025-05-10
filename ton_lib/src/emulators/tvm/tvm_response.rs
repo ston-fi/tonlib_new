@@ -1,6 +1,6 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::tvm::VMStack;
+use crate::types::tlb::block_tlb::tvm::TVMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use serde::{Deserialize, Serialize};
 
@@ -67,7 +67,7 @@ impl TVMSendMsgResponse {
 pub struct TVMRunMethodSuccess {
     pub vm_exit_code: i32,
     pub vm_log: Option<String>,
-    pub stack: VMStack,
+    pub stack: TVMStack,
     pub gas_used: i32,
     pub raw_response: String,
 }

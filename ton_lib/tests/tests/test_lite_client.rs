@@ -26,7 +26,7 @@ async fn test_lite_client() -> anyhow::Result<()> {
     assert_eq!(block_id, mc_info.last);
 
     let usdt_addr = TonAddress::from_str("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")?;
-    let account_boc = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno).await?;
+    let account_boc = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
     assert!(matches!(account_boc, MaybeAccount::Some(_)));
 
     Ok(())

@@ -1,3 +1,5 @@
+use crate::clients::client_types::TxId;
+use crate::types::ton_address::TonAddress;
 use hex::FromHexError;
 use hmac::digest::crypto_common;
 use num_bigint::BigUint;
@@ -136,8 +138,8 @@ pub enum TonlibError {
     UnexpectedValue { expected: String, actual: String },
 
     // TonActiveContract
-    #[error("TonContractNotActive: caching is not active")]
-    TonContractNotActive,
+    #[error("TonContractNotActive: contract {address} is not active at tx_id {tx_id:?}")]
+    TonContractNotActive { address: TonAddress, tx_id: Option<TxId> },
     #[error("CustomError: {0}")]
     CustomError(String),
     #[error("UnexpectedError: {0}")]

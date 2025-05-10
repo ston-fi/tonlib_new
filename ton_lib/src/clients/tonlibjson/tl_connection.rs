@@ -10,9 +10,9 @@ use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
 use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
 use crate::clients::tonlibjson::tl_api::tl_types::{TLBlockId, TLOptions, TLOptionsInfo};
 use crate::clients::tonlibjson::tl_callback::{TLCallback, TLCallbacksStore};
-use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
 use crate::clients::tonlibjson::tl_client_config::{LiteNodeFilter, TLClientConfig};
 use crate::clients::tonlibjson::tl_client_raw::TLClientRaw;
+use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
 use crate::errors::TonlibError;
 use crate::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
 use crate::unwrap_tl_response;
@@ -31,12 +31,11 @@ impl TLClientTrait for TLConnection {
     async fn get_connection(&self) -> Result<&TLConnection, TonlibError> { Ok(self) }
 }
 
-
 impl TLConnection {
     pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
         new_connection_checked(config, semaphore).await
     }
-    
+
     pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         self.inner.exec_impl(req).await
     }
@@ -46,7 +45,6 @@ impl TLConnection {
         unwrap_tl_response!(self.exec_impl(&req).await?, TLOptionsInfo)
     }
 }
-
 
 struct Inner {
     client_raw: TLClientRaw,
@@ -116,7 +114,10 @@ fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLCallbacksStore) {
     callbacks.on_loop_exit(&tag);
 }
 
-async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
+async fn new_connection_checked(
+    config: &TLClientConfig,
+    semaphore: Arc<Semaphore>,
+) -> Result<TLConnection, TonlibError> {
     let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
         match config.connection_check {
@@ -176,4 +177,3 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let _info = conn.init(config.init_opts.clone()).await?;
     Ok(conn)
 }
-

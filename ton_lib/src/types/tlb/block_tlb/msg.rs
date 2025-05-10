@@ -1,8 +1,11 @@
 use super::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt};
 use crate::cell::ton_cell::TonCell;
-use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
+use crate::cell::ton_hash::TonHash;
+use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection, Grams};
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::primitives::{EitherRef, EitherRefLayout};
+use crate::types::tlb::tlb_type::TLBType;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L157
@@ -64,6 +67,27 @@ impl Message {
             },
         }
     }
+
+    pub fn hash_normalized(&self) -> Result<TonHash, TonlibError> {
+        match &self.info {
+            CommonMsgInfo::ExtIn(_) => {
+                let mut msg_normalized = self.clone();
+                let CommonMsgInfo::ExtIn(info) = &mut msg_normalized.info else {
+                    unreachable!()
+                };
+                info.src = MsgAddressExt::NONE;
+                match &mut info.dest {
+                    MsgAddressInt::Std(addr) => addr.anycast = None,
+                    MsgAddressInt::Var(addr) => addr.anycast = None,
+                }
+                info.import_fee = Grams::zero();
+                msg_normalized.init = None;
+                msg_normalized.body.layout = EitherRefLayout::ToRef;
+                msg_normalized.cell_hash()
+            }
+            _ => self.cell_hash(),
+        }
+    }
 }
 
 #[cfg(test)]
@@ -71,6 +95,8 @@ mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
+    use crate::types::tlb::block_tlb::msg_address::{Anycast, MsgAddressExtern, MsgAddressIntStd};
+    use crate::types::tlb::block_tlb::var_len::VarLenBits;
     use crate::types::tlb::tlb_type::TLBType;
     use crate::types::ton_address::TonAddress;
     use std::str::FromStr;
@@ -120,6 +146,41 @@ mod tests {
         let cell = ext_in_msg_info.to_cell()?;
         let parsed = ExtInMsgInfo::from_cell(&cell)?;
         assert_eq!(parsed, ext_in_msg_info);
+        Ok(())
+    }
+
+    // reproducing https://github.com/tonkeeper/tongo/blob/5c0ce694d72b7024bcb62b3d0dcd008940a75419/tlb/messages_test.go#L23C1-L80C2
+    #[test]
+    fn test_ext_in_msg_hash_normalized() -> anyhow::Result<()> {
+        let msg_info = CommonMsgInfo::ExtIn(ExtInMsgInfo {
+            src: MsgAddressExt::Extern(MsgAddressExtern {
+                address: VarLenBits::new(vec![1, 2, 3], 16),
+            }),
+            dest: MsgAddressInt::Std(MsgAddressIntStd {
+                anycast: Some(Anycast::new(16, vec![9, 12])),
+                workchain: -1,
+                address: TonHash::from_str("adfd5f1d28db13e50591d5c76a976c15d8ab6cad90554748ab254871390d9334")?,
+            }),
+            import_fee: Grams::new(12364u128),
+        });
+        let mut body_value_builder = TonCell::builder();
+        body_value_builder.write_num(&200u32, 32)?;
+        let body_value = body_value_builder.build()?;
+
+        let msg = Message {
+            info: msg_info,
+            init: Some(EitherRef {
+                value: StateInit::new(TonCell::EMPTY.into_ref(), TonCell::EMPTY.into_ref()),
+                layout: EitherRefLayout::ToRef,
+            }),
+            body: EitherRef {
+                value: body_value,
+                layout: EitherRefLayout::ToRef,
+            },
+        };
+        let hash_norm = msg.hash_normalized()?;
+        assert_eq!(hash_norm, TonHash::from_str("dfacc0b48826e33a5a127ee1def710a449d8ce79def7c19f43e57b7996e870df")?);
+
         Ok(())
     }
 }

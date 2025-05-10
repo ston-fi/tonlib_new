@@ -1,14 +1,13 @@
 mod liteapi_serde;
 
-use serde::{Deserialize, Serialize};
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::ton_address::TonAddress;
+use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockId {
     pub workchain: i32,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
     pub shard: u64,
     pub seqno: u32,
 }
@@ -27,14 +26,23 @@ pub struct MasterchainInfo {
     pub init: ZeroStateIdExt,
 }
 
-#[derive(Clone, Debug, PartialEq)]
-pub enum TxId {
-    LTHash { lt: i64, hash: TonHash},
-    LTAddress{ lt: i64, address: TonAddress},
-    ExtInMsgHash { hash: TonHash },
-    ExtInMsgHashNorm { hash: TonHash },
+#[derive(Clone, Debug, PartialEq, Eq, Hash)]
+pub struct TxIdLTHash {
+    pub lt: i64,
+    pub hash: TonHash,
 }
 
-impl TxId {
-    pub const ZERO: Self = Self { lt: 0, hash: TonHash::ZERO };
+impl TxIdLTHash {
+    pub const ZERO: Self = Self {
+        lt: 0,
+        hash: TonHash::ZERO,
+    };
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub enum TxId {
+    LTHash(TxIdLTHash),
+    LTAddress { lt: i64, address: TonAddress },
+    ExtInMsgHash { hash: TonHash },
+    ExtInMsgHashNorm { hash: TonHash },
 }

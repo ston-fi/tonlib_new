@@ -1,5 +1,6 @@
-use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
 use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
+use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
+use crate::clients::tonlibjson::tl_connection::TLConnection;
 use crate::clients::tonlibjson::utils::prepare_client_env;
 use crate::errors::TonlibError;
 use async_trait::async_trait;
@@ -8,7 +9,6 @@ use rand::SeedableRng;
 use std::ops::DerefMut;
 use std::sync::Arc;
 use tokio::sync::{Mutex, Semaphore};
-use crate::clients::tonlibjson::tl_connection::TLConnection;
 
 // /// Simple client with many connections
 pub struct TLClient {

@@ -1,10 +1,13 @@
 use super::connection::Connection;
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
+use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::MasterchainInfo;
 use crate::clients::lite::config::LiteClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::account::MaybeAccount;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
+use crate::types::tlb::primitives::LibsDict;
 use crate::types::tlb::tlb_type::TLBType;
 use crate::types::ton_address::TonAddress;
 use auto_pool::config::{AutoPoolConfig, PickStrategy};
@@ -15,8 +18,10 @@ use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::time::sleep;
-use ton_liteapi::tl::common::AccountId;
-use ton_liteapi::tl::request::{GetAccountState, GetBlock, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest};
+use ton_liteapi::tl::common::{AccountId, Int256};
+use ton_liteapi::tl::request::{
+    GetAccountState, GetBlock, GetLibraries, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest,
+};
 use ton_liteapi::tl::response::{BlockData, Response};
 
 const WAIT_MC_SEQNO_MS: u32 = 5000;
@@ -86,7 +91,12 @@ impl LiteClient {
         unwrap_lite_response!(rsp, BlockData)
     }
 
-    pub async fn get_account_state(&self, address: &TonAddress, mc_seqno: u32) -> Result<MaybeAccount, TonlibError> {
+    pub async fn get_account_state(
+        &self,
+        address: &TonAddress,
+        mc_seqno: u32,
+        timeout: Option<Duration>,
+    ) -> Result<MaybeAccount, TonlibError> {
         let req = Request::GetAccountState(GetAccountState {
             id: self.lookup_mc_block(mc_seqno).await?.into(),
             account: AccountId {
@@ -94,9 +104,14 @@ impl LiteClient {
                 id: address.hash.clone().into(),
             },
         });
-        let rsp = self.exec(req, Some(mc_seqno)).await?;
+        let query_timeout = timeout.unwrap_or(self.inner.config.query_timeout);
+        let rsp = self.exec_with_timeout(req, query_timeout, Some(mc_seqno)).await?;
         let account_state_rsp = unwrap_lite_response!(rsp, AccountState)?;
         MaybeAccount::from_boc(&account_state_rsp.state)
+    }
+
+    pub async fn get_libs(&self, lib_ids: &[TonHash]) -> Result<LibsDict, TonlibError> {
+        self.inner.get_libs_impl(lib_ids).await
     }
 
     pub async fn exec(&self, req: Request, wait_mc_seqno: Option<u32>) -> Result<Response, TonlibError> {
@@ -151,6 +166,42 @@ impl Inner {
             global_req_id: AtomicU64::new(0),
             // metrics,
         })
+    }
+
+    async fn get_libs_impl(&self, lib_ids: &[TonHash]) -> Result<LibsDict, TonlibError> {
+        let mut libs_dict = LibsDict::default();
+        for chunk in lib_ids.chunks(16) {
+            let request = Request::GetLibraries(GetLibraries {
+                library_list: chunk.into_iter().map(|x| Int256(*x.as_slice_sized())).collect(),
+            });
+            let rsp = self.exec_with_retries(request, self.config.query_timeout, None).await?;
+            let result = unwrap_lite_response!(rsp, LibraryResult)?;
+            let dict_items = result
+                .result
+                .into_iter()
+                .map(|x| {
+                    let hash = TonHash::from_slice(&x.hash.0);
+                    let lib = TonCellRef::from_boc(x.data.as_slice())?;
+                    Ok::<_, TonlibError>((hash, lib))
+                })
+                .collect::<Result<Vec<_>, TonlibError>>()?;
+
+            let req_cnt = chunk.len();
+            let rsp_cnt = dict_items.len();
+            if req_cnt != rsp_cnt {
+                let got_hashes: Vec<_> = dict_items.iter().map(|x| &x.0).collect();
+                log::warn!(
+                    "[get_libs_impl] expected {req_cnt} libs, got {rsp_cnt}:\n\
+                    requested: {chunk:?}\n\
+                    got: {got_hashes:?}",
+                );
+            }
+            for item in dict_items {
+                libs_dict.insert(item.0, item.1);
+            }
+        }
+
+        Ok(libs_dict)
     }
 
     async fn exec_with_retries(
