@@ -172,7 +172,7 @@ impl Inner {
         let mut libs_dict = LibsDict::default();
         for chunk in lib_ids.chunks(16) {
             let request = Request::GetLibraries(GetLibraries {
-                library_list: chunk.into_iter().map(|x| Int256(*x.as_slice_sized())).collect(),
+                library_list: chunk.iter().map(|x| Int256(*x.as_slice_sized())).collect(),
             });
             let rsp = self.exec_with_retries(request, self.config.query_timeout, None).await?;
             let result = unwrap_lite_response!(rsp, LibraryResult)?;

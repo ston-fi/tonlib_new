@@ -69,6 +69,8 @@ pub enum TonlibError {
     TLBDictWrongKeyLen { exp: usize, got: usize, key: BigUint },
     #[error("TLBDictEmpty: empty dict can't be written")]
     TLBDictEmpty,
+    #[error("TLBWrongData: {0}")]
+    TLBWrongData(String),
 
     #[error("TonAddressParseError: address={0}, err: {1}")]
     TonAddressParseError(String, String),

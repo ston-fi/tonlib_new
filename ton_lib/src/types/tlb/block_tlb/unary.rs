@@ -43,7 +43,7 @@ mod tests {
     use crate::cell::ton_cell::TonCell;
 
     #[test]
-    fn test_unary() -> anyhow::Result<()> {
+    fn test_block_tlb_unary() -> anyhow::Result<()> {
         let mut builder = TonCell::builder();
         let unary = Unary(5);
         unary.write(&mut builder)?;

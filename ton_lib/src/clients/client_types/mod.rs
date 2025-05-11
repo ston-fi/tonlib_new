@@ -3,7 +3,6 @@ mod liteapi_serde;
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use crate::types::ton_address::TonAddress;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockId {

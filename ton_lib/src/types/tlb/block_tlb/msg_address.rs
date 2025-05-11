@@ -133,7 +133,7 @@ mod tests {
     use tokio_test::assert_ok;
 
     #[test]
-    fn test_msg_address_read_write() -> anyhow::Result<()> {
+    fn test_block_tlb_msg_address_read_write() -> anyhow::Result<()> {
         // Anyhow read/write is covered under the hood
         let boc =
             "b5ee9c7201010101002800004bbe031053100134ea6c68e2f2cee9619bdd2732493f3a1361eccd7c5267a9eb3c5dcebc533bb6";
@@ -156,7 +156,7 @@ mod tests {
     }
 
     #[test]
-    fn test_msg_address_int_read_i8_workchain() -> anyhow::Result<()> {
+    fn test_block_tlb_msg_address_int_read_i8_workchain() -> anyhow::Result<()> {
         let boc = "b5ee9c720101010100240000439fe00000000000000000000000000000000000000000000000000000000000000010";
         let parsed = assert_ok!(MsgAddress::from_boc_hex(boc));
 
@@ -175,7 +175,7 @@ mod tests {
     }
 
     #[test]
-    fn test_msg_address_int_read() -> anyhow::Result<()> {
+    fn test_block_tlb_msg_address_int_read() -> anyhow::Result<()> {
         let boc = "b5ee9c720101010100240000439fe00000000000000000000000000000000000000000000000000000000000000010";
         let parsed = assert_ok!(MsgAddressInt::from_boc_hex(boc));
 
@@ -194,7 +194,7 @@ mod tests {
     }
 
     #[test]
-    fn test_msg_address_none() -> anyhow::Result<()> {
+    fn test_block_tlb_msg_address_none() -> anyhow::Result<()> {
         let addr: MsgAddress = MsgAddressNone {}.into();
         let cell = addr.to_cell()?;
         let parsed = MsgAddress::from_cell(&cell)?;

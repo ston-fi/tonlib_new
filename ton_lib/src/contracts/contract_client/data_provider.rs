@@ -5,7 +5,6 @@ use crate::emulators::tvm::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
-use std::sync::Arc;
 
 #[async_trait]
 pub trait DataProvider: Send + Sync {

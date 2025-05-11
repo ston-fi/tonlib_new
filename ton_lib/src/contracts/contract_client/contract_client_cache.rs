@@ -1,4 +1,3 @@
-use crate::clients::block_stream::{BlockStream, BlockStreamItem};
 use crate::clients::client_types::{TxId, TxIdLTHash};
 use crate::contracts::contract_client::data_provider::DataProvider;
 use crate::contracts::contract_client::types::ContractState;
@@ -16,6 +15,7 @@ pub struct ContractClientCacheConfig {
     pub states_ttl: Duration,
 }
 
+#[allow(unused)]
 pub struct ContractClientCacheStats {
     pub tx_ids_request: usize,
     pub tx_ids_miss: usize,
@@ -68,18 +68,18 @@ impl ContractClientCache {
         self.inner.data_provider.get_state(address, tx_id).await.map(Arc::new)
     }
 
-    pub fn get_stats(&self) -> ContractClientCacheStats {
-        let tx_ids_size = self.inner.latest_tx_ids.size();
-        let states_size = self.inner.latest_states.size();
-        ContractClientCacheStats {
-            tx_ids_request: self.inner.latest_tx_ids.request_count(),
-            tx_ids_miss: self.inner.latest_tx_ids.miss_count(),
-            tx_ids_size,
-            states_ids_request: self.inner.latest_states.request_count(),
-            states_ids_miss: self.inner.latest_states.miss_count(),
-            states_ids_size,
-        }
-    }
+    // pub fn get_stats(&self) -> ContractClientCacheStats {
+    //     let tx_ids_size = self.inner.latest_tx_ids.entry_count();
+    //     let states_size = self.inner.latest_states.entry_count();
+    //     ContractClientCacheStats {
+    //         tx_ids_request: 1,
+    //         tx_ids_miss: s2,
+    //         tx_ids_size,
+    //         states_ids_request: self.inner.latest_states.request_count(),
+    //         states_ids_miss: self.inner.latest_states.miss_count(),
+    //         states_ids_size,
+    //     }
+    // }
 }
 
 // invalidates cache for address if see new tx_id for this address

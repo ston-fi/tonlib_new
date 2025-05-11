@@ -1,6 +1,7 @@
 pub mod account;
 pub mod block;
 pub mod coins;
+mod config;
 pub mod hash_update;
 pub mod msg;
 pub mod msg_address;
