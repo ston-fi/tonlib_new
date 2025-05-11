@@ -1,8 +1,10 @@
+use ton_lib_macros::TLBDerive;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
+use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_prev_info::{BlockPrevInfoAfterMerge, PrevBlockInfo};
-use crate::types::tlb::block_tlb::block::{ExtBlockRef, ShardIdent};
+use crate::types::tlb::block_tlb::block::ShardIdent;
 use crate::types::tlb::block_tlb::config::GlobalVersion;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 
@@ -38,6 +40,14 @@ pub struct BlockInfo {
     pub master_ref: Option<ExtBlockRef>,
     pub prev_ref: PrevBlockInfo,
     pub prev_vert_ref: Option<ExtBlockRef>,
+}
+
+#[derive(Debug, Clone, PartialEq, TLBDerive)]
+pub struct ExtBlockRef {
+    end_lt: u64,
+    seqno: u32,
+    root_hash: TonHash,
+    file_hash: TonHash,
 }
 
 impl TLBType for BlockInfo {

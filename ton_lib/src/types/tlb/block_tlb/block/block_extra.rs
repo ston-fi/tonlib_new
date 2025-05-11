@@ -1,7 +1,9 @@
+use crate::types::tlb::block_tlb::config::ConfigParams;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::block::TLBOptRef;
 use ton_lib_macros::TLBDerive;
+use crate::types::tlb::block_tlb::coins::CurrencyCollection;
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x4a33f6fd, bits_len = 32)]
@@ -15,12 +17,3 @@ pub struct BlockExtra {
     pub mc_block_extra: Option<TonCell>, // TODO
 }
 
-#[derive(Debug, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0xcca5, bits_len = 8)]
-pub struct MCBlockExtra {
-    pub key_block: bool,
-    // pub shard_hashes: ShardHashes // TODO
-    // pub shard_fees: ShardFees, // TODO
-    pub prev_block_sign: TonCellRef,
-    // pub config: ConfigParams, // TODO
-}

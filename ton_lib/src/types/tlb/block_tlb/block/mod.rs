@@ -6,6 +6,7 @@ mod block_id_ext;
 mod block_info;
 mod block_prev_info;
 mod shard_ident;
+mod mc_block_extra;
 
 use crate::types::tlb::adapters::TLBOptRef;
 pub use block_extra::*;
@@ -29,12 +30,4 @@ pub struct Block {
     pub state_update: TonCellRef, // TODO
     #[tlb_derive(adapter = "TLBRef")]
     pub extra: BlockExtra,
-}
-
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-pub struct ExtBlockRef {
-    end_lt: u64,
-    seqno: u32,
-    root_hash: TonHash,
-    file_hash: TonHash,
 }
