@@ -15,8 +15,7 @@ pub use block_info::*;
 pub use block_prev_info::*;
 pub use shard_ident::*;
 
-use crate::cell::ton_cell::{TonCell, TonCellRef};
-use crate::cell::ton_hash::TonHash;
+use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::TLBRef;
 use ton_lib_macros::TLBDerive;
 

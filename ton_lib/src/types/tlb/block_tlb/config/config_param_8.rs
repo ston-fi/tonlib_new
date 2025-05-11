@@ -1,10 +1,5 @@
 use ton_lib_macros::TLBDerive;
 
-#[derive(Debug, Clone, TLBDerive)]
-pub struct ConfigParams {
-    
-}
-
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0xc4, bits_len = 8)]
 pub struct GlobalVersion {

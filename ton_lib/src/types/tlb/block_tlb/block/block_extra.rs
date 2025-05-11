@@ -1,9 +1,7 @@
-use crate::types::tlb::block_tlb::config::ConfigParams;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::block::TLBOptRef;
 use ton_lib_macros::TLBDerive;
-use crate::types::tlb::block_tlb::coins::CurrencyCollection;
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x4a33f6fd, bits_len = 32)]
