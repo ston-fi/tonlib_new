@@ -1,7 +1,7 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm::method_id::TVMMethodId;
 use crate::emulators::tvm::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
-use crate::emulators::tvm::TVMRunMethodSuccess;
+use crate::emulators::tvm::{TVMRunMethodSuccess, TVMSendMsgSuccess};
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -75,24 +75,24 @@ impl TVMEmulator {
         }
     }
 
-    pub fn send_int_msg(&mut self, msg_boc: &[u8], amount: u64) -> Result<TVMSendMsgResponse, TonlibError> {
+    pub fn send_int_msg(&mut self, msg_boc: &[u8], amount: u64) -> Result<TVMSendMsgSuccess, TonlibError> {
         log::trace!("[TVMEmulator][send_int_msg]: msg_boc: {msg_boc:?}, amount: {amount}");
         let msg = CString::new(STANDARD.encode(msg_boc))?;
 
         let c_str = unsafe { tvm_emulator_send_internal_message(self.ptr, msg.as_ptr(), amount) };
         let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][send_int_msg]: msg_boc: {msg_boc:?}, amount: {amount}, rsp: {json_str}");
-        Ok(serde_json::from_str(&json_str)?)
+        TVMSendMsgResponse::from_json(json_str)?.into_success()
     }
 
-    pub fn send_ext_msg(&mut self, msg_boc: &[u8]) -> Result<TVMSendMsgResponse, TonlibError> {
+    pub fn send_ext_msg(&mut self, msg_boc: &[u8]) -> Result<TVMSendMsgSuccess, TonlibError> {
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}");
         let msg = CString::new(STANDARD.encode(msg_boc))?;
 
         let c_str = unsafe { tvm_emulator_send_external_message(self.ptr, msg.as_ptr()) };
         let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}, rsp: {json_str}");
-        Ok(serde_json::from_str(&json_str)?)
+        TVMSendMsgResponse::from_json(json_str)?.into_success()
     }
 
     pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodSuccess, TonlibError>
@@ -260,14 +260,12 @@ mod tests {
         // send_int_msg
         let c7 = TVMEmulatorC7::new(dst_address, &hex::decode(BC_CONFIG_HEX)?)?;
         let mut emulator = TVMEmulator::new(&code, &data, &c7)?;
-        let tvm_response = emulator.send_int_msg(&msg.to_boc(false)?, 300)?;
-        let tvm_result = assert_ok!(tvm_response.into_result());
+        let tvm_result = emulator.send_int_msg(&msg.to_boc(false)?, 300)?;
         assert_eq!(tvm_result.gas_used, 2779);
         assert_eq!(tvm_result.vm_exit_code, 65535);
 
         // send_ext_msg
-        let tvm_response = emulator.send_ext_msg(&msg.to_boc(false)?)?;
-        let tvm_result = assert_ok!(tvm_response.into_result());
+        let tvm_result = emulator.send_ext_msg(&msg.to_boc(false)?)?;
         assert_eq!(tvm_result.gas_used, 270);
         assert_eq!(tvm_result.vm_exit_code, 11);
         Ok(())

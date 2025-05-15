@@ -15,6 +15,7 @@ pub struct TVMSendMsgSuccess {
     pub missing_library: Option<String>,
     pub gas_used: i32,
     pub actions_boc_b64: Option<String>,
+    pub raw_response: String,
 }
 
 impl TVMSendMsgSuccess {
@@ -34,10 +35,18 @@ pub struct TVMSendMsgResponse {
     pub gas_used: Option<String>,
     pub actions: Option<String>,
     pub error: Option<String>,
+    #[serde(skip)]
+    pub raw_response: String,
 }
 
 impl TVMSendMsgResponse {
-    pub fn into_result(self) -> Result<TVMSendMsgSuccess, TonlibError> {
+    pub fn from_json(json: String) -> Result<Self, TonlibError> {
+        let mut value: Self = serde_json::from_str(&json)?;
+        value.raw_response = json;
+        Ok(value)
+    }
+
+    pub fn into_success(self) -> Result<TVMSendMsgSuccess, TonlibError> {
         if !self.success {
             let error = unwrap_opt(self.error, "error is None")?;
             return Err(TonlibError::TVMEmulatorError(error));
@@ -60,6 +69,7 @@ impl TVMSendMsgResponse {
             missing_library,
             gas_used,
             actions_boc_b64,
+            raw_response: self.raw_response,
         })
     }
 }
@@ -129,6 +139,8 @@ impl TVMRunMethodSuccess {
     pub fn stack_boc(&self) -> Result<Vec<u8>, TonlibError> {
         Ok(BASE64_STANDARD.decode(self.raw_response.as_bytes())?)
     }
+
+    pub fn exit_success(&self) -> bool { self.vm_exit_code == 0 || self.vm_exit_code == 1 }
 }
 
 fn unwrap_opt<T>(val: Option<T>, field: &'static str) -> Result<T, TonlibError> {
