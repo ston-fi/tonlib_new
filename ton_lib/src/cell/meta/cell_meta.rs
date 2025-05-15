@@ -12,7 +12,6 @@ pub struct CellMeta {
     pub level_mask: LevelMask,
     pub depths: [u16; 4],
     pub hashes: [TonHash; 4],
-    pub refs_count: usize,
 }
 
 impl CellMeta {
@@ -23,7 +22,6 @@ impl CellMeta {
         level_mask: LevelMask::new(0),
         depths: [0; 4],
         hashes: [TonHash::EMPTY_CELL_HASH; 4],
-        refs_count: 0,
     };
 
     pub fn new(
@@ -44,7 +42,6 @@ impl CellMeta {
             level_mask,
             depths,
             hashes,
-            refs_count: refs.len(),
         };
         Ok(meta)
     }

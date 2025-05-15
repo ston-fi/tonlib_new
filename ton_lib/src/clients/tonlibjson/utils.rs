@@ -4,13 +4,11 @@ use crate::clients::lite::lite_client::LiteClient;
 use crate::clients::tonlibjson::tl_api::tl_types::TLKeyStoreType;
 use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::block::BlockIdExt;
+use crate::types::tlb::block_tlb::block::{BlockIdExt, BlockInfo};
 use crate::types::tlb::tlb_type::TLBType;
 use futures_util::future::join_all;
 use std::time::Duration;
 use ton_liteapi::tl::response::BlockData;
-
-const BLOCK_INFO_TAG: u32 = 0x9bc7a987;
 
 pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), TonlibError> {
     if config.update_init_block {
@@ -69,9 +67,14 @@ fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TonlibError> {
         // TODO make proper block parser
     }
     let mut parser = block_cell.refs[0].parser();
-    let tag: u32 = parser.read_num(32)?;
-    if tag != BLOCK_INFO_TAG {
-        return Err(TonlibError::CustomError("Invalid block tag".to_string())); // TODO make proper block parser
+    let tag: usize = parser.read_num(32)?;
+    if tag != BlockInfo::PREFIX.value {
+        return Err(TonlibError::TLBWrongPrefix {
+            exp: BlockInfo::PREFIX.value,
+            given: tag,
+            bits_exp: BlockInfo::PREFIX.bits_len,
+            bits_left: parser.data_bits_left()? + 32,
+        });
     }
     // version(32), merge_info(8), flags(8), seqno(32), vert_seqno(32), shard(104), utime(32), start/end lt(128),
     // validator_list_hash(32), catchain_seqno(32), min_ref_mc_seqno(32)

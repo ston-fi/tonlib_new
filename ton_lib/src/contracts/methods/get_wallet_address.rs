@@ -11,7 +11,7 @@ pub trait GetWalletAddress: TonContractTrait {
     async fn get_wallet_address(&self, owner: &TonAddress) -> Result<TonAddress, TonlibError> {
         let mut stack = TVMStack::default();
         stack.push_cell_slice(owner.to_cell_ref()?);
-        let mut run_result = self.run_method("get_wallet_address", &stack).await?;
-        TonAddress::from_cell(run_result.stack.pop_cell()?.deref())
+        let run_result = self.run_method("get_wallet_address", &stack).await?;
+        TonAddress::from_cell(run_result.stack_parsed()?.pop_cell()?.deref())
     }
 }

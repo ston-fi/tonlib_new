@@ -63,7 +63,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
             Some(c7) => TVMEmulator::new(code_boc, data_boc, c7)?,
             None => {
                 let bc_config = ctx.client.get_config_boc(None).await?;
-                let c7 = TVMEmulatorC7::new(ctx.address.clone(), bc_config)?;
+                let c7 = TVMEmulatorC7::new(ctx.address.clone(), &bc_config)?;
                 TVMEmulator::new(code_boc, data_boc, &c7)?
             }
         };

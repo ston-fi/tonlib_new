@@ -13,7 +13,7 @@ struct CellIndexed<'a> {
 }
 
 impl BOCRaw {
-    pub(crate) fn from_roots(roots: &[TonCellRef]) -> Result<Self, TonlibError> {
+    pub(crate) fn from_ton_cells(roots: &[TonCellRef]) -> Result<Self, TonlibError> {
         let cell_by_hash = build_and_verify_index(roots);
 
         // Sort indexed cells by their index value.
@@ -35,7 +35,7 @@ impl BOCRaw {
 
         Ok(BOCRaw {
             cells: raw_cells,
-            roots: root_indices,
+            roots_position: root_indices,
         })
     }
 }
@@ -65,9 +65,7 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
             cells_by_hash.insert(hash.clone(), indexed_cell);
 
             new_hash_index += 1;
-            for ref_pos in 0..cell.refs.len() {
-                next_cells.push(&cell.refs[ref_pos]);
-            }
+            next_cells.extend(&cell.refs);
         }
 
         cur_cells = next_cells;

@@ -45,7 +45,7 @@ impl ContractClient {
     }
 
     pub async fn get_libs_boc(&self, lib_ids: &[TonHash]) -> Result<Option<Vec<u8>>, TonlibError> {
-        self.inner.data_provider.get_libs_boc(lib_ids).await
+        self.inner.data_provider.get_libs_boc(lib_ids, None).await
     }
 
     pub async fn run_method<M>(

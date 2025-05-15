@@ -92,7 +92,7 @@ async fn run_loop(
     log::info!("[ContractClientCache] run_loop started with mc_seqno: {start_mc_seqno}");
     let mut cur_mc_seqno = start_mc_seqno;
     loop {
-        let tx_ids = match data_provider.get_block_tx_ids(cur_mc_seqno).await {
+        let tx_ids = match data_provider.get_last_tx_id_per_addr(cur_mc_seqno).await {
             Ok(tx_ids) => tx_ids,
             Err(err) => {
                 log::error!(

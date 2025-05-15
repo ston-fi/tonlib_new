@@ -6,10 +6,10 @@ use bitstream_io::{BigEndian, ByteRead, ByteReader};
 use std::io::Cursor;
 
 impl BOCRaw {
+    // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
     pub(crate) fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonlibError> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
-        // serialized_boc#b5ee9c72
         let magic = reader.read::<u32>()?;
 
         if magic != GENERIC_BOC_MAGIC {
@@ -31,39 +31,33 @@ impl BOCRaw {
         //   off_bytes:(## 8) { off_bytes <= 8 }
         let off_bytes = reader.read::<u8>()?;
         //cells:(##(size * 8))
-        let cells = read_var_size(&mut reader, size)?;
+        let cells_cnt = read_var_size(&mut reader, size)?;
         //   roots:(##(size * 8)) { roots >= 1 }
-        let roots = read_var_size(&mut reader, size)?;
+        let roots_cnt = read_var_size(&mut reader, size)?;
         //   absent:(##(size * 8)) { roots + absent <= cells }
         let _absent = read_var_size(&mut reader, size)?;
         //   tot_cells_size:(##(off_bytes * 8))
         let _tot_cells_size = read_var_size(&mut reader, off_bytes)?;
         //   root_list:(roots * ##(size * 8))
-        let mut root_list = vec![];
-        for _ in 0..roots {
-            root_list.push(read_var_size(&mut reader, size)?)
+        let mut roots_position = vec![];
+        for _ in 0..roots_cnt {
+            roots_position.push(read_var_size(&mut reader, size)?)
         }
         //   index:has_idx?(cells * ##(off_bytes * 8))
-        let mut index = vec![];
         if has_idx {
-            for _ in 0..cells {
-                index.push(read_var_size(&mut reader, off_bytes)?)
-            }
+            let _idx = reader.read_to_vec(cells_cnt * off_bytes as usize)?;
         }
         //   cell_data:(tot_cells_size * [ uint8 ])
-        let mut cell_vec = Vec::with_capacity(cells);
+        let mut cells = Vec::with_capacity(cells_cnt);
 
-        for _ in 0..cells {
+        for _ in 0..cells_cnt {
             let cell = read_cell(&mut reader, size)?;
-            cell_vec.push(cell);
+            cells.push(cell);
         }
         //   crc32c:has_crc32c?uint32
         let _crc32c = if has_crc32c { reader.read::<u32>()? } else { 0 };
 
-        Ok(BOCRaw {
-            cells: cell_vec,
-            roots: root_list,
-        })
+        Ok(BOCRaw { cells, roots_position })
     }
 }
 

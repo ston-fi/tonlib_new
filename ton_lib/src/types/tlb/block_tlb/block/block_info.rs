@@ -1,4 +1,3 @@
-use ton_lib_macros::TLBDerive;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_hash::TonHash;
@@ -7,6 +6,7 @@ use crate::types::tlb::block_tlb::block::block_prev_info::{BlockPrevInfoAfterMer
 use crate::types::tlb::block_tlb::block::ShardIdent;
 use crate::types::tlb::block_tlb::config::GlobalVersion;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use ton_lib_macros::TLBDerive;
 
 const GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
 
@@ -216,9 +216,9 @@ mod tests {
         };
         assert_eq!(parsed_block_info, expected);
 
-        let serialized = parsed_block_info.to_boc(false)?;
-        let parsed_back = BlockInfo::from_boc(&serialized)?;
+        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc(false)?)?;
         assert_eq!(parsed_block_info, parsed_back);
+        assert_eq!(parsed_block_info.cell_hash()?, parsed_back.cell_hash()?);
         Ok(())
     }
 
@@ -269,9 +269,9 @@ mod tests {
             prev_vert_ref: None,
         };
         assert_eq!(parsed_block_info, expected);
-        let serialized = parsed_block_info.to_boc(false)?;
-        let parsed_back = BlockInfo::from_boc(&serialized)?;
+        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc(false)?)?;
         assert_eq!(parsed_block_info, parsed_back);
+        assert_eq!(parsed_block_info.cell_hash()?, parsed_back.cell_hash()?);
         Ok(())
     }
 }

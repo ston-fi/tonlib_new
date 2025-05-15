@@ -9,5 +9,6 @@ mod tl_client_trait;
 mod tl_connection;
 
 pub use tl_callback::*;
+pub use tl_client::*;
 pub use tl_client_config::*;
 pub use tl_client_trait::*;
