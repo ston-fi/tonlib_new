@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.19](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.18...ton_lib-v0.0.19) - 2025-05-16
+
+### Other
+
+- comment out serde_scylla
+- more emulator tests
+- up tvm_emulator send_msg interface
+- up emulator interface
+- init ConfigParams support
+- somehow complete block.tlb (with many TODO)
+- support BlockInfo tlb
+- introduce data_provider
+- tmp
+- support serde_scylla feature flag, up adapter naming & vm -> tvm
+
 ## [0.0.18](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.17...ton_lib-v0.0.18) - 2025-05-06
 
 ### Other
