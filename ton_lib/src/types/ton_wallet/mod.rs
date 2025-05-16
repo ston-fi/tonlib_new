@@ -1,6 +1,5 @@
 pub mod mnemonic;
 pub mod version_helper;
-pub mod versions;
 pub mod wallet_code;
 
 use crate::cell::ton_cell::{TonCell, TonCellRef};
@@ -15,7 +14,7 @@ use crate::types::tlb::wallet::constants::{WALLET_DEFAULT_ID, WALLET_V5R1_DEFAUL
 use crate::types::tlb::wallet::versions::WalletVersion;
 use crate::types::ton_address::TonAddress;
 use crate::types::ton_wallet::mnemonic::{KeyPair, Mnemonic};
-use crate::types::ton_wallet::version_helper::VersionHelper;
+use crate::types::ton_wallet::version_helper::WalletVersionHelper;
 use nacl::sign::signature;
 
 #[derive(Debug, PartialEq, Eq, Clone, Hash)]
@@ -45,8 +44,8 @@ impl TonWallet {
         workchain: i32,
         wallet_id: i32,
     ) -> Result<Self, TonlibError> {
-        let data = VersionHelper::get_data(version, &key_pair, wallet_id)?;
-        let code = VersionHelper::get_code(version)?.clone();
+        let data = WalletVersionHelper::get_data_default(version, &key_pair, wallet_id)?;
+        let code = WalletVersionHelper::get_code(version)?.clone();
         let address = TonAddress::derive(workchain, code, data)?;
 
         Ok(TonWallet {
@@ -76,7 +75,7 @@ impl TonWallet {
         seqno: u32,
         int_msgs: Vec<TonCellRef>,
     ) -> Result<TonCell, TonlibError> {
-        VersionHelper::build_ext_in_body(self.version, expire_at, seqno, self.wallet_id, int_msgs)
+        WalletVersionHelper::build_ext_in_body(self.version, expire_at, seqno, self.wallet_id, int_msgs)
     }
 
     pub fn sign_ext_in_body(&self, ext_in_body: &TonCell) -> Result<TonCell, TonlibError> {
@@ -85,7 +84,7 @@ impl TonWallet {
             Ok(signature) => signature,
             Err(err) => return Err(TonlibError::CustomError(format!("{err:?}"))),
         };
-        VersionHelper::sign_msg(self.version, ext_in_body, &sign)
+        WalletVersionHelper::sign_msg(self.version, ext_in_body, &sign)
     }
 
     pub fn create_ext_in_msg_from_body(
@@ -101,8 +100,8 @@ impl TonWallet {
 
         let mut message = Message::new(msg_info, signed_body);
         if add_state_init {
-            let code = VersionHelper::get_code(self.version)?.clone();
-            let data = VersionHelper::get_data(self.version, &self.key_pair, self.wallet_id)?;
+            let code = WalletVersionHelper::get_code(self.version)?.clone();
+            let data = WalletVersionHelper::get_data_default(self.version, &self.key_pair, self.wallet_id)?;
             let state_init = StateInit::new(code, data);
             message.init = Some(EitherRef::new(state_init));
         }

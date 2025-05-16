@@ -3,7 +3,7 @@ use crate::cell::ton_cell_utils::TonCellUtils;
 use crate::clients::client_types::TxId;
 use crate::contracts::contract_client::types::ContractState;
 use crate::contracts::contract_client::ContractClient;
-use crate::emulators::tvm::{TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
+use crate::emulators::tvm::{EmulatorBCConfig, TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::TVMStack;
 use crate::types::tlb::tlb_type::TLBType;
@@ -63,7 +63,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
             Some(c7) => TVMEmulator::new(code_boc, data_boc, c7)?,
             None => {
                 let bc_config = ctx.client.get_config_boc(None).await?;
-                let c7 = TVMEmulatorC7::new(ctx.address.clone(), &bc_config)?;
+                let c7 = TVMEmulatorC7::new(ctx.address.clone(), EmulatorBCConfig::from_boc(&bc_config)?)?;
                 TVMEmulator::new(code_boc, data_boc, &c7)?
             }
         };

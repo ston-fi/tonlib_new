@@ -11,12 +11,12 @@ use crate::types::tlb::wallet::wallet_ext_msg_body::{
     WalletV2ExtMsgBody, WalletV3ExtMsgBody, WalletV4ExtMsgBody, WalletV5ExtMsgBody,
 };
 use crate::types::ton_wallet::mnemonic::KeyPair;
-use crate::types::ton_wallet::wallet_code::TON_WALLET_CODE_BY_VERSION;
+use crate::types::ton_wallet::wallet_code::{TON_WALLET_CODE_BY_VERSION, TON_WALLET_VERSION_BY_CODE};
 
-pub(super) struct VersionHelper;
+pub struct WalletVersionHelper;
 
-impl VersionHelper {
-    pub(super) fn get_data(
+impl WalletVersionHelper {
+    pub fn get_data_default(
         version: WalletVersion,
         key_pair: &KeyPair,
         wallet_id: i32,
@@ -38,6 +38,19 @@ impl VersionHelper {
         TON_WALLET_CODE_BY_VERSION
             .get(&version)
             .ok_or_else(|| TonlibError::CustomError(format!("No code found for {version:?}")))
+    }
+
+    pub fn code_by_version(ver: WalletVersion) -> Result<&'static TonCellRef, TonlibError> {
+        TON_WALLET_CODE_BY_VERSION
+            .get(&ver)
+            .ok_or_else(|| TonlibError::CustomError(format!("No code found for version: {ver:?}")))
+    }
+
+    pub fn version_by_code(code_hash: TonHash) -> Result<WalletVersion, TonlibError> {
+        TON_WALLET_VERSION_BY_CODE
+            .get(&code_hash)
+            .copied()
+            .ok_or_else(|| TonlibError::CustomError(format!("No version found for code_hash: {code_hash}")))
     }
 
     pub fn build_ext_in_body(
