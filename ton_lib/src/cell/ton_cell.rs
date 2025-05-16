@@ -67,6 +67,10 @@ impl Deref for TonCellRef {
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
+impl Display for TonCellRef {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self.deref(), 0) }
+}
+
 fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {
     use std::fmt::Write;
     let indent = "    ".repeat(indent_level);
@@ -88,15 +92,21 @@ fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize
         // Compact format for cells without references
         writeln!(
             f,
-            "{indent}Cell {{Type: {:?}, data: [{data_display}], bit_len: {}, refs: []}}",
-            cell.meta.cell_type, cell.data_bits_len
+            "{indent}Cell {{type: {:?}, lm: {}, data: [{data_display}], bit_len: {}, refs ({}): []}}",
+            cell.meta.cell_type,
+            cell.meta.level_mask,
+            cell.data_bits_len,
+            cell.refs.len()
         )
     } else {
         // Full format for cells with references
         writeln!(
             f,
-            "{indent}Cell x{{Type: {:?}, data: [{data_display}], bit_len: {}, references: [",
-            cell.meta.cell_type, cell.data_bits_len
+            "{indent}Cell x{{type: {:?}, lm: {}, data: [{data_display}], bit_len: {}, refs({}): [",
+            cell.meta.cell_type,
+            cell.meta.level_mask,
+            cell.data_bits_len,
+            cell.refs.len()
         )?;
         for i in 0..cell.refs.len() {
             write_cell_display(f, cell.refs[i].deref(), indent_level + 1)?;

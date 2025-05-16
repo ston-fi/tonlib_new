@@ -1,50 +1,64 @@
+use crate::clients::lite::lite_client::LiteClient;
+use crate::types::tlb::block_tlb::block::{Block, BlockIdExt};
+use std::collections::HashSet;
+use std::sync::Arc;
+
 // use std::collections::HashSet;
 // use std::sync::Arc;
 // use std::sync::atomic::AtomicBool;
 // use async_recursion::async_recursion;
 // use crate::clients::lite::lite_client::LiteClient;
-// use crate::clients::tonlib::tl_client::TLClient;
+// use crate::clients::tonlibjson::tl_client::TLClient;
 // use crate::errors::TonlibError;
 // use crate::types::tlb::block_tlb::block::{Block, BlockIdExt};
 //
-// #[derive(Debug, Clone)]
-// pub struct BlockStreamItem {
-//     pub blocks: Vec<(BlockIdExt, Block)>, // mc_block first, then it's shard_blocks
-// }
+#[derive(Debug, Clone)]
+pub struct BlockStreamItem {
+    pub blocks: Vec<(BlockIdExt, Block)>, // mc_block first, then it's shard_blocks
+}
+
+impl BlockStreamItem {
+    pub fn mc_seqno(&self) -> u32 { todo!() }
+}
 //
-// impl BlockStreamItem {
-//     pub fn mc_seqno(&self) -> u32 {
-//         todo!()
-//     }
-// }
+pub struct BlockStream {
+    inner: Arc<Inner>,
+}
+
+impl BlockStream {
+    pub fn new(client: LiteClient, from_seqno: u32, to_seqno: Option<u32>) -> Self {
+        todo!();
+        // let inner = Arc::new(Inner {client})
+        // BlockStream { client }
+    }
+
+    pub fn next(&self) -> Option<BlockStreamItem> {
+        // let connection = self.client.get_connection().await?;
+        // let result = connection.send("get_block", block_id).await;
+        // match result {
+        //     Ok(block) => Ok(block),
+        //     Err(e) => Err(format!("Error getting block: {}", e)),
+        // }
+        todo!()
+    }
+
+    pub async fn get_block(&self, block_id: &str) -> Result<BlockStreamItem, String> {
+        // let connection = self.client.get_connection().await?;
+        // let result = connection.send("get_block", block_id).await;
+        // match result {
+        //     Ok(block) => Ok(block),
+        //     Err(e) => Err(format!("Error getting block: {}", e)),
+        // }
+        todo!()
+    }
+}
 //
-// pub struct BlockStream {
-//     inner: Arc<Inner>,
-// }
-//
-// impl BlockStream {
-//     pub fn new(client: LiteClient, from_seqno: u32, to_seqno: Option<u32>) -> Self {
-//         let inner = Arc::new(Inner {client})
-//         BlockStream { client }
-//     }
-//
-//     pub async fn get_block(&self, block_id: &str) -> Result<String, String> {
-//         let connection = self.client.get_connection().await?;
-//         let result = connection.send("get_block", block_id).await;
-//         match result {
-//             Ok(block) => Ok(block),
-//             Err(e) => Err(format!("Error getting block: {}", e)),
-//         }
-//     }
-// }
-//
-// struct Inner {
-//     client: LiteClient,
-//     to_seqno: Option<u32>,
-//     to_mc_seqno: u32,
-//     prev_mc_seqno: u32,
-//     prev_last_shards: HashSet<BlockIdExt>, // the latest workchain shards for prev_mc_seqno
-// }
+struct Inner {
+    client: LiteClient,
+    to_mc_seqno: u32,
+    prev_mc_seqno: u32,
+    prev_last_shards: HashSet<BlockIdExt>, // the latest workchain shards for prev_mc_seqno
+}
 //
 // impl Inner {
 //

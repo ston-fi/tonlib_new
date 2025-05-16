@@ -16,6 +16,7 @@ pub(super) struct CellMetaBuilder<'a> {
 }
 
 type CellBitWriter = BitWriter<Vec<u8>, BigEndian>;
+#[derive(Debug)]
 struct Pruned {
     hash: TonHash,
     depth: u16,
@@ -128,7 +129,7 @@ impl<'a> CellMetaBuilder<'a> {
     fn validate_merkle_update(&self) -> Result<(), TonlibError> {
         // type + hash + hash + depth + depth
         // const MERKLE_UPDATE_BITS_LEN: usize = 8 + (2 * (256 + 16));
-        log::error!("validate_merkle_proof is not implemented yet");
+        log::error!("validate_merkle_update is not implemented yet");
         Ok(())
         // todo!();
     }
@@ -203,7 +204,7 @@ impl<'a> CellMetaBuilder<'a> {
 
             // Calculate Hash
             let repr = self.get_repr_for_data(cur_data, cur_bit_len, level_mask, level_pos)?;
-            let hash = TonHash::from_bytes(Sha256::new_with_prefix(repr).finalize())?;
+            let hash = TonHash::from_bytes(&Sha256::new_with_prefix(repr).finalize())?;
             hashes[hash_pos] = hash;
             depths[hash_pos] = depth;
         }
@@ -245,7 +246,7 @@ impl<'a> CellMetaBuilder<'a> {
     /// Calculates d1 descriptor for cell
     /// See https://docs.ton.org/tvm.pdf 3.1.4 for details
     fn get_refs_descriptor<L: Into<u8>>(&self, level_mask: L) -> u8 {
-        let cell_type_var = (self.cell_type != CellType::Ordinary) as u8;
+        let cell_type_var = self.cell_type.is_exotic() as u8;
         self.refs.len() as u8 + 8 * cell_type_var + level_mask.into() * 32
     }
 
@@ -281,13 +282,16 @@ impl<'a> CellMetaBuilder<'a> {
 
             let (hash, depth) = match self.cell_type {
                 CellType::PrunedBranch => {
-                    let this_hash_index = level_mask.hash_index();
-                    if hash_index != this_hash_index {
-                        let pruned = self.calc_pruned_hash_depth(level_mask)?;
-                        (pruned[hash_index].hash.clone(), pruned[hash_index].depth)
-                    } else {
-                        (hashes[0].clone(), depths[0])
-                    }
+                    // let this_hash_index = level_mask.hash_index();
+                    // if hash_index != this_hash_index {
+                    //     println!("calc for pruned");
+                    let pruned = self.calc_pruned_hash_depth(level_mask)?;
+                    // println!("pruned: {:?}", pruned);
+                    (pruned[0].hash.clone(), pruned[0].depth)
+                    // } else {
+                    //     println!("no calc for pruned");
+                    //     (hashes[0].clone(), depths[0])
+                    // }
                 }
                 _ => (hashes[hash_index].clone(), depths[hash_index]),
             };

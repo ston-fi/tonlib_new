@@ -3,7 +3,7 @@
 [![Crates.io](https://img.shields.io/crates/v/ton_lib.svg)](https://crates.io/crates/ton_lib)
 [![codecov](https://codecov.io/gh/sild/ton_lib_rs/branch/main/graph/badge.svg)](https://codecov.io/gh/sild/ton_lib_rs)
 
-This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlib) implementation.
+This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlibjson) implementation.
 
 ## Features
 
@@ -48,7 +48,7 @@ pub struct StateInit {
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    #[tlb_derive(adapter = "TLBDict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
+    #[tlb_derive(adapter = "DictRef::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
     pub library: LibsDict,
 }
 
@@ -65,7 +65,7 @@ fn main() {
 - [LiteClient](ton_lib/src/clients/lite):  
   A "native" lite-node client that uses ADNL. More straightforward to use, but less flexible.
 
-- [TLClient](ton_lib/src/clients/tonlib):  
+- [TLClient](ton_lib/src/clients/tonlibjson):  
   A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
   A bit tricky to use at times, but offers more features.\
   **Does not support `smc` methods - use `MethodEmulator` instead.**

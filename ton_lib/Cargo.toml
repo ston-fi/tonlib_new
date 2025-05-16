@@ -22,8 +22,11 @@ include = [
 ]
 
 [features]
-default = ["sys"]
-sys = ["dep:tonlib-sys"]
+default = ["contracts", "tonlibjson", "emulator"]
+emulator = ["dep:tonlib-sys"] # add tvm/tx emulators
+tonlibjson = ["dep:tonlib-sys"] # add tonlibjson client implementations
+contracts = ["dep:moka"]
+#serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
 
 
 [dependencies]
@@ -32,7 +35,8 @@ ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
 
 # External
 tonlib-sys = { version = "2025.4.1", features = ["with_debug_info"], optional = true }
-bitstream-io = "3.1.0"
+scylla = { version = "1.1", optional=true }
+bitstream-io = "4.0.0"
 thiserror = "2.0"
 log = "0.4"
 sha2 = {version = "0.10"}
@@ -57,7 +61,7 @@ async-trait = "0.1.88"
 futures-util = "0.3"
 libc = "0.2"
 async-recursion = "1.1.1"
-moka = { version = "0.12.10", features = ["async-lock", "future"] }
+moka = { version = "0.12.10", features = ["async-lock", "future"], optional = true }
 hmac = "0.12.1"
 lazy_static = "1.5.0"
 pbkdf2 = { version = "0.12.2", features = ["simple"] }

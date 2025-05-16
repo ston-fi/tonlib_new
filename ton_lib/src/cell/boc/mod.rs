@@ -33,7 +33,7 @@ impl BOC {
         }
         let raw = BOCRaw::from_bytes(bytes_ref)?;
         Ok(Self {
-            roots: raw.into_roots()?,
+            roots: raw.into_ton_cells()?,
             _phantom: PhantomData,
         })
     }
@@ -46,7 +46,7 @@ impl BOC {
     }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-        BOCRaw::from_roots(&self.roots)?.to_bytes(add_crc32)
+        BOCRaw::from_ton_cells(&self.roots)?.to_bytes(add_crc32)
     }
     pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
     pub fn to_b64(&self, add_crc32: bool) -> Result<String, TonlibError> {

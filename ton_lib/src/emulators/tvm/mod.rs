@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod test_tvm_emulator;
-
 mod c7_register;
 mod method_id;
 mod tvm_emulator;

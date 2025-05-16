@@ -4,11 +4,17 @@ use crate::errors::TonlibError;
 use crate::types::tlb::tlb_type::TLBType;
 use std::marker::PhantomData;
 
-/// TLBRef - allows to save object in a reference cell.
+/// TLBRef - allows to save object in a reference cell ( ^X).
 ///
 /// use `#[tlb_derive(adapter="TLBRef")]` to apply it automatically in TLBDerive macro
 #[derive(Debug, Clone, PartialEq)]
 pub struct TLBRef<T: TLBType>(PhantomData<T>);
+
+/// TLBOptRef - allows to save optional object ( Maybe(^X) ) in a reference cell.
+///
+/// use `#[tlb_derive(adapter="TLBOptRef")]` to apply it automatically in TLBDerive macro
+#[derive(Debug, Clone, PartialEq)]
+pub struct TLBOptRef<T: TLBType>(PhantomData<T>);
 
 impl<T: TLBType> TLBRef<T> {
     pub fn new() -> Self { TLBRef(PhantomData) }
@@ -20,8 +26,23 @@ impl<T: TLBType> TLBRef<T> {
     }
 }
 
-impl<T: TLBType> Default for TLBRef<T> {
-    fn default() -> Self { Self::new() }
+impl<T: TLBType> TLBOptRef<Option<T>> {
+    pub fn new() -> Self { TLBOptRef(PhantomData) }
+
+    pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TonlibError> {
+        if parser.read_bit()? {
+            return Ok(Some(T::from_cell(parser.read_next_ref()?)?));
+        }
+        Ok(None)
+    }
+
+    pub fn write(&self, builder: &mut CellBuilder, val: &Option<T>) -> Result<(), TonlibError> {
+        builder.write_bit(val.is_some())?;
+        if let Some(val) = val {
+            builder.write_ref(val.to_cell_ref()?)?;
+        }
+        Ok(())
+    }
 }
 
 #[cfg(test)]
