@@ -1,45 +1,45 @@
-#[cfg(feature = "serde_scylla")]
-mod serde_scylla {
-    use crate::cell::ton_hash::TonHash;
-    use scylla::_macro_internal::{
-        CellWriter, ColumnType, DeserializationError, DeserializeValue, FrameSlice, SerializationError, SerializeValue,
-        TypeCheckError, WrittenCellProof,
-    };
-    use scylla::cluster::metadata::NativeType;
-    use scylla::deserialize::value::{BuiltinTypeCheckError, BuiltinTypeCheckErrorKind};
-
-    impl DeserializeValue<'_, '_> for TonHash {
-        fn type_check(typ: &ColumnType) -> Result<(), TypeCheckError> {
-            match typ {
-                ColumnType::Native(NativeType::Blob) => Ok(()),
-                _ => Err(TypeCheckError::new(BuiltinTypeCheckError {
-                    rust_name: "TonHash",
-                    cql_type: typ.clone().into_owned(),
-                    kind: BuiltinTypeCheckErrorKind::MismatchedType {
-                        expected: &[ColumnType::Native(NativeType::Text)],
-                    },
-                })),
-            }
-        }
-
-        fn deserialize<'a>(typ: &'a ColumnType<'a>, v: Option<FrameSlice<'_>>) -> Result<Self, DeserializationError> {
-            match TonHash::from_vec(DeserializeValue::deserialize(typ, v)?) {
-                Ok(val) => Ok(val),
-                Err(err) => Err(DeserializationError::new(err)),
-            }
-        }
-    }
-
-    impl SerializeValue for TonHash {
-        fn serialize<'b>(
-            &self,
-            typ: &ColumnType,
-            writer: CellWriter<'b>,
-        ) -> Result<WrittenCellProof<'b>, SerializationError> {
-            SerializeValue::serialize(&self.0.as_slice(), typ, writer)
-        }
-    }
-}
+// #[cfg(feature = "serde_scylla")]
+// mod serde_scylla {
+//     use crate::cell::ton_hash::TonHash;
+//     use scylla::_macro_internal::{
+//         CellWriter, ColumnType, DeserializationError, DeserializeValue, FrameSlice, SerializationError, SerializeValue,
+//         TypeCheckError, WrittenCellProof,
+//     };
+//     use scylla::cluster::metadata::NativeType;
+//     use scylla::deserialize::value::{BuiltinTypeCheckError, BuiltinTypeCheckErrorKind};
+//
+//     impl DeserializeValue<'_, '_> for TonHash {
+//         fn type_check(typ: &ColumnType) -> Result<(), TypeCheckError> {
+//             match typ {
+//                 ColumnType::Native(NativeType::Blob) => Ok(()),
+//                 _ => Err(TypeCheckError::new(BuiltinTypeCheckError {
+//                     rust_name: "TonHash",
+//                     cql_type: typ.clone().into_owned(),
+//                     kind: BuiltinTypeCheckErrorKind::MismatchedType {
+//                         expected: &[ColumnType::Native(NativeType::Text)],
+//                     },
+//                 })),
+//             }
+//         }
+//
+//         fn deserialize<'a>(typ: &'a ColumnType<'a>, v: Option<FrameSlice<'_>>) -> Result<Self, DeserializationError> {
+//             match TonHash::from_vec(DeserializeValue::deserialize(typ, v)?) {
+//                 Ok(val) => Ok(val),
+//                 Err(err) => Err(DeserializationError::new(err)),
+//             }
+//         }
+//     }
+//
+//     impl SerializeValue for TonHash {
+//         fn serialize<'b>(
+//             &self,
+//             typ: &ColumnType,
+//             writer: CellWriter<'b>,
+//         ) -> Result<WrittenCellProof<'b>, SerializationError> {
+//             SerializeValue::serialize(&self.0.as_slice(), typ, writer)
+//         }
+//     }
+// }
 
 pub mod serde_ton_hash_b64 {
     use crate::cell::ton_hash::TonHash;

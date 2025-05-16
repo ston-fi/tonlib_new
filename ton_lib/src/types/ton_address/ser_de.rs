@@ -34,47 +34,47 @@ pub mod serde_ton_address_hex {
     }
 }
 
-#[cfg(feature = "serde_scylla")]
-mod serde_scylla {
-    use crate::types::ton_address::TonAddress;
-    use scylla::_macro_internal::{
-        CellWriter, ColumnType, DeserializationError, DeserializeValue, FrameSlice, SerializationError, SerializeValue,
-        TypeCheckError, WrittenCellProof,
-    };
-    use scylla::cluster::metadata::NativeType;
-    use scylla::deserialize::value::{BuiltinTypeCheckError, BuiltinTypeCheckErrorKind};
-    use std::str::FromStr;
-
-    impl DeserializeValue<'_, '_> for TonAddress {
-        fn type_check(typ: &ColumnType) -> Result<(), TypeCheckError> {
-            match typ {
-                ColumnType::Native(NativeType::Text) => Ok(()),
-                _ => Err(TypeCheckError::new(BuiltinTypeCheckError {
-                    rust_name: "TonAddress",
-                    cql_type: typ.clone().into_owned(),
-                    kind: BuiltinTypeCheckErrorKind::MismatchedType {
-                        expected: &[ColumnType::Native(NativeType::Text)],
-                    },
-                })),
-            }
-        }
-
-        fn deserialize<'a>(typ: &'a ColumnType<'a>, v: Option<FrameSlice<'_>>) -> Result<Self, DeserializationError> {
-            let address_str: String = DeserializeValue::deserialize(typ, v)?;
-            match TonAddress::from_str(&address_str) {
-                Ok(val) => Ok(val),
-                Err(err) => Err(DeserializationError::new(err)),
-            }
-        }
-    }
-
-    impl SerializeValue for TonAddress {
-        fn serialize<'b>(
-            &self,
-            typ: &ColumnType,
-            writer: CellWriter<'b>,
-        ) -> Result<WrittenCellProof<'b>, SerializationError> {
-            SerializeValue::serialize(&self.to_string(), typ, writer)
-        }
-    }
-}
+// #[cfg(feature = "serde_scylla")]
+// mod serde_scylla {
+//     use crate::types::ton_address::TonAddress;
+//     use scylla::_macro_internal::{
+//         CellWriter, ColumnType, DeserializationError, DeserializeValue, FrameSlice, SerializationError, SerializeValue,
+//         TypeCheckError, WrittenCellProof,
+//     };
+//     use scylla::cluster::metadata::NativeType;
+//     use scylla::deserialize::value::{BuiltinTypeCheckError, BuiltinTypeCheckErrorKind};
+//     use std::str::FromStr;
+//
+//     impl DeserializeValue<'_, '_> for TonAddress {
+//         fn type_check(typ: &ColumnType) -> Result<(), TypeCheckError> {
+//             match typ {
+//                 ColumnType::Native(NativeType::Text) => Ok(()),
+//                 _ => Err(TypeCheckError::new(BuiltinTypeCheckError {
+//                     rust_name: "TonAddress",
+//                     cql_type: typ.clone().into_owned(),
+//                     kind: BuiltinTypeCheckErrorKind::MismatchedType {
+//                         expected: &[ColumnType::Native(NativeType::Text)],
+//                     },
+//                 })),
+//             }
+//         }
+//
+//         fn deserialize<'a>(typ: &'a ColumnType<'a>, v: Option<FrameSlice<'_>>) -> Result<Self, DeserializationError> {
+//             let address_str: String = DeserializeValue::deserialize(typ, v)?;
+//             match TonAddress::from_str(&address_str) {
+//                 Ok(val) => Ok(val),
+//                 Err(err) => Err(DeserializationError::new(err)),
+//             }
+//         }
+//     }
+//
+//     impl SerializeValue for TonAddress {
+//         fn serialize<'b>(
+//             &self,
+//             typ: &ColumnType,
+//             writer: CellWriter<'b>,
+//         ) -> Result<WrittenCellProof<'b>, SerializationError> {
+//             SerializeValue::serialize(&self.to_string(), typ, writer)
+//         }
+//     }
+// }

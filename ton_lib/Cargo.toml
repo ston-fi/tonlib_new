@@ -22,11 +22,11 @@ include = [
 ]
 
 [features]
-default = ["contracts", "tonlibjson", "emulator", "serde_scylla"]
+default = ["contracts", "tonlibjson", "emulator"]
 emulator = ["dep:tonlib-sys"] # add tvm/tx emulators
 tonlibjson = ["dep:tonlib-sys"] # add tonlibjson client implementations
 contracts = ["dep:moka"]
-serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
+#serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
 
 
 [dependencies]
