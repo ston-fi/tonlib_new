@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.20](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.19...ton_lib-v0.0.20) - 2025-05-16
+
+### Other
+
+- update emulator interface
+- add code_by_version, version_by_code methods
+- make VersionHelper public
+
 ## [0.0.19](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.18...ton_lib-v0.0.19) - 2025-05-16
 
 ### Other
