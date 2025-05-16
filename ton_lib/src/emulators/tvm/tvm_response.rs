@@ -7,8 +7,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
 pub struct TVMSendMsgSuccess {
-    pub new_code_boc_b64: String,
-    pub new_data_boc_b64: String,
+    pub new_code_boc_b64: Option<String>,
+    pub new_data_boc_b64: Option<String>,
     pub accepted: bool,
     pub vm_exit_code: i32,
     pub vm_log: String,
@@ -26,8 +26,8 @@ impl TVMSendMsgSuccess {
 #[serde(rename_all = "snake_case")]
 pub struct TVMSendMsgResponse {
     pub success: bool,
-    pub new_code: Option<String>,
-    pub new_data: Option<String>,
+    pub new_code_boc_b64: Option<String>,
+    pub new_data_boc_b64: Option<String>,
     pub accepted: Option<bool>,
     pub vm_exit_code: Option<i32>,
     pub vm_log: Option<String>,
@@ -52,8 +52,6 @@ impl TVMSendMsgResponse {
             return Err(TonlibError::TVMEmulatorError(error));
         }
 
-        let new_code_boc_b64 = unwrap_opt(self.new_code, "new_code")?;
-        let new_data_boc_b64 = unwrap_opt(self.new_data, "new_data")?;
         let accepted = unwrap_opt(self.accepted, "accepted")?;
         let vm_log = unwrap_opt(self.vm_log, "vm_log")?;
         let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
@@ -61,8 +59,8 @@ impl TVMSendMsgResponse {
         let gas_used = unwrap_opt(self.gas_used, "gas_used")?.parse::<i32>()?;
         let actions_boc_b64 = self.actions;
         Ok(TVMSendMsgSuccess {
-            new_code_boc_b64,
-            new_data_boc_b64,
+            new_code_boc_b64: self.new_code_boc_b64,
+            new_data_boc_b64: self.new_data_boc_b64,
             accepted,
             vm_exit_code,
             vm_log,

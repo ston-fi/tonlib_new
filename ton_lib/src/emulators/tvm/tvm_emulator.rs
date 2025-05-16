@@ -129,7 +129,7 @@ fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<Strin
 
 #[cfg(test)]
 mod tests {
-    use crate::cell::ton_cell::TonCellRef;
+    use crate::cell::ton_cell::{TonCell, TonCellRef};
     use crate::emulators::tvm::c7_register::TVMEmulatorC7;
     use crate::emulators::tvm::tvm_emulator::TVMEmulator;
     use crate::errors::TonlibError;
@@ -139,7 +139,8 @@ mod tests {
     use crate::types::tlb::tep_0074::jetton_transfer_msg::JettonTransferMsg;
     use crate::types::tlb::tlb_type::TLBType;
     use crate::types::ton_address::TonAddress;
-    use std::ops::Deref;
+    use num_bigint::BigInt;
+    use std::ops::{Deref, Neg};
     use std::str::FromStr;
     use tokio_test::{assert_err, assert_ok};
 
@@ -197,7 +198,7 @@ mod tests {
         let c7 = TVMEmulatorC7::new(address, &hex::decode(BC_CONFIG_HEX)?)?;
         let mut emulator = TVMEmulator::new(&master_code, &master_data, &c7)?;
 
-        let emulated = assert_ok!(emulator.run_method("get_pool_full_data", &TVMStack::default().to_boc(false)?));
+        let emulated = assert_ok!(emulator.run_method("get_pool_full_data", TVMStack::EMPTY_BOC));
         assert_eq!(emulated.vm_exit_code, 0);
         Ok(())
     }
@@ -249,6 +250,29 @@ mod tests {
     }
 
     #[test]
+    fn test_usdt_get_wallet_data() -> anyhow::Result<()> {
+        sys_tonlib_set_verbosity_level(0);
+        let code = hex::decode(
+            "b5ee9c72010101010023000842028f452d7a4dfd74066b682365177259ed05734435be76b5fd4bd5d8af2b7c3d68",
+        )?;
+        let data = hex::decode("b5ee9c72010101010046000087008002c3ee8d5843cc6c087de8532a8dad964b352086a4ac814d0bb1853db786e9967002c44ea652d4092859c67da44e4ca3add6565b0e2897d640a2c51bfb370d8877fa")?;
+
+        let c7 = TVMEmulatorC7::new(
+            TonAddress::from_str("EQCFjWfR2q-usR_WKfSkr8C2qQlpn02ZOFd0zclmJvzVzgIx")?,
+            &hex::decode(BC_CONFIG_HEX)?,
+        )?;
+        let mut emulator = TVMEmulator::new(&code, &data, &c7)?;
+        // add required lib
+        let lib_cell = TonCellRef::from_boc_hex("b5ee9c7201020f010003d1000114ff00f4a413f4bcf2c80b01020162020302f8d001d0d3030171b08e48135f038020d721ed44d0d303fa00fa40fa40d104d31f01840f218210178d4519ba0282107bdd97deba12b1f2f48040d721fa003012a0401303c8cb0358fa0201cf1601cf16c9ed54e0fa40fa4031fa0031f401fa0031fa00013170f83a02d31f012082100f8a7ea5ba8e85303459db3ce0330405020120060701f203d33f0101fa00fa4021fa4430c000f2e14ded44d0d303fa00fa40fa40d15309c7052471b0c00021b1f2ad522bc705500ab1f2e0495115a120c2fff2aff82a54259070546004131503c8cb0358fa0201cf1601cf16c921c8cb0113f40012f400cb00c920f9007074c8cb02ca07cbffc9d004fa40f401fa00200802d0228210178d4519ba8e84325adb3ce034218210595f07bcba8e843101db3ce032208210eed236d3ba8e2f30018040d721d303d1ed44d0d303fa00fa40fa40d1335142c705f2e04a403303c8cb0358fa0201cf1601cf16c9ed54e06c218210d372158cbadc840ff2f0090a0027bfd8176a2686981fd007d207d206899fc15209840021bc508f6a2686981fd007d207d2068af81c019820d70b009ad74bc00101c001b0f2b19130e2c88210178d451901cb1f500a01cb3f5008fa0223cf1601cf1626fa025007cf16c9c8801801cb055004cf1670fa024063775003cb6bccccc945370b03f4ed44d0d303fa00fa40fa40d12372b0c002f26d07d33f0101fa005141a004fa40fa4053bac705f82a5464e070546004131503c8cb0358fa0201cf1601cf16c921c8cb0113f40012f400cb00c9f9007074c8cb02ca07cbffc9d0500cc7051bb1f2e04a09fa0021925f04e30d26d70b01c000b393306c33e30d55020c0d0e01f2ed44d0d303fa00fa40fa40d106d33f0101fa00fa40f401d15141a15288c705f2e04926c2fff2afc882107bdd97de01cb1f5801cb3f01fa0221cf1658cf16c9c8801801cb0526cf1670fa02017158cb6accc903f839206e943081169fde718102f270f8380170f836a0811a7770f836a0bcf2b0028050fb00030e00b42191729171e2f839206e938124279120e2216e94318128739101e25023a813a0738103a370f83ca00270f83612a00170f836a07381040982100966018070f837a0bcf2b0048050fb005803c8cb0358fa0201cf1601cf16c9ed540060c882107362d09c01cb1f2501cb3f5004fa0258cf1658cf16c9c8801001cb0524cf1658fa02017158cb6accc98011fb00007a5054a1f82fa07381040982100966018070f837b60972fb02c8801001cb055005cf1670fa027001cb6a8210d53276db01cb1f5801cb3fc9810082fb0059002003c8cb0358fa0201cf1601cf16c9ed54")?;
+        let emulator_libs_boc = LibsDict::new([lib_cell.clone()]).to_boc(false)?;
+        emulator.set_libs(&emulator_libs_boc)?;
+        let emulated = assert_ok!(emulator.run_method("get_wallet_data", TVMStack::EMPTY_BOC));
+        assert_eq!(emulated.stack_parsed()?.len(), 4);
+        assert_eq!(emulated.vm_exit_code, 0);
+        Ok(())
+    }
+
+    #[test]
     fn test_tvm_emulator_send_int_ext_msg() -> anyhow::Result<()> {
         sys_tonlib_set_verbosity_level(0);
         let code = hex::decode("b5ee9c7201021301000463000114ff00f4a413f4bcf2c80b0102016202030202cb040502037a600f1004f7d0831c02497c0f8007434c0c05c6c2497c0f83e903e900c7e800c5c75c87e800c7e800c00b4c7f4cffb51343500743e903e903e900c00fe8034c034e7f5350c0411cab00578c08aa0841657c1ef2ea3854d57c0cd4d56cd04b1c17cb812407e90350c04bc04780aa0841ef765f7aeb8c08aa0840b1dae5ceeb8c08e6060708090201ce0d0e008a39393a5181c705f2e04904fa40d43020d08060d721fa00304bb0527cf0105028a00744655023c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed5401fe3a3b3b05fa00fa40f82854120a70542013541403c85004fa0258cf1601cf16ccc922c8cb0112f400f400cb00c9f9007074c8cb02ca07cbffc9d0500ac705f2e04a14a145465412034a99c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed54f40482103afd461c708018c8cb055005cf1624fa02140a01fe3a5f07048208989680a015bcf2e04b02fa40d3003095c821cf16c9916de28210d1735400708018c8cb055005cf1624fa0214cb6a13cb1f14cb3f23fa443070ba8e33f828440370542013541403c85004fa0258cf1601cf16ccc922c8cb0112f400f400cb00c9f9007074c8cb02ca07cbffc9d0cf16966c227001cb01e2f4000b01fe3b3b27821062dd86f1ba8e3032365161c705f2e04902fa403046755023c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed54e027821066447dadba8e363334355154c705f2e04970c8cb01c9d017104644155023c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed54e0270c007acb6a13cb1f5230cb3ff400c98040fb00fa403020d70b01c3008e1f8210d53276db708010c8cb055003cf1622fa0212cb6acb1fcb3fc98042fb00915be2000ac98040fb0000fc821011db408aba8e3031365161c705f2e04902fa403046745023c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed54e039068210743f8e58ba8e325161c70507c00017b1f2e0497102d430470703c85007cf165005cf165003cf16c9c85006fa02cb00cb9f13cc12ccccc9ed54e05f09840ff2f000950cfe0a005c150804d50500f214013e809633c58073c5b33248b232c044bd003d0032c032483e401c1d3232c0b281f2fff2741de0063232c15633c5a082bebc203e80b2daf333325c7ec020008b0cfe0a005c150804d50500f214013e809633c58073c5b33248b232c044bd003d0032c0327e401c1d3232c0b281f2fff2741c60063232c15633c59c3e80b2dab33260103ec020009badbcf6a2686a00e87d207d207d201801fd00698069cfea6a180823b638fc1400b82a1009aa0a01e428027d012c678b00e78b666491646580897a007a00658064fc80383a6465816503e5ffe4e8400201201112003cab46ed44d0d401d0fa40fa40fa403003fa00d300d39fd4d43010475b6c240040aa2ded44d0d401d0fa40fa40fa403003fa00d300d39fd4d43010476c427f5520")?;
@@ -268,6 +292,38 @@ mod tests {
         let tvm_result = emulator.send_ext_msg(&msg.to_boc(false)?)?;
         assert_eq!(tvm_result.gas_used, 270);
         assert_eq!(tvm_result.vm_exit_code, 11);
+        Ok(())
+    }
+
+    #[test]
+    fn test_multiplier_contract() -> anyhow::Result<()> {
+        let code = hex::decode(include_str!("../../../resources/tests/test_multiplier_code.hex"))?;
+        let c7 = TVMEmulatorC7::new(
+            TonAddress::from_str("Ef8CmPZLxWB-9ypeGdGhEqA6ZNLBFUwnqXPH2eUQd_MzbGh_")?,
+            &hex::decode(BC_CONFIG_HEX)?,
+        )?;
+        let mut emulator = TVMEmulator::new(&code, &TonCell::EMPTY.to_boc(false)?, &c7)?;
+
+        let mut run_test_case = |arg1: &BigInt, arg2: &BigInt| {
+            let expected = arg1 * arg2;
+            let mut stack = TVMStack::default();
+            stack.push_int(arg1.clone());
+            stack.push_int(arg2.clone());
+            let emulator_result = assert_ok!(emulator.run_method("get_val", &stack.to_boc(false)?));
+            let mut res_stack = emulator_result.stack_parsed()?;
+            assert_eq!(emulator_result.vm_exit_code, 0);
+            if expected > BigInt::from(i64::MAX) {
+                assert_eq!(res_stack.pop_int()?, expected);
+            } else {
+                assert_eq!(BigInt::from(res_stack.pop_tiny_int()?), expected);
+            }
+            Ok::<(), anyhow::Error>(())
+        };
+
+        run_test_case(&BigInt::from(1), &BigInt::from(0x1234567890ABCDEFu64))?;
+        run_test_case(&BigInt::from(1), &BigInt::from(0x1234567890ABCDEFu64).neg())?;
+        run_test_case(&BigInt::from(10_000_000_000_i64), &BigInt::from(0x1234567890ABCDEFu64))?;
+
         Ok(())
     }
 }
