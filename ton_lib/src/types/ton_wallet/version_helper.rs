@@ -13,7 +13,7 @@ use crate::types::tlb::wallet::wallet_ext_msg_body::{
 use crate::types::ton_wallet::mnemonic::KeyPair;
 use crate::types::ton_wallet::wallet_code::TON_WALLET_CODE_BY_VERSION;
 
-pub(super) struct VersionHelper;
+pub struct VersionHelper;
 
 impl VersionHelper {
     pub(super) fn get_data(
