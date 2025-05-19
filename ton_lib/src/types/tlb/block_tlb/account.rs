@@ -1,10 +1,19 @@
 use crate::cell::ton_hash::TonHash;
+use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::coins::{CurrencyCollection, Grams};
 use crate::types::tlb::block_tlb::msg_address::MsgAddressInt;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
 use num_bigint::BigUint;
 use ton_lib_macros::TLBDerive;
+
+#[derive(Debug, Clone, TLBDerive)]
+pub struct ShardAccount {
+    #[tlb_derive(adapter = "TLBRef")]
+    pub account: MaybeAccount,
+    pub last_tx_hash: TonHash,
+    pub last_tx_lt: u64,
+}
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L259
 #[derive(Debug, Clone, TLBDerive)]
