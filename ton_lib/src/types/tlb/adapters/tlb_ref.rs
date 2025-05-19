@@ -16,6 +16,10 @@ pub struct TLBRef<T: TLBType>(PhantomData<T>);
 #[derive(Debug, Clone, PartialEq)]
 pub struct TLBOptRef<T: TLBType>(PhantomData<T>);
 
+impl<T: TLBType> Default for TLBRef<T> {
+    fn default() -> Self { Self::new() }
+}
+
 impl<T: TLBType> TLBRef<T> {
     pub fn new() -> Self { TLBRef(PhantomData) }
 
@@ -24,6 +28,10 @@ impl<T: TLBType> TLBRef<T> {
     pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> {
         builder.write_ref(val.to_cell_ref()?)
     }
+}
+
+impl<T: TLBType> Default for TLBOptRef<Option<T>> {
+    fn default() -> Self { Self::new() }
 }
 
 impl<T: TLBType> TLBOptRef<Option<T>> {

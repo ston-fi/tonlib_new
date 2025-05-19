@@ -3,9 +3,10 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
+use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::block_tlb::coins::CurrencyCollection;
 use crate::types::tlb::primitives::Either;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::tlb_type::TLBType;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L399
@@ -43,8 +44,10 @@ pub struct OutActionReserveCurrency {
     pub currency_collection: CurrencyCollection,
 }
 
-#[derive(Debug, PartialEq, Clone)]
+#[derive(Debug, PartialEq, Clone, TLBDerive)]
+#[tlb_derive(prefix = 0x26fa1dd4, bits_len = 32)]
 pub struct OutActionChangeLibrary {
+    #[tlb_derive(bits_len = 7)]
     pub mode: u8,
     pub library: Either<TonHash, TonCellRef>,
 }
@@ -82,23 +85,6 @@ impl TLBType for OutList {
             cur_cell = parent_builder.build()?;
         }
         cur_cell.write(builder)?;
-        Ok(())
-    }
-}
-
-impl TLBType for OutActionChangeLibrary {
-    const PREFIX: TLBPrefix = TLBPrefix::new(32, 0x26fa1dd4);
-
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        Ok(Self {
-            mode: parser.read_num(7)?,
-            library: TLBType::read(parser)?,
-        })
-    }
-
-    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonlibError> {
-        dst.write_num(&self.mode, 7)?;
-        self.library.write(dst)?;
         Ok(())
     }
 }

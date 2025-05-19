@@ -140,8 +140,8 @@ mod tests {
     use std::sync::LazyLock;
     use tokio_test::{assert_err, assert_ok};
 
-    const BC_CONFIG: LazyLock<EmulatorBCConfig> = LazyLock::new(|| {
-        EmulatorBCConfig::from_boc_hex(&include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
+    static BC_CONFIG: LazyLock<EmulatorBCConfig> = LazyLock::new(|| {
+        EmulatorBCConfig::from_boc_hex(include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
             .unwrap()
     });
 
