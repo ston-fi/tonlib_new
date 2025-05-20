@@ -16,6 +16,7 @@ pub struct ShardAccount {
 }
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L259
+// intentionally implemented as enum - Account can't be used directly
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub enum MaybeAccount {
     None(AccountNone),
@@ -65,7 +66,7 @@ pub enum AccountState {
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
-pub struct AccountStateUninit {}
+pub struct AccountStateUninit;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
@@ -86,13 +87,6 @@ pub enum AccountStatus {
     Frozen(AccountStatusFrozen),
     Active(AccountStatusActive),
     NonExist(AccountStatusNotExist),
-}
-
-impl AccountStatus {
-    pub fn is_active(&self) -> bool { matches!(self, AccountStatus::Active(_)) }
-    pub fn is_frozen(&self) -> bool { matches!(self, AccountStatus::Frozen(_)) }
-    pub fn is_uninit(&self) -> bool { matches!(self, AccountStatus::Uninit(_)) }
-    pub fn is_not_exist(&self) -> bool { matches!(self, AccountStatus::NonExist(_)) }
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]

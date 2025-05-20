@@ -25,7 +25,7 @@ pub enum MsgAddressExt {
 
 #[derive(Debug, Clone, Copy, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
-pub struct MsgAddressNone {}
+pub struct MsgAddressNone;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
@@ -97,16 +97,10 @@ impl MsgAddressExt {
     }
 }
 
-/// Allows easily convert enum variants to parent type
+/// Allows easily convert enum variants to parent type - Extra converters (are not derived automatically)
 #[rustfmt::skip]
 mod from_impl {
     use crate::types::tlb::block_tlb::msg_address::*;
-    impl From<MsgAddressNone> for MsgAddressExt { fn from(value: MsgAddressNone) -> Self { Self::None(value) } }
-    impl From<MsgAddressExtern> for MsgAddressExt { fn from(value: MsgAddressExtern) -> Self { Self::Extern(value) } }
-    impl From<MsgAddressIntStd> for MsgAddressInt { fn from(value: MsgAddressIntStd) -> Self { Self::Std(value) } }
-    impl From<MsgAddressIntVar> for MsgAddressInt { fn from(value: MsgAddressIntVar) -> Self { Self::Var(value) } }
-    impl From<MsgAddressInt> for MsgAddress { fn from(value: MsgAddressInt) -> Self { Self::Int(value) } }
-    impl From<MsgAddressExt> for MsgAddress { fn from(value: MsgAddressExt) -> Self { Self::Ext(value) } }
     impl From<MsgAddressNone> for MsgAddress { fn from(value: MsgAddressNone) -> Self { Self::Ext(value.into()) } }
     impl From<MsgAddressExtern> for MsgAddress { fn from(value: MsgAddressExtern) -> Self { Self::Ext(value.into()) } }
     impl From<MsgAddressIntStd> for MsgAddress { fn from(value: MsgAddressIntStd) -> Self { Self::Int(value.into()) } }

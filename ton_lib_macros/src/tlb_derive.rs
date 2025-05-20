@@ -40,7 +40,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
 
     let ident = &input.ident;
 
-    let (read_def_tokens, write_def_tokens) = match &mut input.data {
+    let (read_def_tokens, write_def_tokens, extra_impl_tokens) = match &mut input.data {
         Data::Struct(data) => tlb_derive_struct(&header_attrs, data),
         Data::Enum(data) => tlb_derive_enum(&crate_path, ident, data),
         _ => panic!("TLBDerive only supports structs and enums"),
@@ -63,5 +63,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
                 #write_def_tokens
             }
         }
+
+        #extra_impl_tokens
     }
 }

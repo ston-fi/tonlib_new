@@ -4,7 +4,7 @@ use super::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt};
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::coins::{CurrencyCollection, Grams};
+use crate::types::tlb::block_tlb::coins::Grams;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::primitives::EitherRef;
 use crate::types::tlb::primitives::EitherRefLayout::ToRef;
@@ -52,7 +52,7 @@ impl Msg {
 
     pub fn src(&self) -> MsgAddress {
         match &self.info {
-            CommonMsgInfo::Int(info) => info.src.clone().into(),
+            CommonMsgInfo::Int(info) => info.src.clone(),
             CommonMsgInfo::ExtIn(info) => info.src.clone().into(),
             CommonMsgInfo::ExtOut(info) => info.src.clone().into(),
         }
@@ -60,11 +60,13 @@ impl Msg {
 
     pub fn dst(&self) -> Result<MsgAddress, TonlibError> {
         match &self.info {
-            CommonMsgInfo::Int(info) => Ok(info.dest.clone().into()),
+            CommonMsgInfo::Int(info) => Ok(info.dest.clone()),
             CommonMsgInfo::ExtIn(info) => Ok(info.dest.clone().into()),
             CommonMsgInfo::ExtOut(info) => Ok(info.dest.clone().into()),
         }
     }
+
+    pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
 }
 
 #[cfg(test)]

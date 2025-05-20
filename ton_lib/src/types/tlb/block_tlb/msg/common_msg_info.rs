@@ -41,3 +41,37 @@ pub struct CommonMsgInfoExtOut {
     pub created_lt: u64,
     pub created_at: u32,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cell::ton_hash::TonHash;
+    use crate::types::tlb::block_tlb::msg_address::{MsgAddressIntStd, MsgAddressNone};
+    #[test]
+    fn test_block_tlb_common_msg_info_enum_derive() -> anyhow::Result<()> {
+        let common_msg_info = CommonMsgInfo::Int(CommonMsgInfoInt {
+            ihr_disabled: false,
+            bounce: false,
+            bounced: false,
+            src: MsgAddress::Int(MsgAddressInt::Std(MsgAddressIntStd {
+                anycast: None,
+                workchain: 0,
+                address: TonHash::ZERO,
+            })),
+            dest: MsgAddress::Ext(MsgAddressExt::None(MsgAddressNone {})),
+            value: CurrencyCollection::new(0u32),
+            ihr_fee: Coins::zero(),
+            fwd_fee: Coins::zero(),
+            created_lt: 0,
+            created_at: 0,
+        });
+        assert!(common_msg_info.is_int());
+        assert!(common_msg_info.as_int().is_some());
+        assert!(common_msg_info.as_ext_in().is_none());
+
+        let int = common_msg_info.as_int().unwrap();
+        let common_msg_info_from = CommonMsgInfo::from(int.clone());
+        assert_eq!(common_msg_info_from, common_msg_info);
+        Ok(())
+    }
+}

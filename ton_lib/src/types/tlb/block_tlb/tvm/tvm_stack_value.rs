@@ -27,7 +27,7 @@ pub enum TVMStackValue {
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x00, bits_len = 8)]
-pub struct TVMNull {}
+pub struct TVMNull;
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x01, bits_len = 8)]
@@ -45,7 +45,7 @@ pub struct TVMInt {
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x02ff, bits_len = 16)]
-pub struct TVMNan {}
+pub struct TVMNan;
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x03, bits_len = 8)]
