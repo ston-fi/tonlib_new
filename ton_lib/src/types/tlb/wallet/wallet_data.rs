@@ -113,7 +113,7 @@ mod test {
             wallet_data.public_key,
             TonHash::from_str("cbf377c9b73604c70bf73488ddceba14f763baef2ac70f68d1d6032a120149f4")?
         );
-        let serial_boc_hex = wallet_data.to_boc_hex(false)?;
+        let serial_boc_hex = wallet_data.to_boc_hex()?;
         let restored = WalletV3Data::from_boc_hex(&serial_boc_hex)?;
         assert_eq!(wallet_data, restored);
         Ok(())
@@ -132,7 +132,7 @@ mod test {
         );
         assert_eq!(wallet_data.plugins, None);
 
-        let serial_boc_hex = wallet_data.to_boc_hex(false)?;
+        let serial_boc_hex = wallet_data.to_boc_hex()?;
         let restored = WalletV4Data::from_boc_hex(&serial_boc_hex)?;
         assert_eq!(wallet_data, restored);
         Ok(())
@@ -151,7 +151,7 @@ mod test {
         );
         assert_eq!(wallet_data.extensions, None);
 
-        let serial_boc_hex = wallet_data.to_boc_hex(true)?;
+        let serial_boc_hex = wallet_data.to_boc_hex_extra(true)?;
         assert_eq!(src_boc_hex, serial_boc_hex);
         let restored = WalletV5Data::from_boc_hex(&serial_boc_hex)?;
         assert_eq!(wallet_data, restored);

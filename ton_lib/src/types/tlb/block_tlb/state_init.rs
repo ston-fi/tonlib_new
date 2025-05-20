@@ -9,7 +9,6 @@ use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L281
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(ensure_empty = true)]
 pub struct StateInit {
     #[tlb_derive(bits_len = 5)]
     pub split_depth: Option<u8>,

@@ -88,6 +88,13 @@ pub enum AccountStatus {
     NonExist(AccountStatusNotExist),
 }
 
+impl AccountStatus {
+    pub fn is_active(&self) -> bool { matches!(self, AccountStatus::Active(_)) }
+    pub fn is_frozen(&self) -> bool { matches!(self, AccountStatus::Frozen(_)) }
+    pub fn is_uninit(&self) -> bool { matches!(self, AccountStatus::Uninit(_)) }
+    pub fn is_not_exist(&self) -> bool { matches!(self, AccountStatus::NonExist(_)) }
+}
+
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
 pub struct AccountStatusUninit {}
@@ -209,7 +216,7 @@ mod tests {
             shard_account.cell_hash()?,
             TonHash::from_str("2EF34B7D264FC0C21713BE018B9FBB264B0AF887FF5715C36229BDF79B11A858")?
         );
-        let serialized = shard_account.to_boc_hex(false)?;
+        let serialized = shard_account.to_boc_hex()?;
         let parsed_back = ShardAccount::from_boc_hex(&serialized)?;
         assert_eq!(parsed_back, shard_account);
         Ok(())
@@ -260,7 +267,7 @@ mod tests {
             shard_account.cell_hash()?,
             TonHash::from_str("355BCC314569D5A3627E374F709464D3F9E0126CDB71DAB860DF18C6867C40D4")?
         );
-        let serialized = shard_account.to_boc_hex(false)?;
+        let serialized = shard_account.to_boc_hex()?;
         let parsed_back = ShardAccount::from_boc_hex(&serialized)?;
         assert_eq!(parsed_back, shard_account);
         Ok(())

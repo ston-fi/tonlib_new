@@ -216,7 +216,7 @@ mod tests {
         };
         assert_eq!(parsed_block_info, expected);
 
-        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc(false)?)?;
+        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc()?)?;
         assert_eq!(parsed_block_info, parsed_back);
         assert_eq!(parsed_block_info.cell_hash()?, parsed_back.cell_hash()?);
         Ok(())
@@ -269,7 +269,7 @@ mod tests {
             prev_vert_ref: None,
         };
         assert_eq!(parsed_block_info, expected);
-        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc(false)?)?;
+        let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc()?)?;
         assert_eq!(parsed_block_info, parsed_back);
         assert_eq!(parsed_block_info.cell_hash()?, parsed_back.cell_hash()?);
         Ok(())

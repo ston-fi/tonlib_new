@@ -57,7 +57,7 @@ impl ContractClient {
     where
         M: Into<TVMMethodId> + Send,
     {
-        self.inner.data_provider.run_method(address, &method.into().as_str(), stack.to_boc(false)?).await
+        self.inner.data_provider.run_method(address, &method.into().as_str(), stack.to_boc()?).await
     }
 
     // pub async fn get_account_state_raw(&self, address: &TonAddress) -> Result<TLRawFullAccountState, TonlibError> {

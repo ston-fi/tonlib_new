@@ -53,16 +53,24 @@ pub trait TLBType: Sized {
 
     fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.to_cell()?.into_ref()) }
 
-    fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
+    fn to_boc(&self) -> Result<Vec<u8>, TonlibError> { self.to_boc_extra(false) }
+
+    fn to_boc_hex(&self) -> Result<String, TonlibError> { self.to_boc_hex_extra(false) }
+
+    fn to_boc_b64(&self) -> Result<String, TonlibError> { self.to_boc_b64_extra(false) }
+
+    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         let mut builder = TonCell::builder();
         self.write(&mut builder)?;
         BOC::new(builder.build()?.into_ref()).to_bytes(add_crc32)
     }
 
-    fn to_boc_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_boc(add_crc32)?)) }
+    fn to_boc_hex_extra(&self, add_crc32: bool) -> Result<String, TonlibError> {
+        Ok(hex::encode(self.to_boc_extra(add_crc32)?))
+    }
 
-    fn to_boc_b64(&self, add_crc32: bool) -> Result<String, TonlibError> {
-        Ok(BASE64_STANDARD.encode(self.to_boc(add_crc32)?))
+    fn to_boc_b64_extra(&self, add_crc32: bool) -> Result<String, TonlibError> {
+        Ok(BASE64_STANDARD.encode(self.to_boc_extra(add_crc32)?))
     }
 
     /// Helpers - mostly for internal use
