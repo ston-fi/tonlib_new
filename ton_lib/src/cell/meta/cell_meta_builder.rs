@@ -165,17 +165,16 @@ impl<'a> CellMetaBuilder<'a> {
         &self,
         level_mask: LevelMask,
     ) -> Result<([TonHash; 4], [u16; 4]), TonlibError> {
-        let hash_count = if self.cell_type == CellType::PrunedBranch {
-            1
-        } else {
-            level_mask.hash_count()
+        let hash_count = match self.cell_type {
+            CellType::PrunedBranch => 1,
+            _ => level_mask.hash_count(),
         };
 
         let total_hash_count = level_mask.hash_count();
         let hash_i_offset = total_hash_count - hash_count;
 
-        let mut hashes = [TonHash::ZERO; 4];
-        let mut depths = [0; 4];
+        let mut hashes = Vec::<TonHash>::with_capacity(hash_count);
+        let mut depths = Vec::with_capacity(hash_count);
 
         // Iterate through significant levels
         for (hash_pos, level_pos) in (0..=level_mask.level()).filter(|&i| level_mask.is_significant(i)).enumerate() {
@@ -205,11 +204,11 @@ impl<'a> CellMetaBuilder<'a> {
             // Calculate Hash
             let repr = self.get_repr_for_data(cur_data, cur_bit_len, level_mask, level_pos)?;
             let hash = TonHash::from_bytes(&Sha256::new_with_prefix(repr).finalize())?;
-            hashes[hash_pos] = hash;
-            depths[hash_pos] = depth;
+            hashes.push(hash);
+            depths.push(depth);
         }
 
-        self.resolve_hashes_and_depths(hashes, depths, level_mask)
+        self.resolve_hashes_and_depths(&hashes, &depths, level_mask)
     }
 
     fn get_repr_for_data(
@@ -270,8 +269,8 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn resolve_hashes_and_depths(
         &self,
-        hashes: [TonHash; 4],
-        depths: [u16; 4],
+        hashes: &[TonHash],
+        depths: &[u16],
         level_mask: LevelMask,
     ) -> Result<([TonHash; 4], [u16; 4]), TonlibError> {
         let mut resolved_hashes = [TonHash::ZERO; 4];
@@ -282,16 +281,13 @@ impl<'a> CellMetaBuilder<'a> {
 
             let (hash, depth) = match self.cell_type {
                 CellType::PrunedBranch => {
-                    // let this_hash_index = level_mask.hash_index();
-                    // if hash_index != this_hash_index {
-                    //     println!("calc for pruned");
-                    let pruned = self.calc_pruned_hash_depth(level_mask)?;
-                    // println!("pruned: {:?}", pruned);
-                    (pruned[0].hash.clone(), pruned[0].depth)
-                    // } else {
-                    //     println!("no calc for pruned");
-                    //     (hashes[0].clone(), depths[0])
-                    // }
+                    let this_hash_index = level_mask.hash_index();
+                    if hash_index != this_hash_index {
+                        let pruned = self.calc_pruned_hash_depth(level_mask)?;
+                        (pruned[hash_index].hash.clone(), pruned[hash_index].depth)
+                    } else {
+                        (hashes[0].clone(), depths[0])
+                    }
                 }
                 _ => (hashes[hash_index].clone(), depths[hash_index]),
             };
@@ -305,12 +301,12 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn get_ref_depth(&self, cell_ref: &TonCell, level: u8) -> u16 {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.meta.depths[level as usize + extra_level]
+        cell_ref.meta.depths[(level as usize + extra_level).min(3)]
     }
 
     fn get_ref_hash(&self, cell_ref: &TonCell, level: u8) -> TonHash {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.meta.hashes[level as usize + extra_level].clone()
+        cell_ref.meta.hashes[(level as usize + extra_level).min(3)].clone()
     }
 
     fn calc_pruned_hash_depth(&self, level_mask: LevelMask) -> Result<Vec<Pruned>, TonlibError> {
@@ -322,7 +318,6 @@ impl<'a> CellMetaBuilder<'a> {
         let level = level_mask.level() as usize;
         let hashes = (0..level).map(|_| reader.read::<[u8; TonHash::BYTES_LEN]>()).collect::<Result<Vec<_>, _>>()?;
         let depths = (0..level).map(|_| reader.read::<u16>()).collect::<Result<Vec<_>, _>>()?;
-
         let result = hashes
             .into_iter()
             .zip(depths)

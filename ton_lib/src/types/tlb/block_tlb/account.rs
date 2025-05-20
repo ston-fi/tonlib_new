@@ -91,19 +91,19 @@ pub enum AccountStatus {
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
-pub struct AccountStatusUninit {}
+pub struct AccountStatusUninit;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
-pub struct AccountStatusFrozen {}
+pub struct AccountStatusFrozen;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b10, bits_len = 2)]
-pub struct AccountStatusActive {}
+pub struct AccountStatusActive;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b11, bits_len = 2)]
-pub struct AccountStatusNotExist {}
+pub struct AccountStatusNotExist;
 
 #[cfg(test)]
 mod tests {

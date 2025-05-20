@@ -35,7 +35,6 @@ ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
 
 # External
 tonlib-sys = { version = "2025.4.1", features = ["with_debug_info"], optional = true }
-scylla = { version = "1.1", optional=true }
 bitstream-io = "4.0.0"
 thiserror = "2.0"
 log = "0.4"
