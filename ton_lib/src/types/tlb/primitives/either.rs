@@ -97,6 +97,8 @@ impl<T> EitherRef<T> {
             layout: EitherRefLayout::ToRef,
         }
     }
+
+    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self { Self { value, layout } }
 }
 impl<T> Deref for EitherRef<T> {
     type Target = T;

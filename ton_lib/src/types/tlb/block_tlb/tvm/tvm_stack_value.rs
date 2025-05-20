@@ -14,7 +14,7 @@ use ton_lib_macros::TLBDerive;
 
 #[derive(Clone, TLBDerive)]
 pub enum TVMStackValue {
-    Null(TVMStackNull),
+    Null(TVMNull),
     TinyInt(TVMTinyInt),
     Int(TVMInt),
     Nan(TVMNan),
@@ -27,7 +27,7 @@ pub enum TVMStackValue {
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x00, bits_len = 8)]
-pub struct TVMStackNull {}
+pub struct TVMNull {}
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x01, bits_len = 8)]

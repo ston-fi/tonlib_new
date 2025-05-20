@@ -5,7 +5,8 @@ pub mod wallet_code;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
-use crate::types::tlb::block_tlb::msg::{CommonMsgInfo, ExtInMsgInfo, Message};
+use crate::types::tlb::block_tlb::msg::common_msg_info::{CommonMsgInfo, CommonMsgInfoExtIn};
+use crate::types::tlb::block_tlb::msg::Msg;
 use crate::types::tlb::block_tlb::msg_address::MsgAddressExt;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::primitives::EitherRef;
@@ -92,13 +93,13 @@ impl TonWallet {
         signed_body: TonCell,
         add_state_init: bool,
     ) -> Result<TonCell, TonlibError> {
-        let msg_info = CommonMsgInfo::ExtIn(ExtInMsgInfo {
+        let msg_info = CommonMsgInfo::ExtIn(CommonMsgInfoExtIn {
             src: MsgAddressExt::NONE,
             dest: self.address.to_msg_address_int(),
             import_fee: Coins::zero(),
         });
 
-        let mut message = Message::new(msg_info, signed_body);
+        let mut message = Msg::new(msg_info, signed_body);
         if add_state_init {
             let code = WalletVersionHelper::get_code(self.version)?.clone();
             let data = WalletVersionHelper::get_data_default(self.version, &self.key_pair, self.wallet_id)?;
