@@ -122,16 +122,15 @@ impl<'a> CellMetaBuilder<'a> {
 
         data_slice = &data_slice[TonHash::BYTES_LEN..];
         let _proof_depth = u16::from_be_bytes(data_slice[..CellMeta::DEPTH_BYTES].try_into().unwrap());
-        log::warn!("validate_merkle_proof is not implemented yet!");
+        log::trace!("validate_merkle_proof is not implemented yet!"); // TODO
         Ok(())
     }
 
     fn validate_merkle_update(&self) -> Result<(), TonlibError> {
         // type + hash + hash + depth + depth
         // const MERKLE_UPDATE_BITS_LEN: usize = 8 + (2 * (256 + 16));
-        log::error!("validate_merkle_update is not implemented yet");
+        log::trace!("validate_merkle_update is not implemented yet"); // TODO
         Ok(())
-        // todo!();
     }
 
     fn calc_level_mask_ordinary(&self) -> LevelMask {
