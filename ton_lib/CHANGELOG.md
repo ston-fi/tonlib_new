@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.21](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.20...ton_lib-v0.0.21) - 2025-05-21
+
+### Fixed
+
+- fix write_num in builder, fix bits_len in Coins
+- fix prunned_branch serialization
+
+### Other
+
+- Merge pull request #34 from Sild/dev
+- hide useless wornings
+- TLBDerive for enum produces as_X, as_mut_X, is_X, From<variant> impls
+- replace entities
+- TLClient can clone, to_boc doesn't write crc32 by default
+- add tests for shard_account/tx with blockchain data
+- tests for tick_tock tx & tick_tock account
+- add mock for TxDescr, support ShardAccount
+
 ## [0.0.20](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.19...ton_lib-v0.0.20) - 2025-05-16
 
 ### Other
