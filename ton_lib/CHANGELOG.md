@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.22](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.21...ton_lib-v0.0.22) - 2025-05-21
+
+### Fixed
+
+- fix TLB ComputeSkipReasonNoState
+
+### Other
+
+- hide println
+- reduce default max_parallel_requests 1000 -> 200
+- up ton_net_conf interface
+
 ## [0.0.21](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.20...ton_lib-v0.0.21) - 2025-05-21
 
 ### Fixed
