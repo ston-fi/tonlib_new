@@ -1,5 +1,5 @@
 use crate::cell::ton_cell::TonCell;
-use crate::clients::lite::config::LiteClientConfig;
+use crate::clients::lite::lc_config::LiteClientConfig;
 use crate::clients::lite::lite_client::LiteClient;
 use crate::clients::tonlibjson::tl_api::tl_types::TLKeyStoreType;
 use crate::clients::tonlibjson::tl_client_config::TLClientConfig;

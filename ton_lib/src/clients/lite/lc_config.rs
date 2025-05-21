@@ -8,8 +8,8 @@ pub struct LiteClientConfig {
     pub net_config: TonNetConfig,
     pub connections_per_node: u32,
     pub conn_timeout: Duration,
-    pub retry_count: u32,
-    pub retry_waiting: Duration,
+    pub retry_count: u32,        // TODO unused
+    pub retry_waiting: Duration, // TODO unused
     pub query_timeout: Duration,
     pub last_seqno_polling_period: Duration,
     pub metrics_enabled: bool,
