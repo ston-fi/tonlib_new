@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.15](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.14...ton_lib_macros-v0.0.15) - 2025-05-21
+
+### Other
+
+- TLBDerive for enum produces as_X, as_mut_X, is_X, From<variant> impls
+
 ## [0.0.14](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.13...ton_lib_macros-v0.0.14) - 2025-05-16
 
 ### Other
