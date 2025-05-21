@@ -2,7 +2,7 @@ use std::str::FromStr;
 use tokio_test::assert_ok;
 use ton_lib::clients::tonlibjson::{TLClient, TLClientTrait};
 
-use crate::tests::utils::{get_net_conf, init_logging};
+use crate::tests::utils::init_logging;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
 use ton_lib::clients::tonlibjson::tl_api::tl_types::TLAccountState;
@@ -87,8 +87,7 @@ async fn test_tl_client_default_async_context() -> anyhow::Result<()> {
 pub async fn make_tonlib_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
     init_logging();
     log::info!("initializing tl_client with mainnet={mainnet}...");
-    let net_conf = get_net_conf(mainnet)?;
-    let config = ton_lib::clients::tonlibjson::TLClientConfig::new(net_conf, archive_only);
+    let config = ton_lib::clients::tonlibjson::TLClientConfig::new_mainnet(archive_only);
     let client = TLClient::new(config).await?;
     sys_tonlib_set_verbosity_level(0);
     sys_tonlib_client_set_verbosity_level(0);

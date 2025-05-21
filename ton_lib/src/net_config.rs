@@ -2,6 +2,8 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::BlockIdExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::fs::{exists, File};
+use std::io::Read;
 
 pub const TON_NET_CONF_MAINNET: &str = include_str!("../resources/net_config/mainnet.json");
 pub const TON_NET_CONF_TESTNET: &str = include_str!("../resources/net_config/testnet.json");
@@ -40,6 +42,7 @@ pub struct TonNetConfig {
 }
 
 impl TonNetConfig {
+    pub fn get_json(mainnet: bool) -> String { get_default_net_conf(mainnet) }
     pub fn new(json: &str) -> Result<Self, TonlibError> { Ok(serde_json::from_str(json)?) }
     pub fn from_env_path(env_var: &str, fallback: &str) -> Result<Self, TonlibError> {
         let path = match std::env::var(env_var) {
@@ -64,4 +67,38 @@ impl TonNetConfig {
         self.validator.init_block["root_hash"] = serde_json::json!(block_id.root_hash.to_b64());
         self.validator.init_block["file_hash"] = serde_json::json!(block_id.file_hash.to_b64());
     }
+}
+
+fn get_default_net_conf(mainnet: bool) -> String {
+    match get_default_net_conf_throw(mainnet) {
+        Ok(net_conf) => net_conf,
+        Err(err) => {
+            log::error!("Failed to load net config: {err}. Using default (mainnet: {mainnet})");
+            if mainnet {
+                TON_NET_CONF_MAINNET.to_string()
+            } else {
+                TON_NET_CONF_TESTNET.to_string()
+            }
+        }
+    }
+}
+
+fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TonlibError> {
+    let mut net_conf = match mainnet {
+        true => TON_NET_CONF_MAINNET.to_string(),
+        false => TON_NET_CONF_TESTNET.to_string(),
+    };
+
+    if let Ok(path) = std::env::var("TON_NET_CONF_PATH") {
+        if exists(&path)? {
+            let mut new_conf = String::new();
+            let mut file = File::open(&path)?;
+            file.read_to_string(&mut new_conf)?;
+            net_conf = new_conf;
+            log::info!("Using TON_NET_CONF from {path}")
+        } else {
+            log::warn!("env_var TON_NET_CONF_PATH is set, but path {path} is not available");
+        }
+    }
+    Ok(net_conf)
 }

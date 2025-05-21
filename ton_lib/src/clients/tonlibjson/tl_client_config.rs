@@ -1,6 +1,6 @@
 use crate::clients::tonlibjson::tl_api::tl_types::{TLConfig, TLKeyStoreType, TLOptions};
 use crate::clients::tonlibjson::tl_callback::TLCallbacksStore;
-use crate::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
+use crate::net_config::TonNetConfig;
 
 #[derive(Debug, PartialEq)]
 pub enum LiteNodeFilter {
@@ -47,9 +47,9 @@ impl TLClientConfig {
         }
     }
     pub fn new_mainnet(archive_only: bool) -> TLClientConfig {
-        TLClientConfig::new(TON_NET_CONF_MAINNET.to_string(), archive_only)
+        TLClientConfig::new(TonNetConfig::get_json(true), archive_only)
     }
     pub fn new_testnet(archive_only: bool) -> TLClientConfig {
-        TLClientConfig::new(TON_NET_CONF_TESTNET.to_string(), archive_only)
+        TLClientConfig::new(TonNetConfig::get_json(false), archive_only)
     }
 }
