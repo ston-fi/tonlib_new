@@ -102,14 +102,12 @@ impl CellBuilder {
         Ok(())
     }
 
-    pub fn write_num<N: TonCellNum, B: Deref<Target = N>>(
-        &mut self,
-        data: B,
-        bits_len: usize,
-    ) -> Result<(), TonlibError> {
-        self.ensure_capacity(bits_len)?;
+    pub fn write_num<N, D>(&mut self, data: D, bits_len: usize) -> Result<(), TonlibError>
+    where
+        N: TonCellNum,
+        D: Deref<Target = N>,
+    {
         let data_ref = data.deref();
-
         // handling it like ton-core
         // https://github.com/ton-core/ton-core/blob/main/src/boc/BitBuilder.ts#L122
         if bits_len == 0 {
@@ -123,6 +121,7 @@ impl CellBuilder {
         }
 
         if let Some(unsigned) = data_ref.tcn_to_unsigned_primitive() {
+            self.ensure_capacity(bits_len)?;
             self.data_writer.write_var(bits_len as u32, unsigned)?;
             return Ok(());
         }
@@ -179,6 +178,7 @@ mod tests {
     use super::*;
     use crate::cell::meta::level_mask::LevelMask;
     use crate::cell::ton_hash::TonHash;
+    use num_bigint::BigUint;
     use num_traits::FromPrimitive;
     use std::str::FromStr;
     use tokio_test::{assert_err, assert_ok};
@@ -499,7 +499,7 @@ mod tests {
         );
 
         let mut builder = TonCell::builder();
-        builder.write_num(&num_bigint::BigUint::from_u64(117146891372).unwrap(), 257)?;
+        builder.write_num(&BigUint::from_u64(117146891372).unwrap(), 257)?;
         let cell = builder.build()?;
         assert_eq!(
             cell.data,
@@ -548,6 +548,8 @@ mod tests {
         assert_eq!(builder.data_bits_left(), TonCell::MAX_DATA_BITS_LEN - 8);
         builder.write_bits([0b0000_1111], 4)?;
         assert_eq!(builder.data_bits_left(), TonCell::MAX_DATA_BITS_LEN - 12);
+        builder.write_num(&BigUint::from(1u32), 4)?;
+        assert_eq!(builder.data_bits_left(), TonCell::MAX_DATA_BITS_LEN - 16);
         Ok(())
     }
 }

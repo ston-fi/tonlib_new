@@ -206,6 +206,7 @@ mod tests {
         };
 
         assert_eq!(expected, shard_account);
+
         assert_eq!(
             shard_account.cell_hash()?,
             TonHash::from_str("2EF34B7D264FC0C21713BE018B9FBB264B0AF887FF5715C36229BDF79B11A858")?
