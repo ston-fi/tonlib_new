@@ -1,7 +1,7 @@
 mod liteapi_serde;
 
 use crate::cell::ton_hash::TonHash;
-use crate::types::tlb::block_tlb::block::BlockIdExt;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::ton_address::TonAddress;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]

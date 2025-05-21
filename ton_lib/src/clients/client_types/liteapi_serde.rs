@@ -1,6 +1,7 @@
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::{BlockId, MasterchainInfo, ZeroStateIdExt};
-use crate::types::tlb::block_tlb::block::{BlockIdExt, ShardIdent};
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
+use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
 use ton_liteapi::tl::common::Int256;
 
 impl From<Int256> for TonHash {

@@ -9,7 +9,7 @@ use crate::types::tlb::block_tlb::msg::common_msg_info::{CommonMsgInfo, CommonMs
 use crate::types::tlb::block_tlb::msg::Msg;
 use crate::types::tlb::block_tlb::msg_address::MsgAddressExt;
 use crate::types::tlb::block_tlb::state_init::StateInit;
-use crate::types::tlb::primitives::EitherRef;
+use crate::types::tlb::primitives::either::EitherRef;
 use crate::types::tlb::tlb_type::TLBType;
 use crate::types::tlb::wallet::constants::{WALLET_DEFAULT_ID, WALLET_V5R1_DEFAULT_ID};
 use crate::types::tlb::wallet::versions::WalletVersion;

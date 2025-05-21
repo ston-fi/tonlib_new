@@ -3,7 +3,7 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::CurrencyCollection;
-use crate::types::tlb::block_tlb::config::ConfigParams;
+use crate::types::tlb::block_tlb::config::config_params::ConfigParams;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 use ton_lib_macros::TLBDerive;
 

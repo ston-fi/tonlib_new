@@ -50,7 +50,6 @@ mod tests {
     use super::*;
     use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::block_tlb::block::ShardIdent;
 
     #[test]
     fn test_block_tlb_shard_ident_master() -> anyhow::Result<()> {

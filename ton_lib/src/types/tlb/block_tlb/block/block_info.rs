@@ -3,8 +3,8 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_prev_info::{BlockPrevInfoAfterMerge, PrevBlockInfo};
-use crate::types::tlb::block_tlb::block::ShardIdent;
-use crate::types::tlb::block_tlb::config::GlobalVersion;
+use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
+use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
 use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 use ton_lib_macros::TLBDerive;
 

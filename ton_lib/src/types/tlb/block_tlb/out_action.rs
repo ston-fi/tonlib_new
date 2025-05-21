@@ -5,7 +5,7 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::block_tlb::coins::CurrencyCollection;
-use crate::types::tlb::primitives::Either;
+use crate::types::tlb::primitives::either::Either;
 use crate::types::tlb::tlb_type::TLBType;
 use ton_lib_macros::TLBDerive;
 

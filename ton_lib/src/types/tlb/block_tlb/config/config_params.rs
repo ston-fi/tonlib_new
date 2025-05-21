@@ -1,11 +1,12 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::config::Dict;
-use crate::types::tlb::block_tlb::config::DictKeyAdapterInto;
-use crate::types::tlb::block_tlb::config::DictValAdapterTLB;
-use crate::types::tlb::block_tlb::config::TLBRef;
-use crate::types::tlb::block_tlb::config::{ConfigParam18, GlobalVersion};
+use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
+use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
+use crate::types::tlb::adapters::Dict;
+use crate::types::tlb::adapters::TLBRef;
+use crate::types::tlb::block_tlb::config::config_param_18::ConfigParam18;
+use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
 use crate::types::tlb::tlb_type::TLBType;
 use std::collections::HashMap;
 use ton_lib_macros::TLBDerive;

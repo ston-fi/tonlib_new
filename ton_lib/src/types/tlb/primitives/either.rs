@@ -116,8 +116,8 @@ impl<T: PartialEq> PartialEq for EitherRef<T> {
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::primitives::EitherRefLayout::{ToCell, ToRef};
     use crate::types::tlb::primitives::_test_types::{TestType1, TestType2};
+    use crate::types::tlb::primitives::either::EitherRefLayout::{ToCell, ToRef};
     use tokio_test::assert_ok;
     use ton_lib_macros::TLBDerive;
 

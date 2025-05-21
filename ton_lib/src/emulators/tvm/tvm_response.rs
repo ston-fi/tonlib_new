@@ -1,5 +1,5 @@
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::tvm::TVMStack;
+use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
 use crate::types::tlb::tlb_type::TLBType;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
