@@ -39,7 +39,7 @@ impl TLClientConfig {
             },
             connection_check,
             connections_count: 10,
-            max_parallel_requests: 1000,
+            max_parallel_requests: 200,
             update_init_block: true,
             update_init_block_timeout_sec: 10,
             tonlib_verbosity_level: 1,
