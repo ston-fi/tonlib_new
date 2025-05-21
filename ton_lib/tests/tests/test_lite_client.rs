@@ -4,7 +4,6 @@ use ton_lib::clients::lite::config::LiteClientConfig;
 use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::net_config::TonNetConfig;
-use ton_lib::types::tlb::block_tlb::account::MaybeAccount;
 use ton_lib::types::ton_address::TonAddress;
 use ton_lib::unwrap_lite_response;
 use ton_liteapi::tl::request::Request;
@@ -27,8 +26,19 @@ async fn test_lite_client() -> anyhow::Result<()> {
     assert_eq!(block_id, mc_info.last);
 
     let usdt_addr = TonAddress::from_str("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")?;
-    let account_boc = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
-    assert!(matches!(account_boc, MaybeAccount::Some(_)));
+    let account = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
+    assert!(account.is_some());
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_lite_client_testnet() -> anyhow::Result<()> {
+    let lite_client = make_lite_client(false).await?;
+    let mc_info = lite_client.get_mc_info().await?;
+    let usdt_addr = TonAddress::from_str("kQD4HpyO8ilPHHUV4CpiHMqz8F2eWyVOMH10MxTYrY3Emvmu")?;
+    let account = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
+    assert!(account.is_some());
 
     Ok(())
 }
