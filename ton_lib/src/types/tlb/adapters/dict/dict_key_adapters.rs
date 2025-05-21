@@ -7,7 +7,7 @@ pub trait DictKeyAdapter<K> {
     fn extract_key(dict_key: &BigUint) -> Result<K, TonlibError>;
 }
 
-pub struct DictKeyAdapterTonHash; // properly tested in LibsDict
+pub struct DictKeyAdapterTonHash; // properly tested in LibsDict & account
 pub struct DictKeyAdapterInto;
 pub struct DictKeyAdapterString; // TODO is not covered by tests
 
@@ -16,7 +16,7 @@ impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
 
     fn extract_key(dict_key: &BigUint) -> Result<TonHash, TonlibError> {
         let mut hash_bytes = vec![0; TonHash::BYTES_LEN];
-        let key_bytes = dict_key.to_bytes_le();
+        let key_bytes = dict_key.to_bytes_be();
         if key_bytes.len() > TonHash::BYTES_LEN {
             return Err(TonlibError::TLBDictWrongKeyLen {
                 exp: TonHash::BYTES_LEN,

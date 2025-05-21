@@ -11,16 +11,16 @@ use std::sync::Arc;
 use tokio::sync::{Mutex, Semaphore};
 
 // /// Simple client with many connections
+#[derive(Clone)]
 pub struct TLClient {
-    rnd: Mutex<StdRng>,
-    connections: Vec<TLConnection>,
+    inner: Arc<Inner>,
 }
 
 #[async_trait]
 impl TLClientTrait for TLClient {
     async fn get_connection(&self) -> Result<&TLConnection, TonlibError> {
-        let mut rng_lock = self.rnd.lock().await;
-        let conn = self.connections.choose(&mut rng_lock.deref_mut()).unwrap();
+        let mut rng_lock = self.inner.rnd.lock().await;
+        let conn = self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap();
         Ok(conn)
     }
 }
@@ -35,9 +35,15 @@ impl TLClient {
             let connection = TLConnection::new(&config, semaphore.clone()).await?;
             connections.push(connection);
         }
-        Ok(TLClient {
+        let inner = Inner {
             rnd: Mutex::new(StdRng::from_rng(&mut rand::rng())),
             connections,
-        })
+        };
+        Ok(TLClient { inner: Arc::new(inner) })
     }
+}
+
+struct Inner {
+    rnd: Mutex<StdRng>,
+    connections: Vec<TLConnection>,
 }

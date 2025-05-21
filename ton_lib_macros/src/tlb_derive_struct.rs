@@ -3,6 +3,7 @@ use crate::TLBHeaderAttrs;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
 use std::process::exit;
+use syn::punctuated::Punctuated;
 use syn::{DataStruct, Fields, Index};
 
 struct FieldInfo {
@@ -11,11 +12,14 @@ struct FieldInfo {
     attrs: TLBFieldAttrs,
 }
 
-pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataStruct) -> (TokenStream, TokenStream) {
+pub(crate) fn tlb_derive_struct(
+    header_attrs: &TLBHeaderAttrs,
+    data: &mut DataStruct,
+) -> (TokenStream, TokenStream, TokenStream) {
     let fields = match &mut data.fields {
         Fields::Named(fields) => &mut fields.named, // For struct { field1: T, field2: T }
         Fields::Unnamed(fields) => &mut fields.unnamed, // For tuple struct (T, T)
-        Fields::Unit => panic!("MyDerive only supports structs"),
+        Fields::Unit => &mut Punctuated::new(),     // For unit struct (`struct Unit;`)
     };
 
     let fields_info = fields
@@ -56,7 +60,7 @@ pub(crate) fn tlb_derive_struct(header_attrs: &TLBHeaderAttrs, data: &mut DataSt
     }
 }
 
-fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (TokenStream, TokenStream) {
+fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (TokenStream, TokenStream, TokenStream) {
     let mut read_tokens = Vec::with_capacity(fields.len());
     let mut init_tokens = Vec::with_capacity(fields.len());
     let mut write_tokens = Vec::with_capacity(fields.len());
@@ -90,10 +94,13 @@ fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (
         #(#write_tokens)*
         Ok(())
     };
-    (read_impl_token, write_impl_token)
+    (read_impl_token, write_impl_token, quote::quote! {})
 }
 
-fn derive_unnamed_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (TokenStream, TokenStream) {
+fn derive_unnamed_struct(
+    header_attrs: &TLBHeaderAttrs,
+    fields: &[FieldInfo],
+) -> (TokenStream, TokenStream, TokenStream) {
     let mut read_tokens = Vec::with_capacity(fields.len());
     let mut init_tokens = Vec::with_capacity(fields.len());
     let mut write_tokens = Vec::with_capacity(fields.len());
@@ -128,5 +135,5 @@ fn derive_unnamed_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) ->
         #(#write_tokens)*
         Ok(())
     };
-    (read_impl_token, write_impl_token)
+    (read_impl_token, write_impl_token, quote::quote! {})
 }

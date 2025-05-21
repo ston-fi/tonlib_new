@@ -68,6 +68,7 @@ impl<T: TLBType> TLBType for EitherRef<T> {
             EitherRefLayout::ToCell => EitherRefLayout::ToCell,
             EitherRefLayout::ToRef => EitherRefLayout::ToRef,
             EitherRefLayout::Native => {
+                // strictly <, 1 more bit is reserver for layout marker
                 if cell.data_bits_len < builder.data_bits_left() {
                     EitherRefLayout::ToCell
                 } else {
@@ -97,6 +98,8 @@ impl<T> EitherRef<T> {
             layout: EitherRefLayout::ToRef,
         }
     }
+
+    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self { Self { value, layout } }
 }
 impl<T> Deref for EitherRef<T> {
     type Target = T;

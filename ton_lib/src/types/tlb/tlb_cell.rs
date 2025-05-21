@@ -41,7 +41,8 @@ impl TLBType for TonCell {
     }
 
     fn to_cell(&self) -> Result<TonCell, TonlibError> { Ok(self.clone()) }
-    fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
+
+    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         BOC::new(self.clone().into_ref()).to_bytes(add_crc32)
     }
     fn cell_type(&self) -> CellType { self.meta.cell_type }
@@ -56,7 +57,9 @@ impl TLBType for TonCellRef {
 
     fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.clone()) }
     /// Inconsistent with write(): write value to BOC root, not to the first child
-    fn to_boc(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> { BOC::new(self.clone()).to_bytes(add_crc32) }
+    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
+        BOC::new(self.clone()).to_bytes(add_crc32)
+    }
     fn cell_type(&self) -> CellType { self.meta.cell_type }
 }
 
@@ -105,7 +108,7 @@ mod tests {
         let mut cell = TonCell::builder();
         cell.write_num(&3u32, 32)?;
         let cell_ref = cell.build()?.into_ref();
-        let boc = cell_ref.to_boc(false)?;
+        let boc = cell_ref.to_boc()?;
         let parsed_ref = TonCellRef::from_boc(&boc)?;
         assert_eq!(cell_ref, parsed_ref);
 
@@ -119,26 +122,26 @@ mod tests {
         let lib_hex = "b5ee9c720101010100230008420257de63d28e4d3608e0c02d437a7b50ef5f28f36a4821a047fd663ce63f4597ec";
         let lib_cell = TonCell::from_boc_hex(lib_hex)?;
         assert_eq!(lib_cell.meta.cell_type, CellType::Library);
-        assert_eq!(lib_cell.to_boc_hex(false)?, lib_hex);
+        assert_eq!(lib_cell.to_boc_hex()?, lib_hex);
 
         let lib_cell_ref = TonCellRef::from_boc_hex(lib_hex)?;
         assert_eq!(lib_cell.meta.cell_type, CellType::Library);
-        assert_eq!(lib_cell.to_boc_hex(false)?, lib_hex);
+        assert_eq!(lib_cell.to_boc_hex()?, lib_hex);
 
         // now library is a second cell
         let mut cell = TonCell::builder();
         cell.write_ref(lib_cell_ref.clone())?;
-        let lib_child_hex = cell.build()?.to_boc_hex(false)?;
+        let lib_child_hex = cell.build()?.to_boc_hex()?;
 
         let lib_child_cell = TonCell::from_boc_hex(&lib_child_hex)?;
         assert_eq!(lib_child_cell.meta.cell_type, CellType::Ordinary);
         assert_eq!(lib_child_cell.refs[0].meta.cell_type, CellType::Library);
-        assert_eq!(lib_child_cell.to_boc_hex(false)?, lib_child_hex);
+        assert_eq!(lib_child_cell.to_boc_hex()?, lib_child_hex);
 
         let lib_child_cell_ref = TonCellRef::from_boc_hex(&lib_child_hex)?;
         assert_eq!(lib_child_cell_ref.meta.cell_type, CellType::Ordinary);
         assert_eq!(lib_child_cell_ref.refs[0].meta.cell_type, CellType::Library);
-        assert_eq!(lib_child_cell_ref.to_boc_hex(false)?, lib_child_hex);
+        assert_eq!(lib_child_cell_ref.to_boc_hex()?, lib_child_hex);
 
         // using extra tlb-object
         #[derive(Debug, PartialEq, TLBDerive)]
@@ -148,7 +151,7 @@ mod tests {
         let test_struct = TestStruct {
             cell: lib_cell.clone().into_ref(),
         };
-        let struct_hex = test_struct.to_boc_hex(false)?;
+        let struct_hex = test_struct.to_boc_hex()?;
         let parsed_struct = TestStruct::from_boc_hex(&struct_hex)?;
         assert_eq!(test_struct, parsed_struct);
         let parsed_cell = TonCell::from_boc_hex(&struct_hex)?;

@@ -18,7 +18,7 @@ use std::sync::Arc;
 /// let data = parser.read_bits(24).unwrap();
 /// assert_eq!(data, [1, 2, 3]);
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct TonCell {
     pub meta: CellMeta,
     pub data: Vec<u8>,
@@ -57,8 +57,12 @@ impl Display for TonCell {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) }
 }
 
+impl Debug for TonCell {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+}
+
 // TonCelRef
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Clone, PartialEq)]
 pub struct TonCellRef(pub Arc<TonCell>);
 pub type TonCellRefsStore = Vec<TonCellRef>;
 
@@ -69,6 +73,10 @@ impl Deref for TonCellRef {
 
 impl Display for TonCellRef {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self.deref(), 0) }
+}
+
+impl Debug for TonCellRef {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
 }
 
 fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {

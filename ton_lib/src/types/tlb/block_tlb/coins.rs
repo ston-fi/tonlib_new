@@ -28,7 +28,7 @@ pub struct CurrencyCollection {
 impl Grams {
     pub fn new<T: Into<BigUint>>(amount: T) -> Self {
         let amount = amount.into();
-        let bits_len = amount.bits();
+        let bits_len = amount.bits().div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
     pub fn zero() -> Self { Grams::new(0u32) }

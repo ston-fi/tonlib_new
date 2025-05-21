@@ -3,7 +3,7 @@ use crate::cell::ton_cell_utils::TonCellUtils;
 use crate::clients::client_types::TxId;
 use crate::contracts::contract_client::types::ContractState;
 use crate::contracts::contract_client::ContractClient;
-use crate::emulators::tvm::{EmulatorBCConfig, TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
+use crate::emulators::tvm::{EmulBCConfig, TVMEmulator, TVMEmulatorC7, TVMMethodId, TVMRunMethodSuccess};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::TVMStack;
 use crate::types::tlb::tlb_type::TLBType;
@@ -41,7 +41,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
 
     async fn get_parsed_data<D: TLBType>(&self) -> Result<D, TonlibError> {
         match &self.get_state().await?.data_boc {
-            Some(data_boc) => D::from_boc(&data_boc),
+            Some(data_boc) => D::from_boc(data_boc),
             None => Err(TonlibError::TonContractNotActive {
                 address: self.ctx().address.clone(),
                 tx_id: self.ctx().tx_id.clone(),
@@ -53,17 +53,17 @@ pub trait TonContractTrait: Send + Sync + Sized {
     async fn make_emulator(&self, c7: Option<&TVMEmulatorC7>) -> Result<TVMEmulator, TonlibError> {
         let ctx = self.ctx();
         let state = self.get_state().await?;
-        let code_boc = state.code_boc.as_ref().map(|x| x.as_slice()).unwrap_or(&[]);
+        let code_boc = state.code_boc.as_deref().unwrap_or(&[]);
         let code_cell = state.code_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
 
-        let data_boc = state.data_boc.as_ref().map(|x| x.as_slice()).unwrap_or(&[]);
+        let data_boc = state.data_boc.as_deref().unwrap_or(&[]);
         let data_cell = state.data_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
 
         let mut emulator = match c7 {
             Some(c7) => TVMEmulator::new(code_boc, data_boc, c7)?,
             None => {
                 let bc_config = ctx.client.get_config_boc(None).await?;
-                let c7 = TVMEmulatorC7::new(ctx.address.clone(), EmulatorBCConfig::from_boc(&bc_config)?)?;
+                let c7 = TVMEmulatorC7::new(ctx.address.clone(), EmulBCConfig::from_boc(&bc_config)?)?;
                 TVMEmulator::new(code_boc, data_boc, &c7)?
             }
         };
