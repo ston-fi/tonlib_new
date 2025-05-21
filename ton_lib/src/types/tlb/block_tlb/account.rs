@@ -112,7 +112,7 @@ mod tests {
     use crate::types::tlb::block_tlb::msg_address::MsgAddressIntStd;
     use crate::types::tlb::block_tlb::state_init::{SimpleLib, TickTock};
     use crate::types::tlb::block_tlb::var_len::VarLen;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use std::collections::HashMap;
     use std::str::FromStr;
 

@@ -74,7 +74,7 @@ impl ConstLen<Option<Vec<u8>>> {
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use ton_lib_macros::TLBDerive;
 
     #[test]

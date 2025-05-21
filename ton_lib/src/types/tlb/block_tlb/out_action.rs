@@ -6,7 +6,7 @@ use crate::errors::TonlibError;
 use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::block_tlb::coins::CurrencyCollection;
 use crate::types::tlb::primitives::either::Either;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L399
@@ -56,17 +56,17 @@ impl OutList {
     pub fn new(actions: Vec<OutAction>) -> Self { Self { actions } }
 }
 
-impl TLBType for OutList {
+impl TLB for OutList {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         if parser.data_bits_left()? == 0 {
             return Ok(Self::default());
         }
         let mut cur_ref = parser.read_next_ref()?.clone();
-        let mut actions = vec![TLBType::read(parser)?];
+        let mut actions = vec![TLB::read(parser)?];
         while !cur_ref.data.is_empty() {
             let mut cur_parser = cur_ref.parser();
             let next_ref = cur_parser.read_next_ref()?.clone();
-            actions.push(TLBType::read(&mut cur_parser)?);
+            actions.push(TLB::read(&mut cur_parser)?);
             cur_ref = next_ref;
         }
         actions.reverse();

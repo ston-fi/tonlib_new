@@ -4,7 +4,7 @@ use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_cell_slice::TVMCellSlice;
 use crate::types::tlb::block_tlb::tvm::tvm_stack_value::{TVMCell, TVMInt, TVMStackValue, TVMTinyInt};
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::{TLBPrefix, TLB};
 use num_bigint::BigInt;
 use std::ops::{Deref, DerefMut};
 
@@ -55,7 +55,7 @@ impl TVMTuple {
     }
 }
 
-impl TLBType for TVMTuple {
+impl TLB for TVMTuple {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x07, 8);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {

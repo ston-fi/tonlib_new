@@ -2,7 +2,6 @@ use crate::tlb_derive::TLBFieldAttrs;
 use crate::TLBHeaderAttrs;
 use proc_macro2::TokenStream;
 use quote::{format_ident, quote, ToTokens};
-use std::process::exit;
 use syn::punctuated::Punctuated;
 use syn::{DataStruct, Fields, Index};
 
@@ -29,7 +28,7 @@ pub(crate) fn tlb_derive_struct(
             let ident = &field.ident;
             let mut field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut field.attrs) {
                 Ok(desc) => desc,
-                Err(_err) => exit(777),
+                Err(_err) => panic!("Attribute does not exist at position {}", position),
             };
             // bits_len=XXX is alias for ConstLen adapter
             if field_attrs.bits_len.is_some() {
@@ -73,7 +72,7 @@ fn derive_named_struct(header_attrs: &TLBHeaderAttrs, fields: &[FieldInfo]) -> (
             write_tokens.push(quote!(#adapter_ident.write(builder, &self.#ident)?;));
             continue;
         } else {
-            read_tokens.push(quote!(let #ident = TLBType::read(parser)?;));
+            read_tokens.push(quote!(let #ident = TLB::read(parser)?;));
             init_tokens.push(quote!(#ident,));
             write_tokens.push(quote!(self.#ident.write(builder)?;));
         }
@@ -114,7 +113,7 @@ fn derive_unnamed_struct(
             write_tokens.push(quote!(#adapter_ident.write(builder, &self.#position)?;));
             continue;
         } else {
-            read_tokens.push(quote!(let #read_ident = TLBType::read(parser)?;));
+            read_tokens.push(quote!(let #read_ident = TLB::read(parser)?;));
             init_tokens.push(quote!(#read_ident,));
             write_tokens.push(quote!(self.#position.write(builder)?;));
         }

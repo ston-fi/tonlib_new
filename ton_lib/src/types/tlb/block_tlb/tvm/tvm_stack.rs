@@ -5,7 +5,7 @@ use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_cell_slice::TVMCellSlice;
 use crate::types::tlb::block_tlb::tvm::tvm_stack_value::{TVMCell, TVMInt, TVMStackValue, TVMTinyInt};
 use crate::types::tlb::block_tlb::tvm::tvm_tuple::TVMTuple;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use num_bigint::BigInt;
 use std::fmt::Display;
 use std::ops::{Deref, DerefMut};
@@ -66,7 +66,7 @@ impl TVMStack {
     }
 }
 
-impl TLBType for TVMStack {
+impl TLB for TVMStack {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let depth: u32 = parser.read_num(24)?;
         if depth == 0 {
@@ -75,11 +75,11 @@ impl TLBType for TVMStack {
 
         let mut vm_stack = Self::default();
         let mut rest = parser.read_next_ref()?.clone();
-        vm_stack.push(TLBType::read(parser)?);
+        vm_stack.push(TLB::read(parser)?);
         for _ in 1..depth {
             let mut rest_parser = rest.parser();
             let new_rest = rest_parser.read_next_ref()?.clone(); // read "rest" first
-            vm_stack.push(TLBType::read(&mut rest_parser)?); // then read "item" itself
+            vm_stack.push(TLB::read(&mut rest_parser)?); // then read "item" itself
             rest = new_rest;
         }
         vm_stack.reverse();
@@ -117,7 +117,7 @@ impl Display for TVMStack {
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use crate::types::ton_address::TonAddress;
 
     use tokio_test::assert_ok;

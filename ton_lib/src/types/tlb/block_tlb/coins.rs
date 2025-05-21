@@ -81,7 +81,7 @@ impl FromStr for Grams {
 #[cfg(test)]
 mod tests {
     use crate::types::tlb::block_tlb::coins::CurrencyCollection;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
 
     #[test]
     fn test_currency_collection() -> anyhow::Result<()> {

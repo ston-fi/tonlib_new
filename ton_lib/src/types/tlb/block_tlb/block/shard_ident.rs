@@ -2,7 +2,7 @@ use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::{TLBPrefix, TLB};
 
 // TLBType implementation is quite tricky, it doesn't keep shard as is
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
@@ -16,7 +16,7 @@ impl ShardIdent {
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
 }
 
-impl TLBType for ShardIdent {
+impl TLB for ShardIdent {
     const PREFIX: TLBPrefix = TLBPrefix::new(0b00, 2);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {

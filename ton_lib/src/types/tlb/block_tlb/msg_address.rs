@@ -4,8 +4,8 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::ConstLen;
 use crate::types::tlb::block_tlb::var_len::VarLenBits;
-use crate::types::tlb::tlb_type::TLBPrefix;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLBPrefix;
+use crate::types::tlb::TLB;
 use std::convert::Into;
 use ton_lib_macros::TLBDerive;
 
@@ -58,14 +58,14 @@ pub struct MsgAddressIntVar {
     pub address: Vec<u8>,
 }
 
-impl TLBType for MsgAddressIntVar {
+impl TLB for MsgAddressIntVar {
     #[rustfmt::skip]
     const PREFIX: TLBPrefix = TLBPrefix::new(0b11, 2);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let anycast = TLBType::read(parser)?;
+        let anycast = TLB::read(parser)?;
         let addr_bits_len = ConstLen::<u32>::new(9).read(parser)?;
-        let workchain = TLBType::read(parser)?;
+        let workchain = TLB::read(parser)?;
         let address = parser.read_bits(addr_bits_len as usize)?;
         Ok(Self {
             anycast,
@@ -123,7 +123,7 @@ impl Anycast {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use tokio_test::assert_ok;
 
     #[test]

@@ -7,7 +7,7 @@ use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
 use ton_lib::clients::tonlibjson::tl_api::tl_types::TLAccountState;
 use ton_lib::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
-use ton_lib::types::tlb::tlb_type::TLBType;
+use ton_lib::types::tlb::TLB;
 use ton_lib::types::ton_address::TonAddress;
 
 #[tokio::test]
@@ -27,7 +27,7 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     let config = tl_client.get_config_boc_param(0, 34).await?;
     let cell = assert_ok!(TonCell::from_boc(&config));
     let mut parser = cell.parser();
-    let value: u8 = TLBType::read(&mut parser)?;
+    let value: u8 = TLB::read(&mut parser)?;
     assert_eq!(value, 0x12);
     // ===================
 

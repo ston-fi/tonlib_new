@@ -9,7 +9,7 @@ use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::emulators::tvm::tvm_response::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
 use std::sync::Arc;
 
@@ -42,7 +42,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
         ctx.client.get_state(&ctx.address, ctx.tx_id.as_ref()).await
     }
 
-    async fn get_parsed_data<D: TLBType>(&self) -> Result<D, TonlibError> {
+    async fn get_parsed_data<D: TLB>(&self) -> Result<D, TonlibError> {
         match &self.get_state().await?.data_boc {
             Some(data_boc) => D::from_boc(data_boc),
             None => Err(TonlibError::TonContractNotActive {

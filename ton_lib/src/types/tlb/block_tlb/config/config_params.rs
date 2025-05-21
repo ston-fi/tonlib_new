@@ -7,7 +7,7 @@ use crate::types::tlb::adapters::Dict;
 use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::config::config_param_18::ConfigParam18;
 use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::collections::HashMap;
 use ton_lib_macros::TLBDerive;
 
@@ -28,7 +28,7 @@ impl ConfigParams {
     pub fn storage_prices(&self) -> Result<Option<ConfigParam18>, TonlibError> { self.get_param::<ConfigParam18>(18) }
     pub fn global_version(&self) -> Result<Option<GlobalVersion>, TonlibError> { self.get_param::<GlobalVersion>(8) }
 
-    pub fn get_param<T: TLBType>(&self, index: u32) -> Result<Option<T>, TonlibError> {
-        self.config.data.get(&index).map(|x| TLBType::from_cell(x)).transpose()
+    pub fn get_param<T: TLB>(&self, index: u32) -> Result<Option<T>, TonlibError> {
+        self.config.data.get(&index).map(|x| TLB::from_cell(x)).transpose()
     }
 }

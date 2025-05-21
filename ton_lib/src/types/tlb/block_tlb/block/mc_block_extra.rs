@@ -4,7 +4,7 @@ use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::CurrencyCollection;
 use crate::types::tlb::block_tlb::config::config_params::ConfigParams;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::{TLBPrefix, TLB};
 use ton_lib_macros::TLBDerive;
 
 #[derive(Debug, Clone)]
@@ -29,16 +29,16 @@ pub struct ShardFees {
     pub extra: ShardFeesCreated,
 }
 
-impl TLBType for MCBlockExtra {
+impl TLB for MCBlockExtra {
     const PREFIX: TLBPrefix = TLBPrefix::new(0xcca5, 8);
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let key_block = TLBType::read(parser)?;
-        let shard_hashes = TLBType::read(parser)?;
-        let shard_fees = TLBType::read(parser)?;
-        let ref_data = TLBType::read(parser)?;
+        let key_block = TLB::read(parser)?;
+        let shard_hashes = TLB::read(parser)?;
+        let shard_fees = TLB::read(parser)?;
+        let ref_data = TLB::read(parser)?;
 
         let config = match key_block {
-            true => Some(TLBType::read(parser)?),
+            true => Some(TLB::read(parser)?),
             false => None,
         };
         Ok(Self {

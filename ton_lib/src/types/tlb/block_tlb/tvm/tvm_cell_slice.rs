@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::{TLBPrefix, TLB};
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L873
 // really tricky to implement with current design,
@@ -31,7 +31,7 @@ impl TVMCellSlice {
     }
 }
 
-impl TLBType for TVMCellSlice {
+impl TLB for TVMCellSlice {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x04, 8);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {

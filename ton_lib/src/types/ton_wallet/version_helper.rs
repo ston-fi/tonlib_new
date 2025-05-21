@@ -1,7 +1,6 @@
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
 use crate::types::tlb::wallet::versions::WalletVersion;
 use crate::types::tlb::wallet::versions::WalletVersion::*;
 use crate::types::tlb::wallet::wallet_data::{
@@ -10,6 +9,7 @@ use crate::types::tlb::wallet::wallet_data::{
 use crate::types::tlb::wallet::wallet_ext_msg_body::{
     WalletV2ExtMsgBody, WalletV3ExtMsgBody, WalletV4ExtMsgBody, WalletV5ExtMsgBody,
 };
+use crate::types::tlb::TLB;
 use crate::types::ton_wallet::mnemonic::KeyPair;
 use crate::types::ton_wallet::wallet_code::{TON_WALLET_CODE_BY_VERSION, TON_WALLET_VERSION_BY_CODE};
 

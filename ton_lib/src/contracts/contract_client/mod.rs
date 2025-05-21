@@ -8,7 +8,7 @@ use crate::emulators::tvm::method_id::TVMMethodId;
 use crate::emulators::tvm::tvm_response::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
 use std::sync::Arc;
 

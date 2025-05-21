@@ -37,7 +37,7 @@ mod tests {
     use super::*;
 
     use crate::types::tlb::primitives::either::EitherRefLayout;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use crate::types::ton_address::TonAddress;
     use std::str::FromStr;
 

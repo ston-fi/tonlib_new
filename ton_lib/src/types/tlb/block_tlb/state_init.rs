@@ -48,7 +48,7 @@ mod tests {
     use crate::cell::ton_cell::TonCell;
     use crate::types::tlb::block_tlb::state_init::StateInit;
 
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
 
     #[test]
     fn test_state_init_regular_contract() -> anyhow::Result<()> {

@@ -58,7 +58,7 @@ mod tests {
     };
     use crate::types::tlb::block_tlb::tx::tx_descr::{TxDescrOrd, TxDescrTickTock};
     use crate::types::tlb::block_tlb::var_len::VarLen;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use std::str::FromStr;
 
     #[test]

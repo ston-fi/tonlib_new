@@ -6,7 +6,7 @@ use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use futures_util::future::join_all;
 use std::time::Duration;
 use ton_liteapi::tl::response::BlockData;

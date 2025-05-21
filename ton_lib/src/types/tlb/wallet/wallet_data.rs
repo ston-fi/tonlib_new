@@ -97,9 +97,9 @@ impl WalletHLV2R2Data {
 #[cfg(test)]
 mod test {
     use super::*;
-    use crate::types::tlb::tlb_type::TLBType;
     use crate::types::tlb::wallet::constants::WALLET_DEFAULT_ID;
     use crate::types::tlb::wallet::constants::{WALLET_V5R1_DEFAULT_ID, WALLET_V5R1_DEFAULT_ID_TESTNET};
+    use crate::types::tlb::TLB;
     use core::str::FromStr;
 
     #[test]

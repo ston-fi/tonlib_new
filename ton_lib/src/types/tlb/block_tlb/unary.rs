@@ -1,7 +1,7 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L33
@@ -9,7 +9,7 @@ use std::ops::{Deref, DerefMut};
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Unary(pub usize);
 
-impl TLBType for Unary {
+impl TLB for Unary {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let mut bits_len = 0;
         while parser.read_bit()? {

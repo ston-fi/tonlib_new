@@ -42,7 +42,7 @@ impl TonCellUtils {
 mod tests {
     use super::*;
     use crate::cell::ton_hash::TonHash;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use std::str::FromStr;
 
     #[test]

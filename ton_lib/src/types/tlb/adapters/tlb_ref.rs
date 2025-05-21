@@ -1,26 +1,26 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::marker::PhantomData;
 
 /// TLBRef - allows to save object in a reference cell ( ^X).
 ///
 /// use `#[tlb_derive(adapter="TLBRef")]` to apply it automatically in TLBDerive macro
 #[derive(Debug, Clone, PartialEq)]
-pub struct TLBRef<T: TLBType>(PhantomData<T>);
+pub struct TLBRef<T: TLB>(PhantomData<T>);
 
 /// TLBOptRef - allows to save optional object ( Maybe(^X) ) in a reference cell.
 ///
 /// use `#[tlb_derive(adapter="TLBOptRef")]` to apply it automatically in TLBDerive macro
 #[derive(Debug, Clone, PartialEq)]
-pub struct TLBOptRef<T: TLBType>(PhantomData<T>);
+pub struct TLBOptRef<T: TLB>(PhantomData<T>);
 
-impl<T: TLBType> Default for TLBRef<T> {
+impl<T: TLB> Default for TLBRef<T> {
     fn default() -> Self { Self::new() }
 }
 
-impl<T: TLBType> TLBRef<T> {
+impl<T: TLB> TLBRef<T> {
     pub fn new() -> Self { TLBRef(PhantomData) }
 
     pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> { T::from_cell(parser.read_next_ref()?) }
@@ -30,11 +30,11 @@ impl<T: TLBType> TLBRef<T> {
     }
 }
 
-impl<T: TLBType> Default for TLBOptRef<Option<T>> {
+impl<T: TLB> Default for TLBOptRef<Option<T>> {
     fn default() -> Self { Self::new() }
 }
 
-impl<T: TLBType> TLBOptRef<Option<T>> {
+impl<T: TLB> TLBOptRef<Option<T>> {
     pub fn new() -> Self { TLBOptRef(PhantomData) }
 
     pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TonlibError> {

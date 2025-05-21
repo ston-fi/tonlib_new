@@ -6,7 +6,7 @@ use crate::errors::TonlibError;
 use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterTonHash;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::Dict;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 
@@ -26,7 +26,7 @@ impl LibsDict {
     }
 }
 
-impl TLBType for LibsDict {
+impl TLB for LibsDict {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let data = Dict::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256).read(parser)?;
         Ok(LibsDict(data))
@@ -58,7 +58,7 @@ impl DerefMut for LibsDict {
 mod tests {
     use super::*;
 
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use std::str::FromStr;
 
     #[test]

@@ -1,7 +1,7 @@
 use crate::contracts::ton_contract::TonContractTrait;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
 use std::ops::Deref;
