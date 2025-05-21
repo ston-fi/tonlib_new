@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.23](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.22...ton_lib-v0.0.23) - 2025-05-21
+
+### Other
+
+- support storage_extra_info
+- rename TLBType -> TLB
+- update exports
+
 ## [0.0.22](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.21...ton_lib-v0.0.22) - 2025-05-21
 
 ### Fixed
