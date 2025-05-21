@@ -84,12 +84,16 @@ fn get_default_net_conf(mainnet: bool) -> String {
 }
 
 fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TonlibError> {
+    let env_var_name = match mainnet {
+        true => "TON_NET_CONF_MAINNET_PATH",
+        false => "TON_NET_CONF_TESTNET_PATH",
+    };
     let mut net_conf = match mainnet {
         true => TON_NET_CONF_MAINNET.to_string(),
         false => TON_NET_CONF_TESTNET.to_string(),
     };
 
-    if let Ok(path) = std::env::var("TON_NET_CONF_PATH") {
+    if let Ok(path) = std::env::var(env_var_name) {
         if exists(&path)? {
             let mut new_conf = String::new();
             let mut file = File::open(&path)?;
@@ -97,7 +101,7 @@ fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TonlibError> {
             net_conf = new_conf;
             log::info!("Using TON_NET_CONF from {path}")
         } else {
-            log::warn!("env_var TON_NET_CONF_PATH is set, but path {path} is not available");
+            log::warn!("env_var {env_var_name} is set, but path {path} is not available");
         }
     }
     Ok(net_conf)
