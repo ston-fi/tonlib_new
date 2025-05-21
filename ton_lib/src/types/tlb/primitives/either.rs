@@ -1,7 +1,7 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
 // https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L11
@@ -25,7 +25,7 @@ pub enum EitherRefLayout {
     Native,
 }
 
-impl<L: TLBType, R: TLBType> TLBType for Either<L, R> {
+impl<L: TLB, R: TLB> TLB for Either<L, R> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         match parser.read_bit()? {
             false => Ok(Self::Left(L::read(parser)?)),
@@ -47,15 +47,15 @@ impl<L: TLBType, R: TLBType> TLBType for Either<L, R> {
     }
 }
 
-impl<T: TLBType> TLBType for EitherRef<T> {
+impl<T: TLB> TLB for EitherRef<T> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let val = match parser.read_bit()? {
             false => EitherRef {
-                value: TLBType::read(parser)?,
+                value: TLB::read(parser)?,
                 layout: EitherRefLayout::ToCell,
             },
             true => EitherRef {
-                value: TLBType::from_cell(parser.read_next_ref()?)?,
+                value: TLB::from_cell(parser.read_next_ref()?)?,
                 layout: EitherRefLayout::ToRef,
             },
         };
@@ -116,8 +116,8 @@ impl<T: PartialEq> PartialEq for EitherRef<T> {
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::primitives::EitherRefLayout::{ToCell, ToRef};
     use crate::types::tlb::primitives::_test_types::{TestType1, TestType2};
+    use crate::types::tlb::primitives::either::EitherRefLayout::{ToCell, ToRef};
     use tokio_test::assert_ok;
     use ton_lib_macros::TLBDerive;
 
@@ -166,8 +166,8 @@ mod tests {
         obj2.write(&mut builder)?;
         let cell = builder.build()?;
         let mut parser = cell.parser();
-        let parsed_obj1 = TLBType::read(&mut parser)?;
-        let parsed_obj2 = TLBType::read(&mut parser)?;
+        let parsed_obj1 = TLB::read(&mut parser)?;
+        let parsed_obj2 = TLB::read(&mut parser)?;
         assert_eq!(obj1, parsed_obj1);
         assert_eq!(obj2, parsed_obj2);
 
@@ -195,11 +195,11 @@ mod tests {
             number3: u128,
         }
 
-        impl TLBType for List {
+        impl TLB for List {
             fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
                 match parser.data_bits_left()? {
                     0 => Ok(Self::Empty),
-                    _ => Ok(Self::Some(TLBType::read(parser)?)),
+                    _ => Ok(Self::Some(TLB::read(parser)?)),
                 }
             }
 

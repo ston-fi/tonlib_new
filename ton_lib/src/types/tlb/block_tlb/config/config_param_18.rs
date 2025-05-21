@@ -1,7 +1,7 @@
 use crate::cell::ton_cell::TonCellRef;
-use crate::types::tlb::block_tlb::config::Dict;
-use crate::types::tlb::block_tlb::config::DictKeyAdapterInto;
-use crate::types::tlb::block_tlb::config::DictValAdapterTLB;
+use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
+use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
+use crate::types::tlb::adapters::Dict;
 use std::collections::HashMap;
 use ton_lib_macros::TLBDerive;
 

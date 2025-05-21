@@ -2,10 +2,7 @@ use log::LevelFilter;
 use log4rs::append::console::{ConsoleAppender, Target};
 use log4rs::config::{Appender, Root};
 use log4rs::Config;
-use std::fs::{exists, File};
-use std::io::Read;
 use std::sync::Once;
-use ton_lib::net_config::{TON_NET_CONF_MAINNET, TON_NET_CONF_TESTNET};
 static LOG: Once = Once::new();
 
 pub(crate) fn init_logging() {

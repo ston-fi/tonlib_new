@@ -1,21 +1,16 @@
 #[cfg(test)]
 mod test_block_data;
 
-mod block_extra;
-mod block_id_ext;
-mod block_info;
-mod block_prev_info;
-mod mc_block_extra;
-mod shard_ident;
-
-pub use block_extra::*;
-pub use block_id_ext::*;
-pub use block_info::*;
-pub use block_prev_info::*;
-pub use shard_ident::*;
+pub mod block_extra;
+pub mod block_id_ext;
+pub mod block_info;
+pub mod block_prev_info;
+pub mod mc_block_extra;
+pub mod shard_ident;
 
 use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::TLBRef;
+use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
 use ton_lib_macros::TLBDerive;
 
 // TODO doesn't work properly yet.

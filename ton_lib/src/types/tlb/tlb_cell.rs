@@ -6,10 +6,10 @@ use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::sync::Arc;
 
-impl TLBType for TonCell {
+impl TLB for TonCell {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let bits_left = parser.data_bits_left()?;
         if parser.cell.data_bits_len == bits_left && parser.next_ref_pos == 0 {
@@ -48,7 +48,7 @@ impl TLBType for TonCell {
     fn cell_type(&self) -> CellType { self.meta.cell_type }
 }
 
-impl TLBType for TonCellRef {
+impl TLB for TonCellRef {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_next_ref().cloned() }
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> { builder.write_ref(self.clone()) }
     fn cell_hash(&self) -> Result<TonHash, TonlibError> { Ok(self.hash().clone()) }
@@ -63,7 +63,7 @@ impl TLBType for TonCellRef {
     fn cell_type(&self) -> CellType { self.meta.cell_type }
 }
 
-impl TLBType for TonHash {
+impl TLB for TonHash {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         TonHash::from_vec(parser.read_bits(TonHash::BITS_LEN)?)
     }

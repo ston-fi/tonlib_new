@@ -6,9 +6,9 @@ use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Grams;
 use crate::types::tlb::block_tlb::state_init::StateInit;
-use crate::types::tlb::primitives::EitherRef;
-use crate::types::tlb::primitives::EitherRefLayout::ToRef;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::primitives::either::EitherRef;
+use crate::types::tlb::primitives::either::EitherRefLayout::ToRef;
+use crate::types::tlb::TLB;
 use common_msg_info::CommonMsgInfo;
 use ton_lib_macros::TLBDerive;
 
@@ -77,7 +77,7 @@ mod tests {
     use crate::types::tlb::block_tlb::msg::common_msg_info::CommonMsgInfoExtIn;
     use crate::types::tlb::block_tlb::msg_address::{Anycast, MsgAddressExtern, MsgAddressIntStd};
     use crate::types::tlb::block_tlb::var_len::VarLenBits;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use crate::types::ton_address::TonAddress;
     use std::str::FromStr;
     use tokio_test::assert_ok;

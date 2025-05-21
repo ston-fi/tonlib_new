@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
 pub type VarLenBits<T, const LEN_BITS_LEN: usize> = VarLen<T, LEN_BITS_LEN, false>;
@@ -38,9 +38,7 @@ impl<T, const L: usize, const BL: bool> DerefMut for VarLen<T, L, BL> {
 }
 
 // TonNum impl
-impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLBType
-    for VarLen<T, LEN_BITS_LEN, LEN_IN_BYTES>
-{
+impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for VarLen<T, LEN_BITS_LEN, LEN_IN_BYTES> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let len = parser.read_num(LEN_BITS_LEN)?;
         let bits_len = if LEN_IN_BYTES { len * 8 } else { len };
@@ -63,7 +61,7 @@ impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLBType
 }
 
 // Vec impl
-impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLBType for VarLen<Vec<u8>, LEN_BITS_LEN, LEN_IN_BYTES> {
+impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for VarLen<Vec<u8>, LEN_BITS_LEN, LEN_IN_BYTES> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let len = parser.read_num(LEN_BITS_LEN)?;
         let bits_len = if LEN_IN_BYTES { len * 8 } else { len };
@@ -89,7 +87,7 @@ impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLBType for VarLen<Vec
 mod tests {
     use super::*;
     use crate::cell::ton_cell::TonCell;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use num_bigint::BigUint;
 
     #[test]

@@ -1,7 +1,8 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
 use crate::emulators::tvm::method_id::TVMMethodId;
-use crate::emulators::tvm::tvm_response::{TVMRunMethodResponse, TVMSendMsgResponse};
-use crate::emulators::tvm::{TVMRunMethodSuccess, TVMSendMsgSuccess};
+use crate::emulators::tvm::tvm_response::{
+    TVMRunMethodResponse, TVMRunMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
+};
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
@@ -124,15 +125,14 @@ fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<Strin
 #[cfg(test)]
 mod tests {
     use crate::cell::ton_cell::{TonCell, TonCellRef};
-    use crate::emulators::tvm::c7_register::TVMEmulatorC7;
+    use crate::emulators::tvm::c7_register::{EmulBCConfig, TVMEmulatorC7};
     use crate::emulators::tvm::tvm_emulator::TVMEmulator;
-    use crate::emulators::tvm::EmulBCConfig;
     use crate::errors::TonlibError;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
-    use crate::types::tlb::block_tlb::tvm::TVMStack;
-    use crate::types::tlb::primitives::LibsDict;
+    use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
+    use crate::types::tlb::primitives::libs_dict::LibsDict;
     use crate::types::tlb::tep_0074::jetton_transfer_msg::JettonTransferMsg;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use crate::types::ton_address::TonAddress;
     use num_bigint::BigInt;
     use std::ops::{Deref, Neg};

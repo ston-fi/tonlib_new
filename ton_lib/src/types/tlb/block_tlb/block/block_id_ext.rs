@@ -1,6 +1,6 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_hash::TonHash;
-use crate::types::tlb::block_tlb::block::ShardIdent;
+use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, TLBDerive)]

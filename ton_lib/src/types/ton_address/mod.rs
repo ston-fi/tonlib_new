@@ -11,7 +11,7 @@ use crate::types::tlb::block_tlb::msg_address::{
     MsgAddress, MsgAddressExt, MsgAddressInt, MsgAddressIntStd, MsgAddressIntVar, MsgAddressNone,
 };
 use crate::types::tlb::block_tlb::state_init::StateInit;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use crate::utils::rewrite_bits;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
@@ -99,7 +99,7 @@ impl FromStr for TonAddress {
     }
 }
 
-impl TLBType for TonAddress {
+impl TLB for TonAddress {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         TonAddress::from_msg_address(MsgAddress::read(parser)?)
     }

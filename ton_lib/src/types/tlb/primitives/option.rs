@@ -1,10 +1,10 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
 // Maybe X
-impl<T: TLBType> TLBType for Option<T> {
+impl<T: TLB> TLB for Option<T> {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         match parser.read_bit()? {
             false => Ok(None),
@@ -40,8 +40,8 @@ mod tests {
 
         let cell = builder.build()?;
         let mut parser = cell.parser();
-        let parsed_obj1: Option<TestType1> = TLBType::read(&mut parser)?;
-        let parsed_obj2: Option<TestType1> = TLBType::read(&mut parser)?;
+        let parsed_obj1: Option<TestType1> = TLB::read(&mut parser)?;
+        let parsed_obj2: Option<TestType1> = TLB::read(&mut parser)?;
         assert_eq!(obj1, parsed_obj1);
         assert_eq!(None, parsed_obj2);
 

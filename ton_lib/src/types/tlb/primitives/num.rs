@@ -1,11 +1,11 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
 macro_rules! tlb_num_impl {
     ($t:ty, $bits:tt) => {
-        impl TLBType for $t {
+        impl TLB for $t {
             fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_num($bits) }
 
             fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {

@@ -2,10 +2,10 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
 use crate::types::tlb::wallet::wallet_ext_msg_utils::{
     build_inner_request, parse_inner_request, read_up_to_4_msgs, write_up_to_4_msgs, InnerRequest,
 };
+use crate::types::tlb::{TLBPrefix, TLB};
 
 // Important!!!
 // TLBType implementation assumes there is no signature in cell
@@ -57,10 +57,10 @@ pub struct WalletV5ExtMsgBody {
     pub msgs: Vec<TonCellRef>,
 }
 
-impl TLBType for WalletV2ExtMsgBody {
+impl TLB for WalletV2ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let msg_seqno = TLBType::read(parser)?;
-        let valid_until = TLBType::read(parser)?;
+        let msg_seqno = TLB::read(parser)?;
+        let valid_until = TLB::read(parser)?;
         let (msgs_modes, msgs) = read_up_to_4_msgs(parser)?;
         Ok(Self {
             msg_seqno,
@@ -85,11 +85,11 @@ impl WalletV2ExtMsgBody {
     }
 }
 
-impl TLBType for WalletV3ExtMsgBody {
+impl TLB for WalletV3ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let subwallet_id = TLBType::read(parser)?;
-        let valid_until = TLBType::read(parser)?;
-        let msg_seqno = TLBType::read(parser)?;
+        let subwallet_id = TLB::read(parser)?;
+        let valid_until = TLB::read(parser)?;
+        let msg_seqno = TLB::read(parser)?;
         let (msgs_modes, msgs) = read_up_to_4_msgs(parser)?;
         Ok(Self {
             subwallet_id,
@@ -116,12 +116,12 @@ impl WalletV3ExtMsgBody {
     }
 }
 
-impl TLBType for WalletV4ExtMsgBody {
+impl TLB for WalletV4ExtMsgBody {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let subwallet_id = TLBType::read(parser)?;
-        let valid_until = TLBType::read(parser)?;
-        let msg_seqno = TLBType::read(parser)?;
-        let opcode = TLBType::read(parser)?;
+        let subwallet_id = TLB::read(parser)?;
+        let valid_until = TLB::read(parser)?;
+        let msg_seqno = TLB::read(parser)?;
+        let opcode = TLB::read(parser)?;
         if opcode != 0 {
             return Err(TonlibError::CustomError(format!("Unsupported opcode: {opcode}")));
         }
@@ -156,12 +156,12 @@ impl WalletV4ExtMsgBody {
     }
 }
 
-impl TLBType for WalletV5ExtMsgBody {
+impl TLB for WalletV5ExtMsgBody {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x7369676e, 32);
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let wallet_id = TLBType::read(parser)?;
-        let valid_until = TLBType::read(parser)?;
-        let msg_seqno = TLBType::read(parser)?;
+        let wallet_id = TLB::read(parser)?;
+        let valid_until = TLB::read(parser)?;
+        let msg_seqno = TLB::read(parser)?;
         let inner_request = InnerRequest::read(parser)?;
         let (msgs, msgs_modes) = parse_inner_request(inner_request)?;
         Ok(Self {

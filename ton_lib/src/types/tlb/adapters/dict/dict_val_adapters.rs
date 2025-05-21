@@ -2,7 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
 pub trait DictValAdapter<T> {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError>;
@@ -13,12 +13,12 @@ pub struct DictValAdapterTLB;
 pub struct DictValAdapterTLBRef;
 pub struct DictValAdapterNum<const BITS_LEN: usize>;
 
-impl<T: TLBType> DictValAdapter<T> for DictValAdapterTLB {
+impl<T: TLB> DictValAdapter<T> for DictValAdapterTLB {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> { val.write(builder) }
     fn read(parser: &mut CellParser) -> Result<T, TonlibError> { T::read(parser) }
 }
 
-impl<T: TLBType> DictValAdapter<T> for DictValAdapterTLBRef {
+impl<T: TLB> DictValAdapter<T> for DictValAdapterTLBRef {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> { builder.write_ref(val.to_cell_ref()?) }
     fn read(parser: &mut CellParser) -> Result<T, TonlibError> {
         let out_msg_cell = parser.read_next_ref()?;

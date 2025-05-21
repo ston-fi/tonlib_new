@@ -1,5 +1,5 @@
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::block::BlockIdExt;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs::{exists, File};

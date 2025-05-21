@@ -9,8 +9,8 @@ use crate::clients::tonlibjson::tl_api::tl_types::{
 };
 use crate::clients::tonlibjson::tl_connection::TLConnection;
 use crate::errors::TonlibError;
-use crate::types::tlb::primitives::LibsDict;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::primitives::libs_dict::LibsDict;
+use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
 

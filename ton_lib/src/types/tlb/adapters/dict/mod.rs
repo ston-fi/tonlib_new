@@ -102,7 +102,7 @@ mod tests {
     use crate::types::tlb::adapters::dict::dict_key_adapters::DictKeyAdapterInto;
     use crate::types::tlb::adapters::dict::dict_val_adapters::DictValAdapterNum;
     use crate::types::tlb::adapters::dict::DictRef;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use num_bigint::BigUint;
     use std::collections::HashMap;
 

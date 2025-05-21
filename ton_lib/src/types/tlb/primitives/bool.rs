@@ -1,9 +1,9 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
-impl TLBType for bool {
+impl TLB for bool {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_bit() }
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> { builder.write_bit(*self) }
 }

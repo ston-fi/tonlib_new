@@ -1,8 +1,8 @@
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::types::tlb::tlb_type::TLBType;
 use crate::types::tlb::wallet::versions::WalletVersion;
 use crate::types::tlb::wallet::versions::WalletVersion::*;
+use crate::types::tlb::TLB;
 use std::collections::HashMap;
 use std::sync::LazyLock;
 

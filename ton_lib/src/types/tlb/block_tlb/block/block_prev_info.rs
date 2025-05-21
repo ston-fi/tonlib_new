@@ -1,4 +1,4 @@
-use crate::types::tlb::block_tlb::block::ExtBlockRef;
+use crate::types::tlb::block_tlb::block::block_info::ExtBlockRef;
 use crate::types::tlb::block_tlb::block::TLBRef;
 use ton_lib_macros::TLBDerive;
 

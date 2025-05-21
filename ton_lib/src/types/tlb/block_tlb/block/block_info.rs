@@ -3,9 +3,9 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_prev_info::{BlockPrevInfoAfterMerge, PrevBlockInfo};
-use crate::types::tlb::block_tlb::block::ShardIdent;
-use crate::types::tlb::block_tlb::config::GlobalVersion;
-use crate::types::tlb::tlb_type::{TLBPrefix, TLBType};
+use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
+use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
+use crate::types::tlb::{TLBPrefix, TLB};
 use ton_lib_macros::TLBDerive;
 
 const GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
@@ -50,7 +50,7 @@ pub struct ExtBlockRef {
     file_hash: TonHash,
 }
 
-impl TLBType for BlockInfo {
+impl TLB for BlockInfo {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x9bc7a987, 32);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
@@ -170,7 +170,7 @@ mod tests {
     use crate::cell::ton_hash::TonHash;
     use crate::types::tlb::block_tlb::block::test_block_data::{MASTER_BLOCK_BOC_HEX, SHARD_BLOCK_BOC_HEX};
     use crate::types::tlb::block_tlb::block::Block;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::TLB;
     use std::str::FromStr;
 
     #[test]

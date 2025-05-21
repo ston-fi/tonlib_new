@@ -3,7 +3,7 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::out_action::{OutAction, OutActionSendMsg, OutList};
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
 pub(super) fn write_up_to_4_msgs(
     dst: &mut CellBuilder,
@@ -23,8 +23,8 @@ pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, Vec
     let mut msgs_modes = Vec::with_capacity(msgs_cnt);
     let mut msgs = Vec::with_capacity(msgs_cnt);
     for _ in 0..msgs_cnt {
-        msgs_modes.push(TLBType::read(parser)?);
-        msgs.push(TLBType::read(parser)?);
+        msgs_modes.push(TLB::read(parser)?);
+        msgs.push(TLB::read(parser)?);
     }
     Ok((msgs_modes, msgs))
 }
@@ -44,12 +44,12 @@ pub(super) struct InnerRequest {
                                   // other_actions: Option<()> unsupported
 }
 
-impl TLBType for InnerRequest {
+impl TLB for InnerRequest {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         if !parser.read_bit()? {
             return Ok(Self { out_actions: None });
         }
-        let out_actions = TLBType::from_cell(parser.read_next_ref()?)?;
+        let out_actions = TLB::from_cell(parser.read_next_ref()?)?;
         if parser.read_bit()? {
             return Err(TonlibError::CustomError("other_actions parsing is unsupported".to_string()));
         }

@@ -5,7 +5,7 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::dict::dict_val_adapters::DictValAdapter;
 use crate::types::tlb::block_tlb::unary::Unary;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 use num_bigint::BigUint;
 use num_traits::One;
 

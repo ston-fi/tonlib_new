@@ -3,7 +3,7 @@
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::msg_address::{MsgAddress, MsgAddressInt, MsgAddressNone};
-use crate::types::tlb::primitives::EitherRef;
+use crate::types::tlb::primitives::either::EitherRef;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Clone, Debug, TLBDerive, PartialEq)]
@@ -36,8 +36,8 @@ impl JettonTransferMsg {
 mod tests {
     use super::*;
 
-    use crate::types::tlb::primitives::EitherRefLayout;
-    use crate::types::tlb::tlb_type::TLBType;
+    use crate::types::tlb::primitives::either::EitherRefLayout;
+    use crate::types::tlb::TLB;
     use crate::types::ton_address::TonAddress;
     use std::str::FromStr;
 

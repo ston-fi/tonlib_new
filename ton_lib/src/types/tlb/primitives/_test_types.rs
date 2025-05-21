@@ -1,7 +1,7 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
-use crate::types::tlb::tlb_type::TLBType;
+use crate::types::tlb::TLB;
 
 #[derive(Debug, PartialEq, Clone)]
 pub(crate) struct TestType1 {
@@ -13,7 +13,7 @@ pub(crate) struct TestType2 {
     pub(crate) value: i64,
 }
 
-impl TLBType for TestType1 {
+impl TLB for TestType1 {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         Ok(TestType1 {
             value: parser.read_num(32)?,
@@ -26,7 +26,7 @@ impl TLBType for TestType1 {
     }
 }
 
-impl TLBType for TestType2 {
+impl TLB for TestType2 {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         Ok(TestType2 {
             value: parser.read_num(64)?,
