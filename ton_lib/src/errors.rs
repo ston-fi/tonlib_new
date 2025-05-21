@@ -16,39 +16,39 @@ pub enum TonlibError {
     TonHashWrongLen { exp: usize, given: usize },
 
     // cell_parser
-    #[error("ParserError: Requested {req} bits, but only {left} left")]
+    #[error("ParserDataUnderflow: Requested {req} bits, but only {left} left")]
     ParserDataUnderflow { req: usize, left: usize },
-    #[error("ParserError: New position is {new_pos}, but data_bits_len is {bits_len}")]
+    #[error("ParserBadPosition: New position is {new_pos}, but data_bits_len is {bits_len}")]
     ParserBadPosition { new_pos: i32, bits_len: usize },
     #[error("ParserWrongSlicePosition: expecting bit_pos=0, next_ref_pos=0. Got bit_position={bit_pos}, next_ref_position={next_ref_pos}")]
     ParserWrongSlicePosition { bit_pos: usize, next_ref_pos: usize },
-    #[error("ParserError: No ref with index={req}")]
+    #[error("ParserRefsUnderflow: No ref with index={req}")]
     ParserRefsUnderflow { req: usize },
-    #[error("ParserError: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]
+    #[error("ParserCellNotEmpty: Cell is not empty: {bits_left} bits left, {refs_left} refs left")]
     ParserCellNotEmpty { bits_left: usize, refs_left: usize },
 
     // cell_builder
-    #[error("BuilderError: Can't write {req} bits: only {left} free bits available")]
+    #[error("BuilderDataOverflow: Can't write {req} bits: only {left} free bits available")]
     BuilderDataOverflow { req: usize, left: usize },
-    #[error("BuilderError: Can't write ref - 4 refs are written already")]
+    #[error("BuilderRefsOverflow: Can't write ref - 4 refs are written already")]
     BuilderRefsOverflow,
-    #[error("BuilderError: Can't extract {required_bits} bits from {given} bytes")]
+    #[error("BuilderNotEnoughData: Can't extract {required_bits} bits from {given} bytes")]
     BuilderNotEnoughData { required_bits: usize, given: usize },
-    #[error("BuilderError: Can't write number {number} as {bits} bits")]
+    #[error("BuilderNumberBitsMismatch: Can't write number {number} as {bits} bits")]
     BuilderNumberBitsMismatch { number: String, bits: usize },
-    #[error("BuilderError: Cell validation error: {0}")]
+    #[error("BuilderMeta: Cell validation error: {0}")]
     BuilderMeta(String),
 
     // boc
     #[error("BOCEmpty: can't parse BOC from empty slice")]
     BOCEmpty,
-    #[error("CellType: Unexpected CellType tag: {0}")]
+    #[error("BOCWrongTypeTag: Unexpected CellType tag: {0}")]
     BOCWrongTypeTag(u8),
-    #[error("BOCError: Expected 1 root, got {0}")]
+    #[error("BOCSingleRoot: Expected 1 root, got {0}")]
     BOCSingleRoot(usize),
-    #[error("BOCError: Unexpected magic: {0}")]
+    #[error("BOCWrongMagic: Unexpected magic: {0}")]
     BOCWrongMagic(u32),
-    #[error("BOCError: {0}")]
+    #[error("BOCCustom: {0}")]
     BOCCustom(String),
 
     // tlb
@@ -59,11 +59,11 @@ pub enum TonlibError {
         bits_exp: usize,
         bits_left: usize,
     },
-    #[error("TLBEnum: Out of options")]
+    #[error("TLBEnumOutOfOptions: Out of options")]
     TLBEnumOutOfOptions, // TODO collect errors from all options
-    #[error("TLBObject: No internal value found (method: {0})")]
+    #[error("TLBObjectNoValue: No internal value found (method: {0})")]
     TLBObjectNoValue(String),
-    #[error("TLBSnakeFormat: Unsupported bits_len ({0})")]
+    #[error("TLBSnakeFormatUnsupportedBitsLen: Unsupported bits_len ({0})")]
     TLBSnakeFormatUnsupportedBitsLen(u32),
     #[error("TLBDictWrongKeyLen: Wrong key_bits_len: exp={exp}, got={got} for key={key}")]
     TLBDictWrongKeyLen { exp: usize, got: usize, key: BigUint },
@@ -80,7 +80,7 @@ pub enum TonlibError {
 
     // LiteClient
     #[error("LiteClientWrongResponse: expected {0}, got {1}")]
-    TonLiteClientWrongResponse(String, String),
+    LiteClientWrongResponse(String, String),
     #[error("LiteClientLiteError: {0}")]
     LiteClientLiteError(#[from] LiteError),
     #[error("LiteClientConnTimeout: {0:?}")]
@@ -91,21 +91,21 @@ pub enum TonlibError {
     // TonlibClient
     #[error("TLClientCreationFailed: tonlib_client_json_create returns null")]
     TLClientCreationFailed,
-    #[error("TLClientWrongResult: expected type: {0}, got: {1}")]
+    #[error("TLClientWrongResponse: expected type: {0}, got: {1}")]
     TLClientWrongResponse(String, String),
-    #[error("TLInvalidArguments: {0}")]
+    #[error("TLInvalidArgs: {0}")]
     TLInvalidArgs(String),
     #[error("TLSendError: fail to send request: {0}")]
     TLSendError(String),
-    #[error("TLInvalidResponse: method: {method}, code: {code}, message: {message}")]
+    #[error("TLExecError: method: {method}, code: {code}, message: {message}")]
     TLExecError { method: String, code: i32, message: String },
-    #[error("TLWrongExecImplUsage: {0}")]
+    #[error("TLWrongUsage: {0}")]
     TLWrongUsage(String),
 
     // TVM
     #[error("TVMEmulatorCreationFailed: tvm_emulator_create returns null")]
     TVMEmulatorCreationFailed,
-    #[error("TVMEmulatorSetParamFailed: fail to set param: {0}")]
+    #[error("TVMEmulatorSetFailed: fail to set param: {0}")]
     TVMEmulatorSetFailed(&'static str),
     #[error("TVMEmulatorError: {0}")]
     TVMEmulatorError(String),

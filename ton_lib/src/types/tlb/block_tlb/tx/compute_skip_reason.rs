@@ -9,11 +9,11 @@ pub enum ComputeSkipReason {
 }
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b0, bits_len = 2)]
+#[tlb_derive(prefix = 0b00, bits_len = 2)]
 pub struct ComputeSkipReasonNoState {}
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b01, bits_len = 3)]
+#[tlb_derive(prefix = 0b01, bits_len = 2)]
 pub struct ComputeSkipReasonBadState {}
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
