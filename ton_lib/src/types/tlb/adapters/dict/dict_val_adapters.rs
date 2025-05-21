@@ -22,7 +22,6 @@ impl<T: TLBType> DictValAdapter<T> for DictValAdapterTLBRef {
     fn write(builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> { builder.write_ref(val.to_cell_ref()?) }
     fn read(parser: &mut CellParser) -> Result<T, TonlibError> {
         let out_msg_cell = parser.read_next_ref()?;
-        println!("out_msg_cell: {}", out_msg_cell.to_boc_hex()?);
         T::from_cell(out_msg_cell)
     }
 }
