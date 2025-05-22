@@ -5,6 +5,7 @@ use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
+use crate::errors::TonlibError::TLBWrongData;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use base64::Engine;
 use std::ops::Deref;
@@ -46,7 +47,17 @@ pub trait TLB: Sized {
     fn from_cell(cell: &TonCell) -> Result<Self, TonlibError> { Self::read(&mut cell.parser()) }
 
     fn from_boc(boc: &[u8]) -> Result<Self, TonlibError> {
-        Self::from_cell(BOC::from_bytes(boc)?.single_root()?.deref())
+        match BOC::from_bytes(boc).and_then(|x| x.single_root()).and_then(|x| Self::from_cell(&x)) {
+            Ok(cell) => Ok(cell),
+            Err(err) => {
+                let msg = format!(
+                    "Fail to read {} from bytes: {}, err: {err}",
+                    std::any::type_name::<Self>(),
+                    hex::encode(boc)
+                );
+                Err(TLBWrongData(msg))
+            }
+        }
     }
 
     fn from_boc_hex(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&hex::decode(boc)?) }
