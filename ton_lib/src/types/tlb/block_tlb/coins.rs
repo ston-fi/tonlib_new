@@ -22,7 +22,7 @@ pub type Coins = Grams;
 pub struct CurrencyCollection {
     pub grams: Grams,
     #[tlb_derive(adapter = "DictRef::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
-    pub other: HashMap<u32, VarLenBytes<BigUint, 32>>,
+    pub other: HashMap<u32, VarLenBytes<BigUint, 5>>,
 }
 
 impl Grams {
