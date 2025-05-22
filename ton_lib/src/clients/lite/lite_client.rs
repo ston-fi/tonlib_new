@@ -1,9 +1,9 @@
-use super::connection::Connection;
+use super::lc_connection::Connection;
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::MasterchainInfo;
-use crate::clients::lite::config::LiteClientConfig;
+use crate::clients::lite::lc_config::LiteClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::account::MaybeAccount;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;

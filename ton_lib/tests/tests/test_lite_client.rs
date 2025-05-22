@@ -1,6 +1,6 @@
 use crate::tests::utils::init_logging;
 use std::str::FromStr;
-use ton_lib::clients::lite::config::LiteClientConfig;
+use ton_lib::clients::lite::lc_config::LiteClientConfig;
 use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::errors::TonlibError;
 use ton_lib::net_config::TonNetConfig;
