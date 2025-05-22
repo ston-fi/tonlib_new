@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.24](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.23...ton_lib-v0.0.24) - 2025-05-22
+
+### Fixed
+
+- fix CurrencyCollection::other
+
+### Other
+
+- get nice error if from_boc failed
+- rename files, add retry config options for tl_client
+
 ## [0.0.23](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.22...ton_lib-v0.0.23) - 2025-05-21
 
 ### Other
