@@ -52,7 +52,7 @@ pub enum TonlibError {
     BOCCustom(String),
 
     // tlb
-    #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
+    #[error("TLBWrongPrefix: Expecting prefix: {exp}, got: {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
     TLBWrongPrefix {
         exp: usize,
         given: usize,

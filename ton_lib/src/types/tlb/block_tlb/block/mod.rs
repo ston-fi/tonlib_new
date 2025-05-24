@@ -6,6 +6,7 @@ pub mod block_id_ext;
 pub mod block_info;
 pub mod block_prev_info;
 pub mod mc_block_extra;
+mod shard_accounts_blocks;
 pub mod shard_ident;
 
 use crate::cell::ton_cell::TonCellRef;
@@ -14,7 +15,6 @@ use crate::types::tlb::block_tlb::block::block_extra::BlockExtra;
 use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
 use ton_lib_macros::TLBDerive;
 
-// TODO doesn't work properly yet.
 // https://github.com/ton-blockchain/ton/blob/6f745c04daf8861bb1791cffce6edb1beec62204/crypto/block/block.tlb#L462
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0x11ef55aa, bits_len = 32)]
@@ -40,8 +40,12 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn test_block_tbl_block_serde_hashes() -> anyhow::Result<()> {
+    fn test_block_tbl_block() -> anyhow::Result<()> {
         let parsed = Block::from_boc_hex(MASTER_BLOCK_BOC_HEX)?;
+        assert_eq!(
+            parsed.extra.mc_block_extra.as_ref().unwrap().cell_hash()?,
+            TonHash::from_str("D0D3EA6B963ABEB1C5E2F9936DB6DA8ADDB1DF1F221F1F13C85120DE0BB79DA0")?
+        );
         assert_eq!(
             parsed.cell_hash()?,
             TonHash::from_str("CBEBAA6AC4270C987C90C5ED930FF37F9B73C705999585D6D8C1C5E9FA3DD6E3")?
