@@ -1,7 +1,6 @@
 use crate::cell::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
@@ -17,16 +16,7 @@ impl TLB for TonCell {
             parser.next_ref_pos = parser.cell.refs.len(); // drain refs
             Ok(parser.cell.clone())
         } else {
-            let data = parser.read_bits(bits_left)?;
-            let refs = Vec::from(&parser.cell.refs[parser.next_ref_pos..]);
-            parser.next_ref_pos = parser.cell.refs.len(); // drain refs
-            let meta = CellMeta::new(CellType::Ordinary, &data, bits_left, &refs)?;
-            Ok(Self {
-                meta,
-                data,
-                data_bits_len: bits_left,
-                refs,
-            })
+            parser.read_cell()
         }
     }
 

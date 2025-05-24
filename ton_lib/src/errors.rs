@@ -52,7 +52,7 @@ pub enum TonlibError {
     BOCCustom(String),
 
     // tlb
-    #[error("TLBWrongPrefix: Expecting {exp} bytes, got {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
+    #[error("TLBWrongPrefix: Expecting prefix: {exp}, got: {given}, exp_bits={bits_exp}, left_bits={bits_left}")]
     TLBWrongPrefix {
         exp: usize,
         given: usize,
@@ -93,6 +93,8 @@ pub enum TonlibError {
     TLClientCreationFailed,
     #[error("TLClientWrongResponse: expected type: {0}, got: {1}")]
     TLClientWrongResponse(String, String),
+    #[error("TLClientResponseError: code: {code}, message: {message}")]
+    TLClientResponseError { code: i32, message: String },
     #[error("TLInvalidArgs: {0}")]
     TLInvalidArgs(String),
     #[error("TLSendError: fail to send request: {0}")]
