@@ -5,8 +5,8 @@ use serde_json::Value;
 use std::fs::{exists, File};
 use std::io::Read;
 
-pub const TON_NET_CONF_MAINNET: &str = include_str!("../resources/net_config/mainnet.json");
-pub const TON_NET_CONF_TESTNET: &str = include_str!("../resources/net_config/testnet.json");
+pub const TON_NET_CONF_MAINNET: &str = include_str!("../../resources/net_config/mainnet.json");
+pub const TON_NET_CONF_TESTNET: &str = include_str!("../../resources/net_config/testnet.json");
 
 // can't use ConfigLiteServer directly because it doesn't implement Clone
 #[derive(Debug, Clone, Serialize, Deserialize)]

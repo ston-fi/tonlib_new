@@ -8,7 +8,6 @@ use crate::errors::TonlibError;
 use crate::errors::TonlibError::TLBWrongData;
 use base64::engine::general_purpose::STANDARD as BASE64_STANDARD;
 use base64::Engine;
-use std::ops::Deref;
 
 pub mod adapters;
 pub mod block_tlb;

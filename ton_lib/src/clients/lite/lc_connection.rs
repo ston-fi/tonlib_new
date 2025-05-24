@@ -2,8 +2,8 @@ use std::error::Error;
 use std::net::{Ipv4Addr, SocketAddrV4};
 use std::time::Duration;
 
+use crate::clients::net_config::LiteEndpoint;
 use crate::errors::TonlibError;
-use crate::net_config::LiteEndpoint;
 use adnl::AdnlPeer;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;

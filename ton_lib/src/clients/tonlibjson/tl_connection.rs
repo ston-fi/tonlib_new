@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Weak};
 use std::thread;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::clients::tonlibjson::tl_api::tl_req_ctx::TLRequestCtx;
@@ -13,8 +13,9 @@ use crate::clients::tonlibjson::tl_callback::{TLCallback, TLCallbacksStore};
 use crate::clients::tonlibjson::tl_client_config::{LiteNodeFilter, TLClientConfig};
 use crate::clients::tonlibjson::tl_client_raw::TLClientRaw;
 use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
+use crate::clients::tonlibjson::TLClientRetryStrategy;
 use crate::errors::TonlibError;
-use crate::sys_utils::{sys_tonlib_client_set_verbosity_level, sys_tonlib_set_verbosity_level};
+use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
@@ -28,7 +29,15 @@ pub struct TLConnection {
 
 #[async_trait]
 impl TLClientTrait for TLConnection {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError> { Ok(self) }
+    async fn get_connection(&self) -> &TLConnection { self }
+
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy {
+        static NO_RETRY: TLClientRetryStrategy = TLClientRetryStrategy {
+            retry_count: 0,
+            retry_waiting: Duration::from_millis(0),
+        };
+        &NO_RETRY
+    }
 }
 
 impl TLConnection {
@@ -147,7 +156,6 @@ async fn new_connection_checked(
         };
     };
     sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
-    sys_tonlib_client_set_verbosity_level(config.tonlib_verbosity_level);
     conn
 }
 
@@ -167,7 +175,6 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
         _ => 0,
     };
     sys_tonlib_set_verbosity_level(init_log_level);
-    sys_tonlib_client_set_verbosity_level(init_log_level);
 
     let inner_weak = Arc::downgrade(&inner);
     let callbacks = config.callbacks.clone();

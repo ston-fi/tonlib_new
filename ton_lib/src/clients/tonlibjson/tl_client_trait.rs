@@ -8,17 +8,21 @@ use crate::clients::tonlibjson::tl_api::tl_types::{
     TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLTxId,
 };
 use crate::clients::tonlibjson::tl_connection::TLConnection;
+use crate::clients::tonlibjson::TLClientRetryStrategy;
 use crate::errors::TonlibError;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
 use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
+use tokio_retry::strategy::FixedInterval;
+use tokio_retry::RetryIf;
 
 #[macro_export]
 macro_rules! unwrap_tl_response {
     ($result:expr, $variant:ident) => {
         match $result {
             TLResponse::$variant(inner) => Ok(inner),
+            TLResponse::Error { code, message } => Err(TonlibError::TLClientResponseError { code, message }),
             _ => Err(TonlibError::TLClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
         }
     };
@@ -26,10 +30,14 @@ macro_rules! unwrap_tl_response {
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError>;
+    async fn get_connection(&self) -> &TLConnection;
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
-        self.get_connection().await?.exec_impl(req).await
+        let retry_strat = self.get_retry_strategy();
+        let fi = FixedInterval::new(retry_strat.retry_waiting);
+        let strategy = fi.take(retry_strat.retry_count);
+        RetryIf::spawn(strategy, || async { self.get_connection().await.exec_impl(req).await }, retry_condition).await
     }
 
     async fn get_mc_info(&self) -> Result<TLBlocksMCInfo, TonlibError> {
@@ -286,5 +294,12 @@ pub trait TLClientTrait: Send + Sync {
     async fn get_config_boc_all(&self, mode: u32) -> Result<Vec<u8>, TonlibError> {
         let req = TLRequest::GetConfigAll { mode };
         Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
+    }
+}
+
+fn retry_condition(error: &TonlibError) -> bool {
+    match error {
+        TonlibError::TLClientResponseError { code, .. } => *code == 500,
+        _ => false,
     }
 }

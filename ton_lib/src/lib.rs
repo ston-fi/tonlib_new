@@ -9,7 +9,6 @@ pub mod contracts;
 #[cfg(feature = "emulator")]
 pub mod emulators;
 pub mod errors;
-pub mod net_config;
 #[cfg(any(feature = "tonlibjson", feature = "emulator"))]
 pub mod sys_utils;
 pub mod types;

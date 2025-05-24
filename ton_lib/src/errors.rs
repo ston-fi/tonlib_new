@@ -93,6 +93,8 @@ pub enum TonlibError {
     TLClientCreationFailed,
     #[error("TLClientWrongResponse: expected type: {0}, got: {1}")]
     TLClientWrongResponse(String, String),
+    #[error("TLClientResponseError: code: {code}, message: {message}")]
+    TLClientResponseError { code: i32, message: String },
     #[error("TLInvalidArgs: {0}")]
     TLInvalidArgs(String),
     #[error("TLSendError: fail to send request: {0}")]

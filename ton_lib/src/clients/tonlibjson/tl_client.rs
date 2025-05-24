@@ -2,6 +2,7 @@ use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
 use crate::clients::tonlibjson::tl_client_trait::TLClientTrait;
 use crate::clients::tonlibjson::tl_connection::TLConnection;
 use crate::clients::tonlibjson::utils::prepare_client_env;
+use crate::clients::tonlibjson::TLClientRetryStrategy;
 use crate::errors::TonlibError;
 use async_trait::async_trait;
 use rand::prelude::{IndexedRandom, StdRng};
@@ -18,11 +19,12 @@ pub struct TLClient {
 
 #[async_trait]
 impl TLClientTrait for TLClient {
-    async fn get_connection(&self) -> Result<&TLConnection, TonlibError> {
+    async fn get_connection(&self) -> &TLConnection {
         let mut rng_lock = self.inner.rnd.lock().await;
-        let conn = self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap();
-        Ok(conn)
+        self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
     }
+
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy { &self.inner.config.retry_strategy }
 }
 
 impl TLClient {
@@ -38,6 +40,7 @@ impl TLClient {
         let inner = Inner {
             rnd: Mutex::new(StdRng::from_rng(&mut rand::rng())),
             connections,
+            config,
         };
         Ok(TLClient { inner: Arc::new(inner) })
     }
@@ -46,4 +49,5 @@ impl TLClient {
 struct Inner {
     rnd: Mutex<StdRng>,
     connections: Vec<TLConnection>,
+    config: TLClientConfig,
 }
