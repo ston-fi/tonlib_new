@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.25](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.24...ton_lib-v0.0.25) - 2025-05-24
+
+### Other
+
+- partial support for MCBlockExtra
+- add tests for block hash, block_info values
+- support retry for tl_client
+
 ## [0.0.24](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.23...ton_lib-v0.0.24) - 2025-05-22
 
 ### Fixed
