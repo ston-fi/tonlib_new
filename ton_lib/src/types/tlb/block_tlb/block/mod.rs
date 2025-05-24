@@ -10,6 +10,7 @@ pub mod shard_ident;
 
 use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::TLBRef;
+use crate::types::tlb::block_tlb::block::block_extra::BlockExtra;
 use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
 use ton_lib_macros::TLBDerive;
 
@@ -23,40 +24,71 @@ pub struct Block {
     pub info: BlockInfo,
     pub value_flow: TonCellRef,   // TODO
     pub state_update: TonCellRef, // TODO
-    // #[tlb_derive(adapter = "TLBRef")]
-    pub extra: TonCellRef,
+    #[tlb_derive(adapter = "TLBRef")]
+    pub extra: BlockExtra,
 }
 
 #[cfg(test)]
 mod tests {
-    // use crate::cell::ton_cell::{TonCell, TonCellRef};
-    // use crate::cell::ton_hash::TonHash;
-    // use crate::types::tlb::block_tlb::block::test_block_data::MASTER_BLOCK_BOC_HEX;
-    // use crate::types::tlb::block_tlb::block::Block;
-    // use crate::types::tlb::tlb_type::TLBType;
-    // use std::collections::VecDeque;
-    // use std::ops::Deref;
-    // use std::str::FromStr;
+    use crate::cell::ton_hash::TonHash;
+    use crate::types::tlb::block_tlb::block::block_info::{BlockInfo, ExtBlockRef};
+    use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
+    use crate::types::tlb::block_tlb::block::test_block_data::MASTER_BLOCK_BOC_HEX;
+    use crate::types::tlb::block_tlb::block::Block;
+    use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
+    use crate::types::tlb::TLB;
+    use std::str::FromStr;
 
-    // #[test]
-    // fn test_block_tbl_block_serde_hashes() -> anyhow::Result<()> {
-    //     let parsed = Block::from_boc_hex(MASTER_BLOCK_BOC_HEX)?;
-    //     let extra = parsed.extra.clone();
-    //     println!("{}", extra);
-    //     let extra_parsed_back = TonCellRef::from_boc(&extra.to_boc(false)?)?;
-    //     println!("{}", extra_parsed_back);
-    //     // assert_eq!(extra, extra_parsed_back);
-    //     // assert_eq!(parsed.cell_hash()?, TonHash::from_str("0AEF3393C6CDECA446C71E3C67BDC20C6C9F8DC14FC0D52C39675B2C066F3BBA")?); // TODO find the way to calc actual hash
-    //     // let parsed_back = Block::from_boc(&parsed.to_boc(false)?)?;
-    //     // assert_eq!(parsed_back.global_id, parsed.global_id);
-    //     // assert_eq!(parsed.info, parsed_back.info);
-    //     // assert_eq!(parsed.value_flow, parsed_back.value_flow);
-    //     // assert_eq!(parsed.state_update, parsed_back.state_update);
-    //     // println!("extra: {}", parsed.extra);
-    //     // assert_eq!(parsed.extra, parsed_back.extra);
-    //     assert!(false);
-    //     // assert_eq!(parsed, parsed_back);
-    //     // assert_eq!(parsed.cell_hash()?, parsed_back.cell_hash()?);
-    //     Ok(())
-    // }
+    #[test]
+    fn test_block_tbl_block_serde_hashes() -> anyhow::Result<()> {
+        let parsed = Block::from_boc_hex(MASTER_BLOCK_BOC_HEX)?;
+        assert_eq!(
+            parsed.cell_hash()?,
+            TonHash::from_str("CBEBAA6AC4270C987C90C5ED930FF37F9B73C705999585D6D8C1C5E9FA3DD6E3")?
+        );
+        let expected_block_info = BlockInfo {
+            version: 0,
+            not_master: false,
+            after_merge: false,
+            before_split: false,
+            after_split: false,
+            want_split: false,
+            want_merge: true,
+            key_block: true,
+            vert_seqno_incr: false,
+            flags: 1,
+            seqno: 46991999,
+            vert_seqno: 1,
+            shard: ShardIdent {
+                workchain: -1,
+                shard: 0x8000000000000000,
+            },
+            gen_utime: 1745112841,
+            start_lt: 56255102000000,
+            end_lt: 56255102000004,
+            gen_validator_list_has_short: 4143742061,
+            gen_catchain_seqno: 682531,
+            min_ref_mc_seqno: 46991995,
+            prev_key_block_seqno: 46989053,
+            gen_software: Some(GlobalVersion {
+                version: 10,
+                capabilities: 494,
+            }),
+            master_ref: None,
+            prev_ref: ExtBlockRef {
+                end_lt: 56255101000004,
+                seqno: 46991998,
+                root_hash: TonHash::from_str("a16dd643a1b54a6804ce3264503d9feab4e0f5d1de450888f188179557093595")?,
+                file_hash: TonHash::from_str("2e58dcf8fe16ccc203ddd1d053984f9ac6eafcf0543ced95f96ab9e7e411d256")?,
+            }
+            .into(),
+
+            prev_vert_ref: None,
+        };
+        assert_eq!(expected_block_info, parsed.info);
+        let serialized = parsed.to_boc()?;
+        let parsed_back = Block::from_boc(&serialized)?;
+        assert_eq!(parsed_back, parsed);
+        Ok(())
+    }
 }

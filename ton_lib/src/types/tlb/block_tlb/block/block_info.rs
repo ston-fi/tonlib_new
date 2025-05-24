@@ -44,10 +44,10 @@ pub struct BlockInfo {
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct ExtBlockRef {
-    end_lt: u64,
-    seqno: u32,
-    root_hash: TonHash,
-    file_hash: TonHash,
+    pub end_lt: u64,
+    pub seqno: u32,
+    pub root_hash: TonHash,
+    pub file_hash: TonHash,
 }
 
 impl TLB for BlockInfo {
