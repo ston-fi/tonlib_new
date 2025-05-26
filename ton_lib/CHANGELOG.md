@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.26](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.25...ton_lib-v0.0.26) - 2025-05-26
+
+### Other
+
+- use tlb types in clients, support retry in lite_client
+- move tonlibjson serde to tonlibjson mod
+- don't do extra copy in boc builder
+- move EMPTY_CELL_HASH from TonHash to TonCell
+
 ## [0.0.25](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.24...ton_lib-v0.0.25) - 2025-05-24
 
 ### Other
