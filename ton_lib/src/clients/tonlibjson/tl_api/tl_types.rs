@@ -1,7 +1,8 @@
-use crate::cell::ton_hash::ser_de::serde_ton_hash_b64;
-use crate::cell::ton_hash::ser_de::serde_ton_hash_vec_b64;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_address_b64;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_address_hex;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_b64;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_vec_b64;
 use crate::clients::tonlibjson::tl_api::Base64Standard;
-use crate::types::ton_address::ser_de::serde_ton_address_hex;
 use std::borrow::Cow;
 use std::fmt::Debug;
 
@@ -491,6 +492,7 @@ pub struct TLBlocksShards {
 // tonlib_api.tl_api, line 221
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksAccountTxId {
+    #[serde(with = "serde_ton_address_b64")]
     pub account: TonAddress,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,

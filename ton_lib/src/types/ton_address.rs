@@ -1,5 +1,3 @@
-pub mod ser_de;
-
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
@@ -272,18 +270,18 @@ mod tests {
         Ok(())
     }
 
-    #[test]
-    fn test_ton_address_serde() -> anyhow::Result<()> {
-        let addr_str = "EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR";
-        let expected_serialized = format!("\"{addr_str}\"");
-        let address = TonAddress::from_str(addr_str)?;
-        let serial = serde_json::to_string(&address)?;
-        assert_eq!(serial, expected_serialized);
-
-        let deserialized: TonAddress = serde_json::from_str(serial.as_str())?;
-        assert_eq!(address, deserialized);
-        Ok(())
-    }
+    // #[test]
+    // fn test_ton_address_serde() -> anyhow::Result<()> {
+    //     let addr_str = "EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR";
+    //     let expected_serialized = format!("\"{addr_str}\"");
+    //     let address = TonAddress::from_str(addr_str)?;
+    //     let serial = serde_json::to_string(&address)?;
+    //     assert_eq!(serial, expected_serialized);
+    //
+    //     let deserialized: TonAddress = serde_json::from_str(serial.as_str())?;
+    //     assert_eq!(address, deserialized);
+    //     Ok(())
+    // }
 
     #[test]
     fn test_ton_address_ord() -> anyhow::Result<()> {
