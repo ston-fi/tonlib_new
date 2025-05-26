@@ -1,10 +1,12 @@
-use crate::cell::ton_hash::ser_de::serde_ton_hash_vec_b64;
 use crate::cell::ton_hash::TonHash;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_vec_b64;
 use crate::clients::tonlibjson::tl_api::tl_types::{
-    TLAccountAddress, TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
+    TLAccountAddress, TLBlockId, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
 use crate::clients::tonlibjson::tl_api::Base64Standard;
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use base64::engine::general_purpose::STANDARD;
 use base64::Engine;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -198,7 +200,8 @@ pub enum TLRequest {
     // tonlib_api.tl, line 327
     #[serde(rename = "blocks.getShards")]
     BlocksGetShards {
-        id: TLBlockIdExt,
+        #[serde(with = "serde_block_id_ext")]
+        id: BlockIdExt,
     },
 
     // tonlib_api.tl, line 328
@@ -213,7 +216,8 @@ pub enum TLRequest {
     // tonlib_api.tl, line 329
     #[serde(rename = "blocks.getTransactions")]
     BlocksGetTxs {
-        id: TLBlockIdExt,
+        #[serde(with = "serde_block_id_ext")]
+        id: BlockIdExt,
         mode: u32,
         count: u32,
         after: TLBlocksAccountTxId,
@@ -222,7 +226,8 @@ pub enum TLRequest {
     // tonlib_api.tl, line 330
     #[serde(rename = "blocks.getTransactionsExt")]
     BlocksGetTransactionsExt {
-        id: TLBlockIdExt,
+        #[serde(with = "serde_block_id_ext")]
+        id: BlockIdExt,
         mode: u32,
         count: u32,
         after: TLBlocksAccountTxId,
@@ -231,7 +236,8 @@ pub enum TLRequest {
     // tonlib_api.tl, line 331
     #[serde(rename = "blocks.getBlockHeader")]
     GetBlockHeader {
-        id: TLBlockIdExt,
+        #[serde(with = "serde_block_id_ext")]
+        id: BlockIdExt,
     },
 
     // tonlib_ai.tl, line 342

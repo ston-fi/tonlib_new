@@ -1,5 +1,3 @@
-pub mod ser_de;
-
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;

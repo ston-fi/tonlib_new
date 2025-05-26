@@ -1,8 +1,8 @@
-mod liteapi_serde;
-
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::ton_address::TonAddress;
+
+mod liteapi_serde;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockId {
