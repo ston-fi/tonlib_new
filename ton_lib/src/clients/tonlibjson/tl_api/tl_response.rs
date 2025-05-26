@@ -1,9 +1,11 @@
+use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
 use crate::clients::tonlibjson::tl_api::tl_types::{
-    TLBlockIdExt, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
+    TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
     TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
     TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,
 };
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::ffi::CStr;
@@ -25,7 +27,7 @@ pub enum TLResponse {
     TLOptionsInfo(TLOptionsInfo),
     // tonlib_api.tl_api, line 51
     #[serde(rename = "ton.blockIdExt")]
-    TLBlockIdExt(TLBlockIdExt),
+    TLBlockIdExt(#[serde(with = "serde_block_id_ext")] BlockIdExt),
     // tonlib_api.tl_api, line 53
     #[serde(rename = "raw.fullAccountState")]
     TLRawFullAccountState(TLRawFullAccountState),

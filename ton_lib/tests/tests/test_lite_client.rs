@@ -1,5 +1,6 @@
 use crate::tests::utils::init_logging;
 use std::str::FromStr;
+use std::time::Duration;
 use ton_lib::clients::lite::lc_config::LiteClientConfig;
 use ton_lib::clients::lite::lite_client::LiteClient;
 use ton_lib::clients::net_config::TonNetConfig;
@@ -46,6 +47,8 @@ async fn test_lite_client_testnet() -> anyhow::Result<()> {
 pub async fn make_lite_client(mainnet: bool) -> anyhow::Result<LiteClient> {
     init_logging();
     log::info!("initializing lite_client with mainnet={mainnet}...");
-    let config = LiteClientConfig::new(&TonNetConfig::get_json(mainnet))?;
+    let mut config = LiteClientConfig::new(&TonNetConfig::get_json(mainnet))?;
+    config.retry_count = 20;
+    config.retry_waiting = Duration::from_millis(200);
     Ok(LiteClient::new(config)?)
 }

@@ -1,3 +1,6 @@
+use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext_vec;
+use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext_vec_opt;
 use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_address_b64;
 use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_address_hex;
 use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_b64;
@@ -9,6 +12,7 @@ use std::fmt::Debug;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::{TxId, TxIdLTHash};
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::ton_address::TonAddress;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
@@ -109,19 +113,6 @@ impl From<TLTxId> for TxId {
     }
 }
 
-// tonlib_api.tl_api, line 51
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLBlockIdExt {
-    pub workchain: i32,
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub shard: i64,
-    pub seqno: i32,
-    #[serde(with = "Base64Standard")]
-    pub root_hash: Vec<u8>,
-    #[serde(with = "Base64Standard")]
-    pub file_hash: Vec<u8>,
-}
-
 // tonlib_api.tl_api, line 53
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLRawFullAccountState {
@@ -133,7 +124,8 @@ pub struct TLRawFullAccountState {
     pub data: Vec<u8>,
     #[serde(rename = "last_transaction_id")]
     pub last_tx_id: TLTxId,
-    pub block_id: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub block_id: BlockIdExt,
     #[serde(with = "Base64Standard")]
     pub frozen_hash: Vec<u8>,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -338,7 +330,8 @@ pub struct TLFullAccountState {
     pub balance: i64,
     #[serde(rename = "last_transaction_id")]
     pub last_tx_id: TLTxId,
-    pub block_id: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub block_id: BlockIdExt,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub sync_utime: i64,
     pub account_state: TLAccountState,
@@ -477,16 +470,19 @@ pub struct TLLiteServerInfo {
 // tonlib_api.tl_api, line 219
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksMCInfo {
-    pub last: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub last: BlockIdExt,
     #[serde(with = "Base64Standard")]
     pub state_root_hash: Vec<u8>,
-    pub init: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub init: BlockIdExt,
 }
 
 // tonlib_api.tl_api, line 220
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksShards {
-    pub shards: Vec<TLBlockIdExt>,
+    #[serde(with = "serde_block_id_ext_vec")]
+    pub shards: Vec<BlockIdExt>,
 }
 
 // tonlib_api.tl_api, line 221
@@ -513,7 +509,8 @@ pub struct TLBlocksShortTxId {
 // tonlib_api.tl_api, line 223
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksTxs {
-    pub id: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub id: BlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
     #[serde(rename = "transactions")]
@@ -523,7 +520,8 @@ pub struct TLBlocksTxs {
 // tonlib_api.tl_api, line 224
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksTransactionsExt {
-    pub id: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub id: BlockIdExt,
     pub req_count: i32,
     pub incomplete: bool,
     #[serde(rename = "transactions")]
@@ -544,7 +542,8 @@ pub struct TLTvmCell {
 // tonlib_api.tl_api, line 225
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksHeader {
-    pub id: TLBlockIdExt,
+    #[serde(with = "serde_block_id_ext")]
+    pub id: BlockIdExt,
     pub global_id: i32,
     pub version: i32,
     pub flags: i32,
@@ -565,7 +564,8 @@ pub struct TLBlocksHeader {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub gen_utime: i64,
     pub vert_seqno: Option<i32>,
-    pub prev_blocks: Option<Vec<TLBlockIdExt>>,
+    #[serde(with = "serde_block_id_ext_vec_opt")]
+    pub prev_blocks: Option<Vec<BlockIdExt>>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
