@@ -329,7 +329,7 @@ mod tests {
         let cell = cell_builder.build()?;
         assert_eq!(cell, TonCell::EMPTY);
         for level in 0..4 {
-            assert_eq!(cell.hash_for_level(LevelMask::new(level)), &TonHash::EMPTY_CELL_HASH);
+            assert_eq!(cell.hash_for_level(LevelMask::new(level)), &TonCell::EMPTY_CELL_HASH);
         }
         Ok(())
     }
