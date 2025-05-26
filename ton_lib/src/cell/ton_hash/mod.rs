@@ -21,10 +21,6 @@ impl TonHash {
     pub const BYTES_LEN: usize = 32;
     pub const BITS_LEN: usize = 256;
     pub const ZERO: TonHash = TonHash::from_slice(&[0u8; 32]);
-    pub const EMPTY_CELL_HASH: TonHash = TonHash::from_slice(&[
-        150, 162, 150, 210, 36, 242, 133, 198, 123, 238, 147, 195, 15, 138, 48, 145, 87, 240, 218, 163, 93, 197, 184,
-        126, 65, 11, 120, 99, 10, 9, 207, 199,
-    ]);
 
     pub const fn from_slice(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
 
