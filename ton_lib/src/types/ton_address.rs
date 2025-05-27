@@ -225,7 +225,7 @@ fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), Tonli
 }
 
 // return false if preconditions are not met
-pub fn rewrite_bits(src: &[u8], src_offset_bits: usize, dst: &mut [u8], dst_offset_bits: usize, len: usize) -> bool {
+fn rewrite_bits(src: &[u8], src_offset_bits: usize, dst: &mut [u8], dst_offset_bits: usize, len: usize) -> bool {
     // Calculate total bits available in source and destination
     let src_total_bits = src.len() * 8;
     let dst_total_bits = dst.len() * 8;
