@@ -27,7 +27,7 @@ impl BOCRaw {
             // size:(## 3) { size <= 4 }
             let size = header & 0b0000_0111;
             if size > 4 {
-                return Err(TonlibError::BOCCustom(format!("Invalid BoC header: size({size}) <= 4.")));
+                return Err(TonlibError::BOCCustom(format!("Invalid BoC header: size({size}) <= 4")));
             }
 
             (has_idx, has_crc32c, has_cache_bits, size)
