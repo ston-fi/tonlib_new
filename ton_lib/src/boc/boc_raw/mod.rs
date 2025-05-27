@@ -1,7 +1,7 @@
-mod from_bytes_impl;
-mod from_ton_cells_impl;
-mod into_ton_cell_impl;
+mod into_vec_ton_cell_impl;
 mod to_bytes_impl;
+mod try_from_bytes_impl;
+mod try_from_ton_cells_impl;
 
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;

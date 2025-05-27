@@ -2,7 +2,7 @@ use crate::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::meta::cell_type::CellType;
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::{TonCell, TonCellArc};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::errors::TonlibError::TLBWrongData;
@@ -70,7 +70,7 @@ pub trait TLB: Sized {
         builder.build()
     }
 
-    fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.to_cell()?.into_ref()) }
+    fn to_cell_ref(&self) -> Result<TonCellArc, TonlibError> { Ok(self.to_cell()?.into_ref()) }
 
     fn to_boc(&self) -> Result<Vec<u8>, TonlibError> { self.to_boc_extra(false) }
 

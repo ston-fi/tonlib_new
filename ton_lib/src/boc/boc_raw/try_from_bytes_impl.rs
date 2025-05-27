@@ -6,9 +6,10 @@ use std::io::Cursor;
 
 use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 
-impl BOCRaw {
-    // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
-    pub(crate) fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonlibError> {
+// https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
+impl TryFrom<&[u8]> for BOCRaw {
+    type Error = TonlibError;
+    fn try_from(serial: &[u8]) -> Result<BOCRaw, Self::Error> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
         let magic = reader.read::<u32>()?;
@@ -20,23 +21,38 @@ impl BOCRaw {
         let (has_idx, has_crc32c, _has_cache_bits, size) = {
             // has_idx:(## 1) has_crc32c:(## 1) has_cache_bits:(## 1) flags:(## 2) { flags = 0 }
             let header = reader.read::<u8>()?;
-            let has_idx = (header >> 7) & 1 == 1;
-            let has_crc32c = (header >> 6) & 1 == 1;
-            let has_cache_bits = (header >> 5) & 1 == 1;
+            let has_idx = (header & 0b1000_0000) != 0;
+            let has_crc32c = (header & 0b0100_0000) != 0;
+            let has_cache_bits = (header & 0b0010_0000) != 0;
+
             // size:(## 3) { size <= 4 }
             let size = header & 0b0000_0111;
+            if size > 4 {
+                return Err(TonlibError::BOCCustom(format!("Invalid BoC header: size({size}) <= 4.")));
+            }
 
             (has_idx, has_crc32c, has_cache_bits, size)
         };
 
         //   off_bytes:(## 8) { off_bytes <= 8 }
         let off_bytes = reader.read::<u8>()?;
+        if off_bytes > 8 {
+            return Err(TonlibError::BOCCustom(format!("Invalid BoC header: off_bytes({off_bytes}) <= 8")));
+        }
         //cells:(##(size * 8))
         let cells_cnt = read_var_size(&mut reader, size)?;
         //   roots:(##(size * 8)) { roots >= 1 }
         let roots_cnt = read_var_size(&mut reader, size)?;
+        if roots_cnt < 1 {
+            return Err(TonlibError::BOCCustom(format!("Invalid BoC header: roots({roots_cnt}) >= 1")));
+        }
         //   absent:(##(size * 8)) { roots + absent <= cells }
-        let _absent = read_var_size(&mut reader, size)?;
+        let absent = read_var_size(&mut reader, size)?;
+        if roots_cnt + absent > cells_cnt {
+            return Err(TonlibError::BOCCustom(format!(
+                "Invalid header: roots({roots_cnt}) + absent({absent}) <= cells({cells_cnt})"
+            )));
+        }
         //   tot_cells_size:(##(off_bytes * 8))
         let _tot_cells_size = read_var_size(&mut reader, off_bytes)?;
         //   root_list:(roots * ##(size * 8))

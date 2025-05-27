@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::adapters::TLBOptRef;
 use crate::types::tlb::block_tlb::block::mc_block_extra::MCBlockExtra;
@@ -8,9 +8,9 @@ use ton_lib_macros::TLBDerive;
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0x4a33f6fd, bits_len = 32)]
 pub struct BlockExtra {
-    pub in_msg_descr: TonCellRef,   // TODO
-    pub out_msg_descr: TonCellRef,  // TODO
-    pub account_blocks: TonCellRef, // TODO
+    pub in_msg_descr: TonCellArc,   // TODO
+    pub out_msg_descr: TonCellArc,  // TODO
+    pub account_blocks: TonCellArc, // TODO
     pub rand_seed: TonHash,
     pub created_by: TonHash,
     #[tlb_derive(adapter = "TLBOptRef")]

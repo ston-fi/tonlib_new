@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use ton_lib_macros::TLBDerive;
 
@@ -6,7 +6,7 @@ use ton_lib_macros::TLBDerive;
 pub struct ConfigParams {
     pub config_addr: TonHash,
     // #[tlb_derive(adapter = "TLBRef")]
-    pub config: TonCellRef,
+    pub config: TonCellArc,
 }
 
 // #[derive(Debug, Clone, PartialEq, TLBDerive)]

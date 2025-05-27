@@ -4,26 +4,26 @@
 ///
 mod boc_raw;
 
-use crate::boc::boc_raw::BOCRaw;
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::{boc::boc_raw::BOCRaw, cell::ton_cell::TonCellArcs};
+use crate::cell::ton_cell::{TonCell, TonCellArc};
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::marker::PhantomData;
 
 pub struct BOC<C = TonCell> {
-    roots: Vec<TonCellRef>,
+    roots: TonCellArcs,
     _phantom: PhantomData<C>,
 }
 
 impl BOC {
-    pub fn new(root: TonCellRef) -> Self {
+    pub fn new(root: TonCellArc) -> Self {
         Self {
             roots: vec![root],
             _phantom: PhantomData,
         }
     }
-    pub fn from_roots(roots: Vec<TonCellRef>) -> Self {
+    pub fn from_roots(roots: TonCellArcs) -> Self {
         Self {
             roots,
             _phantom: PhantomData,
@@ -35,9 +35,9 @@ impl BOC {
         if bytes_ref.is_empty() {
             return Err(TonlibError::BOCEmpty);
         }
-        let raw = BOCRaw::from_bytes(bytes_ref)?;
+        let raw = BOCRaw::try_from(bytes_ref)?;
         Ok(Self {
-            roots: raw.into_ton_cells()?,
+            roots: raw.try_into()?,
             _phantom: PhantomData,
         })
     }
@@ -45,19 +45,20 @@ impl BOC {
     pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
         Self::from_bytes(hex::decode(hex.as_ref())?)
     }
-    pub fn from_b64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
+    pub fn from_base64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
         Self::from_bytes(BASE64_STANDARD.decode(hex.as_ref())?)
     }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-        BOCRaw::from_ton_cells(&self.roots)?.to_bytes(add_crc32)
+       let a =  BOCRaw::try_from(self.roots.as_slice())?;
+       a.to_bytes(add_crc32)
     }
     pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
-    pub fn to_b64(&self, add_crc32: bool) -> Result<String, TonlibError> {
+    pub fn to_base64(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
     }
 
-    pub fn single_root(mut self) -> Result<TonCellRef, TonlibError> {
+    pub fn single_root(mut self) -> Result<TonCellArc, TonlibError> {
         if self.roots.len() != 1 {
             return Err(TonlibError::BOCSingleRoot(self.roots.len()));
         }

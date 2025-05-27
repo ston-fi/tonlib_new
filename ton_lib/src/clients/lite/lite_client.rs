@@ -1,6 +1,6 @@
 use super::lc_connection::Connection;
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::MasterchainInfo;
 use crate::clients::lite::lc_config::LiteClientConfig;
@@ -179,7 +179,7 @@ impl Inner {
                 .into_iter()
                 .map(|x| {
                     let hash = TonHash::from_slice(&x.hash.0);
-                    let lib = TonCellRef::from_boc(x.data.as_slice())?;
+                    let lib = TonCellArc::from_boc(x.data.as_slice())?;
                     Ok::<_, TonlibError>((hash, lib))
                 })
                 .collect::<Result<Vec<_>, TonlibError>>()?;

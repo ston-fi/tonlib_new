@@ -1,7 +1,7 @@
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::{TonCell, TonCellArc};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter, ByteRead, ByteReader};
@@ -12,7 +12,7 @@ pub(super) struct CellMetaBuilder<'a> {
     pub(super) cell_type: CellType,
     pub(super) data: &'a [u8],
     pub(super) data_bits_len: usize,
-    pub(super) refs: &'a [TonCellRef],
+    pub(super) refs: &'a [TonCellArc],
 }
 
 type CellBitWriter = BitWriter<Vec<u8>, BigEndian>;
@@ -23,7 +23,7 @@ struct Pruned {
 }
 
 impl<'a> CellMetaBuilder<'a> {
-    pub(super) fn new(cell_type: CellType, data: &'a [u8], data_bits_len: usize, refs: &'a [TonCellRef]) -> Self {
+    pub(super) fn new(cell_type: CellType, data: &'a [u8], data_bits_len: usize, refs: &'a [TonCellArc]) -> Self {
         Self {
             cell_type,
             data,
@@ -355,7 +355,7 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
 mod test {
     use super::*;
 
-    fn empty_cell_ref() -> TonCellRef { TonCell::EMPTY.into_ref() }
+    fn empty_cell_ref() -> TonCellArc { TonCell::EMPTY.into_ref() }
 
     #[test]
     fn test_refs_descriptor_d1() {

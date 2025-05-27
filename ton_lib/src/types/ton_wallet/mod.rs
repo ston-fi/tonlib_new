@@ -2,7 +2,7 @@ pub mod mnemonic;
 pub mod version_helper;
 pub mod wallet_code;
 
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::{TonCell, TonCellArcs};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::msg::common_msg_info::{CommonMsgInfo, CommonMsgInfoExtIn};
@@ -59,7 +59,7 @@ impl TonWallet {
 
     pub fn create_ext_in_msg(
         &self,
-        int_msgs: Vec<TonCellRef>,
+        int_msgs:TonCellArcs,
         seqno: u32,
         expire_at: u32,
         add_state_init: bool,
@@ -74,7 +74,7 @@ impl TonWallet {
         &self,
         expire_at: u32,
         seqno: u32,
-        int_msgs: Vec<TonCellRef>,
+        int_msgs: TonCellArcs,
     ) -> Result<TonCell, TonlibError> {
         WalletVersionHelper::build_ext_in_body(self.version, expire_at, seqno, self.wallet_id, int_msgs)
     }

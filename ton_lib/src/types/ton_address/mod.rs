@@ -3,7 +3,7 @@ mod utils;
 
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::errors::TonlibError::TonAddressParseError;
@@ -35,7 +35,7 @@ impl TonAddress {
 
     pub const fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
 
-    pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonlibError> {
+    pub fn derive(wc: i32, code: TonCellArc, data: TonCellArc) -> Result<TonAddress, TonlibError> {
         let state_init = StateInit::new(code, data);
         Ok(TonAddress::new(wc, state_init.cell_hash()?))
     }
@@ -95,7 +95,7 @@ impl FromStr for TonAddress {
     type Err = TonlibError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() == 48 {
-            return from_b64(s);
+            return from_base64(s);
         }
         from_hex(s)
     }
@@ -141,7 +141,7 @@ impl PartialOrd for TonAddress {
     }
 }
 
-fn from_b64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonlibError> {
+fn from_base64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonlibError> {
     let addr_str = addr.as_ref();
     if addr_str.chars().any(|c| c == '-' || c == '_') {
         from_bytes(&URL_SAFE_NO_PAD.decode(addr_str)?, addr_str)

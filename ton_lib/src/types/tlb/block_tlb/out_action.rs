@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::{TonCell, TonCellArc};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::ConstLen;
@@ -28,13 +28,13 @@ pub enum OutAction {
 #[tlb_derive(prefix = 0x0ec3c86d, bits_len = 32)]
 pub struct OutActionSendMsg {
     pub mode: u8,
-    pub out_msg: TonCellRef,
+    pub out_msg: TonCellArc,
 }
 
 #[derive(Debug, PartialEq, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0xad4de08e, bits_len = 32)]
 pub struct OutActionSetCode {
-    pub new_code: TonCellRef,
+    pub new_code: TonCellArc,
 }
 
 #[derive(Debug, PartialEq, Clone, TLBDerive)]
@@ -49,7 +49,7 @@ pub struct OutActionReserveCurrency {
 pub struct OutActionChangeLibrary {
     #[tlb_derive(bits_len = 7)]
     pub mode: u8,
-    pub library: Either<TonHash, TonCellRef>,
+    pub library: Either<TonHash, TonCellArc>,
 }
 
 impl OutList {

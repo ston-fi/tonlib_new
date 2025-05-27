@@ -1,7 +1,7 @@
 use crate::cell::meta::cell_meta_builder::CellMetaBuilder;
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use std::sync::Arc;
@@ -28,7 +28,7 @@ impl CellMeta {
         cell_type: CellType,
         data: &[u8],
         data_bits_len: usize,
-        refs: &[TonCellRef],
+        refs: &[TonCellArc],
     ) -> Result<Self, TonlibError> {
         let meta_builder = CellMetaBuilder::new(cell_type, data, data_bits_len, refs);
 

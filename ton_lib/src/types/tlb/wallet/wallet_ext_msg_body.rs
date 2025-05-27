@@ -1,6 +1,5 @@
-use crate::cell::build_parse::builder::CellBuilder;
+use crate::cell::{build_parse::builder::CellBuilder, ton_cell::TonCellArcs};
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::wallet::wallet_ext_msg_utils::{
     build_inner_request, parse_inner_request, read_up_to_4_msgs, write_up_to_4_msgs, InnerRequest,
@@ -17,7 +16,7 @@ pub struct WalletV2ExtMsgBody {
     pub msg_seqno: u32,
     pub valid_until: u32,
     pub msgs_modes: Vec<u8>,
-    pub msgs: Vec<TonCellRef>,
+    pub msgs: TonCellArcs,
 }
 
 /// https://docs.ton.org/participate/wallets/contracts#wallet-v3
@@ -29,7 +28,7 @@ pub struct WalletV3ExtMsgBody {
     pub valid_until: u32,
     pub msg_seqno: u32,
     pub msgs_modes: Vec<u8>,
-    pub msgs: Vec<TonCellRef>,
+    pub msgs: TonCellArcs,
 }
 
 /// https://docs.ton.org/participate/wallets/contracts#wallet-v4
@@ -41,7 +40,7 @@ pub struct WalletV4ExtMsgBody {
     pub msg_seqno: u32,
     pub opcode: u8,
     pub msgs_modes: Vec<u8>,
-    pub msgs: Vec<TonCellRef>,
+    pub msgs:TonCellArcs,
 }
 
 /// https://docs.ton.org/participate/wallets/contracts#wallet-v5
@@ -54,7 +53,7 @@ pub struct WalletV5ExtMsgBody {
     pub valid_until: u32,
     pub msg_seqno: u32,
     pub msgs_modes: Vec<u8>,
-    pub msgs: Vec<TonCellRef>,
+    pub msgs: TonCellArcs,
 }
 
 impl TLB for WalletV2ExtMsgBody {

@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::{TonCell, TonCellRef};
+use crate::cell::ton_cell::{TonCell, TonCellArc};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitRead, BitReader};
@@ -106,7 +106,7 @@ impl<'a> CellParser<'a> {
         builder.build()
     }
 
-    pub fn read_next_ref(&mut self) -> Result<&TonCellRef, TonlibError> {
+    pub fn read_next_ref(&mut self) -> Result<&TonCellArc, TonlibError> {
         if self.next_ref_pos == self.cell.refs.len() {
             return Err(TonlibError::ParserRefsUnderflow { req: self.next_ref_pos });
         }

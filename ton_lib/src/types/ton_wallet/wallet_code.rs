@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::ton_cell::TonCellArc;
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::wallet::versions::WalletVersion;
 use crate::types::tlb::wallet::versions::WalletVersion::*;
@@ -8,11 +8,11 @@ use std::sync::LazyLock;
 
 macro_rules! load_code {
     ($path:expr) => {
-        TonCellRef::from_boc_b64(include_str!($path)).unwrap()
+        TonCellArc::from_boc_b64(include_str!($path)).unwrap()
     };
 }
 
-pub(super) static TON_WALLET_CODE_BY_VERSION: LazyLock<HashMap<WalletVersion, TonCellRef>> = LazyLock::new(|| {
+pub(super) static TON_WALLET_CODE_BY_VERSION: LazyLock<HashMap<WalletVersion, TonCellArc>> = LazyLock::new(|| {
     #[allow(clippy::all)]
     HashMap::from([
         (V1R1, load_code!("../../../resources/user_wallet_code/wallet_v1r1.code")),
