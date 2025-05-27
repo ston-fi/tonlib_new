@@ -1,6 +1,10 @@
+/// The lowest brick in the library stack
+/// Provides the basic types to interact with the TON blockchain:
+/// TonHash, TonCell, TonCellRef, CellBuilder, CellParser
+///
 mod boc_raw;
 
-use crate::cell::boc::boc_raw::BOCRaw;
+use crate::boc::boc_raw::BOCRaw;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;

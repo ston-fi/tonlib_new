@@ -1,9 +1,10 @@
-use crate::cell::boc::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 use crate::cell::meta::cell_type::CellType;
 use crate::cell::meta::level_mask::LevelMask;
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, ByteRead, ByteReader};
 use std::io::Cursor;
+
+use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 
 impl BOCRaw {
     // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25

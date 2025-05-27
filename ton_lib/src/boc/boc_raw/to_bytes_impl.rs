@@ -1,7 +1,8 @@
-use crate::cell::boc::boc_raw::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use crc::Crc;
+
+use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 
 const CRC_32_ISCSI: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_ISCSI);
 

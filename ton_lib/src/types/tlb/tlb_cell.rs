@@ -1,4 +1,4 @@
-use crate::cell::boc::BOC;
+use crate::boc::BOC;
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::meta::cell_type::CellType;

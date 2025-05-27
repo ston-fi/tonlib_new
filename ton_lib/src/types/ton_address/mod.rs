@@ -17,10 +17,10 @@ use crate::types::tlb::TLB;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use crc::Crc;
-use utils::rewrite_bits;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
+use utils::rewrite_bits;
 
 const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
