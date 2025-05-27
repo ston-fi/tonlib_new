@@ -17,7 +17,7 @@ use crc::Crc;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
-use utils::rewrite_bits;
+
 
 const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
@@ -282,7 +282,6 @@ mod tests {
         assert!(!rewrite_bits(&src, 14, &mut dst, 6, 10));
     }
 
-    use super::*;
     use crate::cell::ton_cell::TonCell;
     use tokio_test::{assert_err, assert_ok};
 
