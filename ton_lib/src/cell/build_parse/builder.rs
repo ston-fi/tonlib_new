@@ -1,6 +1,6 @@
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
-use crate::cell::ton_cell::{TonCell, TonCellArc, TonCellArcs};
+use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellStorage};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
@@ -11,7 +11,7 @@ pub struct CellBuilder {
     cell_type: CellType,
     data_writer: BitWriter<Vec<u8>, BigEndian>,
     data_bits_len: usize,
-    refs: TonCellArcs,
+    refs: TonCellStorage,
 }
 
 impl CellBuilder {
@@ -20,7 +20,7 @@ impl CellBuilder {
             cell_type,
             data_writer: BitWriter::endian(vec![], BigEndian),
             data_bits_len: 0,
-            refs: TonCellArcs::new(),
+            refs: TonCellStorage::new(),
         }
     }
 
@@ -94,7 +94,7 @@ impl CellBuilder {
         cell.refs.iter().cloned().try_for_each(|r| self.write_ref(r))
     }
 
-    pub fn write_ref(&mut self, cell: TonCellArc) -> Result<(), TonlibError> {
+    pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TonlibError> {
         if self.refs.len() >= TonCell::MAX_REFS_COUNT {
             return Err(TonlibError::BuilderRefsOverflow);
         }
@@ -147,7 +147,9 @@ impl CellBuilder {
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
-    pub fn data_bits_left(&self) -> usize { TonCell::MAX_DATA_BITS_LEN - self.data_bits_len }
+    pub fn data_bits_left(&self) -> usize {
+        TonCell::MAX_DATA_BITS_LEN - self.data_bits_len
+    }
 
     fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TonlibError> {
         let new_bits_len = self.data_bits_len + bits_len;

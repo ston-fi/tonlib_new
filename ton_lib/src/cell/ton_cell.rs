@@ -23,7 +23,7 @@ pub struct TonCell {
     pub meta: CellMeta,
     pub data: Vec<u8>,
     pub data_bits_len: usize,
-    pub refs: TonCellArcs,
+    pub refs: TonCellStorage,
 }
 
 impl TonCell {
@@ -33,54 +33,78 @@ impl TonCell {
         meta: CellMeta::EMPTY_CELL_META,
         data: vec![],
         data_bits_len: 0,
-        refs: TonCellArcs::new(),
+        refs: TonCellStorage::new(),
     };
     pub const EMPTY_CELL_HASH: TonHash = TonHash::from_slice(&[
         150, 162, 150, 210, 36, 242, 133, 198, 123, 238, 147, 195, 15, 138, 48, 145, 87, 240, 218, 163, 93, 197, 184,
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]);
-    pub fn builder() -> CellBuilder { CellBuilder::new(CellType::Ordinary) }
-    pub fn builder_typed(cell_type: CellType) -> CellBuilder { CellBuilder::new(cell_type) }
-    pub fn parser(&self) -> CellParser { CellParser::new(self) }
+    pub fn builder() -> CellBuilder {
+        CellBuilder::new(CellType::Ordinary)
+    }
+    pub fn builder_typed(cell_type: CellType) -> CellBuilder {
+        CellBuilder::new(cell_type)
+    }
+    pub fn parser(&self) -> CellParser {
+        CellParser::new(self)
+    }
 
-    pub fn hash_for_level(&self, level: LevelMask) -> &TonHash { &self.meta.hashes[level.mask() as usize] }
-    pub fn hash(&self) -> &TonHash { self.hash_for_level(LevelMask::MAX_LEVEL) }
-    pub fn into_ref(self) -> TonCellArc { TonCellArc(self.into()) }
+    pub fn hash_for_level(&self, level: LevelMask) -> &TonHash {
+        &self.meta.hashes[level.mask() as usize]
+    }
+    pub fn hash(&self) -> &TonHash {
+        self.hash_for_level(LevelMask::MAX_LEVEL)
+    }
+    pub fn into_ref(self) -> TonCellRef {
+        TonCellRef(self.into())
+    }
 }
 
 unsafe impl Sync for TonCell {}
 unsafe impl Send for TonCell {}
 
 impl PartialEq for TonCell {
-    fn eq(&self, other: &Self) -> bool { self.hash() == other.hash() }
+    fn eq(&self, other: &Self) -> bool {
+        self.hash() == other.hash()
+    }
 }
 
 impl Eq for TonCell {}
 
 impl Display for TonCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write_cell_display(f, self, 0)
+    }
 }
 
 impl Debug for TonCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 // TonCelRef
 #[derive(Clone, PartialEq)]
-pub struct TonCellArc(pub Arc<TonCell>);
-pub type TonCellArcs = Vec<TonCellArc>;
+pub struct TonCellRef(pub Arc<TonCell>);
+pub type TonCellStorage = Vec<TonCellRef>;
 
-impl Deref for TonCellArc {
+impl Deref for TonCellRef {
     type Target = TonCell;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
-impl Display for TonCellArc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self.deref(), 0) }
+impl Display for TonCellRef {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write_cell_display(f, self.deref(), 0)
+    }
 }
 
-impl Debug for TonCellArc {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+impl Debug for TonCellRef {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {
@@ -137,7 +161,7 @@ mod tests {
             meta: CellMeta::EMPTY_CELL_META,
             data: vec![0x01, 0x02, 0x03],
             data_bits_len: 24,
-            refs: TonCellArcs::new(),
+            refs: TonCellStorage::new(),
         }
         .into_ref();
 
@@ -145,7 +169,7 @@ mod tests {
             meta: CellMeta::EMPTY_CELL_META,
             data: vec![0x04, 0x05, 0x06],
             data_bits_len: 24,
-            refs: TonCellArcs::from([child]),
+            refs: TonCellStorage::from([child]),
         };
     }
 }

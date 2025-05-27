@@ -46,8 +46,8 @@ pub struct StateInit {
     #[tlb_derive(bits_len = 5)]
     pub split_depth: Option<u8>,
     pub tick_tock: Option<TickTock>,
-    pub code: Option<TonCellArc>,
-    pub data: Option<TonCellArc>,
+    pub code: Option<TonCellRef>,
+    pub data: Option<TonCellRef>,
     #[tlb_derive(adapter = "DictRef::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
     pub library: LibsDict,
 }

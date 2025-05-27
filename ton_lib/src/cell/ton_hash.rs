@@ -20,7 +20,9 @@ impl TonHash {
     pub const BITS_LEN: usize = 256;
     pub const ZERO: TonHash = TonHash::from_slice(&[0u8; 32]);
 
-    pub const fn from_slice(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
+    pub const fn from_slice(data: &[u8; 32]) -> Self {
+        Self(TonHashData::Slice(*data))
+    }
 
     pub fn from_bytes(data: &[u8]) -> Result<Self, TonlibError> {
         check_bytes_len(data)?;
@@ -42,7 +44,9 @@ impl TonHash {
         Self::from_bytes(&num.tcn_to_bytes())
     }
 
-    pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
+    }
 
     pub fn as_slice_sized(&self) -> &[u8; 32] {
         match &self.0 {
@@ -65,8 +69,12 @@ impl TonHash {
         }
     }
 
-    pub fn to_hex(&self) -> String { hex::encode(self.as_slice()) }
-    pub fn to_b64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.as_slice())
+    }
+    pub fn to_b64(&self) -> String {
+        BASE64_STANDARD.encode(self.as_slice())
+    }
 
     pub fn into_vec(self) -> Vec<u8> {
         match self.0 {
@@ -117,33 +125,47 @@ fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {
 
 // Must implement it manually, because we don't distinguish between Vec and Slice
 impl PartialEq for TonHashData {
-    fn eq(&self, other: &Self) -> bool { self.as_slice() == other.as_slice() }
+    fn eq(&self, other: &Self) -> bool {
+        self.as_slice() == other.as_slice()
+    }
 }
 
 impl Eq for TonHashData {}
 
 impl Hash for TonHashData {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { state.write(self.as_slice()); }
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        state.write(self.as_slice());
+    }
 }
 
 impl From<[u8; 32]> for TonHash {
-    fn from(data: [u8; 32]) -> Self { Self(TonHashData::Slice(data)) }
+    fn from(data: [u8; 32]) -> Self {
+        Self(TonHashData::Slice(data))
+    }
 }
 
 impl AsRef<[u8]> for TonHash {
-    fn as_ref(&self) -> &[u8] { self.as_slice() }
+    fn as_ref(&self) -> &[u8] {
+        self.as_slice()
+    }
 }
 
 impl UpperHex for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.to_hex().to_uppercase()) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.to_hex().to_uppercase())
+    }
 }
 
 impl Display for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self:X}")
+    }
 }
 
 impl Debug for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "TonHash[{self:X}]")
+    }
 }
 
 #[cfg(test)]

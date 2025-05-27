@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use std::cell::RefCell;
@@ -9,14 +9,14 @@ use super::{BOCRaw, CellRaw};
 
 #[derive(Debug, Clone)]
 struct CellIndexed<'a> {
-    cell: &'a TonCellArc,
+    cell: &'a TonCellRef,
     index: RefCell<usize>, // internal mutability required
 }
 
-impl TryFrom<&[TonCellArc]> for BOCRaw {
+impl TryFrom<&[TonCellRef]> for BOCRaw {
     type Error = TonlibError;
 
-    fn try_from(roots: &[TonCellArc]) -> Result<Self, Self::Error> {
+    fn try_from(roots: &[TonCellRef]) -> Result<Self, Self::Error> {
         let cell_by_hash = build_and_verify_index(roots);
 
         // Sort indexed cells by their index value.
@@ -43,7 +43,7 @@ impl TryFrom<&[TonCellArc]> for BOCRaw {
     }
 }
 
-fn build_and_verify_index(roots: &[TonCellArc]) -> HashMap<TonHash, CellIndexed> {
+fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed> {
     let mut cur_cells = vec![];
     for cell in roots {
         cur_cells.push(cell);
@@ -97,7 +97,7 @@ fn build_and_verify_index(roots: &[TonCellArc]) -> HashMap<TonHash, CellIndexed>
     cells_by_hash
 }
 
-fn raw_from_indexed(cell: &TonCellArc, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonlibError> {
+fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonlibError> {
     let refs_positions = raw_cell_refs_indexes(cell, cells_by_hash)?;
     Ok(CellRaw {
         cell_type: cell.meta.cell_type,
@@ -109,7 +109,7 @@ fn raw_from_indexed(cell: &TonCellArc, cells_by_hash: &HashMap<TonHash, CellInde
 }
 
 fn raw_cell_refs_indexes(
-    cell: &TonCellArc,
+    cell: &TonCellRef,
     cells_by_hash: &HashMap<TonHash, CellIndexed>,
 ) -> Result<Vec<usize>, TonlibError> {
     let mut vec = Vec::with_capacity(cell.refs.len());
@@ -120,7 +120,7 @@ fn raw_cell_refs_indexes(
     Ok(vec)
 }
 
-fn get_position(cell: &TonCellArc, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TonlibError> {
+fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TonlibError> {
     let hash = cell.hash();
     call_by_hash
         .get(hash)

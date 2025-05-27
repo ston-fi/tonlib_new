@@ -1,13 +1,13 @@
-use crate::cell::{build_parse::builder::CellBuilder, ton_cell::TonCellArcs};
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
+use crate::cell::{build_parse::builder::CellBuilder, ton_cell::TonCellStorage};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::out_action::{OutAction, OutActionSendMsg, OutList};
 use crate::types::tlb::TLB;
 
 pub(super) fn write_up_to_4_msgs(
     dst: &mut CellBuilder,
-    msgs: &[TonCellArc],
+    msgs: &[TonCellRef],
     msgs_modes: &[u8],
 ) -> Result<(), TonlibError> {
     validate_msgs_count(msgs, msgs_modes, 4)?;
@@ -18,7 +18,7 @@ pub(super) fn write_up_to_4_msgs(
     Ok(())
 }
 
-pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, TonCellArcs), TonlibError> {
+pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, TonCellStorage), TonlibError> {
     let msgs_cnt = parser.cell.refs.len();
     let mut msgs_modes = Vec::with_capacity(msgs_cnt);
     let mut msgs = Vec::with_capacity(msgs_cnt);
@@ -28,7 +28,7 @@ pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, Ton
     }
     Ok((msgs_modes, msgs))
 }
-pub(super) fn validate_msgs_count(msgs: &[TonCellArc], msgs_modes: &[u8], max_cnt: usize) -> Result<(), TonlibError> {
+pub(super) fn validate_msgs_count(msgs: &[TonCellRef], msgs_modes: &[u8], max_cnt: usize) -> Result<(), TonlibError> {
     if msgs.len() > max_cnt || msgs_modes.len() != msgs.len() {
         let err_str = format!("wrong msgs: modes_len={}, msgs_len={}, max_len={max_cnt}", msgs_modes.len(), msgs.len());
         return Err(TonlibError::CustomError(err_str));
@@ -68,7 +68,7 @@ impl TLB for InnerRequest {
     }
 }
 
-pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(TonCellArcs, Vec<u8>), TonlibError> {
+pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(TonCellStorage, Vec<u8>), TonlibError> {
     let out_list = match request.out_actions {
         Some(out_list) => out_list,
         None => return Ok((vec![], vec![])),
@@ -87,7 +87,7 @@ pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(TonCellArcs,
     Ok((msgs, msgs_modes))
 }
 
-pub(super) fn build_inner_request(msgs: &[TonCellArc], msgs_modes: &[u8]) -> Result<InnerRequest, TonlibError> {
+pub(super) fn build_inner_request(msgs: &[TonCellRef], msgs_modes: &[u8]) -> Result<InnerRequest, TonlibError> {
     if msgs.is_empty() {
         return Ok(InnerRequest { out_actions: None });
     }

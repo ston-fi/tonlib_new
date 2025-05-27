@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterTonHash;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
@@ -13,8 +13,8 @@ pub struct StateInit {
     #[tlb_derive(bits_len = 5)]
     pub split_depth: Option<u8>,
     pub tick_tock: Option<TickTock>,
-    pub code: Option<TonCellArc>,
-    pub data: Option<TonCellArc>,
+    pub code: Option<TonCellRef>,
+    pub data: Option<TonCellRef>,
     #[tlb_derive(adapter = "DictRef::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
     pub library: HashMap<TonHash, SimpleLib>,
 }
@@ -22,7 +22,7 @@ pub struct StateInit {
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct SimpleLib {
     pub public: bool,
-    pub root: TonCellArc,
+    pub root: TonCellRef,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
@@ -32,7 +32,7 @@ pub struct TickTock {
 }
 
 impl StateInit {
-    pub fn new(code: TonCellArc, data: TonCellArc) -> Self {
+    pub fn new(code: TonCellRef, data: TonCellRef) -> Self {
         StateInit {
             split_depth: None,
             tick_tock: None,

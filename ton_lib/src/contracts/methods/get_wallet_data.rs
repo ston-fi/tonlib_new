@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::contracts::ton_contract::TonContractTrait;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
@@ -20,7 +20,7 @@ pub struct GetWalletDataResult {
     pub balance: Coins,
     pub owner: TonAddress,
     pub master: TonAddress,
-    pub wallet_code: TonCellArc,
+    pub wallet_code: TonCellRef,
 }
 
 impl GetWalletDataResult {

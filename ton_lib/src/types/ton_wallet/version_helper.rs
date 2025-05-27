@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::{TonCell, TonCellArc, TonCellArcs};
+use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellStorage};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::wallet::versions::WalletVersion;
@@ -20,7 +20,7 @@ impl WalletVersionHelper {
         version: WalletVersion,
         key_pair: &KeyPair,
         wallet_id: i32,
-    ) -> Result<TonCellArc, TonlibError> {
+    ) -> Result<TonCellRef, TonlibError> {
         let public_key = TonHash::from_bytes(&key_pair.public_key)?;
         match version {
             V1R1 | V1R2 | V1R3 | V2R1 | V2R2 => WalletV1V2Data::new(public_key).to_cell_ref(),
@@ -34,13 +34,13 @@ impl WalletVersionHelper {
         }
     }
 
-    pub fn get_code(version: WalletVersion) -> Result<&'static TonCellArc, TonlibError> {
+    pub fn get_code(version: WalletVersion) -> Result<&'static TonCellRef, TonlibError> {
         TON_WALLET_CODE_BY_VERSION
             .get(&version)
             .ok_or_else(|| TonlibError::CustomError(format!("No code found for {version:?}")))
     }
 
-    pub fn code_by_version(ver: WalletVersion) -> Result<&'static TonCellArc, TonlibError> {
+    pub fn code_by_version(ver: WalletVersion) -> Result<&'static TonCellRef, TonlibError> {
         TON_WALLET_CODE_BY_VERSION
             .get(&ver)
             .ok_or_else(|| TonlibError::CustomError(format!("No code found for version: {ver:?}")))
@@ -58,7 +58,7 @@ impl WalletVersionHelper {
         valid_until: u32,
         msg_seqno: u32,
         wallet_id: i32,
-        msgs: TonCellArcs,
+        msgs: TonCellStorage,
     ) -> Result<TonCell, TonlibError> {
         match version {
             V2R1 | V2R2 => WalletV2ExtMsgBody {

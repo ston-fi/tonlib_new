@@ -1,5 +1,5 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
 use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
@@ -194,7 +194,7 @@ pub trait TLClientTrait: Send + Sync {
         }
         let mut libs_dict = LibsDict::default();
         for lib in result.result {
-            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellArc::from_boc(&lib.data)?);
+            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
         }
         Ok(Some(libs_dict))
     }

@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::contracts::ton_contract::TonContractTrait;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::coins::Coins;
@@ -20,8 +20,8 @@ pub struct GetJettonDataResult {
     pub total_supply: Coins,
     pub mintable: bool,
     pub admin: TonAddress,
-    pub content: TonCellArc,
-    pub wallet_code: TonCellArc,
+    pub content: TonCellRef,
+    pub wallet_code: TonCellRef,
 }
 
 impl GetJettonDataResult {
@@ -57,7 +57,7 @@ mod test {
             result.admin,
             TonAddress::from_str("0:6440fe3c69410383963945173c4b11479bf0b9b4d7090e58777bda581c2f9998")?
         );
-        assert_eq!(result.content, TonCellArc::from_boc_hex("b5ee9c7201010701007d00010300c00102012002030143bff872ebdb514d9c97c283b7f0ae5179029e2b6119c39462719e4f46ed8f7413e640040143bff7407e978f01a40711411b1acb773a96bdd93fa83bb5ca8435013c8c4b3ac91f400601020005003e68747470733a2f2f7465746865722e746f2f757364742d746f6e2e6a736f6e00040036")?);
+        assert_eq!(result.content, TonCellRef::from_boc_hex("b5ee9c7201010701007d00010300c00102012002030143bff872ebdb514d9c97c283b7f0ae5179029e2b6119c39462719e4f46ed8f7413e640040143bff7407e978f01a40711411b1acb773a96bdd93fa83bb5ca8435013c8c4b3ac91f400601020005003e68747470733a2f2f7465746865722e746f2f757364742d746f6e2e6a736f6e00040036")?);
         Ok(())
     }
 }

@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::ConstLen;
@@ -52,13 +52,13 @@ pub struct TVMNan;
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x03, bits_len = 8)]
 pub struct TVMCell {
-    pub value: TonCellArc,
+    pub value: TonCellRef,
 }
 
 #[derive(Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x05, bits_len = 8)]
 pub struct TVMBuilder {
-    pub cell: TonCellArc,
+    pub cell: TonCellRef,
 }
 
 #[derive(Debug, Clone, TLBDerive)]
@@ -173,7 +173,9 @@ pub struct VMContPushInt {
 }
 
 impl Debug for TVMStackValue {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{self}")
+    }
 }
 
 impl Display for TVMStackValue {

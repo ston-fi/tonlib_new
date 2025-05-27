@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::errors::TonlibError;
 use crate::types::tlb::{TLBPrefix, TLB};
 
@@ -8,8 +8,8 @@ use crate::types::tlb::{TLBPrefix, TLB};
 // really tricky to implement with current design,
 #[derive(Clone, PartialEq, Debug)]
 pub struct TVMCellSlice {
-    pub value: TonCellArc, // is not part of TLB
-    pub cell_original: TonCellArc,
+    pub value: TonCellRef, // is not part of TLB
+    pub cell_original: TonCellRef,
     pub start_bit: usize,
     pub end_bit: usize,
     pub start_ref: usize,
@@ -17,7 +17,7 @@ pub struct TVMCellSlice {
 }
 
 impl TVMCellSlice {
-    pub fn from_cell(cell: TonCellArc) -> Self {
+    pub fn from_cell(cell: TonCellRef) -> Self {
         let end_bit = cell.data_bits_len;
         let end_ref = cell.refs.len();
         Self {

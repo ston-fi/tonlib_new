@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use ton_lib_macros::TLBDerive;
 
@@ -11,7 +11,9 @@ pub struct WalletV1V2Data {
 }
 
 impl WalletV1V2Data {
-    pub fn new(public_key: TonHash) -> Self { Self { seqno: 0, public_key } }
+    pub fn new(public_key: TonHash) -> Self {
+        Self { seqno: 0, public_key }
+    }
 }
 
 /// WalletVersion::V3R1 | WalletVersion::V3R2
@@ -37,7 +39,7 @@ pub struct WalletV4Data {
     pub seqno: u32,
     pub wallet_id: i32,
     pub public_key: TonHash,
-    pub plugins: Option<TonCellArc>,
+    pub plugins: Option<TonCellRef>,
 }
 
 impl WalletV4Data {
@@ -59,7 +61,7 @@ pub struct WalletV5Data {
     pub seqno: u32,
     pub wallet_id: i32,
     pub public_key: TonHash,
-    pub extensions: Option<TonCellArc>,
+    pub extensions: Option<TonCellRef>,
 }
 
 impl WalletV5Data {
@@ -80,7 +82,7 @@ pub struct WalletHLV2R2Data {
     pub wallet_id: i32,
     pub last_cleaned_time: u64,
     pub public_key: TonHash,
-    pub queries: Option<TonCellArc>,
+    pub queries: Option<TonCellRef>,
 }
 
 impl WalletHLV2R2Data {

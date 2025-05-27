@@ -12,7 +12,9 @@ pub struct DictKeyAdapterInto;
 pub struct DictKeyAdapterString; // TODO is not covered by tests
 
 impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
-    fn make_key(src_key: &TonHash) -> Result<BigUint, TonlibError> { Ok(BigUint::from_bytes_be(src_key.as_slice())) }
+    fn make_key(src_key: &TonHash) -> Result<BigUint, TonlibError> {
+        Ok(BigUint::from_bytes_be(src_key.as_slice()))
+    }
 
     fn extract_key(dict_key: &BigUint) -> Result<TonHash, TonlibError> {
         let mut hash_bytes = vec![0; TonHash::BYTES_LEN];
@@ -31,7 +33,9 @@ impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
 }
 
 impl<T: Clone + Into<BigUint> + TryFrom<BigUint>> DictKeyAdapter<T> for DictKeyAdapterInto {
-    fn make_key(src_key: &T) -> Result<BigUint, TonlibError> { Ok(src_key.clone().into()) }
+    fn make_key(src_key: &T) -> Result<BigUint, TonlibError> {
+        Ok(src_key.clone().into())
+    }
 
     fn extract_key(dict_key: &BigUint) -> Result<T, TonlibError> {
         match T::try_from(dict_key.clone()) {

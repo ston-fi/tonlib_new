@@ -1,29 +1,29 @@
 /// The lowest brick in the library stack
 /// Provides the basic types to interact with the TON blockchain:
-/// TonHash, TonCell, TonCellArc, CellBuilder, CellParser
+/// TonHash, TonCell, TonCellRef, CellBuilder, CellParser
 ///
 mod boc_raw;
 
-use crate::{boc::boc_raw::BOCRaw, cell::ton_cell::TonCellArcs};
-use crate::cell::ton_cell::{TonCell, TonCellArc};
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
+use crate::{boc::boc_raw::BOCRaw, cell::ton_cell::TonCellStorage};
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::marker::PhantomData;
 
 pub struct BOC<C = TonCell> {
-    roots: TonCellArcs,
+    roots: TonCellStorage,
     _phantom: PhantomData<C>,
 }
 
 impl BOC {
-    pub fn new(root: TonCellArc) -> Self {
+    pub fn new(root: TonCellRef) -> Self {
         Self {
             roots: vec![root],
             _phantom: PhantomData,
         }
     }
-    pub fn from_roots(roots: TonCellArcs) -> Self {
+    pub fn from_roots(roots: TonCellStorage) -> Self {
         Self {
             roots,
             _phantom: PhantomData,
@@ -50,15 +50,17 @@ impl BOC {
     }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-       let a =  BOCRaw::try_from(self.roots.as_slice())?;
-       a.to_bytes(add_crc32)
+        let a = BOCRaw::try_from(self.roots.as_slice())?;
+        a.to_bytes(add_crc32)
     }
-    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
+    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> {
+        Ok(hex::encode(self.to_bytes(add_crc32)?))
+    }
     pub fn to_base64(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
     }
 
-    pub fn single_root(mut self) -> Result<TonCellArc, TonlibError> {
+    pub fn single_root(mut self) -> Result<TonCellRef, TonlibError> {
         if self.roots.len() != 1 {
             return Err(TonlibError::BOCSingleRoot(self.roots.len()));
         }

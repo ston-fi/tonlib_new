@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::errors::TonlibError::TonAddressParseError;
@@ -18,7 +18,6 @@ use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
 
-
 const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
 #[derive(Clone, PartialEq, Eq, Hash)]
@@ -30,9 +29,11 @@ pub struct TonAddress {
 impl TonAddress {
     pub const ZERO: Self = TonAddress::new(0, TonHash::ZERO);
 
-    pub const fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
+    pub const fn new(wc: i32, hash: TonHash) -> Self {
+        Self { wc, hash }
+    }
 
-    pub fn derive(wc: i32, code: TonCellArc, data: TonCellArc) -> Result<TonAddress, TonlibError> {
+    pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonlibError> {
         let state_init = StateInit::new(code, data);
         Ok(TonAddress::new(wc, state_init.cell_hash()?))
     }
@@ -48,7 +49,9 @@ impl TonAddress {
         }
     }
 
-    pub fn to_hex(&self) -> String { format!("{}:{}", self.wc, hex::encode(self.hash.as_slice())) }
+    pub fn to_hex(&self) -> String {
+        format!("{}:{}", self.wc, hex::encode(self.hash.as_slice()))
+    }
 
     pub fn to_b64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
         let mut buf = [0; 36];
@@ -112,7 +115,9 @@ impl TLB for TonAddress {
 }
 
 impl Display for TonAddress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str(&self.to_b64(true, true, true)) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.to_b64(true, true, true))
+    }
 }
 
 impl Debug for TonAddress {
@@ -224,7 +229,6 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TonlibError> {
     Err(TonAddressParseError(address.to_string(), msg.as_ref().to_string()))
 }
-
 
 // return false if preconditions are not met
 pub fn rewrite_bits(src: &[u8], src_offset_bits: usize, dst: &mut [u8], dst_offset_bits: usize, len: usize) -> bool {

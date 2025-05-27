@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use ton_lib_macros::TLBDerive;
 
@@ -6,13 +6,13 @@ use ton_lib_macros::TLBDerive;
 pub struct ConfigParams {
     pub config_addr: TonHash,
     // #[tlb_derive(adapter = "TLBRef")]
-    pub config: TonCellArc,
+    pub config: TonCellRef,
 }
 
 // #[derive(Debug, Clone, PartialEq, TLBDerive)]
 // pub struct Config {
 //     #[tlb_derive(adapter = "Dict::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
-//     pub data: HashMap<u32, TonCellArc>,
+//     pub data: HashMap<u32, TonCellRef>,
 // }
 
 impl ConfigParams {

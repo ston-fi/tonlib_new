@@ -29,7 +29,9 @@ pub struct TLConnection {
 
 #[async_trait]
 impl TLClientTrait for TLConnection {
-    async fn get_connection(&self) -> &TLConnection { self }
+    async fn get_connection(&self) -> &TLConnection {
+        self
+    }
 
     fn get_retry_strategy(&self) -> &TLClientRetryStrategy {
         static NO_RETRY: TLClientRetryStrategy = TLClientRetryStrategy {

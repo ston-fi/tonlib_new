@@ -66,7 +66,9 @@ impl Msg {
         }
     }
 
-    pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
+    pub fn state_init(&self) -> Option<&StateInit> {
+        self.init.as_ref().map(|init| &init.value)
+    }
 }
 
 #[cfg(test)]

@@ -9,7 +9,7 @@ pub mod mc_block_extra;
 mod shard_accounts_blocks;
 pub mod shard_ident;
 
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::block::block_extra::BlockExtra;
 use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
@@ -22,8 +22,8 @@ pub struct Block {
     pub global_id: i32,
     #[tlb_derive(adapter = "TLBRef")]
     pub info: BlockInfo,
-    pub value_flow: TonCellArc,   // TODO
-    pub state_update: TonCellArc, // TODO
+    pub value_flow: TonCellRef,   // TODO
+    pub state_update: TonCellRef, // TODO
     #[tlb_derive(adapter = "TLBRef")]
     pub extra: BlockExtra,
 }

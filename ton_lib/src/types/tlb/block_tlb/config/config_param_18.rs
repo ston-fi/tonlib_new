@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::TonCellArc;
+use crate::cell::ton_cell::TonCellRef;
 use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::Dict;
@@ -18,5 +18,5 @@ pub struct StoragePrices {
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct ConfigParam18 {
     #[tlb_derive(adapter = "Dict::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
-    pub storage_prices: HashMap<u32, TonCellArc>,
+    pub storage_prices: HashMap<u32, TonCellRef>,
 }

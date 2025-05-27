@@ -1,16 +1,16 @@
-use crate::cell::{meta::cell_meta::CellMeta, ton_cell::TonCellArcs};
 use crate::cell::ton_cell::TonCell;
+use crate::cell::{meta::cell_meta::CellMeta, ton_cell::TonCellStorage};
 use crate::errors::TonlibError;
 
 use super::BOCRaw;
 
 // Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
-impl TryFrom<BOCRaw> for TonCellArcs {
+impl TryFrom<BOCRaw> for TonCellStorage {
     type Error = TonlibError;
 
-    fn try_from(boc_raw: BOCRaw) -> Result<TonCellArcs, Self::Error> {
+    fn try_from(boc_raw: BOCRaw) -> Result<TonCellStorage, Self::Error> {
         let num_cells = boc_raw.cells.len();
-        let mut cells: TonCellArcs = Vec::with_capacity(num_cells);
+        let mut cells: TonCellStorage = Vec::with_capacity(num_cells);
 
         for (cell_index, cell_raw) in boc_raw.cells.into_iter().enumerate().rev() {
             let mut refs = Vec::with_capacity(cell_raw.refs_positions.len());

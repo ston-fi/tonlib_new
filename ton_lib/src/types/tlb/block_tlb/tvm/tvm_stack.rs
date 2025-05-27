@@ -1,6 +1,6 @@
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::{TonCell, TonCellArc};
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_cell_slice::TVMCellSlice;
 use crate::types::tlb::block_tlb::tvm::tvm_stack_value::{TVMCell, TVMInt, TVMStackValue, TVMTinyInt};
@@ -27,29 +27,47 @@ pub struct TVMStack(Vec<TVMStackValue>);
 
 impl Deref for TVMStack {
     type Target = Vec<TVMStackValue>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl DerefMut for TVMStack {
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
 }
 
 impl TVMStack {
     pub const EMPTY_BOC: &'static [u8] = &[181, 238, 156, 114, 1, 1, 1, 1, 0, 5, 0, 0, 6, 0, 0, 0];
-    pub fn new(items: Vec<TVMStackValue>) -> Self { Self(items) }
+    pub fn new(items: Vec<TVMStackValue>) -> Self {
+        Self(items)
+    }
 
-    pub fn push_tiny_int(&mut self, value: i64) { self.push(TVMStackValue::TinyInt(TVMTinyInt { value })); }
-    pub fn push_int(&mut self, value: BigInt) { self.push(TVMStackValue::Int(TVMInt { value })); }
-    pub fn push_cell(&mut self, value: TonCellArc) { self.push(TVMStackValue::Cell(TVMCell { value })); }
-    pub fn push_cell_slice(&mut self, cell: TonCellArc) {
+    pub fn push_tiny_int(&mut self, value: i64) {
+        self.push(TVMStackValue::TinyInt(TVMTinyInt { value }));
+    }
+    pub fn push_int(&mut self, value: BigInt) {
+        self.push(TVMStackValue::Int(TVMInt { value }));
+    }
+    pub fn push_cell(&mut self, value: TonCellRef) {
+        self.push(TVMStackValue::Cell(TVMCell { value }));
+    }
+    pub fn push_cell_slice(&mut self, cell: TonCellRef) {
         self.push(TVMStackValue::CellSlice(TVMCellSlice::from_cell(cell)));
     }
-    pub fn push_tuple(&mut self, tuple: TVMTuple) { self.push(TVMStackValue::Tuple(tuple)); }
+    pub fn push_tuple(&mut self, tuple: TVMTuple) {
+        self.push(TVMStackValue::Tuple(tuple));
+    }
 
-    pub fn pop_tiny_int(&mut self) -> Result<i64, TonlibError> { extract_stack_val!(self.pop(), TinyInt) }
-    pub fn pop_int(&mut self) -> Result<BigInt, TonlibError> { extract_stack_val!(self.pop(), Int) }
+    pub fn pop_tiny_int(&mut self) -> Result<i64, TonlibError> {
+        extract_stack_val!(self.pop(), TinyInt)
+    }
+    pub fn pop_int(&mut self) -> Result<BigInt, TonlibError> {
+        extract_stack_val!(self.pop(), Int)
+    }
     // extract cell & cell_slice
-    pub fn pop_cell(&mut self) -> Result<TonCellArc, TonlibError> {
+    pub fn pop_cell(&mut self) -> Result<TonCellRef, TonlibError> {
         match self.pop() {
             None => Err(TonlibError::TVMStackEmpty),
             Some(TVMStackValue::Cell(cell)) => Ok(cell.value),
