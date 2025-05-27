@@ -1,9 +1,8 @@
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use std::ops::Deref;
-use std::sync::LazyLock;
-use ton_lib::cell::boc::BOC;
+use std::{ops::Deref, sync::LazyLock};
+use ton_lib::boc::BOC;
 use tonlib_core::cell::BagOfCells;
 
 const ITERATIONS_COUNT: usize = 100;
@@ -15,11 +14,11 @@ static BOC_BYTES: LazyLock<Vec<u8>> = LazyLock::new(|| {
 
 static BOC_TOBLIB: LazyLock<BOC> = LazyLock::new(|| BOC::from_bytes(BOC_BYTES.deref()).unwrap());
 
-static BOC_TOBLIB_CORE: LazyLock<BagOfCells> = LazyLock::new(|| BagOfCells::parse(BOC_BYTES.deref()).unwrap());
+static BOC_TOBLIB_CORE: LazyLock<BagOfCells> = LazyLock::new(|| BagOfCells::parse(&BOC_BYTES).unwrap());
 
 fn boc_from_bytes_tonlib_core() {
     for _ in 0..ITERATIONS_COUNT {
-        let boc = BagOfCells::parse(BOC_BYTES.deref()).unwrap();
+        let boc = BagOfCells::parse(&BOC_BYTES).unwrap();
         black_box(boc);
     }
 }
@@ -33,15 +32,14 @@ fn boc_from_bytes_tonlib() {
 
 fn boc_to_bytes_tonlib_core() {
     for _ in 0..ITERATIONS_COUNT {
-        let bytes = BOC_TOBLIB_CORE.deref().serialize(false).unwrap();
-
+        let bytes = &BOC_TOBLIB_CORE.serialize(false).unwrap();
         black_box(bytes);
     }
 }
 
 fn boc_to_bytes_tonlib() {
     for _ in 0..ITERATIONS_COUNT {
-        let bytes = BOC_TOBLIB.deref().to_bytes(false).unwrap();
+        let bytes = &BOC_TOBLIB.to_bytes(false).unwrap();
         black_box(bytes);
     }
 }

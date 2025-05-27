@@ -1,14 +1,18 @@
+/// The lowest brick in the library stack
+/// Provides the basic types to interact with the TON blockchain:
+/// TonHash, TonCell, TonCellRef, CellBuilder, CellParser
+///
 mod boc_raw;
 
-use crate::cell::boc::boc_raw::BOCRaw;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
+use crate::{boc::boc_raw::BOCRaw, cell::ton_cell::TonCellStorage};
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::marker::PhantomData;
 
 pub struct BOC<C = TonCell> {
-    roots: Vec<TonCellRef>,
+    roots: TonCellStorage,
     _phantom: PhantomData<C>,
 }
 
@@ -19,7 +23,7 @@ impl BOC {
             _phantom: PhantomData,
         }
     }
-    pub fn from_roots(roots: Vec<TonCellRef>) -> Self {
+    pub fn from_roots(roots: TonCellStorage) -> Self {
         Self {
             roots,
             _phantom: PhantomData,
@@ -31,9 +35,8 @@ impl BOC {
         if bytes_ref.is_empty() {
             return Err(TonlibError::BOCEmpty);
         }
-        let raw = BOCRaw::from_bytes(bytes_ref)?;
         Ok(Self {
-            roots: raw.into_ton_cells()?,
+            roots: BOCRaw::from_bytes(bytes_ref)?.into_ton_cells()?,
             _phantom: PhantomData,
         })
     }
@@ -41,15 +44,15 @@ impl BOC {
     pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
         Self::from_bytes(hex::decode(hex.as_ref())?)
     }
-    pub fn from_b64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
+    pub fn from_base64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonlibError> {
         Self::from_bytes(BASE64_STANDARD.decode(hex.as_ref())?)
     }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-        BOCRaw::from_ton_cells(&self.roots)?.to_bytes(add_crc32)
+        BOCRaw::from_ton_cells(self.roots.as_slice())?.to_bytes(add_crc32)
     }
     pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
-    pub fn to_b64(&self, add_crc32: bool) -> Result<String, TonlibError> {
+    pub fn to_base64(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
     }
 

@@ -12,7 +12,7 @@ use ton_liteapi::types::LiteError;
 #[derive(Error, Debug)]
 pub enum TonlibError {
     // ton_hash
-    #[error("TonHashError: Expecting {exp} bytes, got {given}")]
+    #[error("TonHashWrongLen: Expecting {exp} bytes, got {given}")]
     TonHashWrongLen { exp: usize, given: usize },
 
     // cell_parser
@@ -42,11 +42,11 @@ pub enum TonlibError {
     // boc
     #[error("BOCEmpty: can't parse BOC from empty slice")]
     BOCEmpty,
-    #[error("BOCWrongTypeTag: Unexpected CellType tag: {0}")]
-    BOCWrongTypeTag(u8),
+    #[error("BOCWrongCellTypeTag: {0}")]
+    BOCWrongCellTypeTag(u8),
     #[error("BOCSingleRoot: Expected 1 root, got {0}")]
     BOCSingleRoot(usize),
-    #[error("BOCWrongMagic: Unexpected magic: {0}")]
+    #[error("BOCWrongMagic: {0}")]
     BOCWrongMagic(u32),
     #[error("BOCCustom: {0}")]
     BOCCustom(String),
@@ -97,8 +97,8 @@ pub enum TonlibError {
     TLClientWrongResponse(String, String),
     #[error("TLClientResponseError: code: {code}, message: {message}")]
     TLClientResponseError { code: i32, message: String },
-    #[error("TLInvalidArgs: {0}")]
-    TLInvalidArgs(String),
+    #[error("TLWrongArgs: {0}")]
+    TLWrongArgs(String),
     #[error("TLSendError: fail to send request: {0}")]
     TLSendError(String),
     #[error("TLExecError: method: {method}, code: {code}, message: {message}")]

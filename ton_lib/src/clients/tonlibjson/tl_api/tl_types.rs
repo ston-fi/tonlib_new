@@ -99,7 +99,7 @@ impl TryFrom<TxId> for TLTxId {
                 lt: id.lt,
                 hash: id.hash,
             }),
-            rest => Err(TonlibError::TLInvalidArgs(format!("tl_client doesn't support {rest:?} as tx_id"))),
+            rest => Err(TonlibError::TLWrongArgs(format!("tl_client doesn't support {rest:?} as tx_id"))),
         }
     }
 }

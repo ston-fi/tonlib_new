@@ -59,7 +59,7 @@ fn test_build_parse_num() -> anyhow::Result<()> {
 #[cfg(test)]
 mod bignum {
 
-    use crate::cell::boc::BOC;
+    use crate::boc::BOC;
     use crate::cell::build_parse::parser::CellParser;
     use crate::cell::ton_cell::TonCell;
     use crate::cell::ton_hash::TonHash;

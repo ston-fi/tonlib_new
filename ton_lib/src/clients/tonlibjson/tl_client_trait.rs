@@ -114,7 +114,7 @@ pub trait TLClientTrait: Send + Sync {
         try_decode_msg: bool,
     ) -> Result<TLRawTxs, TonlibError> {
         if count > 16 {
-            return Err(TonlibError::TLInvalidArgs(format!(
+            return Err(TonlibError::TLWrongArgs(format!(
                 "get_raw_transactions_v2: count <= 16 supported, got {count}"
             )));
         }

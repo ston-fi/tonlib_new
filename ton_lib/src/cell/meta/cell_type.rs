@@ -17,7 +17,7 @@ impl CellType {
             0x02 => Self::Library,
             0x03 => Self::MerkleProof,
             0x04 => Self::MerkleUpdate,
-            _ => return Err(TonlibError::BOCWrongTypeTag(byte)),
+            _ => return Err(TonlibError::BOCWrongCellTypeTag(byte)),
         };
         Ok(cell_type)
     }

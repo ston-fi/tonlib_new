@@ -1,10 +1,11 @@
-use crate::cell::boc::boc_raw::{BOCRaw, CellRaw};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
+
+use super::{BOCRaw, CellRaw};
 
 #[derive(Debug, Clone)]
 struct CellIndexed<'a> {

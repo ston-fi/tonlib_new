@@ -1,6 +1,6 @@
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::meta::cell_type::CellType;
-use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellRefsStore};
+use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellStorage};
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
@@ -11,7 +11,7 @@ pub struct CellBuilder {
     cell_type: CellType,
     data_writer: BitWriter<Vec<u8>, BigEndian>,
     data_bits_len: usize,
-    refs: TonCellRefsStore,
+    refs: TonCellStorage,
 }
 
 impl CellBuilder {
@@ -20,7 +20,7 @@ impl CellBuilder {
             cell_type,
             data_writer: BitWriter::endian(vec![], BigEndian),
             data_bits_len: 0,
-            refs: TonCellRefsStore::new(),
+            refs: TonCellStorage::new(),
         }
     }
 

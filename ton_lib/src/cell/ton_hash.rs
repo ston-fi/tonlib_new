@@ -82,7 +82,7 @@ impl FromStr for TonHash {
         if s.len() == 64 {
             return from_hex(s);
         }
-        from_b64(s)
+        from_base64(s)
     }
 }
 
@@ -101,7 +101,9 @@ fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<TonHash, TonlibError> {
     Ok(TonHash(TonHashData::Vec(bytes)))
 }
 
-fn from_b64<T: AsRef<[u8]>>(b64: T) -> Result<TonHash, TonlibError> { TonHash::from_vec(BASE64_STANDARD.decode(b64)?) }
+fn from_base64<T: AsRef<[u8]>>(b64: T) -> Result<TonHash, TonlibError> {
+    TonHash::from_vec(BASE64_STANDARD.decode(b64)?)
+}
 
 fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {
     if bytes.len() != TonHash::BYTES_LEN {

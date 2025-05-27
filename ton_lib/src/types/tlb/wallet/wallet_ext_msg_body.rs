@@ -1,6 +1,5 @@
 use crate::cell::build_parse::builder::CellBuilder;
-use crate::cell::build_parse::parser::CellParser;
-use crate::cell::ton_cell::TonCellRef;
+use crate::cell::{build_parse::parser::CellParser, ton_cell::TonCellRef};
 use crate::errors::TonlibError;
 use crate::types::tlb::wallet::wallet_ext_msg_utils::{
     build_inner_request, parse_inner_request, read_up_to_4_msgs, write_up_to_4_msgs, InnerRequest,

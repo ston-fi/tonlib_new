@@ -23,7 +23,7 @@ pub struct TonCell {
     pub meta: CellMeta,
     pub data: Vec<u8>,
     pub data_bits_len: usize,
-    pub refs: TonCellRefsStore,
+    pub refs: TonCellStorage,
 }
 
 impl TonCell {
@@ -33,7 +33,7 @@ impl TonCell {
         meta: CellMeta::EMPTY_CELL_META,
         data: vec![],
         data_bits_len: 0,
-        refs: TonCellRefsStore::new(),
+        refs: TonCellStorage::new(),
     };
     pub const EMPTY_CELL_HASH: TonHash = TonHash::from_slice(&[
         150, 162, 150, 210, 36, 242, 133, 198, 123, 238, 147, 195, 15, 138, 48, 145, 87, 240, 218, 163, 93, 197, 184,
@@ -68,7 +68,7 @@ impl Debug for TonCell {
 // TonCelRef
 #[derive(Clone, PartialEq)]
 pub struct TonCellRef(pub Arc<TonCell>);
-pub type TonCellRefsStore = Vec<TonCellRef>;
+pub type TonCellStorage = Vec<TonCellRef>;
 
 impl Deref for TonCellRef {
     type Target = TonCell;
@@ -137,7 +137,7 @@ mod tests {
             meta: CellMeta::EMPTY_CELL_META,
             data: vec![0x01, 0x02, 0x03],
             data_bits_len: 24,
-            refs: TonCellRefsStore::new(),
+            refs: TonCellStorage::new(),
         }
         .into_ref();
 
@@ -145,7 +145,7 @@ mod tests {
             meta: CellMeta::EMPTY_CELL_META,
             data: vec![0x04, 0x05, 0x06],
             data_bits_len: 24,
-            refs: TonCellRefsStore::from([child]),
+            refs: TonCellStorage::from([child]),
         };
     }
 }

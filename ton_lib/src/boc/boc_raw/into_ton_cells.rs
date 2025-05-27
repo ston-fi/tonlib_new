@@ -1,7 +1,8 @@
-use crate::cell::boc::boc_raw::BOCRaw;
 use crate::cell::meta::cell_meta::CellMeta;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::errors::TonlibError;
+
+use super::BOCRaw;
 
 impl BOCRaw {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
