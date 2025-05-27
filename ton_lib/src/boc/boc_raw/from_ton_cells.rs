@@ -13,10 +13,8 @@ struct CellIndexed<'a> {
     index: RefCell<usize>, // internal mutability required
 }
 
-impl TryFrom<&[TonCellRef]> for BOCRaw {
-    type Error = TonlibError;
-
-    fn try_from(roots: &[TonCellRef]) -> Result<Self, Self::Error> {
+impl BOCRaw {
+    pub(crate) fn from_ton_cells(roots: &[TonCellRef]) -> Result<Self, TonlibError> {
         let cell_by_hash = build_and_verify_index(roots);
 
         // Sort indexed cells by their index value.

@@ -8,7 +8,7 @@ const CRC_32_ISCSI: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_ISCSI);
 
 impl BOCRaw {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
-    pub(crate) fn to_bytes(&self, has_crc32: bool) -> Result<Vec<u8>, TonlibError> {
+    pub(crate) fn into_bytes(self, has_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         let root_count = self.roots_position.len();
         let num_ref_bits = 32 - (self.cells.len() as u32).leading_zeros();
         let num_ref_bytes = num_ref_bits.div_ceil(8);

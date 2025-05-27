@@ -35,9 +35,8 @@ impl BOC {
         if bytes_ref.is_empty() {
             return Err(TonlibError::BOCEmpty);
         }
-        let raw = BOCRaw::try_from(bytes_ref)?;
         Ok(Self {
-            roots: raw.try_into()?,
+            roots: BOCRaw::from_bytes(bytes_ref)?.into_ton_cells()?,
             _phantom: PhantomData,
         })
     }
@@ -50,8 +49,7 @@ impl BOC {
     }
 
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
-        let a = BOCRaw::try_from(self.roots.as_slice())?;
-        a.to_bytes(add_crc32)
+        BOCRaw::from_ton_cells(self.roots.as_slice())?.into_bytes(add_crc32)
     }
     pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(hex::encode(self.to_bytes(add_crc32)?))

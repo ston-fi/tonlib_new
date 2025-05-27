@@ -6,10 +6,9 @@ use std::io::Cursor;
 
 use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 
-// https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
-impl TryFrom<&[u8]> for BOCRaw {
-    type Error = TonlibError;
-    fn try_from(serial: &[u8]) -> Result<BOCRaw, Self::Error> {
+impl BOCRaw {
+    // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
+    pub(crate) fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonlibError> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
         let magic = reader.read::<u32>()?;
