@@ -1,0 +1,300 @@
+digraph {
+
+ graph [
+        label="ton_lib",
+        labelloc=t,
+        pad=0.4,
+
+        // Use the dot layout engine (default, so we omit layout=neato)
+        rankdir=LR, // TB = Top to Bottom, like a tree
+
+        overlap=false,
+        splines="line",
+
+        fontname="Helvetica", 
+        fontsize="36",
+    ];
+
+    node [
+        fontname="monospace",
+        fontsize="10",
+        shape="record",
+        style="filled",
+    ];
+
+    "ton_lib" [label="crate|ton_lib", fillcolor="#5397c8"]; // "crate" node
+    "ton_lib::bc_constants" [label="pub mod|bc_constants", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::boc" [label="pub mod|boc", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::boc::boc_raw" [label="pub(self) mod|boc::boc_raw", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::boc::boc_raw::into_vec_ton_cell_impl" [label="pub(self) mod|boc::boc_raw::into_vec_ton_cell_impl", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::boc::boc_raw::to_bytes_impl" [label="pub(self) mod|boc::boc_raw::to_bytes_impl", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::boc::boc_raw::try_from_bytes_impl" [label="pub(self) mod|boc::boc_raw::try_from_bytes_impl", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::boc::boc_raw::try_from_ton_cells_impl" [label="pub(self) mod|boc::boc_raw::try_from_ton_cells_impl", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::cell" [label="pub mod|cell", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::build_parse" [label="pub mod|cell::build_parse", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::build_parse::builder" [label="pub mod|cell::build_parse::builder", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::build_parse::parser" [label="pub mod|cell::build_parse::parser", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::meta" [label="pub mod|cell::meta", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::meta::cell_meta" [label="pub mod|cell::meta::cell_meta", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::meta::cell_meta_builder" [label="pub(self) mod|cell::meta::cell_meta_builder", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::cell::meta::cell_type" [label="pub mod|cell::meta::cell_type", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::meta::level_mask" [label="pub mod|cell::meta::level_mask", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_cell" [label="pub mod|cell::ton_cell", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_cell_num" [label="pub mod|cell::ton_cell_num", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_cell_utils" [label="pub mod|cell::ton_cell_utils", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_hash" [label="pub mod|cell::ton_hash", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_hash::ser_de" [label="pub mod|cell::ton_hash::ser_de", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_hash::ser_de::serde_ton_hash_b64" [label="pub mod|cell::ton_hash::ser_de::serde_ton_hash_b64", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::cell::ton_hash::ser_de::serde_ton_hash_vec_b64" [label="pub mod|cell::ton_hash::ser_de::serde_ton_hash_vec_b64", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients" [label="pub mod|clients", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::block_stream" [label="pub mod|clients::block_stream", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::client_types" [label="pub mod|clients::client_types", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::client_types::liteapi_serde" [label="pub(self) mod|clients::client_types::liteapi_serde", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::lite" [label="pub mod|clients::lite", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::lite::lc_config" [label="pub mod|clients::lite::lc_config", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::lite::lc_connection" [label="pub mod|clients::lite::lc_connection", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::lite::lite_client" [label="pub mod|clients::lite::lite_client", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::lite::metrics" [label="pub mod|clients::lite::metrics", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::net_config" [label="pub mod|clients::net_config", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_api" [label="pub mod|clients::tonlibjson::tl_api", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_api::tl_req_ctx" [label="pub mod|clients::tonlibjson::tl_api::tl_req_ctx", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_api::tl_request" [label="pub mod|clients::tonlibjson::tl_api::tl_request", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_api::tl_response" [label="pub mod|clients::tonlibjson::tl_api::tl_response", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_api::tl_types" [label="pub mod|clients::tonlibjson::tl_api::tl_types", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_callback" [label="pub(self) mod|clients::tonlibjson::tl_callback", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_client" [label="pub(self) mod|clients::tonlibjson::tl_client", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_client_config" [label="pub(self) mod|clients::tonlibjson::tl_client_config", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_client_raw" [label="pub(self) mod|clients::tonlibjson::tl_client_raw", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_client_trait" [label="pub(self) mod|clients::tonlibjson::tl_client_trait", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::tl_connection" [label="pub(self) mod|clients::tonlibjson::tl_connection", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::clients::tonlibjson::utils" [label="pub mod|clients::tonlibjson::utils", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::contract_client::contract_client_cache" [label="pub(self) mod|contracts::contract_client::contract_client_cache", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::contracts::contract_client::data_provider" [label="pub mod|contracts::contract_client::data_provider", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::contract_client::types" [label="pub mod|contracts::contract_client::types", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::jetton_master" [label="pub mod|contracts::jetton_master", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::jetton_wallet" [label="pub mod|contracts::jetton_wallet", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::methods" [label="pub mod|contracts::methods", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::methods::get_jetton_data" [label="pub mod|contracts::methods::get_jetton_data", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::methods::get_wallet_address" [label="pub mod|contracts::methods::get_wallet_address", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::methods::get_wallet_data" [label="pub mod|contracts::methods::get_wallet_data", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::ton_contract" [label="pub mod|contracts::ton_contract", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::contracts::ton_wallet" [label="pub mod|contracts::ton_wallet", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tvm" [label="pub mod|emulators::tvm", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tvm::c7_register" [label="pub mod|emulators::tvm::c7_register", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tvm::method_id" [label="pub mod|emulators::tvm::method_id", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tvm::tvm_emulator" [label="pub mod|emulators::tvm::tvm_emulator", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tvm::tvm_response" [label="pub mod|emulators::tvm::tvm_response", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tx" [label="pub mod|emulators::tx", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::emulators::tx::tx_emulator" [label="pub mod|emulators::tx::tx_emulator", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::errors" [label="pub mod|errors", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types" [label="pub mod|types", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb" [label="pub mod|types::tlb", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters" [label="pub mod|types::tlb::adapters", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::const_len" [label="pub(self) mod|types::tlb::adapters::const_len", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict" [label="pub(self) mod|types::tlb::adapters::dict", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::data_builder" [label="pub mod|types::tlb::adapters::dict::data_builder", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::data_parser" [label="pub mod|types::tlb::adapters::dict::data_parser", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::dict_key_adapters" [label="pub mod|types::tlb::adapters::dict::dict_key_adapters", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::dict_val_adapters" [label="pub mod|types::tlb::adapters::dict::dict_val_adapters", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::label_type" [label="pub mod|types::tlb::adapters::dict::label_type", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::dict::leading_bit_utils" [label="pub mod|types::tlb::adapters::dict::leading_bit_utils", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::adapters::tlb_ref" [label="pub(self) mod|types::tlb::adapters::tlb_ref", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb" [label="pub mod|types::tlb::block_tlb", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::account" [label="pub mod|types::tlb::block_tlb::account", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block" [label="pub mod|types::tlb::block_tlb::block", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::block_extra" [label="pub mod|types::tlb::block_tlb::block::block_extra", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::block_id_ext" [label="pub mod|types::tlb::block_tlb::block::block_id_ext", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::block_info" [label="pub mod|types::tlb::block_tlb::block::block_info", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::block_prev_info" [label="pub mod|types::tlb::block_tlb::block::block_prev_info", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::mc_block_extra" [label="pub mod|types::tlb::block_tlb::block::mc_block_extra", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::shard_accounts_blocks" [label="pub(self) mod|types::tlb::block_tlb::block::shard_accounts_blocks", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::block::shard_ident" [label="pub mod|types::tlb::block_tlb::block::shard_ident", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::coins" [label="pub mod|types::tlb::block_tlb::coins", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::config" [label="pub mod|types::tlb::block_tlb::config", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::config::config_param_18" [label="pub mod|types::tlb::block_tlb::config::config_param_18", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::config::config_param_8" [label="pub mod|types::tlb::block_tlb::config::config_param_8", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::config::config_params" [label="pub mod|types::tlb::block_tlb::config::config_params", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::hash_update" [label="pub mod|types::tlb::block_tlb::hash_update", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::msg" [label="pub mod|types::tlb::block_tlb::msg", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::msg::common_msg_info" [label="pub mod|types::tlb::block_tlb::msg::common_msg_info", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::msg_address" [label="pub mod|types::tlb::block_tlb::msg_address", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::msg_address::from_impl" [label="pub(self) mod|types::tlb::block_tlb::msg_address::from_impl", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::out_action" [label="pub mod|types::tlb::block_tlb::out_action", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::state_init" [label="pub mod|types::tlb::block_tlb::state_init", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tvm" [label="pub mod|types::tlb::block_tlb::tvm", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tvm::tvm_cell_slice" [label="pub mod|types::tlb::block_tlb::tvm::tvm_cell_slice", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tvm::tvm_stack" [label="pub mod|types::tlb::block_tlb::tvm::tvm_stack", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tvm::tvm_stack_value" [label="pub mod|types::tlb::block_tlb::tvm::tvm_stack_value", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tvm::tvm_tuple" [label="pub mod|types::tlb::block_tlb::tvm::tvm_tuple", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tx" [label="pub mod|types::tlb::block_tlb::tx", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tx::compute_skip_reason" [label="pub mod|types::tlb::block_tlb::tx::compute_skip_reason", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tx::tr_phase" [label="pub mod|types::tlb::block_tlb::tx::tr_phase", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::tx::tx_descr" [label="pub mod|types::tlb::block_tlb::tx::tx_descr", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::unary" [label="pub mod|types::tlb::block_tlb::unary", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::block_tlb::var_len" [label="pub mod|types::tlb::block_tlb::var_len", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::primitives" [label="pub mod|types::tlb::primitives", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::primitives::bool" [label="pub(self) mod|types::tlb::primitives::bool", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::primitives::either" [label="pub mod|types::tlb::primitives::either", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::primitives::libs_dict" [label="pub mod|types::tlb::primitives::libs_dict", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::primitives::num" [label="pub(self) mod|types::tlb::primitives::num", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::primitives::option" [label="pub(self) mod|types::tlb::primitives::option", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::primitives::tlb_ptr" [label="pub(self) mod|types::tlb::primitives::tlb_ptr", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::tep_0064" [label="pub mod|types::tlb::tep_0064", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::tep_0064::snake_format" [label="pub(self) mod|types::tlb::tep_0064::snake_format", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::tlb::tep_0074" [label="pub mod|types::tlb::tep_0074", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::tep_0074::jetton_transfer_msg" [label="pub mod|types::tlb::tep_0074::jetton_transfer_msg", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::tlb_cell" [label="pub mod|types::tlb::tlb_cell", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::tlb_object" [label="pub mod|types::tlb::tlb_object", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet" [label="pub mod|types::tlb::wallet", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet::constants" [label="pub mod|types::tlb::wallet::constants", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet::versions" [label="pub mod|types::tlb::wallet::versions", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet::wallet_data" [label="pub mod|types::tlb::wallet::wallet_data", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet::wallet_ext_msg_body" [label="pub mod|types::tlb::wallet::wallet_ext_msg_body", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::tlb::wallet::wallet_ext_msg_utils" [label="pub(self) mod|types::tlb::wallet::wallet_ext_msg_utils", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::ton_address" [label="pub mod|types::ton_address", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_address::ser_de" [label="pub mod|types::ton_address::ser_de", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_address::ser_de::serde_ton_address_hex" [label="pub mod|types::ton_address::ser_de::serde_ton_address_hex", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_address::utils" [label="pub(self) mod|types::ton_address::utils", fillcolor="#db5367"]; // "mod" node
+    "ton_lib::types::ton_wallet" [label="pub mod|types::ton_wallet", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_wallet::mnemonic" [label="pub mod|types::ton_wallet::mnemonic", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_wallet::version_helper" [label="pub mod|types::ton_wallet::version_helper", fillcolor="#81c169"]; // "mod" node
+    "ton_lib::types::ton_wallet::wallet_code" [label="pub mod|types::ton_wallet::wallet_code", fillcolor="#81c169"]; // "mod" node
+
+    "ton_lib" -> "ton_lib::bc_constants" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::boc" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::cell" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::clients" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::contract_client::contract_client_cache" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::contract_client::data_provider" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::contract_client::types" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::jetton_master" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::jetton_wallet" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::methods" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::ton_contract" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::contracts::ton_wallet" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::emulators::tvm" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::emulators::tx" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::errors" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib" -> "ton_lib::types" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::boc" -> "ton_lib::boc::boc_raw" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::boc::boc_raw" -> "ton_lib::boc::boc_raw::into_vec_ton_cell_impl" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::boc::boc_raw" -> "ton_lib::boc::boc_raw::to_bytes_impl" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::boc::boc_raw" -> "ton_lib::boc::boc_raw::try_from_bytes_impl" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::boc::boc_raw" -> "ton_lib::boc::boc_raw::try_from_ton_cells_impl" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::build_parse" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::meta" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::ton_cell" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::ton_cell_num" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::ton_cell_utils" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell" -> "ton_lib::cell::ton_hash" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::build_parse" -> "ton_lib::cell::build_parse::builder" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::build_parse" -> "ton_lib::cell::build_parse::parser" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::meta" -> "ton_lib::cell::meta::cell_meta" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::meta" -> "ton_lib::cell::meta::cell_meta_builder" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::meta" -> "ton_lib::cell::meta::cell_type" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::meta" -> "ton_lib::cell::meta::level_mask" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::ton_hash" -> "ton_lib::cell::ton_hash::ser_de" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::ton_hash::ser_de" -> "ton_lib::cell::ton_hash::ser_de::serde_ton_hash_b64" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::cell::ton_hash::ser_de" -> "ton_lib::cell::ton_hash::ser_de::serde_ton_hash_vec_b64" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::block_stream" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::client_types" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::lite" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::net_config" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_api" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_callback" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_client" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_client_config" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_client_raw" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_client_trait" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::tl_connection" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients" -> "ton_lib::clients::tonlibjson::utils" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::client_types" -> "ton_lib::clients::client_types::liteapi_serde" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::lite" -> "ton_lib::clients::lite::lc_config" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::lite" -> "ton_lib::clients::lite::lc_connection" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::lite" -> "ton_lib::clients::lite::lite_client" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::lite" -> "ton_lib::clients::lite::metrics" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::tonlibjson::tl_api" -> "ton_lib::clients::tonlibjson::tl_api::tl_req_ctx" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::tonlibjson::tl_api" -> "ton_lib::clients::tonlibjson::tl_api::tl_request" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::tonlibjson::tl_api" -> "ton_lib::clients::tonlibjson::tl_api::tl_response" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::clients::tonlibjson::tl_api" -> "ton_lib::clients::tonlibjson::tl_api::tl_types" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::contracts::methods" -> "ton_lib::contracts::methods::get_jetton_data" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::contracts::methods" -> "ton_lib::contracts::methods::get_wallet_address" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::contracts::methods" -> "ton_lib::contracts::methods::get_wallet_data" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::emulators::tvm" -> "ton_lib::emulators::tvm::c7_register" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::emulators::tvm" -> "ton_lib::emulators::tvm::method_id" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::emulators::tvm" -> "ton_lib::emulators::tvm::tvm_emulator" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::emulators::tvm" -> "ton_lib::emulators::tvm::tvm_response" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::emulators::tx" -> "ton_lib::emulators::tx::tx_emulator" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types" -> "ton_lib::types::tlb" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types" -> "ton_lib::types::ton_address" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types" -> "ton_lib::types::ton_wallet" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::adapters" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::block_tlb" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::primitives" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::tep_0064" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::tep_0074" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::tlb_cell" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::tlb_object" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb" -> "ton_lib::types::tlb::wallet" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters" -> "ton_lib::types::tlb::adapters::const_len" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters" -> "ton_lib::types::tlb::adapters::dict" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters" -> "ton_lib::types::tlb::adapters::tlb_ref" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::data_builder" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::data_parser" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::dict_key_adapters" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::dict_val_adapters" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::label_type" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::adapters::dict" -> "ton_lib::types::tlb::adapters::dict::leading_bit_utils" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::account" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::block" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::coins" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::config" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::hash_update" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::msg" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::msg_address" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::out_action" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::state_init" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::tvm" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::tx" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::unary" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb" -> "ton_lib::types::tlb::block_tlb::var_len" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::block_extra" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::block_id_ext" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::block_info" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::block_prev_info" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::mc_block_extra" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::shard_accounts_blocks" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::block" -> "ton_lib::types::tlb::block_tlb::block::shard_ident" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::config" -> "ton_lib::types::tlb::block_tlb::config::config_param_18" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::config" -> "ton_lib::types::tlb::block_tlb::config::config_param_8" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::config" -> "ton_lib::types::tlb::block_tlb::config::config_params" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::msg" -> "ton_lib::types::tlb::block_tlb::msg::common_msg_info" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::msg_address" -> "ton_lib::types::tlb::block_tlb::msg_address::from_impl" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tvm" -> "ton_lib::types::tlb::block_tlb::tvm::tvm_cell_slice" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tvm" -> "ton_lib::types::tlb::block_tlb::tvm::tvm_stack" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tvm" -> "ton_lib::types::tlb::block_tlb::tvm::tvm_stack_value" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tvm" -> "ton_lib::types::tlb::block_tlb::tvm::tvm_tuple" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tx" -> "ton_lib::types::tlb::block_tlb::tx::compute_skip_reason" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tx" -> "ton_lib::types::tlb::block_tlb::tx::tr_phase" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::block_tlb::tx" -> "ton_lib::types::tlb::block_tlb::tx::tx_descr" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::bool" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::either" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::libs_dict" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::num" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::option" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::primitives" -> "ton_lib::types::tlb::primitives::tlb_ptr" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::tep_0064" -> "ton_lib::types::tlb::tep_0064::snake_format" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::tep_0074" -> "ton_lib::types::tlb::tep_0074::jetton_transfer_msg" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::wallet" -> "ton_lib::types::tlb::wallet::constants" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::wallet" -> "ton_lib::types::tlb::wallet::versions" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::wallet" -> "ton_lib::types::tlb::wallet::wallet_data" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::wallet" -> "ton_lib::types::tlb::wallet::wallet_ext_msg_body" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::tlb::wallet" -> "ton_lib::types::tlb::wallet::wallet_ext_msg_utils" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_address" -> "ton_lib::types::ton_address::ser_de" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_address" -> "ton_lib::types::ton_address::utils" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_address::ser_de" -> "ton_lib::types::ton_address::ser_de::serde_ton_address_hex" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_wallet" -> "ton_lib::types::ton_wallet::mnemonic" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_wallet" -> "ton_lib::types::ton_wallet::version_helper" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+    "ton_lib::types::ton_wallet" -> "ton_lib::types::ton_wallet::wallet_code" [label="owns", color="#000000", style="solid"] [constraint=true]; // "owns" edge
+
+}

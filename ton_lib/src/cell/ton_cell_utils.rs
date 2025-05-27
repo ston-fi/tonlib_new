@@ -8,7 +8,7 @@ use std::ops::Deref;
 pub struct TonCellUtils;
 
 impl TonCellUtils {
-    /// Result vector will contains only unique hashes
+    /// Result vector will contain only unique hashes
     pub fn extract_lib_ids<'a, I>(cells_iter: I) -> Result<Vec<TonHash>, TonlibError>
     where
         I: IntoIterator<Item = &'a TonCell>,
