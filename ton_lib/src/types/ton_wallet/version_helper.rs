@@ -1,4 +1,4 @@
-use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellStorage};
+use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
 use crate::types::tlb::wallet::versions::WalletVersion;
@@ -58,7 +58,7 @@ impl WalletVersionHelper {
         valid_until: u32,
         msg_seqno: u32,
         wallet_id: i32,
-        msgs: TonCellStorage,
+        msgs: Vec<TonCellRef>,
     ) -> Result<TonCell, TonlibError> {
         match version {
             V2R1 | V2R2 => WalletV2ExtMsgBody {

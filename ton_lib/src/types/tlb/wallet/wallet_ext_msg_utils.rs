@@ -1,6 +1,6 @@
+use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell::TonCellRef;
-use crate::cell::{build_parse::builder::CellBuilder, ton_cell::TonCellStorage};
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::out_action::{OutAction, OutActionSendMsg, OutList};
 use crate::types::tlb::TLB;
@@ -18,7 +18,7 @@ pub(super) fn write_up_to_4_msgs(
     Ok(())
 }
 
-pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, TonCellStorage), TonlibError> {
+pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, Vec<TonCellRef>), TonlibError> {
     let msgs_cnt = parser.cell.refs.len();
     let mut msgs_modes = Vec::with_capacity(msgs_cnt);
     let mut msgs = Vec::with_capacity(msgs_cnt);
@@ -68,7 +68,7 @@ impl TLB for InnerRequest {
     }
 }
 
-pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(TonCellStorage, Vec<u8>), TonlibError> {
+pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(Vec<TonCellRef>, Vec<u8>), TonlibError> {
     let out_list = match request.out_actions {
         Some(out_list) => out_list,
         None => return Ok((vec![], vec![])),
