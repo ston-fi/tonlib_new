@@ -12,4 +12,4 @@ pub mod errors;
 #[cfg(any(feature = "tonlibjson", feature = "emulator"))]
 pub mod sys_utils;
 pub mod types;
-pub mod utils;
+

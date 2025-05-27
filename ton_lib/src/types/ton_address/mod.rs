@@ -1,4 +1,5 @@
 pub mod ser_de;
+mod utils;
 
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
@@ -12,10 +13,11 @@ use crate::types::tlb::block_tlb::msg_address::{
 };
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::TLB;
-use crate::utils::rewrite_bits;
+
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use crc::Crc;
+use utils::rewrite_bits;
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
