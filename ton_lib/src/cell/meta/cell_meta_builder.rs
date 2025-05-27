@@ -233,12 +233,10 @@ impl<'a> CellMetaBuilder<'a> {
         self.write_ref_depths(&mut writer, level)?;
         self.write_ref_hashes(&mut writer, level)?;
 
-        let result = writer
-            .writer()
-            .ok_or_else(|| TonlibError::BuilderMeta("Stream for cell repr is not byte-aligned".to_string()))?
-            .to_vec();
-
-        Ok(result)
+        if !writer.byte_aligned() {
+            return Err(TonlibError::BuilderMeta("Stream for cell repr is not byte-aligned".to_string()));
+        }
+        Ok(writer.into_writer())
     }
 
     /// Calculates d1 descriptor for cell
@@ -385,7 +383,7 @@ mod test {
         let (hashes, depths) = meta_builder.calc_hashes_and_depths(level_mask)?;
 
         for i in 0..4 {
-            assert_eq!(hashes[i], TonHash::EMPTY_CELL_HASH);
+            assert_eq!(hashes[i], TonCell::EMPTY_CELL_HASH);
             assert_eq!(depths[i], 0);
         }
         Ok(())

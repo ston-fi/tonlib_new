@@ -17,7 +17,8 @@ use std::sync::atomic::AtomicU64;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use std::time::Duration;
-use tokio::time::sleep;
+use tokio_retry::strategy::FixedInterval;
+use tokio_retry::RetryIf;
 use ton_liteapi::tl::common::{AccountId, Int256};
 use ton_liteapi::tl::request::{
     GetAccountState, GetBlock, GetLibraries, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest,
@@ -32,6 +33,7 @@ macro_rules! unwrap_lite_response {
     ($result:expr, $variant:ident) => {
         match $result {
             Response::$variant(inner) => Ok(inner),
+            Response::Error(err) => Err(TonlibError::LiteClientErrorResponse(err)),
             _ => Err(TonlibError::LiteClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
         }
     };
@@ -204,7 +206,7 @@ impl Inner {
 
     async fn exec_with_retries(
         &self,
-        request: Request,
+        req: Request,
         req_timeout: Duration,
         wait_seqno: Option<u32>,
     ) -> Result<Response, TonlibError> {
@@ -213,50 +215,26 @@ impl Inner {
                 seqno,
                 timeout_ms: WAIT_MC_SEQNO_MS,
             }),
-            request,
+            request: req,
         };
         let req_id = self.global_req_id.fetch_add(1, Relaxed);
-        let max_ret_count = self.config.retry_count;
-        let mut ret_num = 0;
-
-        let retry_duration = self.config.retry_waiting;
-        loop {
-            log::trace!("[req_id={req_id} ret_num={ret_num}/{max_ret_count}] send req: {wrap_req:?}");
-            let execute_result = self.exec_impl(req_id, ret_num, wrap_req.clone(), req_timeout).await;
-
-            match execute_result {
-                // case got response of error type
-                Ok(Response::Error(err)) => {
-                    log::trace!("[req_id={req_id} ret_num={ret_num}/{max_ret_count}] got response with error: {err:?}");
-                    if ret_num == max_ret_count {
-                        return Ok(Response::Error(err));
-                    }
-                }
-                // case got response of any other type
-                Ok(response) => break Ok(response),
-
-                // case failed to get response with retryable error
-                Err(err) => {
-                    if ret_num == max_ret_count {
-                        return Err(err);
-                    }
-                    log::warn!("[req_id={req_id} ret_num={ret_num}/{max_ret_count}] got error: {err:?}");
-                }
-            };
-            ret_num += 1;
-            sleep(retry_duration).await;
-        }
+        let fi = FixedInterval::new(self.config.retry_waiting);
+        let strategy = fi.take(self.config.retry_count);
+        RetryIf::spawn(strategy, || async { self.exec_impl(req_id, &wrap_req, req_timeout).await }, retry_condition)
+            .await
     }
 
     async fn exec_impl(
         &self,
-        _req_id: u64,
-        _retry_num: u32,
-        req: WrappedRequest,
+        req_id: u64,
+        req: &WrappedRequest,
         req_timeout: Duration,
     ) -> Result<Response, TonlibError> {
+        log::trace!("LiteClient exec_impl: req_id={req_id}, req={:?}", req);
         // pool is configured to spin until get connection
         let mut conn = self.conn_pool.get_async().await.unwrap();
-        conn.exec(req, req_timeout).await
+        conn.exec(req.clone(), req_timeout).await
     }
 }
+
+fn retry_condition(error: &TonlibError) -> bool { !matches!(error, TonlibError::LiteClientWrongResponse(..)) }

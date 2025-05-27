@@ -4,12 +4,13 @@ use crate::cell::ton_hash::TonHash;
 use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
 use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
 use crate::clients::tonlibjson::tl_api::tl_types::{
-    TLBlockId, TLBlockIdExt, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs,
-    TLFullAccountState, TLRawFullAccountState, TLRawTxs, TLTxId,
+    TLBlockId, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs, TLFullAccountState,
+    TLRawFullAccountState, TLRawTxs, TLTxId,
 };
 use crate::clients::tonlibjson::tl_connection::TLConnection;
 use crate::clients::tonlibjson::TLClientRetryStrategy;
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
 use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
@@ -52,7 +53,7 @@ pub trait TLClientTrait: Send + Sync {
         block_id: TLBlockId,
         lt: i64,
         utime: i32,
-    ) -> Result<TLBlockIdExt, TonlibError> {
+    ) -> Result<BlockIdExt, TonlibError> {
         let req = TLRequest::BlocksLookupBlock {
             mode,
             id: block_id,
@@ -62,11 +63,11 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
     }
 
-    async fn lookup_mc_block(&self, seqno: i32) -> Result<TLBlockIdExt, TonlibError> {
+    async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TonlibError> {
         let block_id = TLBlockId {
             workchain: TON_MASTERCHAIN_ID,
             shard: TON_SHARD_FULL as i64,
-            seqno,
+            seqno: seqno as i32,
         };
         self.lookup_block(1, block_id, 0, 0).await
     }
@@ -132,7 +133,7 @@ pub trait TLClientTrait: Send + Sync {
         TonHash::from_vec(rsp.hash)
     }
 
-    async fn sync(&self) -> Result<TLBlockIdExt, TonlibError> {
+    async fn sync(&self) -> Result<BlockIdExt, TonlibError> {
         let req = TLRequest::Sync {};
         unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
     }
@@ -217,7 +218,7 @@ pub trait TLClientTrait: Send + Sync {
     //
 
     //
-    async fn get_block_shards(&self, block_id: TLBlockIdExt) -> Result<TLBlocksShards, TonlibError> {
+    async fn get_block_shards(&self, block_id: BlockIdExt) -> Result<TLBlocksShards, TonlibError> {
         let req = TLRequest::BlocksGetShards { id: block_id.clone() };
         unwrap_tl_response!(self.exec(&req).await?, TLBlocksShards)
     }
@@ -232,7 +233,7 @@ pub trait TLClientTrait: Send + Sync {
     ///
     async fn get_block_txs(
         &self,
-        block_id: TLBlockIdExt,
+        block_id: BlockIdExt,
         mode: u32,
         count: u32,
         after: TLBlocksAccountTxId,
@@ -281,7 +282,7 @@ pub trait TLClientTrait: Send + Sync {
     //     }
     // }
     //
-    async fn get_block_header(&self, block_id: TLBlockIdExt) -> Result<TLBlocksHeader, TonlibError> {
+    async fn get_block_header(&self, block_id: BlockIdExt) -> Result<TLBlocksHeader, TonlibError> {
         let req = TLRequest::GetBlockHeader { id: block_id };
         unwrap_tl_response!(self.exec(&req).await?, TLBlocksHeader)
     }

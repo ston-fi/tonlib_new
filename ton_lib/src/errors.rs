@@ -79,6 +79,8 @@ pub enum TonlibError {
     NetRequestTimeout { msg: String, timeout: Duration },
 
     // LiteClient
+    #[error("LiteClientErrorResponse: {0:?}")]
+    LiteClientErrorResponse(ton_liteapi::tl::response::Error),
     #[error("LiteClientWrongResponse: expected {0}, got {1}")]
     LiteClientWrongResponse(String, String),
     #[error("LiteClientLiteError: {0}")]
