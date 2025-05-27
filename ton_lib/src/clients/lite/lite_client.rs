@@ -237,6 +237,4 @@ impl Inner {
     }
 }
 
-fn retry_condition(error: &TonlibError) -> bool {
-    !matches!(error, TonlibError::LiteClientWrongResponse(..))
-}
+fn retry_condition(error: &TonlibError) -> bool { !matches!(error, TonlibError::LiteClientWrongResponse(..)) }

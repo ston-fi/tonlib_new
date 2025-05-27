@@ -99,25 +99,17 @@ impl<T> EitherRef<T> {
         }
     }
 
-    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self {
-        Self { value, layout }
-    }
+    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self { Self { value, layout } }
 }
 impl<T> Deref for EitherRef<T> {
     type Target = T;
-    fn deref(&self) -> &Self::Target {
-        &self.value
-    }
+    fn deref(&self) -> &Self::Target { &self.value }
 }
 impl<T> DerefMut for EitherRef<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.value
-    }
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.value }
 }
 impl<T: PartialEq> PartialEq for EitherRef<T> {
-    fn eq(&self, other: &Self) -> bool {
-        self.value == other.value
-    }
+    fn eq(&self, other: &Self) -> bool { self.value == other.value }
 }
 
 #[cfg(test)]

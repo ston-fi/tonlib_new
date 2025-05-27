@@ -11,9 +11,7 @@ pub struct WalletV1V2Data {
 }
 
 impl WalletV1V2Data {
-    pub fn new(public_key: TonHash) -> Self {
-        Self { seqno: 0, public_key }
-    }
+    pub fn new(public_key: TonHash) -> Self { Self { seqno: 0, public_key } }
 }
 
 /// WalletVersion::V3R1 | WalletVersion::V3R2

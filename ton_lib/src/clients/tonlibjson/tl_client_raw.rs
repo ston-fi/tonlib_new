@@ -20,9 +20,7 @@ impl TLClientRaw {
         Ok(TLClientRaw { ptr: client_ptr, tag })
     }
 
-    pub fn tag(&self) -> &str {
-        self.tag.as_str()
-    }
+    pub fn tag(&self) -> &str { self.tag.as_str() }
 
     pub fn send(&self, req: &TLRequest, extra: &str) -> Result<(), TonlibError> {
         let c_str = req.to_c_str_json(extra)?;
@@ -41,9 +39,7 @@ impl TLClientRaw {
 }
 
 impl Drop for TLClientRaw {
-    fn drop(&mut self) {
-        unsafe { tonlib_client_json_destroy(self.ptr) }
-    }
+    fn drop(&mut self) { unsafe { tonlib_client_json_destroy(self.ptr) } }
 }
 
 unsafe impl Send for TLClientRaw {}

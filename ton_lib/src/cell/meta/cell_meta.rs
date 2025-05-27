@@ -46,7 +46,5 @@ impl CellMeta {
         Ok(meta)
     }
 
-    pub fn into_ref(self) -> Arc<Self> {
-        Arc::new(self)
-    }
+    pub fn into_ref(self) -> Arc<Self> { Arc::new(self) }
 }

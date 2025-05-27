@@ -29,9 +29,7 @@ pub struct TonAddress {
 impl TonAddress {
     pub const ZERO: Self = TonAddress::new(0, TonHash::ZERO);
 
-    pub const fn new(wc: i32, hash: TonHash) -> Self {
-        Self { wc, hash }
-    }
+    pub const fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
 
     pub fn derive(wc: i32, code: TonCellRef, data: TonCellRef) -> Result<TonAddress, TonlibError> {
         let state_init = StateInit::new(code, data);
@@ -49,9 +47,7 @@ impl TonAddress {
         }
     }
 
-    pub fn to_hex(&self) -> String {
-        format!("{}:{}", self.wc, hex::encode(self.hash.as_slice()))
-    }
+    pub fn to_hex(&self) -> String { format!("{}:{}", self.wc, hex::encode(self.hash.as_slice())) }
 
     pub fn to_b64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
         let mut buf = [0; 36];
@@ -115,9 +111,7 @@ impl TLB for TonAddress {
 }
 
 impl Display for TonAddress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(&self.to_b64(true, true, true))
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str(&self.to_b64(true, true, true)) }
 }
 
 impl Debug for TonAddress {

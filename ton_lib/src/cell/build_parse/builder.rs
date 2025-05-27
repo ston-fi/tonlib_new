@@ -147,9 +147,7 @@ impl CellBuilder {
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
-    pub fn data_bits_left(&self) -> usize {
-        TonCell::MAX_DATA_BITS_LEN - self.data_bits_len
-    }
+    pub fn data_bits_left(&self) -> usize { TonCell::MAX_DATA_BITS_LEN - self.data_bits_len }
 
     fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TonlibError> {
         let new_bits_len = self.data_bits_len + bits_len;

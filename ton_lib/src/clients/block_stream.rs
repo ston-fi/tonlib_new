@@ -19,9 +19,7 @@ pub struct BlockStreamItem {
 }
 
 impl BlockStreamItem {
-    pub fn mc_seqno(&self) -> u32 {
-        todo!()
-    }
+    pub fn mc_seqno(&self) -> u32 { todo!() }
 }
 //
 pub struct BlockStream {
