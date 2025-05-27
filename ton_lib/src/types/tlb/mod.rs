@@ -129,7 +129,7 @@ pub trait TLB: Sized {
     }
 
     // when we write an object, we have to idea of it's type - including writing TonCell itself
-    // so for all types except TonCell & TonCellRef we return Ordinary, but for them we return proper type
+    // so for all types except TonCell & TonCellArc we return Ordinary, but for them we return proper type
     // it's required to build proper BOC
     fn cell_type(&self) -> CellType { CellType::Ordinary }
 }

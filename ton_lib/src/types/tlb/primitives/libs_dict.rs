@@ -12,7 +12,7 @@ use std::ops::{Deref, DerefMut};
 
 /// Contains dict itself, not 'present' marker in root cell
 /// Add TLBDict adapter to use in in TLB structs
-/// Consider using `Option<TonCellRef>` instead, if libraries itself are not important
+/// Consider using `Option<TonCellArc>` instead, if libraries itself are not important
 #[derive(Debug, Clone, PartialEq, Default)]
 pub struct LibsDict(HashMap<TonHash, TonCellArc>);
 

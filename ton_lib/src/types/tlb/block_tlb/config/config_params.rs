@@ -12,7 +12,7 @@ pub struct ConfigParams {
 // #[derive(Debug, Clone, PartialEq, TLBDerive)]
 // pub struct Config {
 //     #[tlb_derive(adapter = "Dict::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
-//     pub data: HashMap<u32, TonCellRef>,
+//     pub data: HashMap<u32, TonCellArc>,
 // }
 
 impl ConfigParams {

@@ -1,6 +1,6 @@
 /// The lowest brick in the library stack
 /// Provides the basic types to interact with the TON blockchain:
-/// TonHash, TonCell, TonCellRef, CellBuilder, CellParser
+/// TonHash, TonCell, TonCellArc, CellBuilder, CellParser
 ///
 mod boc_raw;
 
