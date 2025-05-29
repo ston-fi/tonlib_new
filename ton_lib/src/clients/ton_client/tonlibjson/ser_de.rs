@@ -1,41 +1,33 @@
-pub(super) mod serde_ton_address_hex {
-    use crate::types::ton_address::TonAddress;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
+#[macro_export]
+macro_rules! impl_serde_str {
+    ($mod_name:ident, $ty:ty, $to_string_fn:expr) => {
+        pub(super) mod $mod_name {
+            use serde::{de::Error, Deserialize, Deserializer, Serializer};
+            use std::str::FromStr;
 
-    pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_hex().as_str())
-    }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonAddress, D::Error> {
-        TonAddress::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
-    }
+            pub fn serialize<S: Serializer>(value: &$ty, serializer: S) -> Result<S::Ok, S::Error> {
+                serializer.serialize_str(&$to_string_fn(value))
+            }
+
+            pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<$ty, D::Error> {
+                let s = String::deserialize(deserializer)?;
+                <$ty>::from_str(&s).map_err(Error::custom)
+            }
+        }
+    };
 }
 
-pub(super) mod serde_ton_address_b64 {
-    use crate::types::ton_address::TonAddress;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
-
-    pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_string().as_str())
-    }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonAddress, D::Error> {
-        TonAddress::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
-    }
-}
-
-pub(super) mod serde_ton_hash_b64 {
-    use crate::cell::ton_hash::TonHash;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
-
-    pub fn serialize<S: Serializer>(hash: &TonHash, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_b64().as_str())
-    }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonHash, D::Error> {
-        TonHash::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
-    }
-}
+impl_serde_str!(
+    serde_ton_address_b64,
+    crate::types::ton_address::TonAddress,
+    |v: &crate::types::ton_address::TonAddress| v.to_string()
+);
+impl_serde_str!(
+    serde_ton_address_hex,
+    crate::types::ton_address::TonAddress,
+    |v: &crate::types::ton_address::TonAddress| v.to_hex()
+);
+impl_serde_str!(serde_ton_hash_b64, crate::cell::ton_hash::TonHash, |v: &crate::cell::ton_hash::TonHash| v.to_b64());
 
 pub(super) mod serde_ton_hash_vec_b64 {
     use crate::cell::ton_hash::TonHash;
@@ -55,7 +47,7 @@ pub(super) mod serde_ton_hash_vec_b64 {
 
 pub(super) mod serde_block_id_ext {
     use crate::cell::ton_hash::TonHash;
-    use crate::clients::tonlibjson::tl_api::Base64Standard;
+    use crate::clients::ton_client::tonlibjson::Base64Standard;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -100,7 +92,7 @@ pub(super) mod serde_block_id_ext {
 }
 
 pub(super) mod serde_block_id_ext_vec {
-    use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
+    use crate::clients::ton_client::tonlibjson::ser_de::serde_block_id_ext;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -124,7 +116,7 @@ pub(super) mod serde_block_id_ext_vec {
 }
 
 pub(super) mod serde_block_id_ext_vec_opt {
-    use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext_vec;
+    use crate::clients::ton_client::tonlibjson::ser_de::serde_block_id_ext_vec;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use serde::de::IntoDeserializer;
     use serde::{Deserialize, Deserializer, Serializer};

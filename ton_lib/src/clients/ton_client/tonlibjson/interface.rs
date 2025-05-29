@@ -1,14 +1,14 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::ton_client::connection::TonConnection;
+use crate::clients::ton_client::tonlibjson::request::TLRequest;
+use crate::clients::ton_client::tonlibjson::response::TLResponse;
+use crate::clients::ton_client::tonlibjson::types::{
     TLBlockId, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs, TLFullAccountState,
     TLRawFullAccountState, TLRawTxs, TLTxId,
 };
-use crate::clients::tonlibjson::tl_connection::TLConnection;
-use crate::clients::tonlibjson::TLClientRetryStrategy;
+use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
@@ -30,9 +30,8 @@ macro_rules! unwrap_tl_response {
 }
 
 #[async_trait]
-pub trait TLClientTrait: Send + Sync {
-    async fn get_connection(&self) -> &TLConnection;
-    fn get_retry_strategy(&self) -> &TLClientRetryStrategy;
+pub trait TonlibjsonInterface: Send + Sync {
+    async fn get_connection(&self) -> &TonConnection;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         let retry_strat = self.get_retry_strategy();
@@ -296,6 +295,8 @@ pub trait TLClientTrait: Send + Sync {
         let req = TLRequest::GetConfigAll { mode };
         Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
     }
+
+    fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy;
 }
 
 fn retry_condition(error: &TonlibError) -> bool {

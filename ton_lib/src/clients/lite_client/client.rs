@@ -1,15 +1,18 @@
-use super::lc_connection::Connection;
-use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
+use super::connection::Connection;
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::MasterchainInfo;
-use crate::clients::lite::lc_config::LiteClientConfig;
+use crate::clients::lite_client::config::LiteClientConfig;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::account::MaybeAccount;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
 use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
+use crate::{
+    bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
+    unwrap_lite_response,
+};
 use auto_pool::config::{AutoPoolConfig, PickStrategy};
 use auto_pool::pool::AutoPool;
 use std::cmp::max;
@@ -27,17 +30,6 @@ use ton_liteapi::tl::response::{BlockData, Response};
 
 const WAIT_MC_SEQNO_MS: u32 = 5000;
 const WAIT_CONNECTION_MS: u64 = 5;
-
-#[macro_export]
-macro_rules! unwrap_lite_response {
-    ($result:expr, $variant:ident) => {
-        match $result {
-            Response::$variant(inner) => Ok(inner),
-            Response::Error(err) => Err(TonlibError::LiteClientErrorResponse(err)),
-            _ => Err(TonlibError::LiteClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
-        }
-    };
-}
 
 #[derive(Clone)]
 pub struct LiteClient {

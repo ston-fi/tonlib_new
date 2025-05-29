@@ -1,8 +1,8 @@
 use crate::cell::ton_cell::TonCell;
-use crate::clients::lite::lc_config::LiteClientConfig;
-use crate::clients::lite::lite_client::LiteClient;
-use crate::clients::tonlibjson::tl_api::tl_types::TLKeyStoreType;
-use crate::clients::tonlibjson::tl_client_config::TLClientConfig;
+use crate::clients::lite_client::client::LiteClient;
+use crate::clients::lite_client::config::LiteClientConfig;
+use crate::clients::ton_client::config::TonClientConfig;
+use crate::clients::ton_client::tonlibjson::types::TLKeyStoreType;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::block_tlb::block::block_info::BlockInfo;
@@ -11,7 +11,7 @@ use futures_util::future::join_all;
 use std::time::Duration;
 use ton_liteapi::tl::response::BlockData;
 
-pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), TonlibError> {
+pub async fn prepare_client_env(config: &mut TonClientConfig) -> Result<(), TonlibError> {
     if config.update_init_block {
         update_init_block(config).await?;
     }
@@ -22,7 +22,7 @@ pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), Tonli
     Ok(())
 }
 
-async fn update_init_block(config: &mut TLClientConfig) -> Result<(), TonlibError> {
+async fn update_init_block(config: &mut TonClientConfig) -> Result<(), TonlibError> {
     log::info!("Updating init_block...");
     let lite_config = LiteClientConfig::new(&config.init_opts.config.net_config)?;
     let cur_init_seqno = lite_config.net_config.get_init_block_seqno();

@@ -1,5 +1,5 @@
-use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::ton_client::tonlibjson::ser_de::serde_block_id_ext;
+use crate::clients::ton_client::tonlibjson::types::{
     TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
     TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
     TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,

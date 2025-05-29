@@ -1,12 +1,11 @@
-use crate::clients::tonlibjson::tl_api::tl_req_ctx::TLRequestCtx;
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
+use crate::clients::ton_client::tonlibjson::response::TLResponse;
+use crate::clients::ton_client::{request_context::TLRequestCtx, tonlibjson::request::TLRequest};
 use crate::errors::TonlibError;
 use std::sync::Arc;
 
 /// Check tl_conn_default (mostly `run_loop` method) for method execution flow
 #[allow(unused)]
-pub trait TLCallback: Send + Sync {
+pub trait TonCallback: Send + Sync {
     fn on_loop_enter(&self, tag: &str);
     fn on_loop_exit(&self, tag: &str);
 
@@ -19,11 +18,11 @@ pub trait TLCallback: Send + Sync {
 }
 
 #[derive(Clone, Default)]
-pub struct TLCallbacksStore {
-    pub callbacks: Arc<Vec<Box<dyn TLCallback>>>,
+pub struct TonCallbacksStore {
+    pub callbacks: Arc<Vec<Box<dyn TonCallback>>>,
 }
 
-impl TLCallback for TLCallbacksStore {
+impl TonCallback for TonCallbacksStore {
     fn on_loop_enter(&self, tag: &str) { self.callbacks.iter().for_each(|cb| cb.on_loop_enter(tag)); }
     fn on_loop_exit(&self, tag: &str) { self.callbacks.iter().for_each(|cb| cb.on_loop_exit(tag)); }
     fn before_send(&self, tag: &str, req_ctx: &TLRequestCtx, req: &TLRequest) {
@@ -44,8 +43,8 @@ impl TLCallback for TLCallbacksStore {
     }
 }
 
-pub struct TLCallbackLogTrace {}
-impl TLCallback for TLCallbackLogTrace {
+pub struct TonCallbackLogTrace {}
+impl TonCallback for TonCallbackLogTrace {
     fn on_loop_enter(&self, tag: &str) {
         log::info!("[{tag}] Starting event loop");
     }
