@@ -1,6 +1,6 @@
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::adapters::TLBRef;
-use crate::types::tlb::block_tlb::coins::{CurrencyCollection, Grams};
+use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
 use crate::types::tlb::block_tlb::msg_address::MsgAddressInt;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
@@ -47,7 +47,7 @@ pub struct StorageInfo {
     pub used: StorageUsed,
     pub storage_extra: MaybeStorageExtraInfo,
     pub last_paid: u32,
-    pub due_payment: Option<Grams>,
+    pub due_payment: Option<Coins>,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
