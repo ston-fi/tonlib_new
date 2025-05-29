@@ -168,8 +168,8 @@ impl TLB for BlockInfo {
 mod tests {
     use super::*;
     use crate::cell::ton_hash::TonHash;
-    use crate::types::tlb::block_tlb::block::test_block_data::{MASTER_BLOCK_BOC_HEX, SHARD_BLOCK_BOC_HEX};
     use crate::types::tlb::block_tlb::block::Block;
+    use crate::types::tlb::block_tlb::test_block_data::{MASTER_BLOCK_BOC_HEX, SHARD_BLOCK_BOC_HEX};
     use crate::types::tlb::TLB;
     use std::str::FromStr;
 

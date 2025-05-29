@@ -18,7 +18,7 @@ use std::collections::HashMap;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L291
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b0111, bits_len = 4)]
 pub struct Tx {
     pub account_addr: TonHash,
@@ -39,7 +39,7 @@ pub struct Tx {
     pub descr: TxDescr,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Default, Debug, Clone, PartialEq, TLBDerive)]
 pub struct TxMsgs {
     #[tlb_derive(adapter = "TLBOptRef")]
     pub in_msg: Option<Msg>,

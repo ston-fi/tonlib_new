@@ -1,6 +1,6 @@
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
-use crate::types::tlb::block_tlb::tx::compute_skip_reason::ComputeSkipReason;
+use crate::types::tlb::block_tlb::tx::compute_skip_reason::{ComputeSkipReason, ComputeSkipReasonNoState};
 use crate::types::tlb::block_tlb::tx::TLBRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
 use num_bigint::BigUint;
@@ -18,6 +18,14 @@ pub enum TrComputePhase {
     Skipped(TrComputePhaseSkipped),
     #[rustfmt::skip]
     VM(Box::<TrComputePhaseVM>),
+}
+
+impl Default for TrComputePhase {
+    fn default() -> Self {
+        TrComputePhase::Skipped(TrComputePhaseSkipped {
+            reason: ComputeSkipReasonNoState.into(),
+        })
+    }
 }
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]

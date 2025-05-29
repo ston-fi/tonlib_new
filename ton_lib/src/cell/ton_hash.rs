@@ -86,6 +86,10 @@ impl FromStr for TonHash {
     }
 }
 
+impl Default for TonHash {
+    fn default() -> Self { TonHash::ZERO }
+}
+
 impl TonHashData {
     fn as_slice(&self) -> &[u8] {
         match self {

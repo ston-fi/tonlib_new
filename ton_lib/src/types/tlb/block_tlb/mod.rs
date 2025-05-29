@@ -1,3 +1,6 @@
+#[cfg(test)]
+mod test_block_data;
+
 pub mod account;
 pub mod block;
 pub mod coins;

@@ -1,6 +1,3 @@
-#[cfg(test)]
-mod test_block_data;
-
 pub mod block_extra;
 pub mod block_id_ext;
 pub mod block_info;
@@ -33,9 +30,9 @@ mod tests {
     use crate::cell::ton_hash::TonHash;
     use crate::types::tlb::block_tlb::block::block_info::{BlockInfo, ExtBlockRef};
     use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
-    use crate::types::tlb::block_tlb::block::test_block_data::MASTER_BLOCK_BOC_HEX;
     use crate::types::tlb::block_tlb::block::Block;
     use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
+    use crate::types::tlb::block_tlb::test_block_data::MASTER_BLOCK_BOC_HEX;
     use crate::types::tlb::TLB;
     use std::str::FromStr;
 

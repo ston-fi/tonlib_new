@@ -1,11 +1,12 @@
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::tx::tr_phase::{
-    TrActionPhase, TrBouncePhase, TrComputePhase, TrCreditPhase, TrStoragePhase,
+    TrActionPhase, TrBouncePhase, TrComputePhase, TrComputePhaseVM, TrCreditPhase, TrStoragePhase,
 };
 use crate::types::tlb::block_tlb::tx::ConstLen;
 use crate::types::tlb::block_tlb::tx::TLBOptRef;
 use crate::types::tlb::block_tlb::tx::TLBRef;
 use crate::types::tlb::block_tlb::tx::Tx;
+use std::ops::Deref;
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L353
@@ -20,7 +21,7 @@ pub enum TxDescr {
     MergeInstall(TxDescrMergeInstall),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Default, Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b0000, bits_len = 4)]
 pub struct TxDescrOrd {
     pub credit_first: bool,
@@ -106,4 +107,37 @@ pub struct SplitMergeInfo {
     pub acc_split_depth: u8,
     pub this_addr: TonHash,
     pub sibling_addr: TonHash,
+}
+
+impl Default for TxDescr {
+    fn default() -> Self { TxDescrOrd::default().into() }
+}
+
+impl TxDescr {
+    pub fn compute_phase(&self) -> Option<&TrComputePhaseVM> {
+        let compute_phase = match &self {
+            TxDescr::Ord(descr) => descr.compute_phase.as_vm(),
+            TxDescr::Storage(_) => return None,
+            TxDescr::TickTock(descr) => descr.compute_phase.as_vm(),
+            TxDescr::SplitPrepare(_) => return None,
+            TxDescr::SplitInstall(_) => return None,
+            TxDescr::MergePrepare(_) => return None,
+            TxDescr::MergeInstall(_) => return None,
+        };
+        compute_phase.map(|phase| phase.deref())
+    }
+
+    pub fn storage_phase(&self) -> Option<&TrStoragePhase> {
+        match &self {
+            TxDescr::Ord(descr) => descr.storage_phase.as_ref(),
+            TxDescr::Storage(descr) => Some(&descr.storage_phase),
+            TxDescr::TickTock(descr) => Some(&descr.storage_phase),
+            TxDescr::SplitPrepare(descr) => descr.storage_phase.as_ref(),
+            TxDescr::SplitInstall(_) => None,
+            TxDescr::MergePrepare(descr) => Some(&descr.storage_phase),
+            TxDescr::MergeInstall(descr) => descr.storage_phase.as_ref(),
+        }
+    }
+
+    pub fn exit_code(&self) -> Option<i32> { self.compute_phase().map(|x| x.compute_phase_vm_info.exit_code) }
 }

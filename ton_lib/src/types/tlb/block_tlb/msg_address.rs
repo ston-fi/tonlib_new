@@ -97,6 +97,21 @@ impl MsgAddressExt {
     }
 }
 
+impl MsgAddressInt {
+    pub fn workchain(&self) -> i32 {
+        match self {
+            MsgAddressInt::Std(addr) => addr.workchain as i32,
+            MsgAddressInt::Var(addr) => addr.workchain,
+        }
+    }
+    pub fn address_hash(&self) -> &[u8] {
+        match self {
+            MsgAddressInt::Std(addr) => addr.address.as_slice(),
+            MsgAddressInt::Var(addr) => &addr.address,
+        }
+    }
+}
+
 /// Allows easily convert enum variants to parent type - Extra converters (are not derived automatically)
 #[rustfmt::skip]
 mod from_impl {
