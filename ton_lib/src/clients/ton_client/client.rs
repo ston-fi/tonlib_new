@@ -1,7 +1,7 @@
 use crate::clients::ton_client::connection::TonConnection;
 use crate::clients::ton_client::utils::prepare_client_env;
 use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
-use crate::clients::ton_client::{config::TonClientConfig, tonlibjson::interface::TonlibjsonInterface};
+use crate::clients::ton_client::{config::TonClientConfig, tl::client::TLClientTrait};
 use crate::errors::TonlibError;
 use async_trait::async_trait;
 use rand::prelude::{IndexedRandom, StdRng};
@@ -12,12 +12,12 @@ use tokio::sync::{Mutex, Semaphore};
 
 // /// Simple client with many connections
 #[derive(Clone)]
-pub struct TonClient {
+pub struct TLClient {
     inner: Arc<Inner>,
 }
 
 #[async_trait]
-impl TonlibjsonInterface for TonClient {
+impl TLClientTrait for TLClient {
     async fn get_connection(&self) -> &TonConnection {
         let mut rng_lock = self.inner.rnd.lock().await;
         self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
@@ -26,8 +26,8 @@ impl TonlibjsonInterface for TonClient {
     fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy { &self.inner.config.retry_strategy }
 }
 
-impl TonClient {
-    pub async fn new(mut config: TonClientConfig) -> Result<TonClient, TonlibError> {
+impl TLClient {
+    pub async fn new(mut config: TonClientConfig) -> Result<TLClient, TonlibError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));
@@ -41,7 +41,7 @@ impl TonClient {
             connections,
             config,
         };
-        Ok(TonClient { inner: Arc::new(inner) })
+        Ok(TLClient { inner: Arc::new(inner) })
     }
 }
 

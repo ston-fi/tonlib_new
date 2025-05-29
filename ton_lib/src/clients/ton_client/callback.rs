@@ -1,5 +1,5 @@
-use crate::clients::ton_client::tonlibjson::response::TLResponse;
-use crate::clients::ton_client::{request_context::TLRequestCtx, tonlibjson::request::TLRequest};
+use crate::clients::ton_client::tl::request::TLRequest;
+use crate::clients::ton_client::tl::{request_context::TLRequestCtx, response::TLResponse};
 use crate::errors::TonlibError;
 use std::sync::Arc;
 

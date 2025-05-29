@@ -1,6 +1,6 @@
 use crate::clients::net_config::TonNetConfig;
 use crate::clients::ton_client::callback::TonCallbacksStore;
-use crate::clients::ton_client::tonlibjson::types::{TLConfig, TLKeyStoreType, TLOptions};
+use crate::clients::ton_client::tl::types::{TLConfig, TLKeyStoreType, TLOptions};
 use std::time::Duration;
 
 pub struct TonClientConfig {

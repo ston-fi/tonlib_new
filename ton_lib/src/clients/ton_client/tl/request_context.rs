@@ -3,7 +3,7 @@ use std::time::Instant;
 
 use tokio::sync::oneshot::Sender;
 
-use crate::{clients::ton_client::tonlibjson::response::TLResponse, errors::TonlibError};
+use crate::{clients::ton_client::tl::response::TLResponse, errors::TonlibError};
 
 pub struct TLRequestCtx {
     pub id: u64,

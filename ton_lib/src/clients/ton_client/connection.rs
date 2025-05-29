@@ -4,20 +4,21 @@ use std::sync::{Arc, Weak};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::clients::ton_client::callback::{TonCallback, TonCallbacksStore};
+use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::clients::ton_client::config::{LiteNodeFilter, TonClientConfig};
-use crate::clients::ton_client::tonlibjson::interface::TonlibjsonInterface;
-use crate::clients::ton_client::tonlibjson::request::TLRequest;
-use crate::clients::ton_client::tonlibjson::response::TLResponse;
-use crate::clients::ton_client::tonlibjson::types::{TLBlockId, TLOptions, TLOptionsInfo};
+use crate::clients::ton_client::tl::client::TLClientTrait;
+use crate::clients::ton_client::tl::request::TLRequest;
+use crate::clients::ton_client::tl::response::TLResponse;
+use crate::clients::ton_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
 use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
+use crate::clients::ton_client::{
+    callback::{TonCallback, TonCallbacksStore},
+    tl::request_context::TLRequestCtx,
+    tonlibjson_wrapper::TonlibjsonWrapper,
+};
 use crate::errors::TonlibError;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
-use crate::{
-    bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
-    clients::ton_client::request_context::TLRequestCtx,
-};
-use crate::{clients::ton_client::tonlibjson::client::TonlibjsonClient, unwrap_tl_response};
+use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
 
@@ -29,7 +30,7 @@ pub struct TonConnection {
 }
 
 #[async_trait]
-impl TonlibjsonInterface for TonConnection {
+impl TLClientTrait for TonConnection {
     async fn get_connection(&self) -> &TonConnection { self }
 
     fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy {
@@ -57,7 +58,7 @@ impl TonConnection {
 }
 
 struct Inner {
-    client_raw: TonlibjsonClient,
+    client_raw: TonlibjsonWrapper,
     active_requests: Mutex<HashMap<u64, TLRequestCtx>>,
     semaphore: Arc<Semaphore>,
     next_request_id: AtomicU64,
@@ -165,7 +166,7 @@ async fn new_connection(config: &TonClientConfig, semaphore: Arc<Semaphore>) -> 
     let tag = format!("ton-conn-{conn_id}");
 
     let inner = Arc::new(Inner {
-        client_raw: TonlibjsonClient::new(tag.clone())?,
+        client_raw: TonlibjsonWrapper::new(tag.clone())?,
         active_requests: Mutex::new(HashMap::new()),
         semaphore,
         next_request_id: AtomicU64::new(0),

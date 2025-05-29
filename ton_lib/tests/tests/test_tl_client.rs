@@ -1,12 +1,12 @@
 use std::str::FromStr;
 use tokio_test::assert_ok;
-use ton_lib::clients::ton_client::tonlibjson::interface::TonlibjsonInterface;
-use ton_lib::clients::ton_client::TonClient;
+use ton_lib::clients::ton_client::tl::client::TLClientTrait;
+use ton_lib::clients::ton_client::TLClient;
 
 use crate::tests::utils::init_logging;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::cell::ton_hash::TonHash;
-use ton_lib::clients::ton_client::tonlibjson::types::TLAccountState;
+use ton_lib::clients::ton_client::tl::types::TLAccountState;
 use ton_lib::sys_utils::sys_tonlib_set_verbosity_level;
 use ton_lib::types::tlb::TLB;
 use ton_lib::types::ton_address::TonAddress;
@@ -85,11 +85,11 @@ async fn test_tl_client_default_async_context() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn make_tonlib_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TonClient> {
+pub async fn make_tonlib_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
     init_logging();
     log::info!("initializing tl_client with mainnet={mainnet}...");
     let config = ton_lib::clients::ton_client::TonClientConfig::new_mainnet(archive_only);
-    let client = TonClient::new(config).await?;
+    let client = TLClient::new(config).await?;
     sys_tonlib_set_verbosity_level(0);
     Ok(client)
 }

@@ -1,10 +1,10 @@
 use crate::cell::ton_hash::TonHash;
-use crate::clients::ton_client::tonlibjson::ser_de::serde_block_id_ext;
-use crate::clients::ton_client::tonlibjson::ser_de::serde_ton_hash_vec_b64;
-use crate::clients::ton_client::tonlibjson::types::{
+use crate::clients::ton_client::tl::ser_de::serde_block_id_ext;
+use crate::clients::ton_client::tl::ser_de::serde_ton_hash_vec_b64;
+use crate::clients::ton_client::tl::types::{
     TLAccountAddress, TLBlockId, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
-use crate::clients::ton_client::tonlibjson::Base64Standard;
+use crate::clients::ton_client::tl::Base64Standard;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 
@@ -218,7 +218,7 @@ impl TLRequest {
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::ton_client::tonlibjson::request::TLRequest;
+    use crate::clients::ton_client::tl::request::TLRequest;
     use std::ffi::CString;
 
     #[test]
