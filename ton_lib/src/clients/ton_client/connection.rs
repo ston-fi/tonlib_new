@@ -5,12 +5,12 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
-use crate::clients::ton_client::config::{LiteNodeFilter, TonClientConfig};
+use crate::clients::ton_client::config::{LiteNodeFilter, TLClientConfig};
 use crate::clients::ton_client::tl::client::TLClientTrait;
 use crate::clients::ton_client::tl::request::TLRequest;
 use crate::clients::ton_client::tl::response::TLResponse;
 use crate::clients::ton_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
-use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
+use crate::clients::ton_client::TLClientRetryStrategy;
 use crate::clients::ton_client::{
     callback::{TonCallback, TonCallbacksStore},
     tl::request_context::TLRequestCtx,
@@ -33,8 +33,8 @@ pub struct TonConnection {
 impl TLClientTrait for TonConnection {
     async fn get_connection(&self) -> &TonConnection { self }
 
-    fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy {
-        static NO_RETRY: TonlibjsonClientRetryStrategy = TonlibjsonClientRetryStrategy {
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy {
+        static NO_RETRY: TLClientRetryStrategy = TLClientRetryStrategy {
             retry_count: 0,
             retry_waiting: Duration::from_millis(0),
         };
@@ -43,7 +43,7 @@ impl TLClientTrait for TonConnection {
 }
 
 impl TonConnection {
-    pub async fn new(config: &TonClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
+    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
         new_connection_checked(config, semaphore).await
     }
 
@@ -126,7 +126,7 @@ fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TonCallbacksStore) 
 }
 
 async fn new_connection_checked(
-    config: &TonClientConfig,
+    config: &TLClientConfig,
     semaphore: Arc<Semaphore>,
 ) -> Result<TonConnection, TonlibError> {
     let conn = loop {
@@ -161,7 +161,7 @@ async fn new_connection_checked(
     conn
 }
 
-async fn new_connection(config: &TonClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
+async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 

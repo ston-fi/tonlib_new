@@ -1,7 +1,7 @@
 use crate::clients::ton_client::connection::TonConnection;
 use crate::clients::ton_client::utils::prepare_client_env;
-use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
-use crate::clients::ton_client::{config::TonClientConfig, tl::client::TLClientTrait};
+use crate::clients::ton_client::TLClientRetryStrategy;
+use crate::clients::ton_client::{config::TLClientConfig, tl::client::TLClientTrait};
 use crate::errors::TonlibError;
 use async_trait::async_trait;
 use rand::prelude::{IndexedRandom, StdRng};
@@ -23,11 +23,11 @@ impl TLClientTrait for TLClient {
         self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
     }
 
-    fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy { &self.inner.config.retry_strategy }
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy { &self.inner.config.retry_strategy }
 }
 
 impl TLClient {
-    pub async fn new(mut config: TonClientConfig) -> Result<TLClient, TonlibError> {
+    pub async fn new(mut config: TLClientConfig) -> Result<TLClient, TonlibError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));
@@ -48,5 +48,5 @@ impl TLClient {
 struct Inner {
     rnd: Mutex<StdRng>,
     connections: Vec<TonConnection>,
-    config: TonClientConfig,
+    config: TLClientConfig,
 }

@@ -3,12 +3,12 @@ use crate::clients::ton_client::callback::TonCallbacksStore;
 use crate::clients::ton_client::tl::types::{TLConfig, TLKeyStoreType, TLOptions};
 use std::time::Duration;
 
-pub struct TonClientConfig {
+pub struct TLClientConfig {
     pub init_opts: TLOptions,
     pub connection_check: LiteNodeFilter,
     pub connections_count: usize,
     pub max_parallel_requests: usize, // max_parallel_requests / connections_count = parallel requests per connection
-    pub retry_strategy: TonlibjsonClientRetryStrategy,
+    pub retry_strategy: TLClientRetryStrategy,
     pub update_init_block: bool,
     pub update_init_block_timeout_sec: u64,
     pub tonlib_verbosity_level: u32,
@@ -21,18 +21,18 @@ pub enum LiteNodeFilter {
     Archive, // connect to archive node only
 }
 
-pub struct TonlibjsonClientRetryStrategy {
+pub struct TLClientRetryStrategy {
     pub retry_count: usize,
     pub retry_waiting: Duration,
 }
 
-impl TonClientConfig {
-    pub fn new(net_config: String, archive_only: bool) -> TonClientConfig {
+impl TLClientConfig {
+    pub fn new(net_config: String, archive_only: bool) -> TLClientConfig {
         let connection_check = match archive_only {
             true => LiteNodeFilter::Archive,
             false => LiteNodeFilter::Healthy,
         };
-        TonClientConfig {
+        TLClientConfig {
             init_opts: TLOptions {
                 config: TLConfig {
                     net_config,
@@ -47,7 +47,7 @@ impl TonClientConfig {
             connection_check,
             connections_count: 10,
             max_parallel_requests: 200,
-            retry_strategy: TonlibjsonClientRetryStrategy {
+            retry_strategy: TLClientRetryStrategy {
                 retry_count: 10,
                 retry_waiting: Duration::from_millis(10),
             },
@@ -57,10 +57,10 @@ impl TonClientConfig {
             callbacks: TonCallbacksStore::default(),
         }
     }
-    pub fn new_mainnet(archive_only: bool) -> TonClientConfig {
-        TonClientConfig::new(TonNetConfig::get_json(true), archive_only)
+    pub fn new_mainnet(archive_only: bool) -> TLClientConfig {
+        TLClientConfig::new(TonNetConfig::get_json(true), archive_only)
     }
-    pub fn new_testnet(archive_only: bool) -> TonClientConfig {
-        TonClientConfig::new(TonNetConfig::get_json(false), archive_only)
+    pub fn new_testnet(archive_only: bool) -> TLClientConfig {
+        TLClientConfig::new(TonNetConfig::get_json(false), archive_only)
     }
 }

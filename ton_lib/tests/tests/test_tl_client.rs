@@ -88,7 +88,7 @@ async fn test_tl_client_default_async_context() -> anyhow::Result<()> {
 pub async fn make_tonlib_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
     init_logging();
     log::info!("initializing tl_client with mainnet={mainnet}...");
-    let config = ton_lib::clients::ton_client::TonClientConfig::new_mainnet(archive_only);
+    let config = ton_lib::clients::ton_client::TLClientConfig::new_mainnet(archive_only);
     let client = TLClient::new(config).await?;
     sys_tonlib_set_verbosity_level(0);
     Ok(client)

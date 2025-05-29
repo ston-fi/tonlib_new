@@ -8,7 +8,7 @@ use crate::clients::ton_client::tl::types::{
     TLBlockId, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs, TLFullAccountState,
     TLRawFullAccountState, TLRawTxs, TLTxId,
 };
-use crate::clients::ton_client::TonlibjsonClientRetryStrategy;
+use crate::clients::ton_client::TLClientRetryStrategy;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
@@ -296,7 +296,7 @@ pub trait TLClientTrait: Send + Sync {
         Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
     }
 
-    fn get_retry_strategy(&self) -> &TonlibjsonClientRetryStrategy;
+    fn get_retry_strategy(&self) -> &TLClientRetryStrategy;
 }
 
 fn retry_condition(error: &TonlibError) -> bool {
