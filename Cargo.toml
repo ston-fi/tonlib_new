@@ -1,8 +1,8 @@
 [workspace]
 resolver = "2"
 members = [
-    "ton_lib",
     "ton_lib_macros",
+    "ton_lib",
 ]
 
 [workspace.package]
@@ -21,3 +21,6 @@ publish = false
 debug = true
 [profile.release]
 debug = true
+
+
+

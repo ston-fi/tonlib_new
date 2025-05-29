@@ -107,8 +107,8 @@ pub trait TLB: Sized {
             })
         };
 
-        if reader.data_bits_left()? < Self::PREFIX.bits_len {
-            return prefix_error(0, reader.data_bits_left()?);
+        if reader.data_bits_remaining()? < Self::PREFIX.bits_len {
+            return prefix_error(0, reader.data_bits_remaining()?);
         }
 
         // we handle cell_underflow above - all other errors can be rethrown
@@ -116,7 +116,7 @@ pub trait TLB: Sized {
 
         if actual_val != Self::PREFIX.value {
             reader.seek_bits(-(Self::PREFIX.bits_len as i32))?; // revert reader position
-            return prefix_error(actual_val, reader.data_bits_left()?);
+            return prefix_error(actual_val, reader.data_bits_remaining()?);
         }
         Ok(())
     }

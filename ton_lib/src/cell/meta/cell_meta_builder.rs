@@ -36,7 +36,7 @@ impl<'a> CellMetaBuilder<'a> {
         match self.cell_type {
             CellType::Ordinary => self.validate_ordinary(), // guaranteed by builder
             CellType::PrunedBranch => self.validate_pruned(),
-            CellType::Library => self.validate_library(),
+            CellType::LibraryRef => self.validate_library(),
             CellType::MerkleProof => self.validate_merkle_proof(),
             CellType::MerkleUpdate => self.validate_merkle_update(),
         }
@@ -46,7 +46,7 @@ impl<'a> CellMetaBuilder<'a> {
         match self.cell_type {
             CellType::Ordinary => self.calc_level_mask_ordinary(),
             CellType::PrunedBranch => self.calc_level_mask_pruned(),
-            CellType::Library => LevelMask::new(0),
+            CellType::LibraryRef => LevelMask::new(0),
             CellType::MerkleProof => self.refs[0].meta.level_mask >> 1,
             CellType::MerkleUpdate => self.calc_level_mask_merkle_update(),
         }

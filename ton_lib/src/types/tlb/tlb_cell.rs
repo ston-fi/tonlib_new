@@ -10,9 +10,9 @@ use std::sync::Arc;
 
 impl TLB for TonCell {
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        let bits_left = parser.data_bits_left()?;
-        if parser.cell.data_bits_len == bits_left && parser.next_ref_pos == 0 {
-            let _data = parser.read_bits(bits_left)?; // drain data
+        let bits_remaining = parser.data_bits_remaining()?;
+        if parser.cell.data_bits_len == bits_remaining && parser.next_ref_pos == 0 {
+            let _data = parser.read_bits(bits_remaining)?; // drain data
             parser.next_ref_pos = parser.cell.refs.len(); // drain refs
             Ok(parser.cell.clone())
         } else {
@@ -112,11 +112,11 @@ mod tests {
     fn test_tlb_cell_boc_library() -> anyhow::Result<()> {
         let lib_hex = "b5ee9c720101010100230008420257de63d28e4d3608e0c02d437a7b50ef5f28f36a4821a047fd663ce63f4597ec";
         let lib_cell = TonCell::from_boc_hex(lib_hex)?;
-        assert_eq!(lib_cell.meta.cell_type, CellType::Library);
+        assert_eq!(lib_cell.meta.cell_type, CellType::LibraryRef);
         assert_eq!(lib_cell.to_boc_hex()?, lib_hex);
 
         let lib_cell_ref = TonCellRef::from_boc_hex(lib_hex)?;
-        assert_eq!(lib_cell.meta.cell_type, CellType::Library);
+        assert_eq!(lib_cell.meta.cell_type, CellType::LibraryRef);
         assert_eq!(lib_cell.to_boc_hex()?, lib_hex);
 
         // now library is a second cell
@@ -126,12 +126,12 @@ mod tests {
 
         let lib_child_cell = TonCell::from_boc_hex(&lib_child_hex)?;
         assert_eq!(lib_child_cell.meta.cell_type, CellType::Ordinary);
-        assert_eq!(lib_child_cell.refs[0].meta.cell_type, CellType::Library);
+        assert_eq!(lib_child_cell.refs[0].meta.cell_type, CellType::LibraryRef);
         assert_eq!(lib_child_cell.to_boc_hex()?, lib_child_hex);
 
         let lib_child_cell_ref = TonCellRef::from_boc_hex(&lib_child_hex)?;
         assert_eq!(lib_child_cell_ref.meta.cell_type, CellType::Ordinary);
-        assert_eq!(lib_child_cell_ref.refs[0].meta.cell_type, CellType::Library);
+        assert_eq!(lib_child_cell_ref.refs[0].meta.cell_type, CellType::LibraryRef);
         assert_eq!(lib_child_cell_ref.to_boc_hex()?, lib_child_hex);
 
         // using extra tlb-object
@@ -147,7 +147,7 @@ mod tests {
         assert_eq!(test_struct, parsed_struct);
         let parsed_cell = TonCell::from_boc_hex(&struct_hex)?;
         assert_eq!(parsed_cell.meta.cell_type, CellType::Ordinary);
-        assert_eq!(parsed_cell.refs[0].meta.cell_type, CellType::Library);
+        assert_eq!(parsed_cell.refs[0].meta.cell_type, CellType::LibraryRef);
         Ok(())
     }
 

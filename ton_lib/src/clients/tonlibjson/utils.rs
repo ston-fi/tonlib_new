@@ -74,7 +74,7 @@ fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TonlibError> {
             exp: BlockInfo::PREFIX.value,
             given: tag,
             bits_exp: BlockInfo::PREFIX.bits_len,
-            bits_left: parser.data_bits_left()? + 32,
+            bits_left: parser.data_bits_remaining()? + 32,
         });
     }
     // version(32), merge_info(8), flags(8), seqno(32), vert_seqno(32), shard(104), utime(32), start/end lt(128),

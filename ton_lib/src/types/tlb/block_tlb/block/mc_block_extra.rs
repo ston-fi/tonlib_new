@@ -13,7 +13,7 @@ pub struct MCBlockExtra {
     pub key_block: bool,
     pub shard_hashes: Option<TonCellRef>,
     pub shard_fees: Option<TonCellRef>,
-    shard_fees_crated: ShardFeesCreated, // this is a mock to read/write cell properly while we don't support fail HashmapAugE
+    shard_fees_crated: ShardFeesCreated, // this is a mock to read/write cell properly while we don't support a fair HashmapAugE
     // https://github.com/ton-blockchain/ton/blob/6f745c04daf8861bb1791cffce6edb1beec62204/crypto/block/block.tlb#L597
     pub ref_data: TonCellRef,
     pub config: Option<ConfigParams>,

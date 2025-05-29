@@ -197,7 +197,7 @@ mod tests {
 
         impl TLB for List {
             fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-                match parser.data_bits_left()? {
+                match parser.data_bits_remaining()? {
                     0 => Ok(Self::Empty),
                     _ => Ok(Self::Some(TLB::read(parser)?)),
                 }
