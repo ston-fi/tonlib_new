@@ -1,3 +1,4 @@
+use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::adapters::TLBRef;
 use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
@@ -120,6 +121,19 @@ pub struct AccountStatusActive;
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b11, bits_len = 2)]
 pub struct AccountStatusNotExist;
+
+impl Default for AccountStatus {
+    fn default() -> Self { AccountStatus::NonExist(AccountStatusNotExist) }
+}
+
+impl MaybeAccount {
+    pub fn get_code(&self) -> Option<&TonCellRef> {
+        self.as_some()?.storage.state.as_active()?.state_init.code.as_ref()
+    }
+    pub fn get_data(&self) -> Option<&TonCellRef> {
+        self.as_some()?.storage.state.as_active()?.state_init.data.as_ref()
+    }
+}
 
 #[cfg(test)]
 mod tests {

@@ -14,6 +14,7 @@ use crate::types::tlb::TLB;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use crc::Crc;
+use serde::{Deserialize, Deserializer};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
@@ -136,6 +137,13 @@ impl PartialOrd for TonAddress {
                 None
             }
         }
+    }
+}
+
+impl<'de> Deserialize<'de> for TonAddress {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s: String = Deserialize::deserialize(deserializer)?;
+        TonAddress::from_str(&s).map_err(serde::de::Error::custom)
     }
 }
 

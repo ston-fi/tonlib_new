@@ -3,15 +3,15 @@ use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use crate::types::tlb::TLB;
+use num_bigint::BigUint;
+use num_traits::ToPrimitive;
 use std::ops::{Deref, DerefMut};
 
 pub type VarLenBits<T, const LEN_BITS_LEN: usize> = VarLen<T, LEN_BITS_LEN, false>;
 pub type VarLenBytes<T, const LEN_BITS_LEN: usize> = VarLen<T, LEN_BITS_LEN, true>;
 
 /// VarLen: store data len, and then data itself
-///
 /// BITS_LEN_LEN - number of bits used to store length
-///
 /// LEN_IN_BYTES - if true, data len is specified in bytes. Otherwise - in bits
 #[derive(Debug, Clone, PartialEq)]
 pub struct VarLen<T, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> {
@@ -35,6 +35,29 @@ impl<T, const L: usize, const BL: bool> Deref for VarLen<T, L, BL> {
 
 impl<T, const L: usize, const BL: bool> DerefMut for VarLen<T, L, BL> {
     fn deref_mut(&mut self) -> &mut Self::Target { &mut self.data }
+}
+
+impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> VarLen<BigUint, LEN_BITS_LEN, LEN_IN_BYTES> {
+    pub fn to_u32(&self) -> Result<u32, TonlibError> {
+        self.data.to_u32().ok_or(TonlibError::UnexpectedValue {
+            expected: "u32".to_string(),
+            actual: format!("{}", self.data),
+        })
+    }
+
+    pub fn to_u64(&self) -> Result<u64, TonlibError> {
+        self.data.to_u64().ok_or(TonlibError::UnexpectedValue {
+            expected: "u64".to_string(),
+            actual: format!("{}", self.data),
+        })
+    }
+
+    pub fn to_u128(&self) -> Result<u128, TonlibError> {
+        self.data.to_u128().ok_or(TonlibError::UnexpectedValue {
+            expected: "u128".to_string(),
+            actual: format!("{}", self.data),
+        })
+    }
 }
 
 // TonNum impl

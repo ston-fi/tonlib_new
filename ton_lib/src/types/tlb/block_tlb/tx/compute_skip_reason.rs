@@ -10,16 +10,16 @@ pub enum ComputeSkipReason {
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b00, bits_len = 2)]
-pub struct ComputeSkipReasonNoState {}
+pub struct ComputeSkipReasonNoState;
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
-pub struct ComputeSkipReasonBadState {}
+pub struct ComputeSkipReasonBadState;
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b10, bits_len = 2)]
-pub struct ComputeSkipReasonNoGas {}
+pub struct ComputeSkipReasonNoGas;
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b110, bits_len = 3)]
-pub struct ComputeSkipReasonSuspended {}
+pub struct ComputeSkipReasonSuspended;
