@@ -20,20 +20,20 @@ tonlib-core = "0.25.2"
 
 [[example]]
 name = "cell_perf_boc_from_bytes_tonlib"
-path = "cell_perf_boc_from_bytes_tonlib.rs"
+path = "./cell_perf_boc_from_bytes_tonlib.rs"
 
 [[example]]
 name = "cell_perf_boc_from_bytes"
-path = "cell_perf_boc_from_bytes.rs"
+path = "./cell_perf_boc_from_bytes.rs"
 
 [[example]]
 name = "cell_perf_boc_cell_tonlib"
-path = "cell_perf_boc_cell_tonlib.rs"
+path = "./cell_perf_boc_cell_tonlib.rs"
 
 [[example]]
 name = "cell_perf_boc_cell"
-path = "cell_perf_boc_cell.rs"
+path = "./cell_perf_boc_cell.rs"
 
 [[example]]
 name = "types_tlb_build_dict_large"
-path = "types_tlb_build_dict_large.rs"
+path = "./types_tlb_build_dict_large.rs" 

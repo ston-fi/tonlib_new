@@ -15,8 +15,6 @@ publish = true
 include = [
     "Cargo.toml",
     "src/*",
-    "benches/*",
-    "examples/*",
     "tests/*",
     "resources/*",
 ]
@@ -70,5 +68,8 @@ anyhow = "1.0"
 tokio-test = "0.4"
 tokio = { version = "1.43", features = ["rt", "macros"] }
 log4rs = "1.3"
+
+
+
 
 
