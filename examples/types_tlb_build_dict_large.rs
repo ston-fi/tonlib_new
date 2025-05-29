@@ -1,11 +1,9 @@
 use num_bigint::BigUint;
 use std::collections::HashMap;
-use ton_lib::{cell::ton_cell::TonCell, types::tlb::TLB};
+use ton_lib::{ton_lib_macros::TLBDerive, types::tlb::TLB};
 use ton_lib::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use ton_lib::types::tlb::adapters::dict_val_adapters::DictValAdapterNum;
 use ton_lib::types::tlb::adapters::Dict;
-
-use ton_lib_macros::TLBDerive;
 
 // const ITEMS_COUNT: usize = 40000000;
 const ITEMS_COUNT: usize = 4000000;
