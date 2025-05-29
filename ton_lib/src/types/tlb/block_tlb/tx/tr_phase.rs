@@ -1,5 +1,5 @@
 use crate::cell::ton_hash::TonHash;
-use crate::types::tlb::block_tlb::coins::{CurrencyCollection, Grams};
+use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
 use crate::types::tlb::block_tlb::tx::compute_skip_reason::ComputeSkipReason;
 use crate::types::tlb::block_tlb::tx::TLBRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
@@ -8,8 +8,8 @@ use ton_lib_macros::TLBDerive;
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct TrStoragePhase {
-    pub storage_fees_collected: Grams,
-    pub storage_fees_due: Option<Grams>,
+    pub storage_fees_collected: Coins,
+    pub storage_fees_due: Option<Coins>,
     pub status_change: AccStatusChange,
 }
 
@@ -26,8 +26,8 @@ pub struct TrActionPhase {
     pub valid: bool,
     pub no_funds: bool,
     pub status_change: AccStatusChange,
-    pub total_fwd_fees: Option<Grams>,
-    pub total_action_fees: Option<Grams>,
+    pub total_fwd_fees: Option<Coins>,
+    pub total_action_fees: Option<Coins>,
     pub result_code: i32,
     pub result_arg: Option<i32>,
     pub tot_actions: u16,
@@ -63,7 +63,7 @@ pub struct TrComputePhaseVM {
     pub success: bool,
     pub msg_state_used: bool,
     pub account_activated: bool,
-    pub gas_fees: Grams,
+    pub gas_fees: Coins,
     #[tlb_derive(adapter = "TLBRef")]
     pub compute_phase_vm_info: ComputePhaseVMInfo,
 }
@@ -102,7 +102,7 @@ pub struct AccStatusChangeDeleted {}
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct TrCreditPhase {
-    pub due_fees_collected: Option<Grams>,
+    pub due_fees_collected: Option<Coins>,
     pub credit: CurrencyCollection,
 }
 
@@ -114,13 +114,13 @@ pub struct TrBouncePhaseNegFunds {}
 #[tlb_derive(prefix = 0b01, bits_len = 2)]
 pub struct TrBouncePhaseNoFunds {
     pub msg_size: StorageUsedShort,
-    pub req_fwd_fee: Grams,
+    pub req_fwd_fee: Coins,
 }
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0b1, bits_len = 1)]
 pub struct TrBouncePhaseOk {
     pub msg_size: StorageUsedShort,
-    pub msg_fees: Grams,
-    pub fws_fees: Grams,
+    pub msg_fees: Coins,
+    pub fws_fees: Coins,
 }

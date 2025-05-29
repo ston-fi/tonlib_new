@@ -51,7 +51,7 @@ pub struct TxMsgs {
 mod tests {
     use super::*;
     use crate::types::tlb::block_tlb::account::AccountStatusActive;
-    use crate::types::tlb::block_tlb::coins::Grams;
+    use crate::types::tlb::block_tlb::coins::Coins;
     use crate::types::tlb::block_tlb::tx::tr_phase::{
         AccStatusChange, AccStatusChangeUnchanged, ComputePhaseVMInfo, StorageUsedShort, TrActionPhase, TrComputePhase,
         TrComputePhaseVM, TrCreditPhase, TrStoragePhase,
@@ -85,7 +85,7 @@ mod tests {
             descr: TxDescr::TickTock(TxDescrTickTock {
                 is_tock: true,
                 storage_phase: TrStoragePhase {
-                    storage_fees_collected: Grams::zero(),
+                    storage_fees_collected: Coins::zero(),
                     storage_fees_due: None,
                     status_change: AccStatusChange::Unchanged(AccStatusChangeUnchanged {}),
                 },
@@ -93,7 +93,7 @@ mod tests {
                     success: true,
                     msg_state_used: false,
                     account_activated: false,
-                    gas_fees: Grams::zero(),
+                    gas_fees: Coins::zero(),
                     compute_phase_vm_info: ComputePhaseVMInfo {
                         gas_used: VarLen::new(4914u32, 16),
                         gas_limit: VarLen::new(10000000u32, 24),
@@ -174,7 +174,7 @@ mod tests {
             descr: TxDescr::Ord(TxDescrOrd {
                 credit_first: false,
                 storage_phase: Some(TrStoragePhase {
-                    storage_fees_collected: Grams::new(2410u32),
+                    storage_fees_collected: Coins::new(2410u32),
                     storage_fees_due: None,
                     status_change: AccStatusChange::Unchanged(AccStatusChangeUnchanged{}),
                 }),
@@ -186,7 +186,7 @@ mod tests {
                     success: true,
                     msg_state_used: false,
                     account_activated: false,
-                    gas_fees: Grams::new(4408000u32),
+                    gas_fees: Coins::new(4408000u32),
                     compute_phase_vm_info: ComputePhaseVMInfo {
                         gas_used: VarLen::new(11020u32, 16),
                         gas_limit: VarLen::new(529389u32, 24),
@@ -204,8 +204,8 @@ mod tests {
                     valid: true,
                     no_funds: false,
                     status_change: AccStatusChange::Unchanged(AccStatusChangeUnchanged{}),
-                    total_fwd_fees: Some(Grams::new(1287600u32)),
-                    total_action_fees: Some(Grams::new(429193u32)),
+                    total_fwd_fees: Some(Coins::new(1287600u32)),
+                    total_action_fees: Some(Coins::new(429193u32)),
                     result_code: 0,
                     result_arg: None,
                     tot_actions: 2,

@@ -4,7 +4,7 @@ use super::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt};
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::coins::Grams;
+use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::primitives::either::EitherRef;
 use crate::types::tlb::primitives::either::EitherRefLayout::ToRef;
@@ -41,7 +41,7 @@ impl Msg {
                     MsgAddressInt::Std(addr) => addr.anycast = None,
                     MsgAddressInt::Var(addr) => addr.anycast = None,
                 }
-                info.import_fee = Grams::zero();
+                info.import_fee = Coins::zero();
                 msg_normalized.init = None;
                 msg_normalized.body.layout = ToRef;
                 msg_normalized.cell_hash()
@@ -141,7 +141,7 @@ mod tests {
                 workchain: -1,
                 address: TonHash::from_str("adfd5f1d28db13e50591d5c76a976c15d8ab6cad90554748ab254871390d9334")?,
             }),
-            import_fee: Grams::new(12364u128),
+            import_fee: Coins::new(12364u128),
         });
         let mut body_value_builder = TonCell::builder();
         body_value_builder.write_num(&200u32, 32)?;
