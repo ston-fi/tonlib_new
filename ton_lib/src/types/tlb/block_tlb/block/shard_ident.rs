@@ -12,8 +12,12 @@ pub struct ShardIdent {
 }
 
 impl ShardIdent {
-    pub fn new(workchain: i32, shard: u64) -> Self { Self { workchain, shard } }
-    pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
+    pub fn new(workchain: i32, shard: u64) -> Self {
+        Self { workchain, shard }
+    }
+    pub fn new_mc() -> Self {
+        Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL)
+    }
 }
 
 impl TLB for ShardIdent {

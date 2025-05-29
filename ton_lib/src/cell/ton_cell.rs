@@ -39,30 +39,48 @@ impl TonCell {
         150, 162, 150, 210, 36, 242, 133, 198, 123, 238, 147, 195, 15, 138, 48, 145, 87, 240, 218, 163, 93, 197, 184,
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]);
-    pub fn builder() -> CellBuilder { CellBuilder::new(CellType::Ordinary) }
-    pub fn builder_typed(cell_type: CellType) -> CellBuilder { CellBuilder::new(cell_type) }
-    pub fn parser(&self) -> CellParser { CellParser::new(self) }
+    pub fn builder() -> CellBuilder {
+        CellBuilder::new(CellType::Ordinary)
+    }
+    pub fn builder_typed(cell_type: CellType) -> CellBuilder {
+        CellBuilder::new(cell_type)
+    }
+    pub fn parser(&self) -> CellParser {
+        CellParser::new(self)
+    }
 
-    pub fn hash_for_level(&self, level: LevelMask) -> &TonHash { &self.meta.hashes[level.mask() as usize] }
-    pub fn hash(&self) -> &TonHash { self.hash_for_level(LevelMask::MAX_LEVEL) }
-    pub fn into_ref(self) -> TonCellRef { TonCellRef(self.into()) }
+    pub fn hash_for_level(&self, level: LevelMask) -> &TonHash {
+        &self.meta.hashes[level.mask() as usize]
+    }
+    pub fn hash(&self) -> &TonHash {
+        self.hash_for_level(LevelMask::MAX_LEVEL)
+    }
+    pub fn into_ref(self) -> TonCellRef {
+        TonCellRef(self.into())
+    }
 }
 
 unsafe impl Sync for TonCell {}
 unsafe impl Send for TonCell {}
 
 impl PartialEq for TonCell {
-    fn eq(&self, other: &Self) -> bool { self.hash() == other.hash() }
+    fn eq(&self, other: &Self) -> bool {
+        self.hash() == other.hash()
+    }
 }
 
 impl Eq for TonCell {}
 
 impl Display for TonCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write_cell_display(f, self, 0)
+    }
 }
 
 impl Debug for TonCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 // TonCelRef
@@ -72,15 +90,21 @@ pub type TonCellStorage = Vec<TonCellRef>;
 
 impl Deref for TonCellRef {
     type Target = TonCell;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl Display for TonCellRef {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self.deref(), 0) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write_cell_display(f, self.deref(), 0)
+    }
 }
 
 impl Debug for TonCellRef {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self)
+    }
 }
 
 fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {

@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "ton_lib",
     "ton_lib_macros",
+    "examples"
 ]
 
 [workspace.package]

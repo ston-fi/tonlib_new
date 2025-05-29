@@ -23,7 +23,9 @@ impl<T> ConstLen<T> {
 }
 
 impl<T: TonCellNum> ConstLen<T> {
-    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> { parser.read_num(self.bits_len) }
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> {
+        parser.read_num(self.bits_len)
+    }
     pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> {
         builder.write_num(val, self.bits_len)
     }
@@ -46,7 +48,9 @@ impl<T: TonCellNum> ConstLen<Option<T>> {
 }
 
 impl ConstLen<Vec<u8>> {
-    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TonlibError> { parser.read_bits(self.bits_len) }
+    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TonlibError> {
+        parser.read_bits(self.bits_len)
+    }
     pub fn write(&self, builder: &mut CellBuilder, val: &Vec<u8>) -> Result<(), TonlibError> {
         builder.write_bits(val, self.bits_len)
     }

@@ -74,7 +74,9 @@ where
     VA: DictValAdapter<V>,
     K: Eq + Hash + Ord,
 {
-    pub fn new(key_bits_len: u32) -> Self { Self(Dict::new(key_bits_len)) }
+    pub fn new(key_bits_len: u32) -> Self {
+        Self(Dict::new(key_bits_len))
+    }
 
     pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TonlibError> {
         if !parser.read_bit()? {

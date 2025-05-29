@@ -4,7 +4,6 @@ use crate::cell::meta::level_mask::LevelMask;
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
-use std::sync::Arc;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct CellMeta {
@@ -45,6 +44,4 @@ impl CellMeta {
         };
         Ok(meta)
     }
-
-    pub fn into_ref(self) -> Arc<Self> { Arc::new(self) }
 }

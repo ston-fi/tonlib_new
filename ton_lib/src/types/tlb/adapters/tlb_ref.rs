@@ -17,13 +17,19 @@ pub struct TLBRef<T: TLB>(PhantomData<T>);
 pub struct TLBOptRef<T: TLB>(PhantomData<T>);
 
 impl<T: TLB> Default for TLBRef<T> {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<T: TLB> TLBRef<T> {
-    pub fn new() -> Self { TLBRef(PhantomData) }
+    pub fn new() -> Self {
+        TLBRef(PhantomData)
+    }
 
-    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> { T::from_cell(parser.read_next_ref()?) }
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonlibError> {
+        T::from_cell(parser.read_next_ref()?)
+    }
 
     pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonlibError> {
         builder.write_ref(val.to_cell_ref()?)
@@ -31,11 +37,15 @@ impl<T: TLB> TLBRef<T> {
 }
 
 impl<T: TLB> Default for TLBOptRef<Option<T>> {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl<T: TLB> TLBOptRef<Option<T>> {
-    pub fn new() -> Self { TLBOptRef(PhantomData) }
+    pub fn new() -> Self {
+        TLBOptRef(PhantomData)
+    }
 
     pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TonlibError> {
         if parser.read_bit()? {

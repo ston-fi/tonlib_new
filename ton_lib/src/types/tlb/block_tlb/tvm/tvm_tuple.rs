@@ -26,19 +26,31 @@ pub struct TVMTuple(Vec<TVMStackValue>);
 
 impl Deref for TVMTuple {
     type Target = Vec<TVMStackValue>;
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl DerefMut for TVMTuple {
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
 }
 
 impl TVMTuple {
-    pub fn new(items: Vec<TVMStackValue>) -> Self { Self(items) }
+    pub fn new(items: Vec<TVMStackValue>) -> Self {
+        Self(items)
+    }
 
-    pub fn push_tiny_int(&mut self, value: i64) { self.push(TVMStackValue::TinyInt(TVMTinyInt { value })); }
-    pub fn push_int(&mut self, value: BigInt) { self.push(TVMStackValue::Int(TVMInt { value })); }
-    pub fn push_cell(&mut self, value: TonCellRef) { self.push(TVMStackValue::Cell(TVMCell { value })); }
+    pub fn push_tiny_int(&mut self, value: i64) {
+        self.push(TVMStackValue::TinyInt(TVMTinyInt { value }));
+    }
+    pub fn push_int(&mut self, value: BigInt) {
+        self.push(TVMStackValue::Int(TVMInt { value }));
+    }
+    pub fn push_cell(&mut self, value: TonCellRef) {
+        self.push(TVMStackValue::Cell(TVMCell { value }));
+    }
     pub fn push_cell_slice(&mut self, cell: TonCellRef) {
         self.push(TVMStackValue::CellSlice(TVMCellSlice::from_cell(cell)));
     }
@@ -46,7 +58,9 @@ impl TVMTuple {
     pub fn get_tiny_int(&mut self, index: usize) -> Result<&i64, TonlibError> {
         extract_tuple_val!(self.get(index), TinyInt)
     }
-    pub fn get_int(&mut self, index: usize) -> Result<&BigInt, TonlibError> { extract_tuple_val!(self.get(index), Int) }
+    pub fn get_int(&mut self, index: usize) -> Result<&BigInt, TonlibError> {
+        extract_tuple_val!(self.get(index), Int)
+    }
     pub fn get_cell(&mut self, index: usize) -> Result<&TonCellRef, TonlibError> {
         extract_tuple_val!(self.get(index), Cell)
     }

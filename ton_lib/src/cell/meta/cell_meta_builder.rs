@@ -36,7 +36,7 @@ impl<'a> CellMetaBuilder<'a> {
         match self.cell_type {
             CellType::Ordinary => self.validate_ordinary(), // guaranteed by builder
             CellType::PrunedBranch => self.validate_pruned(),
-            CellType::Library => self.validate_library(),
+            CellType::LibraryRef => self.validate_library(),
             CellType::MerkleProof => self.validate_merkle_proof(),
             CellType::MerkleUpdate => self.validate_merkle_update(),
         }
@@ -46,7 +46,7 @@ impl<'a> CellMetaBuilder<'a> {
         match self.cell_type {
             CellType::Ordinary => self.calc_level_mask_ordinary(),
             CellType::PrunedBranch => self.calc_level_mask_pruned(),
-            CellType::Library => LevelMask::new(0),
+            CellType::LibraryRef => LevelMask::new(0),
             CellType::MerkleProof => self.refs[0].meta.level_mask >> 1,
             CellType::MerkleUpdate => self.calc_level_mask_merkle_update(),
         }
@@ -330,7 +330,9 @@ impl<'a> CellMetaBuilder<'a> {
 
 /// Calculates d2 descriptor for cell
 /// See https://docs.ton.org/tvm.pdf 3.1.4 for details
-fn get_bits_descriptor(data_bits_len: usize) -> u8 { (data_bits_len / 8 + data_bits_len.div_ceil(8)) as u8 }
+fn get_bits_descriptor(data_bits_len: usize) -> u8 {
+    (data_bits_len / 8 + data_bits_len.div_ceil(8)) as u8
+}
 
 fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result<(), TonlibError> {
     let data_len = data.len();
@@ -353,7 +355,9 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
 mod test {
     use super::*;
 
-    fn empty_cell_ref() -> TonCellRef { TonCell::EMPTY.into_ref() }
+    fn empty_cell_ref() -> TonCellRef {
+        TonCell::EMPTY.into_ref()
+    }
 
     #[test]
     fn test_refs_descriptor_d1() {

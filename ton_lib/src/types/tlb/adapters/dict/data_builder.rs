@@ -1,4 +1,4 @@
-use super::label_type::LabelType;
+use super::label_type::DictLabelType;
 use super::leading_bit_utils::{add_leading_bit, all_bits_same, common_prefix_len, remove_leading_bit};
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::ton_cell::TonCell;
@@ -126,27 +126,27 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         let short_label_len = 2 + label_len * 2;
         let long_label_len = 2 + label_len_len + label_len;
 
-        let mut label_type = LabelType::Short;
+        let mut label_type = DictLabelType::Short;
         if long_label_len < short_label_len {
-            label_type = LabelType::Long;
+            label_type = DictLabelType::Long;
         }
         if same_label_len < short_label_len {
-            label_type = LabelType::Same;
+            label_type = DictLabelType::Same;
         }
         match label_type {
-            LabelType::Same => {
+            DictLabelType::Same => {
                 builder.write_bit(true)?;
                 builder.write_bit(true)?;
                 builder.write_bit(!fair_label.is_zero())?;
                 builder.write_num(&label_len, label_len_len)?;
             }
-            LabelType::Short => {
+            DictLabelType::Short => {
                 builder.write_bit(false)?;
                 let unary_len = Unary(label_len);
                 unary_len.write(builder)?;
                 builder.write_num(&fair_label, label_len)?;
             }
-            LabelType::Long => {
+            DictLabelType::Long => {
                 builder.write_bit(true)?;
                 builder.write_bit(false)?;
                 builder.write_num(&label_len, label_len_len)?;

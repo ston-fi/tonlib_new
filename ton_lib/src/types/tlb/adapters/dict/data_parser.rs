@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use super::label_type::LabelType;
+use super::label_type::DictLabelType;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
 use crate::types::tlb::adapters::dict::dict_val_adapters::DictValAdapter;
@@ -44,7 +44,7 @@ impl DictDataParser {
 
         let label_type = self.detect_label_type(parser)?;
         match label_type {
-            LabelType::Same => {
+            DictLabelType::Same => {
                 let prefix_val = parser.read_bit()?;
                 let prefix_len_len = self.remain_suffix_bit_len();
                 let prefix_len = parser.read_num::<usize>(prefix_len_len)?;
@@ -56,7 +56,7 @@ impl DictDataParser {
                     self.cur_key_prefix <<= prefix_len;
                 }
             }
-            LabelType::Short => {
+            DictLabelType::Short => {
                 let prefix_len = Unary::read(parser)?;
                 if *prefix_len != 0 {
                     let val = parser.read_num::<BigUint>(*prefix_len)?;
@@ -64,7 +64,7 @@ impl DictDataParser {
                     self.cur_key_prefix |= val;
                 }
             }
-            LabelType::Long => {
+            DictLabelType::Long => {
                 let prefix_len_len = self.remain_suffix_bit_len();
                 let prefix_len: usize = parser.read_num(prefix_len_len)?;
                 if prefix_len_len != 0 {
@@ -91,15 +91,15 @@ impl DictDataParser {
         Ok(())
     }
 
-    fn detect_label_type(&self, parser: &mut CellParser) -> Result<LabelType, TonlibError> {
+    fn detect_label_type(&self, parser: &mut CellParser) -> Result<DictLabelType, TonlibError> {
         let label = if parser.read_bit()? {
             if parser.read_bit()? {
-                LabelType::Same
+                DictLabelType::Same
             } else {
-                LabelType::Long
+                DictLabelType::Long
             }
         } else {
-            LabelType::Short
+            DictLabelType::Short
         };
         Ok(label)
     }

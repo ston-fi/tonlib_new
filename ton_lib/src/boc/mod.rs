@@ -51,7 +51,9 @@ impl BOC {
     pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         BOCRaw::from_ton_cells(self.roots.as_slice())?.to_bytes(add_crc32)
     }
-    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
+    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonlibError> {
+        Ok(hex::encode(self.to_bytes(add_crc32)?))
+    }
     pub fn to_base64(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
     }

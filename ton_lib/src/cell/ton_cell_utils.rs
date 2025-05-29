@@ -31,7 +31,7 @@ impl TonCellUtils {
     }
 
     pub fn read_lib_id(cell: &TonCell) -> Result<Option<TonHash>, TonlibError> {
-        if cell.meta.cell_type != CellType::Library {
+        if cell.meta.cell_type != CellType::LibraryRef {
             return Ok(None);
         }
         Ok(Some(TonHash::from_bytes(&cell.data[1..=32])?))

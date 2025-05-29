@@ -67,7 +67,7 @@ impl<'a> CellParser<'a> {
     }
 
     pub fn read_cell(&mut self) -> Result<TonCell, TonlibError> {
-        let bits_left = self.data_bits_left()?;
+        let bits_left = self.data_bits_remaining()?;
         let data = self.read_bits(bits_left)?;
 
         let mut builder = TonCell::builder();
@@ -115,7 +115,7 @@ impl<'a> CellParser<'a> {
         Ok(cell_ref)
     }
 
-    pub fn data_bits_left(&mut self) -> Result<usize, TonlibError> {
+    pub fn data_bits_remaining(&mut self) -> Result<usize, TonlibError> {
         let reader_pos = self.data_reader.position_in_bits()? as usize;
         Ok(self.cell.data_bits_len - reader_pos)
     }
@@ -134,7 +134,7 @@ impl<'a> CellParser<'a> {
     }
 
     pub fn ensure_empty(&mut self) -> Result<(), TonlibError> {
-        let bits_left = self.data_bits_left()?;
+        let bits_left = self.data_bits_remaining()?;
         let refs_left = self.cell.refs.len() - self.next_ref_pos;
         if bits_left == 0 && refs_left == 0 {
             return Ok(());
@@ -145,7 +145,7 @@ impl<'a> CellParser<'a> {
 
     // returns remaining bits
     fn ensure_enough_bits(&mut self, bit_len: usize) -> Result<usize, TonlibError> {
-        let bits_left = self.data_bits_left()?;
+        let bits_left = self.data_bits_remaining()?;
 
         if bit_len <= bits_left {
             return Ok(bits_left);

@@ -40,10 +40,14 @@ pub trait TLB: Sized {
     }
 
     // Utilities
-    fn cell_hash(&self) -> Result<TonHash, TonlibError> { Ok(self.to_cell()?.hash().clone()) }
+    fn cell_hash(&self) -> Result<TonHash, TonlibError> {
+        Ok(self.to_cell()?.hash().clone())
+    }
 
     /// Reading
-    fn from_cell(cell: &TonCell) -> Result<Self, TonlibError> { Self::read(&mut cell.parser()) }
+    fn from_cell(cell: &TonCell) -> Result<Self, TonlibError> {
+        Self::read(&mut cell.parser())
+    }
 
     fn from_boc(boc: &[u8]) -> Result<Self, TonlibError> {
         match BOC::from_bytes(boc).and_then(|x| x.single_root()).and_then(|x| Self::from_cell(&x)) {
@@ -59,9 +63,13 @@ pub trait TLB: Sized {
         }
     }
 
-    fn from_boc_hex(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&hex::decode(boc)?) }
+    fn from_boc_hex(boc: &str) -> Result<Self, TonlibError> {
+        Self::from_boc(&hex::decode(boc)?)
+    }
 
-    fn from_boc_b64(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&BASE64_STANDARD.decode(boc)?) }
+    fn from_boc_b64(boc: &str) -> Result<Self, TonlibError> {
+        Self::from_boc(&BASE64_STANDARD.decode(boc)?)
+    }
 
     /// Writing
     fn to_cell(&self) -> Result<TonCell, TonlibError> {
@@ -70,13 +78,21 @@ pub trait TLB: Sized {
         builder.build()
     }
 
-    fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> { Ok(self.to_cell()?.into_ref()) }
+    fn to_cell_ref(&self) -> Result<TonCellRef, TonlibError> {
+        Ok(self.to_cell()?.into_ref())
+    }
 
-    fn to_boc(&self) -> Result<Vec<u8>, TonlibError> { self.to_boc_extra(false) }
+    fn to_boc(&self) -> Result<Vec<u8>, TonlibError> {
+        self.to_boc_extra(false)
+    }
 
-    fn to_boc_hex(&self) -> Result<String, TonlibError> { self.to_boc_hex_extra(false) }
+    fn to_boc_hex(&self) -> Result<String, TonlibError> {
+        self.to_boc_hex_extra(false)
+    }
 
-    fn to_boc_b64(&self) -> Result<String, TonlibError> { self.to_boc_b64_extra(false) }
+    fn to_boc_b64(&self) -> Result<String, TonlibError> {
+        self.to_boc_b64_extra(false)
+    }
 
     fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         let mut builder = TonCell::builder();
@@ -107,8 +123,8 @@ pub trait TLB: Sized {
             })
         };
 
-        if reader.data_bits_left()? < Self::PREFIX.bits_len {
-            return prefix_error(0, reader.data_bits_left()?);
+        if reader.data_bits_remaining()? < Self::PREFIX.bits_len {
+            return prefix_error(0, reader.data_bits_remaining()?);
         }
 
         // we handle cell_underflow above - all other errors can be rethrown
@@ -116,7 +132,7 @@ pub trait TLB: Sized {
 
         if actual_val != Self::PREFIX.value {
             reader.seek_bits(-(Self::PREFIX.bits_len as i32))?; // revert reader position
-            return prefix_error(actual_val, reader.data_bits_left()?);
+            return prefix_error(actual_val, reader.data_bits_remaining()?);
         }
         Ok(())
     }
@@ -131,7 +147,9 @@ pub trait TLB: Sized {
     // when we write an object, we have to idea of it's type - including writing TonCell itself
     // so for all types except TonCell & TonCellRef we return Ordinary, but for them we return proper type
     // it's required to build proper BOC
-    fn cell_type(&self) -> CellType { CellType::Ordinary }
+    fn cell_type(&self) -> CellType {
+        CellType::Ordinary
+    }
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -142,5 +160,7 @@ pub struct TLBPrefix {
 
 impl TLBPrefix {
     pub const NULL: TLBPrefix = TLBPrefix::new(0, 0);
-    pub const fn new(value: usize, bits_len: usize) -> Self { TLBPrefix { value, bits_len } }
+    pub const fn new(value: usize, bits_len: usize) -> Self {
+        TLBPrefix { value, bits_len }
+    }
 }

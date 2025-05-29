@@ -184,5 +184,7 @@ pub enum TonlibError {
 }
 
 impl<T> From<TonlibError> for Result<T, TonlibError> {
-    fn from(val: TonlibError) -> Self { Err(val) }
+    fn from(val: TonlibError) -> Self {
+        Err(val)
+    }
 }
