@@ -1,12 +1,12 @@
 use num_bigint::BigUint;
 use std::collections::HashMap;
-use ton_lib::{ton_lib_macros::TLBDerive, types::tlb::TLB};
 use ton_lib::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use ton_lib::types::tlb::adapters::dict_val_adapters::DictValAdapterNum;
 use ton_lib::types::tlb::adapters::Dict;
+use ton_lib::{ton_lib_macros::TLBDerive, types::tlb::TLB};
 
 // const ITEMS_COUNT: usize = 40000000;
-const ITEMS_COUNT: usize = 4000000;
+const ITEMS_COUNT: usize = 400000;
 
 #[derive(TLBDerive)]
 struct MyDict {
@@ -19,7 +19,7 @@ fn main() -> anyhow::Result<()> {
     for i in 0..ITEMS_COUNT {
         data.insert(i, BigUint::from(i));
     }
-    let cell =  MyDict { data }.to_cell()?;
+    let cell = MyDict { data }.to_cell()?;
 
     println!("{}", cell.hash());
     Ok(())

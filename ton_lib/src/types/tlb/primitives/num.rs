@@ -6,9 +6,7 @@ use crate::types::tlb::TLB;
 macro_rules! tlb_num_impl {
     ($t:ty, $bits:tt) => {
         impl TLB for $t {
-            fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-                parser.read_num($bits)
-            }
+            fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_num($bits) }
 
             fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
                 builder.write_num(self, $bits)

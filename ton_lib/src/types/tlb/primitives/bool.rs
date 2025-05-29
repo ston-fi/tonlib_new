@@ -4,12 +4,8 @@ use crate::errors::TonlibError;
 use crate::types::tlb::TLB;
 
 impl TLB for bool {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
-        parser.read_bit()
-    }
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
-        builder.write_bit(*self)
-    }
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> { parser.read_bit() }
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> { builder.write_bit(*self) }
 }
 
 #[cfg(test)]

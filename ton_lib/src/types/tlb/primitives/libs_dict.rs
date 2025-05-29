@@ -42,22 +42,16 @@ impl TLB for LibsDict {
 }
 
 impl From<HashMap<TonHash, TonCellRef>> for LibsDict {
-    fn from(data: HashMap<TonHash, TonCellRef>) -> Self {
-        LibsDict(data)
-    }
+    fn from(data: HashMap<TonHash, TonCellRef>) -> Self { LibsDict(data) }
 }
 
 impl Deref for LibsDict {
     type Target = HashMap<TonHash, TonCellRef>;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 impl DerefMut for LibsDict {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }
 
 #[cfg(test)]

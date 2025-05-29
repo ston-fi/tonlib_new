@@ -66,22 +66,9 @@ nacl = "0.5"
 tokio-retry = "0.3"
 
 [dev-dependencies]
-tonlib-core = "0.25.2"
 anyhow = "1.0"
 tokio-test = "0.4"
-criterion = "0.5"
-sha2 = {version = "0.10", features = ["asm"]} # strongly recommend to enable it for your application
 tokio = { version = "1.43", features = ["rt", "macros"] }
 log4rs = "1.3"
 
-[[bench]]
-name = "boc_to_from_bytes"
-harness = false
 
-[[bench]]
-name = "build_cell"
-harness = false
-
-[[bench]]
-name = "build_dict_cell"
-harness = false

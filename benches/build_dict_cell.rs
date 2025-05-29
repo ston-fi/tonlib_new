@@ -1,5 +1,6 @@
-use criterion::{black_box, criterion_group, criterion_main, Criterion};
+use criterion::{criterion_group, criterion_main, Criterion};
 use std::collections::HashMap;
+use std::hint::black_box;
 use std::sync::LazyLock;
 use ton_lib::cell::ton_cell::TonCell;
 use ton_lib::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
@@ -23,6 +24,7 @@ fn build_dict_tonlib() {
     for _ in 0..ITERATIONS_COUNT {
         let mut builder = TonCell::builder();
         let data_clone = DICT_DATA.clone(); // must do it to compare with tonlib_core
+                                            // MyDict{data:data_clone}
         Dict::<DictKeyAdapterInto, DictValAdapterNum<2>, _, _>::new(256).write(&mut builder, &data_clone).unwrap();
         let cell = builder.build().unwrap();
         black_box(cell);

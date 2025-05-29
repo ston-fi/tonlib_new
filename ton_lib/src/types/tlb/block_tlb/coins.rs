@@ -31,9 +31,7 @@ impl Grams {
         let bits_len = amount.bits().div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
-    pub fn zero() -> Self {
-        Grams::new(0u32)
-    }
+    pub fn zero() -> Self { Grams::new(0u32) }
     pub fn from_signed<T: Into<BigInt>>(amount: T) -> Result<Self, TonlibError> {
         let amount = amount.into();
         let unsigned = match amount.to_biguint() {
@@ -60,34 +58,24 @@ impl CurrencyCollection {
 
 impl FromStr for CurrencyCollection {
     type Err = TonlibError;
-    fn from_str(grams: &str) -> Result<Self, Self::Err> {
-        Ok(Self::new(BigUint::from_str(grams)?))
-    }
+    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
 }
 
 impl Deref for Grams {
     type Target = BigUint;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 impl DerefMut for Grams {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
+    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
 }
 
 impl<T: Into<BigUint>> From<T> for Grams {
-    fn from(value: T) -> Self {
-        Grams::new(value)
-    }
+    fn from(value: T) -> Self { Grams::new(value) }
 }
 
 impl FromStr for Grams {
     type Err = TonlibError;
-    fn from_str(grams: &str) -> Result<Self, Self::Err> {
-        Ok(Self::new(BigUint::from_str(grams)?))
-    }
+    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
 }
 
 #[cfg(test)]

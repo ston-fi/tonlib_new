@@ -22,7 +22,5 @@ impl CellType {
         Ok(cell_type)
     }
 
-    pub fn is_exotic(&self) -> bool {
-        self != &CellType::Ordinary
-    }
+    pub fn is_exotic(&self) -> bool { self != &CellType::Ordinary }
 }

@@ -5,15 +5,11 @@ use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
 use ton_liteapi::tl::common::Int256;
 
 impl From<Int256> for TonHash {
-    fn from(value: Int256) -> Self {
-        TonHash::from_slice(&value.0)
-    }
+    fn from(value: Int256) -> Self { TonHash::from_slice(&value.0) }
 }
 
 impl From<TonHash> for Int256 {
-    fn from(value: TonHash) -> Self {
-        Int256(*value.as_slice_sized())
-    }
+    fn from(value: TonHash) -> Self { Int256(*value.as_slice_sized()) }
 }
 
 impl From<ton_liteapi::tl::common::BlockId> for BlockId {

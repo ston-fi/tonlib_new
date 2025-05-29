@@ -42,12 +42,8 @@ pub struct TonNetConfig {
 }
 
 impl TonNetConfig {
-    pub fn get_json(mainnet: bool) -> String {
-        get_default_net_conf(mainnet)
-    }
-    pub fn new(json: &str) -> Result<Self, TonlibError> {
-        Ok(serde_json::from_str(json)?)
-    }
+    pub fn get_json(mainnet: bool) -> String { get_default_net_conf(mainnet) }
+    pub fn new(json: &str) -> Result<Self, TonlibError> { Ok(serde_json::from_str(json)?) }
     pub fn from_env_path(env_var: &str, fallback: &str) -> Result<Self, TonlibError> {
         let path = match std::env::var(env_var) {
             Ok(path) => path,
@@ -60,13 +56,9 @@ impl TonNetConfig {
         TonNetConfig::new(&std::fs::read_to_string(path)?)
     }
 
-    pub fn to_json(&self) -> Result<String, serde_json::Error> {
-        serde_json::to_string(self)
-    }
+    pub fn to_json(&self) -> Result<String, serde_json::Error> { serde_json::to_string(self) }
 
-    pub fn get_init_block_seqno(&self) -> u64 {
-        self.validator.init_block["seqno"].as_u64().unwrap_or(0)
-    }
+    pub fn get_init_block_seqno(&self) -> u64 { self.validator.init_block["seqno"].as_u64().unwrap_or(0) }
 
     pub fn set_init_block(&mut self, block_id: &BlockIdExt) {
         self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_id.workchain);

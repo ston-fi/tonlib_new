@@ -55,9 +55,7 @@ impl From<&TonHash> for TonLibraryId {
 impl TryFrom<TonLibraryId> for TonHash {
     type Error = TonlibError;
 
-    fn try_from(value: TonLibraryId) -> Result<Self, Self::Error> {
-        TonHash::from_vec(value.id)
-    }
+    fn try_from(value: TonLibraryId) -> Result<Self, Self::Error> { TonHash::from_vec(value.id) }
 }
 
 #[derive(IntoStaticStr, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]

@@ -106,9 +106,7 @@ impl TVMEmulator {
 }
 
 impl Drop for TVMEmulator {
-    fn drop(&mut self) {
-        unsafe { tvm_emulator_destroy(self.ptr) };
-    }
+    fn drop(&mut self) { unsafe { tvm_emulator_destroy(self.ptr) }; }
 }
 
 // no multithread access to internal pointer => it's safe
