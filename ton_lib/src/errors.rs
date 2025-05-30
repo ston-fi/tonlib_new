@@ -115,7 +115,7 @@ pub enum TonlibError {
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
     TVMEmulatorResponseParseError(String),
-    #[error("TVMRunMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
+    #[error("TVMRunGetMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
     TVMRunGetMethodError {
         vm_exit_code: Option<i32>,
         response_raw: String,
