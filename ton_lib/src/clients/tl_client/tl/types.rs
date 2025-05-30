@@ -1,11 +1,11 @@
-use crate::clients::ton_client::tl::ser_de::serde_block_id_ext;
-use crate::clients::ton_client::tl::ser_de::serde_block_id_ext_vec;
-use crate::clients::ton_client::tl::ser_de::serde_block_id_ext_vec_opt;
-use crate::clients::ton_client::tl::ser_de::serde_ton_address_b64;
-use crate::clients::ton_client::tl::ser_de::serde_ton_address_hex;
-use crate::clients::ton_client::tl::ser_de::serde_ton_hash_b64;
-use crate::clients::ton_client::tl::ser_de::serde_ton_hash_vec_b64;
-use crate::clients::ton_client::tl::Base64Standard;
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext_vec;
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext_vec_opt;
+use crate::clients::tl_client::tl::ser_de::serde_ton_address_b64;
+use crate::clients::tl_client::tl::ser_de::serde_ton_address_hex;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_b64;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_b64;
+use crate::clients::tl_client::tl::Base64Standard;
 use std::borrow::Cow;
 use std::fmt::Debug;
 

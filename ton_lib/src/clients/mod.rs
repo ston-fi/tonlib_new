@@ -4,4 +4,4 @@ pub mod client_types;
 pub mod lite_client;
 pub mod net_config;
 #[cfg(feature = "tonlibjson")]
-pub mod ton_client;
+pub mod tl_client;

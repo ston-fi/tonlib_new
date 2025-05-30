@@ -4,13 +4,13 @@ use std::sync::{Arc, Weak};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::clients::ton_client::config::{LiteNodeFilter, TLClientConfig};
-use crate::clients::ton_client::tl::client::TLClientTrait;
-use crate::clients::ton_client::tl::request::TLRequest;
-use crate::clients::ton_client::tl::response::TLResponse;
-use crate::clients::ton_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
-use crate::clients::ton_client::RetryStrategy;
-use crate::clients::ton_client::{
+use crate::clients::tl_client::config::{LiteNodeFilter, TLClientConfig};
+use crate::clients::tl_client::tl::client::TLClientTrait;
+use crate::clients::tl_client::tl::request::TLRequest;
+use crate::clients::tl_client::tl::response::TLResponse;
+use crate::clients::tl_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
+use crate::clients::tl_client::RetryStrategy;
+use crate::clients::tl_client::{
     callback::{TonCallback, TonCallbacksStore},
     tl::request_context::TLRequestCtx,
 };
@@ -19,7 +19,7 @@ use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::unwrap_tl_response;
 use crate::{
     bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
-    clients::ton_client::tl::tonlibjson_wrapper::TonlibjsonWrapper,
+    clients::tl_client::tl::tonlibjson_wrapper::TonlibjsonWrapper,
 };
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
@@ -27,7 +27,7 @@ use tokio::sync::{oneshot, Mutex, Semaphore};
 static CONNECTION_COUNTER: AtomicU64 = AtomicU64::new(0);
 
 #[derive(Clone)]
-pub struct TonConnection {
+pub struct TLConnection {
     inner: Arc<Inner>,
 }
 
@@ -40,8 +40,8 @@ struct Inner {
 }
 
 #[async_trait]
-impl TLClientTrait for TonConnection {
-    async fn get_connection(&self) -> &TonConnection { self }
+impl TLClientTrait for TLConnection {
+    async fn get_connection(&self) -> &TLConnection { self }
 
     fn get_retry_strategy(&self) -> &RetryStrategy {
         static NO_RETRY: RetryStrategy = RetryStrategy {
@@ -52,8 +52,8 @@ impl TLClientTrait for TonConnection {
     }
 }
 
-impl TonConnection {
-    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
+impl TLConnection {
+    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
         new_connection_checked(config, semaphore).await
     }
 
@@ -130,7 +130,7 @@ fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TonCallbacksStore) 
 async fn new_connection_checked(
     config: &TLClientConfig,
     semaphore: Arc<Semaphore>,
-) -> Result<TonConnection, TonlibError> {
+) -> Result<TLConnection, TonlibError> {
     let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
         match config.connection_check {
@@ -163,7 +163,7 @@ async fn new_connection_checked(
     conn
 }
 
-async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TonConnection, TonlibError> {
+async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonlibError> {
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 
@@ -184,7 +184,7 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let callbacks = config.callbacks.clone();
     let _join_handle = thread::Builder::new().name(tag.clone()).spawn(|| run_loop(tag, inner_weak, callbacks))?;
 
-    let conn = TonConnection { inner };
+    let conn = TLConnection { inner };
     let _info = conn.init(config.init_opts.clone()).await?;
     Ok(conn)
 }

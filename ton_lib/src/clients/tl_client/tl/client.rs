@@ -1,14 +1,14 @@
 use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
-use crate::clients::ton_client::connection::TonConnection;
-use crate::clients::ton_client::tl::request::TLRequest;
-use crate::clients::ton_client::tl::response::TLResponse;
-use crate::clients::ton_client::tl::types::{
+use crate::clients::tl_client::connection::TLConnection;
+use crate::clients::tl_client::tl::request::TLRequest;
+use crate::clients::tl_client::tl::response::TLResponse;
+use crate::clients::tl_client::tl::types::{
     TLBlockId, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs, TLFullAccountState,
     TLRawFullAccountState, TLRawTxs, TLTxId,
 };
-use crate::clients::ton_client::RetryStrategy;
+use crate::clients::tl_client::RetryStrategy;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
@@ -31,7 +31,7 @@ macro_rules! unwrap_tl_response {
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
-    async fn get_connection(&self) -> &TonConnection;
+    async fn get_connection(&self) -> &TLConnection;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         let retry_strat = self.get_retry_strategy();

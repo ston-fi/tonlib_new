@@ -1,5 +1,5 @@
-use crate::clients::ton_client::tl::ser_de::serde_block_id_ext;
-use crate::clients::ton_client::tl::types::{
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
+use crate::clients::tl_client::tl::types::{
     TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTransactionsExt, TLBlocksTxs, TLConfigInfo,
     TLFullAccountState, TLLiteServerInfo, TLLogVerbosityLevel, TLOptionsInfo, TLRawExtMessageInfo,
     TLRawFullAccountState, TLRawTxs, TLSmcInfo, TLSmcLibraryResult, TLSmcLibraryResultExt, TLUpdateSyncState,

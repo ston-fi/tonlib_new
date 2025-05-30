@@ -1,7 +1,7 @@
-use crate::clients::ton_client::connection::TonConnection;
-use crate::clients::ton_client::env::prepare_client_env;
-use crate::clients::ton_client::RetryStrategy;
-use crate::clients::ton_client::{config::TLClientConfig, tl::client::TLClientTrait};
+use crate::clients::tl_client::connection::TLConnection;
+use crate::clients::tl_client::env::prepare_client_env;
+use crate::clients::tl_client::RetryStrategy;
+use crate::clients::tl_client::{config::TLClientConfig, tl::client::TLClientTrait};
 use crate::errors::TonlibError;
 use async_trait::async_trait;
 use rand::prelude::{IndexedRandom, StdRng};
@@ -18,13 +18,13 @@ pub struct TLClient {
 
 struct Inner {
     rnd: Mutex<StdRng>,
-    connections: Vec<TonConnection>,
+    connections: Vec<TLConnection>,
     config: TLClientConfig,
 }
 
 #[async_trait]
 impl TLClientTrait for TLClient {
-    async fn get_connection(&self) -> &TonConnection {
+    async fn get_connection(&self) -> &TLConnection {
         let mut rng_lock = self.inner.rnd.lock().await;
         self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
     }
@@ -39,7 +39,7 @@ impl TLClient {
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));
         let mut connections = Vec::with_capacity(config.connections_count);
         for _ in 0..config.connections_count {
-            let connection = TonConnection::new(&config, semaphore.clone()).await?;
+            let connection = TLConnection::new(&config, semaphore.clone()).await?;
             connections.push(connection);
         }
         let inner = Inner {

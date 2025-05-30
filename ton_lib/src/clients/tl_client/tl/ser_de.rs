@@ -47,7 +47,7 @@ pub(super) mod serde_ton_hash_vec_b64 {
 
 pub(super) mod serde_block_id_ext {
     use crate::cell::ton_hash::TonHash;
-    use crate::clients::ton_client::tl::Base64Standard;
+    use crate::clients::tl_client::tl::Base64Standard;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -92,7 +92,7 @@ pub(super) mod serde_block_id_ext {
 }
 
 pub(super) mod serde_block_id_ext_vec {
-    use crate::clients::ton_client::tl::ser_de::serde_block_id_ext;
+    use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
@@ -116,7 +116,7 @@ pub(super) mod serde_block_id_ext_vec {
 }
 
 pub(super) mod serde_block_id_ext_vec_opt {
-    use crate::clients::ton_client::tl::ser_de::serde_block_id_ext_vec;
+    use crate::clients::tl_client::tl::ser_de::serde_block_id_ext_vec;
     use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
     use serde::de::IntoDeserializer;
     use serde::{Deserialize, Deserializer, Serializer};
