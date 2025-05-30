@@ -35,7 +35,7 @@ impl TonCell {
         data_bits_len: 0,
         refs: TonCellStorage::new(),
     };
-    pub const EMPTY_CELL_HASH: TonHash = TonHash::from_slice(&[
+    pub const EMPTY_CELL_HASH: TonHash = TonHash::from_slice_sized(&[
         150, 162, 150, 210, 36, 242, 133, 198, 123, 238, 147, 195, 15, 138, 48, 145, 87, 240, 218, 163, 93, 197, 184,
         126, 65, 11, 120, 99, 10, 9, 207, 199,
     ]);

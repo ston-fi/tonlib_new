@@ -97,7 +97,6 @@ fn variants_access_impl(ident: &Ident, data: &mut DataEnum) -> TokenStream {
     let methods = data.variants.iter().map(|variant| {
         let variant_name = &variant.ident;
         let method_suffix = variant_name.to_string().to_case(Case::Snake);
-        let is_fn = Ident::new(&format!("is_{}", method_suffix), variant_name.span());
         let as_fn = Ident::new(&format!("as_{}", method_suffix), variant_name.span());
         let as_fn_mut = Ident::new(&format!("as_{}_mut", method_suffix), variant_name.span());
         let into_fn = Ident::new(&format!("into_{}", method_suffix), variant_name.span());
@@ -107,10 +106,6 @@ fn variants_access_impl(ident: &Ident, data: &mut DataEnum) -> TokenStream {
                 let field_ty = &fields.unnamed.first().unwrap().ty;
 
                 quote! {
-                    pub fn #is_fn(&self) -> bool {
-                        matches!(self, #ident::#variant_name(_))
-                    }
-
                     pub fn #as_fn(&self) -> Option<& #field_ty> {
                         match self {
                             #ident::#variant_name(ref inner) => Some(inner),

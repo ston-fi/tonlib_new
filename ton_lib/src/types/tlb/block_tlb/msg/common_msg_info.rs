@@ -49,7 +49,7 @@ mod tests {
     use crate::types::tlb::block_tlb::msg_address::{MsgAddressIntStd, MsgAddressNone};
     #[test]
     fn test_block_tlb_common_msg_info_enum_derive() -> anyhow::Result<()> {
-        let common_msg_info = CommonMsgInfo::Int(CommonMsgInfoInt {
+        let mut common_msg_info = CommonMsgInfo::Int(CommonMsgInfoInt {
             ihr_disabled: false,
             bounce: false,
             bounced: false,
@@ -65,9 +65,9 @@ mod tests {
             created_lt: 0,
             created_at: 0,
         });
-        assert!(common_msg_info.is_int());
         assert!(common_msg_info.as_int().is_some());
         assert!(common_msg_info.as_ext_in().is_none());
+        assert!(common_msg_info.as_ext_in_mut().is_none());
 
         let int = common_msg_info.as_int().unwrap();
         let common_msg_info_from = CommonMsgInfo::from(int.clone());
