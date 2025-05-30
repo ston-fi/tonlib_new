@@ -8,8 +8,6 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::time::{SystemTime, UNIX_EPOCH};
 
-
-
 #[derive(Clone, Debug)]
 pub struct TVMEmulatorC7 {
     pub address: TonAddress,
@@ -45,7 +43,9 @@ impl From<Arc<CString>> for EmulatorConfig {
 }
 
 impl EmulatorConfig {
-    pub fn from_boc(config_boc: &[u8]) -> Result<Self, TonlibError> { Self::from_boc_base64(&STANDARD.encode(config_boc)) }
+    pub fn from_boc(config_boc: &[u8]) -> Result<Self, TonlibError> {
+        Self::from_boc_base64(&STANDARD.encode(config_boc))
+    }
     pub fn from_boc_hex(config_boc_hex: &str) -> Result<Self, TonlibError> {
         Self::from_boc_base64(&STANDARD.encode(hex::decode(config_boc_hex)?))
     }

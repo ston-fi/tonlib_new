@@ -111,7 +111,9 @@ impl TLB for TonAddress {
 }
 
 impl Display for TonAddress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str(&self.to_base64(true, true, true)) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.to_base64(true, true, true))
+    }
 }
 
 impl Debug for TonAddress {
