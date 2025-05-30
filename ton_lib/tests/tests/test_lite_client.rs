@@ -1,8 +1,8 @@
 use crate::tests::utils::init_logging;
 use std::str::FromStr;
 use std::time::Duration;
-use ton_lib::clients::lite::lc_config::LiteClientConfig;
-use ton_lib::clients::lite::lite_client::LiteClient;
+use ton_lib::clients::lite_client::client::LiteClient;
+use ton_lib::clients::lite_client::config::LiteClientConfig;
 use ton_lib::clients::net_config::TonNetConfig;
 use ton_lib::errors::TonlibError;
 use ton_lib::types::ton_address::TonAddress;

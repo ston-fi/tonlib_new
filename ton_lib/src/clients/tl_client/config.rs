@@ -1,36 +1,36 @@
 use crate::clients::net_config::TonNetConfig;
-use crate::clients::tonlibjson::tl_api::tl_types::{TLConfig, TLKeyStoreType, TLOptions};
-use crate::clients::tonlibjson::tl_callback::TLCallbacksStore;
+use crate::clients::tl_client::callback::TLCallbacksStore;
+use crate::clients::tl_client::tl::types::{TLConfig, TLKeyStoreType, TLOptions};
 use std::time::Duration;
-
-#[derive(Debug, PartialEq)]
-pub enum LiteNodeFilter {
-    Health,  // connected only to healthy node
-    Archive, // connected only to archive node
-}
-
-pub struct TLClientRetryStrategy {
-    pub retry_count: usize,
-    pub retry_waiting: Duration,
-}
 
 pub struct TLClientConfig {
     pub init_opts: TLOptions,
     pub connection_check: LiteNodeFilter,
     pub connections_count: usize,
-    pub max_parallel_requests: usize, // => (max_parallel_requests / connections_count) parallel requests per connection
-    pub retry_strategy: TLClientRetryStrategy,
+    pub max_parallel_requests: usize, // max_parallel_requests / connections_count = parallel requests per connection
+    pub retry_strategy: RetryStrategy,
     pub update_init_block: bool,
     pub update_init_block_timeout_sec: u64,
     pub tonlib_verbosity_level: u32,
     pub callbacks: TLCallbacksStore,
 }
 
+#[derive(Debug, PartialEq)]
+pub enum LiteNodeFilter {
+    Healthy, // connect to healthy node only
+    Archive, // connect to archive node only
+}
+
+pub struct RetryStrategy {
+    pub retry_count: usize,
+    pub retry_waiting: Duration,
+}
+
 impl TLClientConfig {
     pub fn new(net_config: String, archive_only: bool) -> TLClientConfig {
         let connection_check = match archive_only {
             true => LiteNodeFilter::Archive,
-            false => LiteNodeFilter::Health,
+            false => LiteNodeFilter::Healthy,
         };
         TLClientConfig {
             init_opts: TLOptions {
@@ -47,9 +47,9 @@ impl TLClientConfig {
             connection_check,
             connections_count: 10,
             max_parallel_requests: 200,
-            retry_strategy: TLClientRetryStrategy {
+            retry_strategy: RetryStrategy {
                 retry_count: 10,
-                retry_waiting: Duration::from_millis(10),
+                retry_waiting: Duration::from_millis(100),
             },
             update_init_block: true,
             update_init_block_timeout_sec: 10,

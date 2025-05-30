@@ -4,6 +4,8 @@ use ton_lib::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use ton_lib::types::tlb::adapters::dict_val_adapters::DictValAdapterNum;
 use ton_lib::types::tlb::adapters::Dict;
 use ton_lib::{ton_lib_macros::TLBDerive, types::tlb::TLB};
+extern crate num_bigint;
+extern crate ton_lib;
 
 // const ITEMS_COUNT: usize = 40000000;
 const ITEMS_COUNT: usize = 400000;
