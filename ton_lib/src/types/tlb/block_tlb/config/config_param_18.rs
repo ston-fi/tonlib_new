@@ -13,7 +13,7 @@ pub struct ConfigParam18 {
 }
 
 impl ConfigParam18 {
-    pub fn get_first_prices(&self) -> Result<&StoragePrices, TonlibError> {
+    pub fn get_first(&self) -> Result<&StoragePrices, TonlibError> {
         self.storage_prices
             .values()
             .next()

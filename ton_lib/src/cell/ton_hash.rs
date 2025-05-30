@@ -65,6 +65,7 @@ impl TonHash {
         }
     }
 
+    pub fn to_vec(&self) -> Vec<u8> { self.as_slice().to_vec() }
     pub fn to_hex(&self) -> String { hex::encode(self.as_slice()) }
     pub fn to_base64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
 
