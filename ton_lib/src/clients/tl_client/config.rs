@@ -49,7 +49,7 @@ impl TLClientConfig {
             max_parallel_requests: 200,
             retry_strategy: RetryStrategy {
                 retry_count: 10,
-                retry_waiting: Duration::from_millis(10),
+                retry_waiting: Duration::from_millis(100),
             },
             update_init_block: true,
             update_init_block_timeout_sec: 10,
