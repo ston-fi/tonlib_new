@@ -1,4 +1,3 @@
-use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::ton_cell::TonCellRef;
 use crate::cell::ton_hash::TonHash;
 use crate::clients::tl_client::connection::TLConnection;
@@ -14,20 +13,13 @@ use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::primitives::libs_dict::LibsDict;
 use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
+use crate::{
+    bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
+    unwrap_tl_response,
+};
 use async_trait::async_trait;
 use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
-
-#[macro_export]
-macro_rules! unwrap_tl_response {
-    ($result:expr, $variant:ident) => {
-        match $result {
-            TLResponse::$variant(inner) => Ok(inner),
-            TLResponse::Error { code, message } => Err(TonlibError::TLClientResponseError { code, message }),
-            _ => Err(TonlibError::TLClientWrongResponse(stringify!($variant).to_string(), format!("{:?}", $result))),
-        }
-    };
-}
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
