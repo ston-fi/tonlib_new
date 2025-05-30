@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 pub struct TVMRunGetMethodSuccess {
     pub vm_exit_code: i32,
     pub vm_log: Option<String>,
-    pub stack_boc_base64: String, // base64(String) <--> Vec<u8> <--> TVMStack
+    pub stack_boc_base64: String,
     pub gas_used: i32,
     pub raw_response: String,
 }
