@@ -66,7 +66,7 @@ impl TonHash {
     }
 
     pub fn to_hex(&self) -> String { hex::encode(self.as_slice()) }
-    pub fn to_b64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
+    pub fn to_base64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
 
     pub fn into_vec(self) -> Vec<u8> {
         match self.0 {
@@ -101,8 +101,8 @@ fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<TonHash, TonlibError> {
     Ok(TonHash(TonHashData::Vec(bytes)))
 }
 
-fn from_base64<T: AsRef<[u8]>>(b64: T) -> Result<TonHash, TonlibError> {
-    TonHash::from_vec(BASE64_STANDARD.decode(b64)?)
+fn from_base64<T: AsRef<[u8]>>(base64: T) -> Result<TonHash, TonlibError> {
+    TonHash::from_vec(BASE64_STANDARD.decode(base64)?)
 }
 
 fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {

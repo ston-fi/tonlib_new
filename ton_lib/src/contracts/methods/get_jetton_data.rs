@@ -11,7 +11,7 @@ use std::ops::Deref;
 #[async_trait]
 pub trait GetJettonData: TonContractTrait {
     async fn get_jetton_data(&self) -> Result<GetJettonDataResult, TonlibError> {
-        let run_result = self.run_method("get_jetton_data", &TVMStack::default()).await?;
+        let run_result = self.run_get_method("get_jetton_data", &TVMStack::default()).await?;
         GetJettonDataResult::from_stack(&mut run_result.stack_parsed()?)
     }
 }

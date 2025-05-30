@@ -61,7 +61,7 @@ pub trait TLB: Sized {
 
     fn from_boc_hex(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&hex::decode(boc)?) }
 
-    fn from_boc_b64(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&BASE64_STANDARD.decode(boc)?) }
+    fn from_boc_base64(boc: &str) -> Result<Self, TonlibError> { Self::from_boc(&BASE64_STANDARD.decode(boc)?) }
 
     /// Writing
     fn to_cell(&self) -> Result<TonCell, TonlibError> {
@@ -76,7 +76,7 @@ pub trait TLB: Sized {
 
     fn to_boc_hex(&self) -> Result<String, TonlibError> { self.to_boc_hex_extra(false) }
 
-    fn to_boc_b64(&self) -> Result<String, TonlibError> { self.to_boc_b64_extra(false) }
+    fn to_boc_base64(&self) -> Result<String, TonlibError> { self.to_boc_base64_extra(false) }
 
     fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonlibError> {
         let mut builder = TonCell::builder();
@@ -88,7 +88,7 @@ pub trait TLB: Sized {
         Ok(hex::encode(self.to_boc_extra(add_crc32)?))
     }
 
-    fn to_boc_b64_extra(&self, add_crc32: bool) -> Result<String, TonlibError> {
+    fn to_boc_base64_extra(&self, add_crc32: bool) -> Result<String, TonlibError> {
         Ok(BASE64_STANDARD.encode(self.to_boc_extra(add_crc32)?))
     }
 

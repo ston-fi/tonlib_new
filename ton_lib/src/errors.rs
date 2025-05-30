@@ -156,7 +156,7 @@ pub enum TonlibError {
     #[error("{0}")]
     FromHex(#[from] FromHexError),
     #[error("{0}")]
-    B64Error(#[from] base64::DecodeError),
+    Base64Error(#[from] base64::DecodeError),
     #[error("{0}")]
     ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]

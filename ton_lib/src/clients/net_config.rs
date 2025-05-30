@@ -64,8 +64,8 @@ impl TonNetConfig {
         self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_id.workchain);
         self.validator.init_block["shard"] = serde_json::json!(block_id.shard_id.shard as i64);
         self.validator.init_block["seqno"] = serde_json::json!(block_id.seqno);
-        self.validator.init_block["root_hash"] = serde_json::json!(block_id.root_hash.to_b64());
-        self.validator.init_block["file_hash"] = serde_json::json!(block_id.file_hash.to_b64());
+        self.validator.init_block["root_hash"] = serde_json::json!(block_id.root_hash.to_base64());
+        self.validator.init_block["file_hash"] = serde_json::json!(block_id.file_hash.to_base64());
     }
 }
 
