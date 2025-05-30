@@ -1,5 +1,5 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm::method_id::MethodId;
+use crate::emulators::tvm::method_id::TVMGetMethodID;
 use crate::emulators::tvm::response::{
     TVMRunGetMethodResponse, TVMRunGetMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
 };
@@ -72,7 +72,7 @@ impl TVMEmulator {
 
     pub fn run_get_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
-        T: Into<MethodId>,
+        T: Into<TVMGetMethodID>,
     {
         let tvm_method = method.into();
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack: {stack_boc:?}");

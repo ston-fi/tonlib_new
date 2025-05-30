@@ -4,7 +4,7 @@ use crate::contracts::contract_client::contract_client_cache::{ContractClientCac
 use crate::contracts::contract_client::data_provider::DataProvider;
 use crate::contracts::contract_client::types::ContractState;
 use crate::emulators::tvm::c7_register::EmulatorBCConfig;
-use crate::emulators::tvm::method_id::MethodId;
+use crate::emulators::tvm::method_id::TVMGetMethodID;
 use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
@@ -57,7 +57,7 @@ impl ContractClient {
         stack: &TVMStack,
     ) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
-        M: Into<MethodId> + Send,
+        M: Into<TVMGetMethodID> + Send,
     {
         self.inner.data_provider.run_get_method(address, &method.into().as_str(), stack.to_boc()?).await
     }

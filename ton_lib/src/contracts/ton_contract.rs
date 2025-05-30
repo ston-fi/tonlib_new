@@ -4,7 +4,7 @@ use crate::clients::client_types::TxId;
 use crate::contracts::contract_client::types::ContractState;
 use crate::contracts::contract_client::ContractClient;
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm::method_id::MethodId;
+use crate::emulators::tvm::method_id::TVMGetMethodID;
 use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::errors::TonlibError;
@@ -31,7 +31,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
 
     async fn run_get_method<M>(&self, method: M, stack: &TVMStack) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
-        M: Into<MethodId> + Send,
+        M: Into<TVMGetMethodID> + Send,
     {
         let ctx = self.ctx();
         ctx.client.run_get_method(&ctx.address, method, stack).await
