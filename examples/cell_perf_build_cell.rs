@@ -1,4 +1,5 @@
 use ton_lib::cell::ton_cell::TonCell;
+extern crate ton_lib;
 
 fn main() -> anyhow::Result<()> {
     for _ in 0..10000000 {

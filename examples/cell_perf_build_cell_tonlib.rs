@@ -1,5 +1,7 @@
 use tonlib_core::cell::CellBuilder;
 
+extern crate tonlib_core;
+
 fn main() -> anyhow::Result<()> {
     for _ in 0..10000000 {
         let mut builder1 = CellBuilder::new();
