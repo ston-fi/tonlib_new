@@ -1,7 +1,15 @@
+use crate::cell::ton_hash::TonHash;
+use crate::clients::tl_client::tl::Base64Standard;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
+use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
+use crate::types::ton_address::TonAddress;
+use serde::de::IntoDeserializer;
+use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
+use serde_aux::prelude::deserialize_number_from_string;
+use std::str::FromStr;
+
 pub(super) mod serde_ton_address_hex {
-    use crate::types::ton_address::TonAddress;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
+    use super::*;
 
     pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_str(hash.to_hex().as_str())
@@ -12,9 +20,7 @@ pub(super) mod serde_ton_address_hex {
 }
 
 pub(super) mod serde_ton_address_b64 {
-    use crate::types::ton_address::TonAddress;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
+    use super::*;
 
     pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_str(hash.to_string().as_str())
@@ -25,9 +31,7 @@ pub(super) mod serde_ton_address_b64 {
 }
 
 pub(super) mod serde_ton_hash_b64 {
-    use crate::cell::ton_hash::TonHash;
-    use serde::{de::Error, Deserialize, Deserializer, Serializer};
-    use std::str::FromStr;
+    use super::*;
 
     pub fn serialize<S: Serializer>(hash: &TonHash, serializer: S) -> Result<S::Ok, S::Error> {
         serializer.serialize_str(hash.to_b64().as_str())
@@ -38,9 +42,7 @@ pub(super) mod serde_ton_hash_b64 {
 }
 
 pub(super) mod serde_ton_hash_vec_b64 {
-    use crate::cell::ton_hash::TonHash;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-    use std::str::FromStr;
+    use super::*;
 
     pub fn serialize<S: Serializer>(data: &[TonHash], serializer: S) -> Result<S::Ok, S::Error> {
         let b64_strings: Vec<String> = data.iter().map(|h| h.to_b64()).collect();
@@ -54,12 +56,7 @@ pub(super) mod serde_ton_hash_vec_b64 {
 }
 
 pub(super) mod serde_block_id_ext {
-    use crate::cell::ton_hash::TonHash;
-    use crate::clients::tonlibjson::tl_api::Base64Standard;
-    use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
-    use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
-    use serde_aux::prelude::deserialize_number_from_string;
+    use super::*;
 
     // tonlib_api.tl_api, line 51
     #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -100,10 +97,8 @@ pub(super) mod serde_block_id_ext {
 }
 
 pub(super) mod serde_block_id_ext_vec {
-    use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
-    use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
-    use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
+    use super::*;
     pub fn serialize<S: Serializer>(data: &[BlockIdExt], serializer: S) -> Result<S::Ok, S::Error> {
         let tl_wrapped: Vec<_> = data
             .iter()
@@ -124,10 +119,8 @@ pub(super) mod serde_block_id_ext_vec {
 }
 
 pub(super) mod serde_block_id_ext_vec_opt {
-    use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext_vec;
-    use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
-    use serde::de::IntoDeserializer;
-    use serde::{Deserialize, Deserializer, Serializer};
+
+    use super::*;
 
     pub fn serialize<S: Serializer>(data: &Option<Vec<BlockIdExt>>, serializer: S) -> Result<S::Ok, S::Error> {
         match data {

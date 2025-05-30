@@ -1,62 +1,16 @@
 use crate::cell::ton_hash::TonHash;
-use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
-use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_vec_b64;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_b64;
+use crate::clients::tl_client::tl::types::{
     TLAccountAddress, TLBlockId, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
-use crate::clients::tonlibjson::tl_api::Base64Standard;
+use crate::clients::tl_client::tl::Base64Standard;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
-use base64::engine::general_purpose::STANDARD;
-use base64::Engine;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+
+use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use strum::IntoStaticStr;
-
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TonLibraryId {
-    pub id: Vec<u8>,
-}
-
-impl Serialize for TonLibraryId {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        serializer.serialize_str(&STANDARD.encode(&self.id))
-    }
-}
-
-impl<'de> Deserialize<'de> for TonLibraryId {
-    fn deserialize<D>(deserializer: D) -> Result<TonLibraryId, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s: String = Deserialize::deserialize(deserializer)?;
-
-        // Try to decode the base64 string
-        let bytes = match STANDARD.decode(s) {
-            Ok(decoded) => decoded,
-            Err(_) => return Err(serde::de::Error::custom("Invalid base64 string")),
-        };
-
-        Ok(TonLibraryId { id: bytes })
-    }
-}
-
-impl From<&TonHash> for TonLibraryId {
-    fn from(value: &TonHash) -> Self {
-        TonLibraryId {
-            id: value.as_slice().to_vec(),
-        }
-    }
-}
-
-impl TryFrom<TonLibraryId> for TonHash {
-    type Error = TonlibError;
-
-    fn try_from(value: TonLibraryId) -> Result<Self, Self::Error> { TonHash::from_vec(value.id) }
-}
 
 #[derive(IntoStaticStr, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(tag = "@type", rename_all = "camelCase")]
@@ -264,7 +218,7 @@ impl TLRequest {
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
+    use crate::clients::tl_client::tl::request::TLRequest;
     use std::ffi::CString;
 
     #[test]

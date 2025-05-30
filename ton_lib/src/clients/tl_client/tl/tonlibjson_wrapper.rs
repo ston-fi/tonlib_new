@@ -1,23 +1,24 @@
-use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-use crate::clients::tonlibjson::tl_api::tl_response::TLResponse;
+use crate::clients::tl_client::tl::request::TLRequest;
+use crate::clients::tl_client::tl::response::TLResponse;
 use crate::errors::TonlibError;
 use tonlib_sys::{
     tonlib_client_json_create, tonlib_client_json_destroy, tonlib_client_json_receive, tonlib_client_json_send,
 };
+
 // Wrapper around ton client with support for TL data types
 
-pub struct TLClientRaw {
+pub(crate) struct TonlibjsonWrapper {
     ptr: *mut std::os::raw::c_void,
     tag: String,
 }
 
-impl TLClientRaw {
-    pub fn new(tag: String) -> Result<TLClientRaw, TonlibError> {
+impl TonlibjsonWrapper {
+    pub fn new(tag: String) -> Result<TonlibjsonWrapper, TonlibError> {
         let client_ptr = unsafe { tonlib_client_json_create() };
         if client_ptr.is_null() {
             return Err(TonlibError::TLClientCreationFailed);
         }
-        Ok(TLClientRaw { ptr: client_ptr, tag })
+        Ok(TonlibjsonWrapper { ptr: client_ptr, tag })
     }
 
     pub fn tag(&self) -> &str { self.tag.as_str() }
@@ -38,23 +39,22 @@ impl TLClientRaw {
     }
 }
 
-impl Drop for TLClientRaw {
+impl Drop for TonlibjsonWrapper {
     fn drop(&mut self) { unsafe { tonlib_client_json_destroy(self.ptr) } }
 }
 
-unsafe impl Send for TLClientRaw {}
-unsafe impl Sync for TLClientRaw {}
+unsafe impl Send for TonlibjsonWrapper {}
+unsafe impl Sync for TonlibjsonWrapper {}
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::tonlibjson::tl_api::tl_request::TLRequest;
-    use crate::clients::tonlibjson::tl_client_raw::TLClientRaw;
+    use crate::clients::tl_client::tl::{request::TLRequest, tonlibjson_wrapper::TonlibjsonWrapper};
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
 
     #[test]
     fn it_executes_functions() -> anyhow::Result<()> {
         sys_tonlib_set_verbosity_level(1);
-        let client = TLClientRaw::new("test".to_string())?;
+        let client = TonlibjsonWrapper::new("test".to_string())?;
         client.send(&TLRequest::GetLogVerbosityLevel {}, "test2")?;
         Ok(())
     }

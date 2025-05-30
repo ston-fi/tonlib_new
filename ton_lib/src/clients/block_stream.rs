@@ -1,4 +1,4 @@
-use crate::clients::lite::lite_client::LiteClient;
+use crate::clients::lite_client::client::LiteClient;
 use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::block_tlb::block::Block;
 use std::collections::HashSet;
