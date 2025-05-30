@@ -3,7 +3,7 @@ use crate::clients::client_types::TxId;
 use crate::contracts::contract_client::contract_client_cache::{ContractClientCache, ContractClientCacheConfig};
 use crate::contracts::contract_client::data_provider::DataProvider;
 use crate::contracts::contract_client::types::ContractState;
-use crate::emulators::tvm::c7_register::EmulatorConfig;
+use crate::emulators::tvm::c7_register::EmulatorBCConfig;
 use crate::emulators::tvm::method_id::MethodId;
 use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::errors::TonlibError;
@@ -42,7 +42,7 @@ impl ContractClient {
         self.inner.cache.get_state(address, tx_id).await
     }
 
-    pub async fn get_config_boc(&self, mc_seqno: Option<u32>) -> Result<EmulatorConfig, TonlibError> {
+    pub async fn get_config_boc(&self, mc_seqno: Option<u32>) -> Result<EmulatorBCConfig, TonlibError> {
         self.inner.data_provider.get_config_boc(mc_seqno).await
     }
 

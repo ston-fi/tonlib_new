@@ -125,7 +125,7 @@ fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<Strin
 #[cfg(test)]
 mod tests {
     use crate::cell::ton_cell::{TonCell, TonCellRef};
-    use crate::emulators::tvm::c7_register::{EmulatorConfig, TVMEmulatorC7};
+    use crate::emulators::tvm::c7_register::{EmulatorBCConfig, TVMEmulatorC7};
     use crate::emulators::tvm::tvm_emulator::TVMEmulator;
     use crate::errors::TonlibError;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
@@ -140,8 +140,8 @@ mod tests {
     use std::sync::LazyLock;
     use tokio_test::{assert_err, assert_ok};
 
-    static BC_CONFIG: LazyLock<EmulatorConfig> = LazyLock::new(|| {
-        EmulatorConfig::from_boc_hex(include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
+    static BC_CONFIG: LazyLock<EmulatorBCConfig> = LazyLock::new(|| {
+        EmulatorBCConfig::from_boc_hex(include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
             .unwrap()
     });
 

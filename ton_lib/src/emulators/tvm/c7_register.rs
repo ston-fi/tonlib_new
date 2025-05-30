@@ -14,11 +14,11 @@ pub struct TVMEmulatorC7 {
     pub unix_time: u32,
     pub balance: u64,
     pub rand_seed: TonHash,
-    pub config: EmulatorConfig,
+    pub config: EmulatorBCConfig,
 }
 
 impl TVMEmulatorC7 {
-    pub fn new(address: TonAddress, config: EmulatorConfig) -> Result<Self, TonlibError> {
+    pub fn new(address: TonAddress, config: EmulatorBCConfig) -> Result<Self, TonlibError> {
         Ok(Self {
             address,
             unix_time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u32,
@@ -30,19 +30,19 @@ impl TVMEmulatorC7 {
 }
 
 #[derive(Clone, Debug)]
-pub struct EmulatorConfig(Arc<CString>);
+pub struct EmulatorBCConfig(Arc<CString>);
 
-impl Deref for EmulatorConfig {
+impl Deref for EmulatorBCConfig {
     type Target = CString;
 
     fn deref(&self) -> &Self::Target { &self.0 }
 }
 
-impl From<Arc<CString>> for EmulatorConfig {
+impl From<Arc<CString>> for EmulatorBCConfig {
     fn from(config: Arc<CString>) -> Self { Self(config) }
 }
 
-impl EmulatorConfig {
+impl EmulatorBCConfig {
     pub fn from_boc(config_boc: &[u8]) -> Result<Self, TonlibError> {
         Self::from_boc_base64(&STANDARD.encode(config_boc))
     }
