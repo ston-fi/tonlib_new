@@ -229,7 +229,7 @@ mod tests {
 
         // no libs - should fail
         let emulator_error = assert_err!(emulator.run_get_method("get_wallet_address", &stack.to_boc()?));
-        if let TonlibError::TVMRunMethodError {
+        if let TonlibError::TVMRunGetMethodError {
             vm_exit_code,
             response_raw,
         } = emulator_error

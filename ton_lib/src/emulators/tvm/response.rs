@@ -37,14 +37,14 @@ impl TVMRunGetMethodResponse {
 
     pub fn into_success(self) -> Result<TVMRunGetMethodSuccess, TonlibError> {
         if !self.success {
-            return Err(TonlibError::TVMRunMethodError {
+            return Err(TonlibError::TVMRunGetMethodError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
         }
         let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code")?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TonlibError::TVMRunMethodError {
+            return Err(TonlibError::TVMRunGetMethodError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
