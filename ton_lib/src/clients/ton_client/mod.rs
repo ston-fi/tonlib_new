@@ -1,4 +1,4 @@
-pub mod utils;
+pub mod env;
 
 pub mod tl;
 
@@ -6,7 +6,6 @@ mod callback;
 mod client;
 mod config;
 mod connection;
-mod tonlibjson_wrapper;
 
 pub use callback::*;
 pub use client::*;

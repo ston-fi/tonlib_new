@@ -48,7 +48,7 @@ unsafe impl Sync for TonlibjsonWrapper {}
 
 #[cfg(test)]
 mod tests {
-    use crate::clients::ton_client::{tl::request::TLRequest, tonlibjson_wrapper::TonlibjsonWrapper};
+    use crate::clients::ton_client::tl::{request::TLRequest, tonlibjson_wrapper::TonlibjsonWrapper};
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
 
     #[test]

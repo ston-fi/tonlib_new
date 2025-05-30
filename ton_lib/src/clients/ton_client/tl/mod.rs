@@ -4,6 +4,8 @@ base64_serde_type!(pub Base64Standard, base64::engine::general_purpose::STANDARD
 pub mod client;
 pub mod request;
 pub mod request_context;
+pub(crate) mod tonlibjson_wrapper;
+
 pub mod response;
 pub(super) mod ser_de;
 pub mod types;

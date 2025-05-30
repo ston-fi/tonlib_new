@@ -4,21 +4,23 @@ use std::sync::{Arc, Weak};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::clients::ton_client::config::{LiteNodeFilter, TLClientConfig};
 use crate::clients::ton_client::tl::client::TLClientTrait;
 use crate::clients::ton_client::tl::request::TLRequest;
 use crate::clients::ton_client::tl::response::TLResponse;
 use crate::clients::ton_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
-use crate::clients::ton_client::TLClientRetryStrategy;
+use crate::clients::ton_client::RetryStrategy;
 use crate::clients::ton_client::{
     callback::{TonCallback, TonCallbacksStore},
     tl::request_context::TLRequestCtx,
-    tonlibjson_wrapper::TonlibjsonWrapper,
 };
 use crate::errors::TonlibError;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::unwrap_tl_response;
+use crate::{
+    bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
+    clients::ton_client::tl::tonlibjson_wrapper::TonlibjsonWrapper,
+};
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
 
@@ -29,12 +31,20 @@ pub struct TonConnection {
     inner: Arc<Inner>,
 }
 
+struct Inner {
+    tonlibjson_wrapper: TonlibjsonWrapper,
+    active_requests: Mutex<HashMap<u64, TLRequestCtx>>,
+    semaphore: Arc<Semaphore>,
+    next_request_id: AtomicU64,
+    callbacks: TonCallbacksStore,
+}
+
 #[async_trait]
 impl TLClientTrait for TonConnection {
     async fn get_connection(&self) -> &TonConnection { self }
 
-    fn get_retry_strategy(&self) -> &TLClientRetryStrategy {
-        static NO_RETRY: TLClientRetryStrategy = TLClientRetryStrategy {
+    fn get_retry_strategy(&self) -> &RetryStrategy {
+        static NO_RETRY: RetryStrategy = RetryStrategy {
             retry_count: 0,
             retry_waiting: Duration::from_millis(0),
         };
@@ -57,19 +67,11 @@ impl TonConnection {
     }
 }
 
-struct Inner {
-    client_raw: TonlibjsonWrapper,
-    active_requests: Mutex<HashMap<u64, TLRequestCtx>>,
-    semaphore: Arc<Semaphore>,
-    next_request_id: AtomicU64,
-    callbacks: TonCallbacksStore,
-}
-
 impl Inner {
     pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonlibError> {
         let _permit = self.semaphore.acquire().await;
         let req_id = self.next_request_id.fetch_add(1, Ordering::Relaxed);
-        let tag = self.client_raw.tag();
+        let tag = self.tonlibjson_wrapper.tag();
 
         let (sender, receiver) = oneshot::channel();
         let req_ctx = TLRequestCtx {
@@ -83,7 +85,7 @@ impl Inner {
         self.active_requests.lock().await.insert(req_id, req_ctx);
 
         let extra = req_id.to_string();
-        if let Err(err) = self.client_raw.send(req, &extra) {
+        if let Err(err) = self.tonlibjson_wrapper.send(req, &extra) {
             let req_ctx = self.active_requests.lock().await.remove(&req_id).unwrap();
             self.callbacks.on_send_error(tag, &req_ctx, &err);
             return Err(err);
@@ -96,8 +98,8 @@ impl Inner {
 fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TonCallbacksStore) {
     callbacks.on_loop_enter(&tag);
     while let Some(inner) = weak_inner.upgrade() {
-        let tag = inner.client_raw.tag();
-        let result = match inner.client_raw.receive(1.0) {
+        let tag = inner.tonlibjson_wrapper.tag();
+        let result = match inner.tonlibjson_wrapper.receive(1.0) {
             Some(res) => res,
             None => {
                 callbacks.on_idle(tag);
@@ -166,7 +168,7 @@ async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> R
     let tag = format!("ton-conn-{conn_id}");
 
     let inner = Arc::new(Inner {
-        client_raw: TonlibjsonWrapper::new(tag.clone())?,
+        tonlibjson_wrapper: TonlibjsonWrapper::new(tag.clone())?,
         active_requests: Mutex::new(HashMap::new()),
         semaphore,
         next_request_id: AtomicU64::new(0),

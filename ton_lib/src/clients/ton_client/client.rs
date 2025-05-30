@@ -1,6 +1,6 @@
 use crate::clients::ton_client::connection::TonConnection;
-use crate::clients::ton_client::utils::prepare_client_env;
-use crate::clients::ton_client::TLClientRetryStrategy;
+use crate::clients::ton_client::env::prepare_client_env;
+use crate::clients::ton_client::RetryStrategy;
 use crate::clients::ton_client::{config::TLClientConfig, tl::client::TLClientTrait};
 use crate::errors::TonlibError;
 use async_trait::async_trait;
@@ -16,6 +16,12 @@ pub struct TLClient {
     inner: Arc<Inner>,
 }
 
+struct Inner {
+    rnd: Mutex<StdRng>,
+    connections: Vec<TonConnection>,
+    config: TLClientConfig,
+}
+
 #[async_trait]
 impl TLClientTrait for TLClient {
     async fn get_connection(&self) -> &TonConnection {
@@ -23,7 +29,7 @@ impl TLClientTrait for TLClient {
         self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
     }
 
-    fn get_retry_strategy(&self) -> &TLClientRetryStrategy { &self.inner.config.retry_strategy }
+    fn get_retry_strategy(&self) -> &RetryStrategy { &self.inner.config.retry_strategy }
 }
 
 impl TLClient {
@@ -43,10 +49,4 @@ impl TLClient {
         };
         Ok(TLClient { inner: Arc::new(inner) })
     }
-}
-
-struct Inner {
-    rnd: Mutex<StdRng>,
-    connections: Vec<TonConnection>,
-    config: TLClientConfig,
 }

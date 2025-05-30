@@ -8,7 +8,7 @@ pub struct TLClientConfig {
     pub connection_check: LiteNodeFilter,
     pub connections_count: usize,
     pub max_parallel_requests: usize, // max_parallel_requests / connections_count = parallel requests per connection
-    pub retry_strategy: TLClientRetryStrategy,
+    pub retry_strategy: RetryStrategy,
     pub update_init_block: bool,
     pub update_init_block_timeout_sec: u64,
     pub tonlib_verbosity_level: u32,
@@ -21,7 +21,7 @@ pub enum LiteNodeFilter {
     Archive, // connect to archive node only
 }
 
-pub struct TLClientRetryStrategy {
+pub struct RetryStrategy {
     pub retry_count: usize,
     pub retry_waiting: Duration,
 }
@@ -47,7 +47,7 @@ impl TLClientConfig {
             connection_check,
             connections_count: 10,
             max_parallel_requests: 200,
-            retry_strategy: TLClientRetryStrategy {
+            retry_strategy: RetryStrategy {
                 retry_count: 10,
                 retry_waiting: Duration::from_millis(10),
             },
