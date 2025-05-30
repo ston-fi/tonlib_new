@@ -2,7 +2,7 @@ use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::{TxId, TxIdLTHash};
 use crate::contracts::contract_client::types::ContractState;
 use crate::emulators::tvm::c7_register::EmulatorConfig;
-use crate::emulators::tvm::response::TVMSuccess;
+use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
@@ -24,5 +24,5 @@ pub trait DataProvider: Send + Sync {
         address: &TonAddress,
         method: &str,
         stack_boc: Vec<u8>,
-    ) -> Result<TVMSuccess, TonlibError>;
+    ) -> Result<TVMRunGetMethodSuccess, TonlibError>;
 }

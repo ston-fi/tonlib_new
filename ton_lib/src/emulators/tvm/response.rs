@@ -6,7 +6,7 @@ use base64::Engine;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug)]
-pub struct TVMSuccess {
+pub struct TVMRunGetMethodSuccess {
     pub vm_exit_code: i32,
     pub vm_log: Option<String>,
     pub stack_boc_base64: String, // base64(String) <--> Vec<u8> <--> TVMStack
@@ -16,7 +16,7 @@ pub struct TVMSuccess {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct TVMResponse {
+pub struct TVMRunGetMethodResponse {
     pub success: bool,
     pub vm_exit_code: Option<i32>,
     pub vm_log: Option<String>,
@@ -28,21 +28,21 @@ pub struct TVMResponse {
     pub raw_response: String,
 }
 
-impl TVMResponse {
+impl TVMRunGetMethodResponse {
     pub fn from_json(json: String) -> Result<Self, TonlibError> {
         let mut value: Self = serde_json::from_str(&json)?;
         value.raw_response = json;
         Ok(value)
     }
 
-    pub fn into_success(self) -> Result<TVMSuccess, TonlibError> {
+    pub fn into_success(self) -> Result<TVMRunGetMethodSuccess, TonlibError> {
         if !self.success {
             return Err(TonlibError::TVMRunMethodError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
         }
-        let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
+        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code")?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
             return Err(TonlibError::TVMRunMethodError {
                 vm_exit_code: self.vm_exit_code,
@@ -51,10 +51,10 @@ impl TVMResponse {
         }
 
         let vm_log = self.vm_log;
-        let stack_boc_base64 = unwrap_opt(self.stack, "stack")?;
-        let gas_used = unwrap_opt(self.gas_used, "gas_used")?.parse::<i32>()?;
+        let stack_boc_base64 = require_field(self.stack, "stack")?;
+        let gas_used = require_field(self.gas_used, "gas_used")?.parse::<i32>()?;
 
-        Ok(TVMSuccess {
+        Ok(TVMRunGetMethodSuccess {
             vm_log,
             vm_exit_code,
             stack_boc_base64,
@@ -64,7 +64,7 @@ impl TVMResponse {
     }
 }
 
-impl TVMSuccess {
+impl TVMRunGetMethodSuccess {
     pub fn stack_parsed(&self) -> Result<TVMStack, TonlibError> { TVMStack::from_boc_base64(&self.stack_boc_base64) }
 
     pub fn stack_boc(&self) -> Result<Vec<u8>, TonlibError> {
@@ -117,15 +117,15 @@ impl TVMSendMsgResponse {
 
     pub fn into_success(self) -> Result<TVMSendMsgSuccess, TonlibError> {
         if !self.success {
-            let error = unwrap_opt(self.error, "error is None")?;
+            let error = require_field(self.error, "error is None")?;
             return Err(TonlibError::TVMEmulatorError(error));
         }
 
-        let accepted = unwrap_opt(self.accepted, "accepted")?;
-        let vm_log = unwrap_opt(self.vm_log, "vm_log")?;
-        let vm_exit_code = unwrap_opt(self.vm_exit_code, "vm_exit_code")?;
+        let accepted = require_field(self.accepted, "accepted")?;
+        let vm_log = require_field(self.vm_log, "vm_log")?;
+        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code")?;
         let missing_library = self.missing_library;
-        let gas_used = unwrap_opt(self.gas_used, "gas_used")?.parse::<i32>()?;
+        let gas_used = require_field(self.gas_used, "gas_used")?.parse::<i32>()?;
         let actions_boc_base64 = self.actions;
         Ok(TVMSendMsgSuccess {
             new_code_boc_base64: self.new_code_boc_base64,
@@ -141,6 +141,6 @@ impl TVMSendMsgResponse {
     }
 }
 
-fn unwrap_opt<T>(val: Option<T>, field: &'static str) -> Result<T, TonlibError> {
+fn require_field<T>(val: Option<T>, field: &'static str) -> Result<T, TonlibError> {
     val.ok_or(TonlibError::TVMEmulatorResponseParseError(format!("{field} is None")))
 }

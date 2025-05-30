@@ -5,7 +5,7 @@ use crate::contracts::contract_client::data_provider::DataProvider;
 use crate::contracts::contract_client::types::ContractState;
 use crate::emulators::tvm::c7_register::EmulatorConfig;
 use crate::emulators::tvm::method_id::MethodId;
-use crate::emulators::tvm::response::TVMSuccess;
+use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
 use crate::types::tlb::TLB;
@@ -55,7 +55,7 @@ impl ContractClient {
         address: &TonAddress,
         method: M,
         stack: &TVMStack,
-    ) -> Result<TVMSuccess, TonlibError>
+    ) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
         M: Into<MethodId> + Send,
     {
