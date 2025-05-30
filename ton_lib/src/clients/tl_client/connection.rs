@@ -11,7 +11,7 @@ use crate::clients::tl_client::tl::response::TLResponse;
 use crate::clients::tl_client::tl::types::{TLBlockId, TLOptions, TLOptionsInfo};
 use crate::clients::tl_client::RetryStrategy;
 use crate::clients::tl_client::{
-    callback::{TonCallback, TonCallbacksStore},
+    callback::{TLCallback, TLCallbacksStore},
     tl::request_context::TLRequestCtx,
 };
 use crate::errors::TonlibError;
@@ -36,7 +36,7 @@ struct Inner {
     active_requests: Mutex<HashMap<u64, TLRequestCtx>>,
     semaphore: Arc<Semaphore>,
     next_request_id: AtomicU64,
-    callbacks: TonCallbacksStore,
+    callbacks: TLCallbacksStore,
 }
 
 #[async_trait]
@@ -95,7 +95,7 @@ impl Inner {
 }
 
 // receiving updates from tonlibjson
-fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TonCallbacksStore) {
+fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLCallbacksStore) {
     callbacks.on_loop_enter(&tag);
     while let Some(inner) = weak_inner.upgrade() {
         let tag = inner.tonlibjson_wrapper.tag();

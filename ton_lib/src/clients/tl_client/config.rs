@@ -1,5 +1,5 @@
 use crate::clients::net_config::TonNetConfig;
-use crate::clients::tl_client::callback::TonCallbacksStore;
+use crate::clients::tl_client::callback::TLCallbacksStore;
 use crate::clients::tl_client::tl::types::{TLConfig, TLKeyStoreType, TLOptions};
 use std::time::Duration;
 
@@ -12,7 +12,7 @@ pub struct TLClientConfig {
     pub update_init_block: bool,
     pub update_init_block_timeout_sec: u64,
     pub tonlib_verbosity_level: u32,
-    pub callbacks: TonCallbacksStore,
+    pub callbacks: TLCallbacksStore,
 }
 
 #[derive(Debug, PartialEq)]
@@ -54,7 +54,7 @@ impl TLClientConfig {
             update_init_block: true,
             update_init_block_timeout_sec: 10,
             tonlib_verbosity_level: 1,
-            callbacks: TonCallbacksStore::default(),
+            callbacks: TLCallbacksStore::default(),
         }
     }
     pub fn new_mainnet(archive_only: bool) -> TLClientConfig {

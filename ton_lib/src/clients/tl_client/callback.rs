@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 /// Check tl_conn_default (mostly `run_loop` method) for method execution flow
 #[allow(unused)]
-pub trait TonCallback: Send + Sync {
+pub trait TLCallback: Send + Sync {
     fn on_loop_enter(&self, tag: &str);
     fn on_loop_exit(&self, tag: &str);
 
@@ -18,11 +18,11 @@ pub trait TonCallback: Send + Sync {
 }
 
 #[derive(Clone, Default)]
-pub struct TonCallbacksStore {
-    pub callbacks: Arc<Vec<Box<dyn TonCallback>>>,
+pub struct TLCallbacksStore {
+    pub callbacks: Arc<Vec<Box<dyn TLCallback>>>,
 }
 
-impl TonCallback for TonCallbacksStore {
+impl TLCallback for TLCallbacksStore {
     fn on_loop_enter(&self, tag: &str) { self.callbacks.iter().for_each(|cb| cb.on_loop_enter(tag)); }
     fn on_loop_exit(&self, tag: &str) { self.callbacks.iter().for_each(|cb| cb.on_loop_exit(tag)); }
     fn before_send(&self, tag: &str, req_ctx: &TLRequestCtx, req: &TLRequest) {
@@ -43,8 +43,8 @@ impl TonCallback for TonCallbacksStore {
     }
 }
 
-pub struct TonCallbackLogTrace {}
-impl TonCallback for TonCallbackLogTrace {
+pub struct TLCallbackLogTrace {}
+impl TLCallback for TLCallbackLogTrace {
     fn on_loop_enter(&self, tag: &str) {
         log::info!("[{tag}] Starting event loop");
     }
