@@ -115,8 +115,8 @@ pub enum TonlibError {
     TVMEmulatorError(String),
     #[error("TVMEmulatorResponseParseError: {0}")]
     TVMEmulatorResponseParseError(String),
-    #[error("TVMRunMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
-    TVMRunMethodError {
+    #[error("TVMRunGetMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
+    TVMRunGetMethodError {
         vm_exit_code: Option<i32>,
         response_raw: String,
     },
@@ -156,7 +156,7 @@ pub enum TonlibError {
     #[error("{0}")]
     FromHex(#[from] FromHexError),
     #[error("{0}")]
-    B64Error(#[from] base64::DecodeError),
+    Base64Error(#[from] base64::DecodeError),
     #[error("{0}")]
     ParseInt(#[from] std::num::ParseIntError),
     #[error("{0}")]

@@ -1,10 +1,10 @@
 use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
 use crate::clients::tl_client::tl::ser_de::serde_block_id_ext_vec;
 use crate::clients::tl_client::tl::ser_de::serde_block_id_ext_vec_opt;
-use crate::clients::tl_client::tl::ser_de::serde_ton_address_b64;
+use crate::clients::tl_client::tl::ser_de::serde_ton_address_base64;
 use crate::clients::tl_client::tl::ser_de::serde_ton_address_hex;
-use crate::clients::tl_client::tl::ser_de::serde_ton_hash_b64;
-use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_b64;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_base64;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_base64;
 use crate::clients::tl_client::tl::Base64Standard;
 use std::borrow::Cow;
 use std::fmt::Debug;
@@ -87,7 +87,7 @@ pub struct TLBlockId {
 pub struct TLTxId {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
-    #[serde(with = "serde_ton_hash_b64")]
+    #[serde(with = "serde_ton_hash_base64")]
     pub hash: TonHash,
 }
 
@@ -421,7 +421,7 @@ pub struct TLSmcLibraryResult {
 pub enum TLSmcLibraryQueryExt {
     #[serde(rename = "smc.libraryQueryExt.one")]
     One {
-        #[serde(with = "serde_ton_hash_b64")]
+        #[serde(with = "serde_ton_hash_base64")]
         hash: TonHash,
     },
 
@@ -438,9 +438,9 @@ pub enum TLSmcLibraryQueryExt {
 pub struct TLSmcLibraryResultExt {
     #[serde(with = "Base64Standard")]
     pub dict_boc: Vec<u8>,
-    #[serde(with = "serde_ton_hash_vec_b64")]
+    #[serde(with = "serde_ton_hash_vec_base64")]
     pub libs_ok: Vec<TonHash>,
-    #[serde(with = "serde_ton_hash_vec_b64")]
+    #[serde(with = "serde_ton_hash_vec_base64")]
     pub libs_not_found: Vec<TonHash>,
 }
 
@@ -488,7 +488,7 @@ pub struct TLBlocksShards {
 // tonlib_api.tl_api, line 221
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLBlocksAccountTxId {
-    #[serde(with = "serde_ton_address_b64")]
+    #[serde(with = "serde_ton_address_base64")]
     pub account: TonAddress,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,

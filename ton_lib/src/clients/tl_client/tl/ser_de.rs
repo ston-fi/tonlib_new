@@ -19,7 +19,7 @@ pub(super) mod serde_ton_address_hex {
     }
 }
 
-pub(super) mod serde_ton_address_b64 {
+pub(super) mod serde_ton_address_base64 {
     use super::*;
 
     pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
@@ -30,28 +30,28 @@ pub(super) mod serde_ton_address_b64 {
     }
 }
 
-pub(super) mod serde_ton_hash_b64 {
+pub(super) mod serde_ton_hash_base64 {
     use super::*;
 
     pub fn serialize<S: Serializer>(hash: &TonHash, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_b64().as_str())
+        serializer.serialize_str(hash.to_base64().as_str())
     }
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonHash, D::Error> {
         TonHash::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
     }
 }
 
-pub(super) mod serde_ton_hash_vec_b64 {
+pub(super) mod serde_ton_hash_vec_base64 {
     use super::*;
 
     pub fn serialize<S: Serializer>(data: &[TonHash], serializer: S) -> Result<S::Ok, S::Error> {
-        let b64_strings: Vec<String> = data.iter().map(|h| h.to_b64()).collect();
-        b64_strings.serialize(serializer)
+        let base64_strings: Vec<String> = data.iter().map(|h| h.to_base64()).collect();
+        base64_strings.serialize(serializer)
     }
 
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<Vec<TonHash>, D::Error> {
-        let b64_vec: Vec<String> = Vec::deserialize(deserializer)?;
-        b64_vec.into_iter().map(|s| TonHash::from_str(&s).map_err(serde::de::Error::custom)).collect()
+        let base64_vec: Vec<String> = Vec::deserialize(deserializer)?;
+        base64_vec.into_iter().map(|s| TonHash::from_str(&s).map_err(serde::de::Error::custom)).collect()
     }
 }
 
@@ -153,9 +153,9 @@ mod tests {
     fn test_ton_hash_serde() -> anyhow::Result<()> {
         #[derive(Serialize, Deserialize, Debug, PartialEq)]
         struct TestStruct {
-            #[serde(with = "serde_ton_hash_b64")]
+            #[serde(with = "serde_ton_hash_base64")]
             hash: TonHash,
-            #[serde(with = "serde_ton_hash_vec_b64")]
+            #[serde(with = "serde_ton_hash_vec_base64")]
             hash_vec: Vec<TonHash>,
         }
 

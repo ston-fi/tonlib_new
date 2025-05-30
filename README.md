@@ -89,6 +89,6 @@ async fn main() -> anyhow::Result<()> {
 ---
 
 ### [emulators](ton_lib/src/emulators) module
-- [TVMEmulator](ton_lib/src/emulators/tvm/tvm_emulator.rs): `run_method`, `send_int_msg`, `send_ext_msg`\
+- [TVMEmulator](ton_lib/src/emulators/tvm/tvm_emulator.rs): `run_get_method`, `send_int_msg`, `send_ext_msg`\
 Check [tvm_emulator_tests](ton_lib/src/emulators/tvm/test_tvm_emulator.rs) for usage examples
 - [TXEmulator](ton_lib/src/emulators/tx/tx_emulator.rs): WIP

@@ -10,7 +10,7 @@ pub struct WalletContract {}
 
 impl WalletContract {
     pub async fn seqno(&self) -> Result<u32, TonlibError> {
-        let result = self.run_method("seqno", &TVMStack::default()).await?;
+        let result = self.run_get_method("seqno", &TVMStack::default()).await?;
         let seqno_int = result.stack_parsed()?.pop_tiny_int()?;
         if seqno_int < 0 {
             return Err(TonlibError::UnexpectedValue {
@@ -22,7 +22,7 @@ impl WalletContract {
     }
 
     pub async fn get_public_key(&self) -> Result<TonHash, TonlibError> {
-        let result = self.run_method("get_public_key", &TVMStack::default()).await?;
+        let result = self.run_get_method("get_public_key", &TVMStack::default()).await?;
         TonHash::from_num(&result.stack_parsed()?.pop_int()?)
     }
 }

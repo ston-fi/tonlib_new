@@ -49,7 +49,7 @@ impl TonAddress {
 
     pub fn to_hex(&self) -> String { format!("{}:{}", self.wc, hex::encode(self.hash.as_slice())) }
 
-    pub fn to_b64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
+    pub fn to_base64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
         let mut buf = [0; 36];
         let tag: u8 = match (mainnet, bounce) {
             (true, true) => 0x11,
@@ -111,7 +111,9 @@ impl TLB for TonAddress {
 }
 
 impl Display for TonAddress {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { f.write_str(&self.to_b64(true, true, true)) }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.to_base64(true, true, true))
+    }
 }
 
 impl Debug for TonAddress {
@@ -288,9 +290,9 @@ mod tests {
         let bytes = TonHash::from_str("e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76")?;
         let addr = TonAddress::new(0, bytes);
         assert_eq!(addr.to_hex(), "0:e4d954ef9f4e1250a26b5bbad76a1cdd17cfd08babad6f4c23e372270aef6f76");
-        assert_eq!(addr.to_b64(true, true, true), "EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR");
-        assert_eq!(addr.to_b64(true, true, false), "EQDk2VTvn04SUKJrW7rXahzdF8/Qi6utb0wj43InCu9vdjrR");
-        assert_eq!(addr.to_b64(true, true, true), addr.to_string());
+        assert_eq!(addr.to_base64(true, true, true), "EQDk2VTvn04SUKJrW7rXahzdF8_Qi6utb0wj43InCu9vdjrR");
+        assert_eq!(addr.to_base64(true, true, false), "EQDk2VTvn04SUKJrW7rXahzdF8/Qi6utb0wj43InCu9vdjrR");
+        assert_eq!(addr.to_base64(true, true, true), addr.to_string());
         Ok(())
     }
 

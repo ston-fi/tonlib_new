@@ -4,9 +4,9 @@ use crate::clients::client_types::TxId;
 use crate::contracts::contract_client::types::ContractState;
 use crate::contracts::contract_client::ContractClient;
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm::method_id::TVMMethodId;
+use crate::emulators::tvm::method_id::TVMGetMethodID;
+use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
 use crate::emulators::tvm::tvm_emulator::TVMEmulator;
-use crate::emulators::tvm::tvm_response::TVMRunMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
 use crate::types::tlb::TLB;
@@ -29,12 +29,12 @@ pub trait TonContractTrait: Send + Sync + Sized {
         Ok(Self::from_ctx(ContractCtx { client, address, tx_id }))
     }
 
-    async fn run_method<M>(&self, method: M, stack: &TVMStack) -> Result<TVMRunMethodSuccess, TonlibError>
+    async fn run_get_method<M>(&self, method: M, stack: &TVMStack) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
-        M: Into<TVMMethodId> + Send,
+        M: Into<TVMGetMethodID> + Send,
     {
         let ctx = self.ctx();
-        ctx.client.run_method(&ctx.address, method, stack).await
+        ctx.client.run_get_method(&ctx.address, method, stack).await
     }
 
     async fn get_state(&self) -> Result<Arc<ContractState>, TonlibError> {

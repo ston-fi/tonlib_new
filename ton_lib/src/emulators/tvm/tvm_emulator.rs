@@ -1,7 +1,7 @@
 use crate::emulators::tvm::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm::method_id::TVMMethodId;
-use crate::emulators::tvm::tvm_response::{
-    TVMRunMethodResponse, TVMRunMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
+use crate::emulators::tvm::method_id::TVMGetMethodID;
+use crate::emulators::tvm::response::{
+    TVMRunGetMethodResponse, TVMRunGetMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
 };
 use crate::errors::TonlibError;
 use base64::engine::general_purpose::STANDARD;
@@ -70,9 +70,9 @@ impl TVMEmulator {
         }
     }
 
-    pub fn run_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunMethodSuccess, TonlibError>
+    pub fn run_get_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunGetMethodSuccess, TonlibError>
     where
-        T: Into<TVMMethodId>,
+        T: Into<TVMGetMethodID>,
     {
         let tvm_method = method.into();
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack: {stack_boc:?}");
@@ -81,7 +81,7 @@ impl TVMEmulator {
         let c_str = unsafe { tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr()) };
         let json_str = convert_emulator_response(c_str)?;
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
-        TVMRunMethodResponse::from_json(json_str)?.into_success()
+        TVMRunGetMethodResponse::from_json(json_str)?.into_success()
     }
 
     pub fn send_int_msg(&mut self, msg_boc: &[u8], amount: u64) -> Result<TVMSendMsgSuccess, TonlibError> {
@@ -125,7 +125,7 @@ fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<Strin
 #[cfg(test)]
 mod tests {
     use crate::cell::ton_cell::{TonCell, TonCellRef};
-    use crate::emulators::tvm::c7_register::{EmulBCConfig, TVMEmulatorC7};
+    use crate::emulators::tvm::c7_register::{EmulatorBCConfig, TVMEmulatorC7};
     use crate::emulators::tvm::tvm_emulator::TVMEmulator;
     use crate::errors::TonlibError;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
@@ -140,8 +140,8 @@ mod tests {
     use std::sync::LazyLock;
     use tokio_test::{assert_err, assert_ok};
 
-    static BC_CONFIG: LazyLock<EmulBCConfig> = LazyLock::new(|| {
-        EmulBCConfig::from_boc_hex(include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
+    static BC_CONFIG: LazyLock<EmulatorBCConfig> = LazyLock::new(|| {
+        EmulatorBCConfig::from_boc_hex(include_str!("../../../../resources/tests/bc_config_key_block_42123611.hex"))
             .unwrap()
     });
 
@@ -161,7 +161,7 @@ mod tests {
         let mut stack = TVMStack::default();
         stack.push_cell_slice(owner_address.to_cell_ref()?);
 
-        let emulated = emulator.run_method("get_wallet_address", &stack.to_boc()?)?;
+        let emulated = emulator.run_get_method("get_wallet_address", &stack.to_boc()?)?;
         // check stack_boc() works well
         let stack_boc = emulated.stack_boc()?;
         let stack = TVMStack::from_boc(&stack_boc)?;
@@ -181,7 +181,7 @@ mod tests {
         let mut stack = TVMStack::default();
         stack.push_cell_slice(owner_address.to_cell_ref()?);
 
-        let emulated = emulator.run_method("get_wallet_address", &stack.to_boc()?)?;
+        let emulated = emulator.run_get_method("get_wallet_address", &stack.to_boc()?)?;
 
         let emulated_addr = TonAddress::from_cell(emulated.stack_parsed()?.pop_cell()?.deref())?;
         assert_eq!(
@@ -201,7 +201,7 @@ mod tests {
         let c7 = TVMEmulatorC7::new(address, BC_CONFIG.clone())?;
         let mut emulator = TVMEmulator::new(&master_code, &master_data, &c7)?;
 
-        let emulated = assert_ok!(emulator.run_method("get_pool_full_data", TVMStack::EMPTY_BOC));
+        let emulated = assert_ok!(emulator.run_get_method("get_pool_full_data", TVMStack::EMPTY_BOC));
         assert_eq!(emulated.vm_exit_code, 0);
         Ok(())
     }
@@ -228,8 +228,8 @@ mod tests {
         stack.push_cell_slice(owner_address.to_cell_ref()?);
 
         // no libs - should fail
-        let emulator_error = assert_err!(emulator.run_method("get_wallet_address", &stack.to_boc()?));
-        if let TonlibError::TVMRunMethodError {
+        let emulator_error = assert_err!(emulator.run_get_method("get_wallet_address", &stack.to_boc()?));
+        if let TonlibError::TVMRunGetMethodError {
             vm_exit_code,
             response_raw,
         } = emulator_error
@@ -237,7 +237,7 @@ mod tests {
             assert_eq!(vm_exit_code, Some(9));
             assert!(response_raw.contains("D29017573B8132BE742E9C02DABE2311FB3DF9F077E661D3EE24D431058B8830"));
         } else {
-            panic!("Expected TVMRunMethodError, got: {:?}", emulator_error);
+            panic!("Expected TVMRunGetMethodError, got: {:?}", emulator_error);
         }
 
         // add required lib
@@ -245,7 +245,7 @@ mod tests {
         let emulator_libs_boc = LibsDict::new([lib_cell.clone()]).to_boc()?;
         emulator.set_libs(&emulator_libs_boc)?;
 
-        let emulated_result = emulator.run_method("get_wallet_address", &stack.to_boc()?)?;
+        let emulated_result = emulator.run_get_method("get_wallet_address", &stack.to_boc()?)?;
         let emulated_addr = TonAddress::from_cell(emulated_result.stack_parsed()?.pop_cell()?.deref())?;
 
         assert_eq!(emulated_addr, expected_address);
@@ -269,7 +269,7 @@ mod tests {
         let lib_cell = TonCellRef::from_boc_hex("b5ee9c7201020f010003d1000114ff00f4a413f4bcf2c80b01020162020302f8d001d0d3030171b08e48135f038020d721ed44d0d303fa00fa40fa40d104d31f01840f218210178d4519ba0282107bdd97deba12b1f2f48040d721fa003012a0401303c8cb0358fa0201cf1601cf16c9ed54e0fa40fa4031fa0031f401fa0031fa00013170f83a02d31f012082100f8a7ea5ba8e85303459db3ce0330405020120060701f203d33f0101fa00fa4021fa4430c000f2e14ded44d0d303fa00fa40fa40d15309c7052471b0c00021b1f2ad522bc705500ab1f2e0495115a120c2fff2aff82a54259070546004131503c8cb0358fa0201cf1601cf16c921c8cb0113f40012f400cb00c920f9007074c8cb02ca07cbffc9d004fa40f401fa00200802d0228210178d4519ba8e84325adb3ce034218210595f07bcba8e843101db3ce032208210eed236d3ba8e2f30018040d721d303d1ed44d0d303fa00fa40fa40d1335142c705f2e04a403303c8cb0358fa0201cf1601cf16c9ed54e06c218210d372158cbadc840ff2f0090a0027bfd8176a2686981fd007d207d206899fc15209840021bc508f6a2686981fd007d207d2068af81c019820d70b009ad74bc00101c001b0f2b19130e2c88210178d451901cb1f500a01cb3f5008fa0223cf1601cf1626fa025007cf16c9c8801801cb055004cf1670fa024063775003cb6bccccc945370b03f4ed44d0d303fa00fa40fa40d12372b0c002f26d07d33f0101fa005141a004fa40fa4053bac705f82a5464e070546004131503c8cb0358fa0201cf1601cf16c921c8cb0113f40012f400cb00c9f9007074c8cb02ca07cbffc9d0500cc7051bb1f2e04a09fa0021925f04e30d26d70b01c000b393306c33e30d55020c0d0e01f2ed44d0d303fa00fa40fa40d106d33f0101fa00fa40f401d15141a15288c705f2e04926c2fff2afc882107bdd97de01cb1f5801cb3f01fa0221cf1658cf16c9c8801801cb0526cf1670fa02017158cb6accc903f839206e943081169fde718102f270f8380170f836a0811a7770f836a0bcf2b0028050fb00030e00b42191729171e2f839206e938124279120e2216e94318128739101e25023a813a0738103a370f83ca00270f83612a00170f836a07381040982100966018070f837a0bcf2b0048050fb005803c8cb0358fa0201cf1601cf16c9ed540060c882107362d09c01cb1f2501cb3f5004fa0258cf1658cf16c9c8801001cb0524cf1658fa02017158cb6accc98011fb00007a5054a1f82fa07381040982100966018070f837b60972fb02c8801001cb055005cf1670fa027001cb6a8210d53276db01cb1f5801cb3fc9810082fb0059002003c8cb0358fa0201cf1601cf16c9ed54")?;
         let emulator_libs_boc = LibsDict::new([lib_cell.clone()]).to_boc()?;
         emulator.set_libs(&emulator_libs_boc)?;
-        let emulated = assert_ok!(emulator.run_method("get_wallet_data", TVMStack::EMPTY_BOC));
+        let emulated = assert_ok!(emulator.run_get_method("get_wallet_data", TVMStack::EMPTY_BOC));
         assert_eq!(emulated.stack_parsed()?.len(), 4);
         assert_eq!(emulated.vm_exit_code, 0);
         Ok(())
@@ -312,7 +312,7 @@ mod tests {
             let mut stack = TVMStack::default();
             stack.push_int(arg1.clone());
             stack.push_int(arg2.clone());
-            let emulator_result = assert_ok!(emulator.run_method("get_val", &stack.to_boc()?));
+            let emulator_result = assert_ok!(emulator.run_get_method("get_val", &stack.to_boc()?));
             let mut res_stack = emulator_result.stack_parsed()?;
             assert_eq!(emulator_result.vm_exit_code, 0);
             if expected > BigInt::from(i64::MAX) {

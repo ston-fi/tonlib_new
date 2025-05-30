@@ -11,7 +11,7 @@ use std::ops::Deref;
 #[async_trait]
 pub trait GetWalletData: TonContractTrait {
     async fn get_wallet_data(&self) -> Result<GetWalletDataResult, TonlibError> {
-        let run_result = self.run_method("get_wallet_data", &TVMStack::default()).await?;
+        let run_result = self.run_get_method("get_wallet_data", &TVMStack::default()).await?;
         GetWalletDataResult::from_stack(&mut run_result.stack_parsed()?)
     }
 }
