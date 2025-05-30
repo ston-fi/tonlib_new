@@ -1,8 +1,8 @@
 use crate::cell::ton_hash::TonHash;
 
-use crate::clients::tonlibjson::tl_api::ser_de::serde_block_id_ext;
-use crate::clients::tonlibjson::tl_api::ser_de::serde_ton_hash_vec_base64;
-use crate::clients::tonlibjson::tl_api::tl_types::{
+use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
+use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_base64;
+use crate::clients::tl_client::tl::types::{
     TLAccountAddress, TLBlockId, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
 use crate::clients::tl_client::tl::Base64Standard;
