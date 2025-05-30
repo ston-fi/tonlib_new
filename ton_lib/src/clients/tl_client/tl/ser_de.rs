@@ -160,8 +160,8 @@ mod tests {
         }
 
         let val = TestStruct {
-            hash: TonHash::from_bytes(&[1u8; 32])?,
-            hash_vec: vec![TonHash::from_bytes(&[2u8; 32])?, TonHash::from_bytes(&[3u8; 32])?],
+            hash: TonHash::from_slice(&[1u8; 32])?,
+            hash_vec: vec![TonHash::from_slice(&[2u8; 32])?, TonHash::from_slice(&[3u8; 32])?],
         };
         let val_json = serde_json::to_string(&val)?;
         let expected = json!({

@@ -182,7 +182,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonlibError> {
 
     let address = TonAddress {
         wc: bytes[1] as i8 as i32,
-        hash: TonHash::from_bytes(&bytes[2..34])?,
+        hash: TonHash::from_slice(&bytes[2..34])?,
     };
     Ok(address)
 }
@@ -204,7 +204,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 
     let anycast = match anycast {
         Some(anycast) => anycast,
-        None => return Ok(TonAddress::new(wc, TonHash::from_bytes(addr)?)),
+        None => return Ok(TonAddress::new(wc, TonHash::from_slice(addr)?)),
     };
 
     if bits_len < anycast.rewrite_pfx.bits_len as u32 {

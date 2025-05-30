@@ -172,7 +172,7 @@ impl Inner {
                 .result
                 .into_iter()
                 .map(|x| {
-                    let hash = TonHash::from_slice(&x.hash.0);
+                    let hash = TonHash::from_slice_sized(&x.hash.0);
                     let lib = TonCellRef::from_boc(x.data.as_slice())?;
                     Ok::<_, TonlibError>((hash, lib))
                 })

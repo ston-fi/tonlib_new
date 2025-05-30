@@ -117,7 +117,7 @@ impl<'a> CellMetaBuilder<'a> {
         }
 
         let mut data_slice = &self.data[1..];
-        let _proof_hash = TonHash::from_bytes(&data_slice[..TonHash::BYTES_LEN])
+        let _proof_hash = TonHash::from_slice(&data_slice[..TonHash::BYTES_LEN])
             .map_err(|err| TonlibError::BuilderMeta(format!("Can't get proof hash bytes from cell data: {err}")))?;
 
         data_slice = &data_slice[TonHash::BYTES_LEN..];
@@ -202,7 +202,7 @@ impl<'a> CellMetaBuilder<'a> {
 
             // Calculate Hash
             let repr = self.get_repr_for_data(cur_data, cur_bit_len, level_mask, level_pos)?;
-            let hash = TonHash::from_bytes(&Sha256::new_with_prefix(repr).finalize())?;
+            let hash = TonHash::from_slice(&Sha256::new_with_prefix(repr).finalize())?;
             hashes.push(hash);
             depths.push(depth);
         }

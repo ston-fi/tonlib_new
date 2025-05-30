@@ -28,7 +28,7 @@ async fn test_lite_client() -> anyhow::Result<()> {
 
     let usdt_addr = TonAddress::from_str("EQCxE6mUtQJKFnGfaROTKOt1lZbDiiX1kCixRv7Nw2Id_sDs")?;
     let account = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
-    assert!(account.is_some());
+    assert!(account.as_account().is_some());
 
     Ok(())
 }
@@ -39,7 +39,7 @@ async fn test_lite_client_testnet() -> anyhow::Result<()> {
     let mc_info = lite_client.get_mc_info().await?;
     let usdt_addr = TonAddress::from_str("kQD4HpyO8ilPHHUV4CpiHMqz8F2eWyVOMH10MxTYrY3Emvmu")?;
     let account = lite_client.get_account_state(&usdt_addr, mc_info.last.seqno, None).await?;
-    assert!(account.is_some());
+    assert!(account.as_account().is_some());
 
     Ok(())
 }
