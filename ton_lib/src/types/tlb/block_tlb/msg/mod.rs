@@ -29,6 +29,40 @@ impl Msg {
         }
     }
 
+    pub fn src(&self) -> MsgAddress {
+        match &self.info {
+            CommonMsgInfo::Int(info) => info.src.clone(),
+            CommonMsgInfo::ExtIn(info) => info.src.clone().into(),
+            CommonMsgInfo::ExtOut(info) => info.src.clone().into(),
+        }
+    }
+
+    pub fn dst(&self) -> MsgAddress {
+        match &self.info {
+            CommonMsgInfo::Int(info) => info.dest.clone(),
+            CommonMsgInfo::ExtIn(info) => info.dest.clone().into(),
+            CommonMsgInfo::ExtOut(info) => info.dest.clone().into(),
+        }
+    }
+
+    pub fn created_at(&self) -> Option<u32> {
+        match &self.info {
+            CommonMsgInfo::Int(info) => Some(info.created_at),
+            CommonMsgInfo::ExtIn(_) => None,
+            CommonMsgInfo::ExtOut(info) => Some(info.created_at),
+        }
+    }
+
+    pub fn created_lt(&self) -> Option<u64> {
+        match &self.info {
+            CommonMsgInfo::Int(info) => Some(info.created_lt),
+            CommonMsgInfo::ExtIn(_) => None,
+            CommonMsgInfo::ExtOut(info) => Some(info.created_lt),
+        }
+    }
+
+    pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
+
     pub fn hash_normalized(&self) -> Result<TonHash, TonlibError> {
         match &self.info {
             CommonMsgInfo::ExtIn(_) => {
@@ -49,24 +83,6 @@ impl Msg {
             _ => self.cell_hash(),
         }
     }
-
-    pub fn src(&self) -> MsgAddress {
-        match &self.info {
-            CommonMsgInfo::Int(info) => info.src.clone(),
-            CommonMsgInfo::ExtIn(info) => info.src.clone().into(),
-            CommonMsgInfo::ExtOut(info) => info.src.clone().into(),
-        }
-    }
-
-    pub fn dst(&self) -> Result<MsgAddress, TonlibError> {
-        match &self.info {
-            CommonMsgInfo::Int(info) => Ok(info.dest.clone()),
-            CommonMsgInfo::ExtIn(info) => Ok(info.dest.clone().into()),
-            CommonMsgInfo::ExtOut(info) => Ok(info.dest.clone().into()),
-        }
-    }
-
-    pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
 }
 
 #[cfg(test)]
