@@ -22,12 +22,16 @@ pub struct CurrencyCollection {
 }
 
 impl Coins {
+    pub const ZERO: Coins = Coins(VarLenBytes {
+        data: 0u128,
+        bits_len: 0,
+    });
+
     pub fn new<T: Into<u128>>(amount: T) -> Self {
         let amount = amount.into();
         let bits_len = (128 - amount.leading_zeros()).div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
-    pub fn zero() -> Self { Coins::new(0u32) }
     pub fn from_signed<T: Into<i128>>(amount: T) -> Result<Self, TonlibError> {
         let amount = amount.into();
         if amount < 0 {
@@ -76,7 +80,7 @@ mod traits_impl {
     }
 
     impl Default for Coins {
-        fn default() -> Self { Coins::zero() }
+        fn default() -> Self { Coins::ZERO }
     }
 }
 
