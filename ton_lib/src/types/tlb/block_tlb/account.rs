@@ -5,7 +5,6 @@ use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
 use crate::types::tlb::block_tlb::msg_address::MsgAddressInt;
 use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use num_bigint::BigUint;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
@@ -39,8 +38,8 @@ pub struct Account {
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 pub struct StorageUsed {
-    pub cells: VarLenBytes<BigUint, 3>,
-    pub bits: VarLenBytes<BigUint, 3>,
+    pub cells: VarLenBytes<u64, 3>,
+    pub bits: VarLenBytes<u64, 3>,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]

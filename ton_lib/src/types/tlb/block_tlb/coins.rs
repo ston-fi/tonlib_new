@@ -4,6 +4,7 @@ use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::DictRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
 use num_bigint::BigUint;
+use num_traits::ToPrimitive;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -11,7 +12,7 @@ use ton_lib_macros::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-pub struct Coins(pub VarLenBytes<u128, 4>);
+pub struct Coins(VarLenBytes<u128, 4>);
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
 #[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
@@ -42,6 +43,22 @@ impl Coins {
         }
         Ok(Self::new(amount as u128))
     }
+
+    pub fn to_u32(&self) -> Result<u32, TonlibError> {
+        self.0.to_u32().ok_or(TonlibError::UnexpectedValue {
+            expected: "u32".to_string(),
+            actual: format!("{}", self.0.data),
+        })
+    }
+
+    pub fn to_u64(&self) -> Result<u64, TonlibError> {
+        self.0.to_u64().ok_or(TonlibError::UnexpectedValue {
+            expected: "u64".to_string(),
+            actual: format!("{}", self.0.data),
+        })
+    }
+
+    pub fn to_u128(&self) -> u128 { self.0.data }
 }
 
 impl CurrencyCollection {
@@ -55,6 +72,8 @@ impl CurrencyCollection {
 
 mod traits_impl {
     use super::*;
+
+    impl Copy for Coins {}
 
     impl FromStr for CurrencyCollection {
         type Err = TonlibError;
