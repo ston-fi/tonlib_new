@@ -60,8 +60,8 @@ mod tests {
             })),
             dest: MsgAddress::Ext(MsgAddressExt::None(MsgAddressNone {})),
             value: CurrencyCollection::new(0u32),
-            ihr_fee: Coins::zero(),
-            fwd_fee: Coins::zero(),
+            ihr_fee: Coins::ZERO,
+            fwd_fee: Coins::ZERO,
             created_lt: 0,
             created_at: 0,
         });

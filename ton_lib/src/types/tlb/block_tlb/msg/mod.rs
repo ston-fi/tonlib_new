@@ -75,7 +75,7 @@ impl Msg {
                     MsgAddressInt::Std(addr) => addr.anycast = None,
                     MsgAddressInt::Var(addr) => addr.anycast = None,
                 }
-                info.import_fee = Coins::zero();
+                info.import_fee = Coins::ZERO;
                 msg_normalized.init = None;
                 msg_normalized.body.layout = ToRef;
                 msg_normalized.cell_hash()

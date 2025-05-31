@@ -96,7 +96,7 @@ impl TonWallet {
         let msg_info = CommonMsgInfo::ExtIn(CommonMsgInfoExtIn {
             src: MsgAddressExt::NONE,
             dest: self.address.to_msg_address_int(),
-            import_fee: Coins::zero(),
+            import_fee: Coins::ZERO,
         });
 
         let mut message = Msg::new(msg_info, signed_body);

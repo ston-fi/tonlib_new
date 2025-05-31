@@ -85,7 +85,7 @@ mod tests {
             descr: TxDescr::TickTock(TxDescrTickTock {
                 is_tock: true,
                 storage_phase: TrStoragePhase {
-                    storage_fees_collected: Coins::zero(),
+                    storage_fees_collected: Coins::ZERO,
                     storage_fees_due: None,
                     status_change: AccStatusChange::Unchanged(AccStatusChangeUnchanged {}),
                 },
@@ -93,7 +93,7 @@ mod tests {
                     success: true,
                     msg_state_used: false,
                     account_activated: false,
-                    gas_fees: Coins::zero(),
+                    gas_fees: Coins::ZERO,
                     compute_phase_vm_info: ComputePhaseVMInfo {
                         gas_used: VarLen::new(4914u32, 16),
                         gas_limit: VarLen::new(10000000u32, 24),

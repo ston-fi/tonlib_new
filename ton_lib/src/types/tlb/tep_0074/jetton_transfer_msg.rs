@@ -26,7 +26,7 @@ impl JettonTransferMsg {
             dst: dst.into(),
             response_dst: MsgAddressNone {}.into(),
             custom_payload: None,
-            forward_ton_amount: Coins::zero(),
+            forward_ton_amount: Coins::ZERO,
             forward_payload: EitherRef::new(TonCell::EMPTY),
         }
     }
