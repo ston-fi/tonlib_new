@@ -3,7 +3,7 @@ use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::DictRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -11,7 +11,7 @@ use ton_lib_macros::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-pub struct Coins(pub VarLenBytes<BigUint, 4>);
+pub struct Coins(pub VarLenBytes<u128, 4>);
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
 #[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
@@ -22,29 +22,26 @@ pub struct CurrencyCollection {
 }
 
 impl Coins {
-    pub fn new<T: Into<BigUint>>(amount: T) -> Self {
+    pub fn new<T: Into<u128>>(amount: T) -> Self {
         let amount = amount.into();
-        let bits_len = amount.bits().div_ceil(8) * 8;
+        let bits_len = (128 - amount.leading_zeros()).div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
     pub fn zero() -> Self { Coins::new(0u32) }
-    pub fn from_signed<T: Into<BigInt>>(amount: T) -> Result<Self, TonlibError> {
+    pub fn from_signed<T: Into<i128>>(amount: T) -> Result<Self, TonlibError> {
         let amount = amount.into();
-        let unsigned = match amount.to_biguint() {
-            Some(amount) => amount,
-            None => {
-                return Err(TonlibError::UnexpectedValue {
-                    expected: "positive int".to_string(),
-                    actual: format!("{amount}"),
-                })
-            }
-        };
-        Ok(Self::new(unsigned))
+        if amount < 0 {
+            return Err(TonlibError::UnexpectedValue {
+                expected: "positive int".to_string(),
+                actual: format!("{amount}"),
+            });
+        }
+        Ok(Self::new(amount as u128))
     }
 }
 
 impl CurrencyCollection {
-    pub fn new<T: Into<BigUint>>(grams: T) -> Self {
+    pub fn new<T: Into<u128>>(grams: T) -> Self {
         Self {
             grams: Coins::new(grams),
             other: Default::default(),
@@ -57,11 +54,11 @@ mod traits_impl {
 
     impl FromStr for CurrencyCollection {
         type Err = TonlibError;
-        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
+        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
     }
 
     impl Deref for Coins {
-        type Target = VarLenBytes<BigUint, 4>;
+        type Target = u128;
         fn deref(&self) -> &Self::Target { &self.0 }
     }
 
@@ -69,13 +66,13 @@ mod traits_impl {
         fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
     }
 
-    impl<T: Into<BigUint>> From<T> for Coins {
+    impl<T: Into<u128>> From<T> for Coins {
         fn from(value: T) -> Self { Coins::new(value) }
     }
 
     impl FromStr for Coins {
         type Err = TonlibError;
-        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
+        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
     }
 
     impl Default for Coins {

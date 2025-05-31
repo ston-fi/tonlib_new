@@ -72,7 +72,7 @@ impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
         if LEN_IN_BYTES && self.bits_len % 8 != 0 {
             return Err(TonlibError::TLBWrongData(format!(
-                "VarLen: len in bytes must be multiple of 8, but got {}",
+                "VarLen: len in bits must be multiple of 8, but got {}",
                 self.bits_len
             )));
         }
