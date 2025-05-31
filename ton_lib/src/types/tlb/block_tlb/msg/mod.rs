@@ -63,7 +63,7 @@ impl Msg {
 
     pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
 
-    pub fn hash_normalized(&self) -> Result<TonHash, TonlibError> {
+    pub fn cell_hash_normalized(&self) -> Result<TonHash, TonlibError> {
         match &self.info {
             CommonMsgInfo::ExtIn(_) => {
                 let mut msg_normalized = self.clone();
@@ -174,7 +174,7 @@ mod tests {
                 layout: ToRef,
             },
         };
-        let hash_norm = msg.hash_normalized()?;
+        let hash_norm = msg.cell_hash_normalized()?;
         assert_eq!(hash_norm, TonHash::from_str("dfacc0b48826e33a5a127ee1def710a449d8ce79def7c19f43e57b7996e870df")?);
 
         Ok(())

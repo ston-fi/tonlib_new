@@ -3,7 +3,6 @@ use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
 use crate::types::tlb::block_tlb::tx::compute_skip_reason::{ComputeSkipReason, ComputeSkipReasonNoState};
 use crate::types::tlb::block_tlb::tx::TLBRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use num_bigint::BigUint;
 use ton_lib_macros::TLBDerive;
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
@@ -55,8 +54,8 @@ pub enum TrBouncePhase {
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct StorageUsedShort {
-    pub cells: VarLenBytes<BigUint, 3>,
-    pub bits: VarLenBytes<BigUint, 3>,
+    pub cells: VarLenBytes<u64, 3>,
+    pub bits: VarLenBytes<u64, 3>,
 }
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
@@ -78,9 +77,9 @@ pub struct TrComputePhaseVM {
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 pub struct ComputePhaseVMInfo {
-    pub gas_used: VarLenBytes<BigUint, 3>,
-    pub gas_limit: VarLenBytes<BigUint, 3>,
-    pub gas_credit: Option<VarLenBytes<BigUint, 2>>,
+    pub gas_used: VarLenBytes<u64, 3>,
+    pub gas_limit: VarLenBytes<u64, 3>,
+    pub gas_credit: Option<VarLenBytes<u64, 2>>,
     pub mode: i8,
     pub exit_code: i32,
     pub exit_arg: Option<i32>,
