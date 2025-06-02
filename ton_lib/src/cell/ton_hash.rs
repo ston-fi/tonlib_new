@@ -154,6 +154,7 @@ impl Debug for TonHash {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use tokio_test::assert_err;
 
     #[test]
     fn test_ton_hash_display() -> anyhow::Result<()> {
@@ -165,7 +166,7 @@ mod tests {
     }
 
     #[test]
-    fn test_ton_hash_from_slice() -> anyhow::Result<()> {
+    fn test_ton_hash_from() -> anyhow::Result<()> {
         let data = [1u8; 32];
         let hash = TonHash::from(data);
         assert_eq!(hash.as_slice(), &data);
@@ -173,17 +174,28 @@ mod tests {
     }
 
     #[test]
-    fn test_ton_hash_from_bytes() -> anyhow::Result<()> {
+    fn test_ton_hash_slice() -> anyhow::Result<()> {
         let data = [1u8; 32];
         let hash = TonHash::from_slice(&data)?;
+        assert_eq!(hash.as_slice(), &data);
+
+        let wrong_data = [1u8; 31];
+        assert_err!(TonHash::from_slice(&wrong_data));
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_hash_from_slice_sized() -> anyhow::Result<()> {
+        let data = [1u8; 32];
+        let hash = TonHash::from_slice_sized(&data);
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }
 
     #[test]
     fn test_ton_hash_from_vec() -> anyhow::Result<()> {
-        let data = [1u8; 32];
-        let hash = TonHash::from_slice(&data)?;
+        let data = vec![1u8; 32];
+        let hash = TonHash::from_vec(data.clone())?;
         assert_eq!(hash.as_slice(), &data);
         Ok(())
     }
