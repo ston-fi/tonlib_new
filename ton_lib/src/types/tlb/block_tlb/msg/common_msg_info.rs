@@ -43,7 +43,7 @@ pub struct CommonMsgInfoExtOut {
     pub created_at: u32,
 }
 
-impl Default for CommonMsgInfo {
+impl Default for CommonMsgInfoInt {
     fn default() -> Self {
         CommonMsgInfoInt {
             ihr_disabled: false,
@@ -67,8 +67,11 @@ impl Default for CommonMsgInfo {
             created_lt: 0,
             created_at: 0,
         }
-        .into()
     }
+}
+
+impl Default for CommonMsgInfo {
+    fn default() -> Self { CommonMsgInfoInt::default().into() }
 }
 
 #[cfg(test)]
