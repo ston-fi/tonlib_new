@@ -7,7 +7,7 @@ use crate::types::tlb::block_tlb::state_init::StateInit;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
 use ton_lib_macros::TLBDerive;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Default, Debug, Clone, PartialEq, TLBDerive)]
 pub struct ShardAccount {
     #[tlb_derive(adapter = "TLBRef")]
     pub account: MaybeAccount,
@@ -123,6 +123,10 @@ pub struct AccountStatusNotExist;
 
 impl Default for AccountStatus {
     fn default() -> Self { AccountStatus::NonExist(AccountStatusNotExist) }
+}
+
+impl Default for MaybeAccount {
+    fn default() -> Self { MaybeAccount::None(AccountNone) }
 }
 
 impl MaybeAccount {

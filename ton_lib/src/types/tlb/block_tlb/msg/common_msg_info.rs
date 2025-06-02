@@ -1,5 +1,6 @@
+use crate::cell::ton_hash::TonHash;
 use crate::types::tlb::block_tlb::coins::{Coins, CurrencyCollection};
-use crate::types::tlb::block_tlb::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt};
+use crate::types::tlb::block_tlb::msg_address::{MsgAddress, MsgAddressExt, MsgAddressInt, MsgAddressIntStd};
 use ton_lib_macros::TLBDerive;
 
 // https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L155
@@ -14,7 +15,7 @@ pub enum CommonMsgInfo {
 #[tlb_derive(prefix = 0b10, bits_len = 2)]
 pub struct CommonMsgInfoExtIn {
     pub src: MsgAddressExt,
-    pub dest: MsgAddressInt,
+    pub dst: MsgAddressInt,
     pub import_fee: Coins,
 }
 
@@ -24,8 +25,8 @@ pub struct CommonMsgInfoInt {
     pub ihr_disabled: bool,
     pub bounce: bool,
     pub bounced: bool,
-    pub src: MsgAddress,  // it's MsgAddressInt in tlb, but in fact it can be at least MsgAddressNone
-    pub dest: MsgAddress, // the same
+    pub src: MsgAddress, // it's MsgAddressInt in tlb, but in fact it can be at least MsgAddressNone
+    pub dst: MsgAddress, // the same
     pub value: CurrencyCollection,
     pub ihr_fee: Coins,
     pub fwd_fee: Coins,
@@ -37,9 +38,37 @@ pub struct CommonMsgInfoInt {
 #[tlb_derive(prefix = 0b11, bits_len = 2)]
 pub struct CommonMsgInfoExtOut {
     pub src: MsgAddressInt,
-    pub dest: MsgAddressExt,
+    pub dst: MsgAddressExt,
     pub created_lt: u64,
     pub created_at: u32,
+}
+
+impl Default for CommonMsgInfo {
+    fn default() -> Self {
+        CommonMsgInfoInt {
+            ihr_disabled: false,
+            bounce: false,
+            bounced: false,
+            src: MsgAddressIntStd {
+                anycast: None,
+                workchain: -1,
+                address: TonHash::ZERO,
+            }
+            .into(),
+            dst: MsgAddressIntStd {
+                anycast: None,
+                workchain: -1,
+                address: TonHash::ZERO,
+            }
+            .into(),
+            value: CurrencyCollection::new(0u32),
+            ihr_fee: Coins::ZERO,
+            fwd_fee: Coins::ZERO,
+            created_lt: 0,
+            created_at: 0,
+        }
+        .into()
+    }
 }
 
 #[cfg(test)]
@@ -58,7 +87,7 @@ mod tests {
                 workchain: 0,
                 address: TonHash::ZERO,
             })),
-            dest: MsgAddress::Ext(MsgAddressExt::None(MsgAddressNone {})),
+            dst: MsgAddress::Ext(MsgAddressExt::None(MsgAddressNone {})),
             value: CurrencyCollection::new(0u32),
             ihr_fee: Coins::ZERO,
             fwd_fee: Coins::ZERO,

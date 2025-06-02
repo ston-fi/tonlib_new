@@ -21,9 +21,9 @@ pub struct Msg {
 }
 
 impl Msg {
-    pub fn new(info: CommonMsgInfo, body: TonCell) -> Self {
+    pub fn new<T: Into<CommonMsgInfo>>(info: T, body: TonCell) -> Self {
         Self {
-            info,
+            info: info.into(),
             init: None,
             body: EitherRef::new_with_layout(body, ToRef),
         }
@@ -39,9 +39,9 @@ impl Msg {
 
     pub fn dst(&self) -> MsgAddress {
         match &self.info {
-            CommonMsgInfo::Int(info) => info.dest.clone(),
-            CommonMsgInfo::ExtIn(info) => info.dest.clone().into(),
-            CommonMsgInfo::ExtOut(info) => info.dest.clone().into(),
+            CommonMsgInfo::Int(info) => info.dst.clone(),
+            CommonMsgInfo::ExtIn(info) => info.dst.clone().into(),
+            CommonMsgInfo::ExtOut(info) => info.dst.clone().into(),
         }
     }
 
@@ -71,7 +71,7 @@ impl Msg {
                     unreachable!()
                 };
                 info.src = MsgAddressExt::NONE;
-                match &mut info.dest {
+                match &mut info.dst {
                     MsgAddressInt::Std(addr) => addr.anycast = None,
                     MsgAddressInt::Var(addr) => addr.anycast = None,
                 }
@@ -116,7 +116,7 @@ mod tests {
         let expected_src = TonAddress::from_str("Ef8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAU")?;
         let expected_dest = TonAddress::from_str("Ef8zMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzMzM0vF")?;
         assert_eq!(TonAddress::from_msg_address(info.src)?, expected_src);
-        assert_eq!(TonAddress::from_msg_address(info.dest)?, expected_dest);
+        assert_eq!(TonAddress::from_msg_address(info.dst)?, expected_dest);
         assert_eq!(info.value, CurrencyCollection::new(3242439121u32));
         assert_eq!(info.ihr_fee, Coins::new(0u32));
         assert_eq!(info.fwd_fee, Coins::new(0u32));
@@ -135,7 +135,7 @@ mod tests {
             "b5ee9c7201010101002500004588010319f77e4d761f956e78f9c9fd45f1e914b7ffab9b5c1ea514858979c1560dee10",
         )?;
         let expected_dst = TonAddress::from_str("EQCBjPu_JrsPyrc8fOT-ovj0ilv_1c2uD1KKQsS84KsG90PM")?;
-        let dst = TonAddress::from_msg_address(ext_in_msg_info.dest.clone())?;
+        let dst = TonAddress::from_msg_address(ext_in_msg_info.dst.clone())?;
         assert_eq!(dst, expected_dst);
         assert_eq!(ext_in_msg_info.import_fee, Coins::new(0u32));
 
@@ -152,7 +152,7 @@ mod tests {
             src: MsgAddressExt::Extern(MsgAddressExtern {
                 address: VarLenBits::new(vec![1, 2, 3], 16),
             }),
-            dest: MsgAddressInt::Std(MsgAddressIntStd {
+            dst: MsgAddressInt::Std(MsgAddressIntStd {
                 anycast: Some(Anycast::new(16, vec![9, 12])),
                 workchain: -1,
                 address: TonHash::from_str("adfd5f1d28db13e50591d5c76a976c15d8ab6cad90554748ab254871390d9334")?,

@@ -95,7 +95,7 @@ impl TonWallet {
     ) -> Result<TonCell, TonlibError> {
         let msg_info = CommonMsgInfo::ExtIn(CommonMsgInfoExtIn {
             src: MsgAddressExt::NONE,
-            dest: self.address.to_msg_address_int(),
+            dst: self.address.to_msg_address_int(),
             import_fee: Coins::ZERO,
         });
 
