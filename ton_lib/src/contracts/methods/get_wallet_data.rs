@@ -1,11 +1,11 @@
-use crate::cell::ton_cell::TonCellRef;
 use crate::contracts::ton_contract::TonContractTrait;
 use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::coins::Coins;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
 use crate::types::tlb::TLB;
 use crate::types::ton_address::TonAddress;
+use crate::{cell::ton_cell::TonCellRef, types::tlb::block_tlb::tvm::tvm_stack_value::TVMStackValue};
 use async_trait::async_trait;
+use num_bigint::BigInt;
 use std::ops::Deref;
 
 #[async_trait]
@@ -17,7 +17,7 @@ pub trait GetWalletData: TonContractTrait {
 }
 
 pub struct GetWalletDataResult {
-    pub balance: Coins,
+    pub balance: BigInt,
     pub owner: TonAddress,
     pub master: TonAddress,
     pub wallet_code: TonCellRef,
@@ -28,7 +28,12 @@ impl GetWalletDataResult {
         let wallet_code = stack.pop_cell()?;
         let master = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let owner = TonAddress::from_cell(stack.pop_cell()?.deref())?;
-        let balance = Coins::from_signed(stack.pop_tiny_int()?)?;
+        let balance = match stack.pop() {
+            Some(TVMStackValue::Int(i)) => i.value,
+            Some(TVMStackValue::TinyInt(i)) => BigInt::from(i.value),
+            Some(t) => return Err(TonlibError::TVMStackWrongType("Int or TinyInt".to_string(), format!("{:?}", t))),
+            None => return Err(TonlibError::TVMStackEmpty),
+        };
 
         Ok(Self {
             balance,
