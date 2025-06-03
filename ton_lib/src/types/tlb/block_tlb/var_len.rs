@@ -9,9 +9,7 @@ pub type VarLenBits<T, const LEN_BITS_LEN: usize> = VarLen<T, LEN_BITS_LEN, fals
 pub type VarLenBytes<T, const LEN_BITS_LEN: usize> = VarLen<T, LEN_BITS_LEN, true>;
 
 /// VarLen: store data len, and then data itself
-///
 /// BITS_LEN_LEN - number of bits used to store length
-///
 /// LEN_IN_BYTES - if true, data len is specified in bytes. Otherwise - in bits
 #[derive(Debug, Clone, PartialEq)]
 pub struct VarLen<T, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> {
@@ -49,7 +47,7 @@ impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
         if LEN_IN_BYTES && self.bits_len % 8 != 0 {
             return Err(TonlibError::TLBWrongData(format!(
-                "VarLen: len in bytes must be multiple of 8, but got {}",
+                "VarLen: len in bits must be multiple of 8, but got {}",
                 self.bits_len
             )));
         }
@@ -82,6 +80,8 @@ impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for VarLen<Vec<u8>
         Ok(())
     }
 }
+
+impl Copy for VarLenBytes<u128, 4> {}
 
 #[cfg(test)]
 mod tests {

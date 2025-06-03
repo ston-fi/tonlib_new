@@ -34,7 +34,7 @@ impl TonCellUtils {
         if cell.meta.cell_type != CellType::LibraryRef {
             return Ok(None);
         }
-        Ok(Some(TonHash::from_bytes(&cell.data[1..=32])?))
+        Ok(Some(TonHash::from_slice(&cell.data[1..=32])?))
     }
 }
 

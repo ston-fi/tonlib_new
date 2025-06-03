@@ -3,7 +3,8 @@ use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterInto;
 use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
 use crate::types::tlb::adapters::DictRef;
 use crate::types::tlb::block_tlb::var_len::VarLenBytes;
-use num_bigint::{BigInt, BigUint};
+use num_bigint::BigUint;
+use num_traits::ToPrimitive;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -11,71 +12,95 @@ use ton_lib_macros::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
-pub struct Grams(pub VarLenBytes<BigUint, 4>);
-
-// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L118
-// ¯\_(ツ)_/¯
-pub type Coins = Grams;
+pub struct Coins(VarLenBytes<u128, 4>);
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
 pub struct CurrencyCollection {
-    pub grams: Grams,
+    pub grams: Coins,
     #[tlb_derive(adapter = "DictRef::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
     pub other: HashMap<u32, VarLenBytes<BigUint, 5>>,
 }
 
-impl Grams {
-    pub fn new<T: Into<BigUint>>(amount: T) -> Self {
+impl Coins {
+    pub const ZERO: Coins = Coins(VarLenBytes {
+        data: 0u128,
+        bits_len: 0,
+    });
+
+    pub fn new<T: Into<u128>>(amount: T) -> Self {
         let amount = amount.into();
-        let bits_len = amount.bits().div_ceil(8) * 8;
+        let bits_len = (128 - amount.leading_zeros()).div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
-    pub fn zero() -> Self { Grams::new(0u32) }
-    pub fn from_signed<T: Into<BigInt>>(amount: T) -> Result<Self, TonlibError> {
+    pub fn from_signed<T: Into<i128>>(amount: T) -> Result<Self, TonlibError> {
         let amount = amount.into();
-        let unsigned = match amount.to_biguint() {
-            Some(amount) => amount,
-            None => {
-                return Err(TonlibError::UnexpectedValue {
-                    expected: "positive int".to_string(),
-                    actual: format!("{amount}"),
-                })
-            }
-        };
-        Ok(Self::new(unsigned))
+        if amount < 0 {
+            return Err(TonlibError::UnexpectedValue {
+                expected: "positive int".to_string(),
+                actual: format!("{amount}"),
+            });
+        }
+        Ok(Self::new(amount as u128))
     }
+
+    pub fn to_u32(&self) -> Result<u32, TonlibError> {
+        self.0.to_u32().ok_or(TonlibError::UnexpectedValue {
+            expected: "u32".to_string(),
+            actual: format!("{}", self.0.data),
+        })
+    }
+
+    pub fn to_u64(&self) -> Result<u64, TonlibError> {
+        self.0.to_u64().ok_or(TonlibError::UnexpectedValue {
+            expected: "u64".to_string(),
+            actual: format!("{}", self.0.data),
+        })
+    }
+
+    pub fn to_u128(&self) -> u128 { self.0.data }
 }
 
 impl CurrencyCollection {
-    pub fn new<T: Into<BigUint>>(grams: T) -> Self {
+    pub fn new<T: Into<u128>>(grams: T) -> Self {
         Self {
-            grams: Grams::new(grams),
+            grams: Coins::new(grams),
             other: Default::default(),
         }
     }
 }
 
-impl FromStr for CurrencyCollection {
-    type Err = TonlibError;
-    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
-}
+mod traits_impl {
+    use super::*;
 
-impl Deref for Grams {
-    type Target = BigUint;
-    fn deref(&self) -> &Self::Target { &self.0 }
-}
-impl DerefMut for Grams {
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
-}
+    impl Copy for Coins {}
 
-impl<T: Into<BigUint>> From<T> for Grams {
-    fn from(value: T) -> Self { Grams::new(value) }
-}
+    impl FromStr for CurrencyCollection {
+        type Err = TonlibError;
+        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
+    }
 
-impl FromStr for Grams {
-    type Err = TonlibError;
-    fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(BigUint::from_str(grams)?)) }
+    impl Deref for Coins {
+        type Target = u128;
+        fn deref(&self) -> &Self::Target { &self.0 }
+    }
+
+    impl DerefMut for Coins {
+        fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+    }
+
+    impl<T: Into<u128>> From<T> for Coins {
+        fn from(value: T) -> Self { Coins::new(value) }
+    }
+
+    impl FromStr for Coins {
+        type Err = TonlibError;
+        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
+    }
+
+    impl Default for Coins {
+        fn default() -> Self { Coins::ZERO }
+    }
 }
 
 #[cfg(test)]
@@ -86,7 +111,7 @@ mod tests {
     #[test]
     fn test_currency_collection() -> anyhow::Result<()> {
         let parsed = CurrencyCollection::from_boc_hex("b5ee9c720101010100070000094c143b1d14")?;
-        assert_eq!(*parsed.grams, 3242439121u32.into());
+        assert_eq!(parsed.grams, 3242439121u32.into());
 
         let cell_serial = parsed.to_cell()?;
         let parsed_back = CurrencyCollection::from_cell(&cell_serial)?;
@@ -99,7 +124,7 @@ mod tests {
         let currency = CurrencyCollection::new(0u32);
         let cell = currency.to_cell()?;
         let parsed = CurrencyCollection::from_cell(&cell)?;
-        assert_eq!(*parsed.grams, 0u32.into());
+        assert_eq!(parsed.grams, 0u32.into());
 
         let cell_serial = parsed.to_cell()?;
         assert_eq!(cell_serial, cell);

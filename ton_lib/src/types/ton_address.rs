@@ -14,6 +14,7 @@ use crate::types::tlb::TLB;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
 use base64::Engine;
 use crc::Crc;
+use serde::{Deserialize, Deserializer};
 use std::cmp::Ordering;
 use std::fmt::{Debug, Display};
 use std::str::FromStr;
@@ -139,6 +140,13 @@ impl PartialOrd for TonAddress {
     }
 }
 
+impl<'de> Deserialize<'de> for TonAddress {
+    fn deserialize<D: Deserializer<'de>>(deserializer: D) -> Result<Self, D::Error> {
+        let s: String = Deserialize::deserialize(deserializer)?;
+        TonAddress::from_str(&s).map_err(serde::de::Error::custom)
+    }
+}
+
 fn from_base64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonlibError> {
     let addr_str = addr.as_ref();
     if addr_str.chars().any(|c| c == '-' || c == '_') {
@@ -174,7 +182,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonlibError> {
 
     let address = TonAddress {
         wc: bytes[1] as i8 as i32,
-        hash: TonHash::from_bytes(&bytes[2..34])?,
+        hash: TonHash::from_slice(&bytes[2..34])?,
     };
     Ok(address)
 }
@@ -196,7 +204,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, Tonli
 
     let anycast = match anycast {
         Some(anycast) => anycast,
-        None => return Ok(TonAddress::new(wc, TonHash::from_bytes(addr)?)),
+        None => return Ok(TonAddress::new(wc, TonHash::from_slice(addr)?)),
     };
 
     if bits_len < anycast.rewrite_pfx.bits_len as u32 {

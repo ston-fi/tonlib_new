@@ -21,7 +21,7 @@ impl WalletVersionHelper {
         key_pair: &KeyPair,
         wallet_id: i32,
     ) -> Result<TonCellRef, TonlibError> {
-        let public_key = TonHash::from_bytes(&key_pair.public_key)?;
+        let public_key = TonHash::from_slice(&key_pair.public_key)?;
         match version {
             V1R1 | V1R2 | V1R3 | V2R1 | V2R2 => WalletV1V2Data::new(public_key).to_cell_ref(),
             V3R1 | V3R2 => WalletV3Data::new(wallet_id, public_key).to_cell_ref(),
