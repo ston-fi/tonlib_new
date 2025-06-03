@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.28](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.27...ton_lib-v0.0.28) - 2025-06-03
+
+### Other
+
+- Fix get wallet data tinyint ([#56](https://github.com/Sild/ton_lib_rs/pull/56))
+
 ## [0.0.27](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.26...ton_lib-v0.0.27) - 2025-06-02
 
 ### Other
