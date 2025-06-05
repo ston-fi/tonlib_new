@@ -15,3 +15,14 @@ pub struct BlockPrevInfoAfterMerge {
     #[tlb_derive(adapter = "TLBRef")]
     pub prev2: ExtBlockRef,
 }
+
+impl Default for PrevBlockInfo {
+    fn default() -> Self {
+        PrevBlockInfo::Regular(ExtBlockRef {
+            end_lt: 0,
+            seqno: 0,
+            root_hash: Default::default(),
+            file_hash: Default::default(),
+        })
+    }
+}
