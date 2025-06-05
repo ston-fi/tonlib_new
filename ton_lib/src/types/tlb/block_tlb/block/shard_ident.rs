@@ -1,4 +1,4 @@
-use crate::bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL};
+use crate::bc_constants::{MAX_SPLIT_DEPTH, TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
@@ -12,9 +12,17 @@ pub struct ShardIdent {
 }
 
 impl ShardIdent {
-    pub fn new(workchain: i32, shard: u64) -> Self { Self { wc: workchain, shard } }
+    pub fn new(wc: i32, shard: u64) -> Self { Self { wc, shard } }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
     pub fn prefix_len(&self) -> usize { 63 - self.shard.leading_zeros() as usize }
+    pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TonlibError> {
+        let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
+        if lb & (!0 >> (MAX_SPLIT_DEPTH + 1)) != 0 {
+            let err_str = format!("Can't split shard {}, because of max split depth is {MAX_SPLIT_DEPTH}", self.shard);
+            return Err(TonlibError::CustomError(err_str));
+        }
+        Ok((ShardIdent::new(self.wc, self.shard - lb), ShardIdent::new(self.wc, self.shard + lb)))
+    }
 }
 
 impl TLB for ShardIdent {
@@ -83,6 +91,25 @@ mod tests {
         assert_eq!(mc_shard_ident_parsed.shard, 0x6000000000000000);
         let mc_shard_ident_cell_serial = mc_shard_ident_parsed.to_cell()?;
         assert_eq!(shard_shard_ident_cell, mc_shard_ident_cell_serial);
+        Ok(())
+    }
+
+    #[test]
+    fn test_block_tlb_shard_ident_split() -> anyhow::Result<()> {
+        let shard_ident = ShardIdent::new(0, 0x8000000000000000);
+        let (left, right) = shard_ident.split()?;
+        assert_eq!(left.wc, 0);
+        assert_eq!(left.shard, 0x4000000000000000);
+        assert_eq!(right.wc, 0);
+        assert_eq!(right.shard, 0xC000000000000000);
+
+        let (left2, right2) = left.split()?;
+        assert_eq!(left2.shard, 0x2000000000000000);
+        assert_eq!(right2.shard, 0x6000000000000000);
+
+        let (left3, right3) = right.split()?;
+        assert_eq!(left3.shard, 0xa000000000000000);
+        assert_eq!(right3.shard, 0xe000000000000000);
         Ok(())
     }
 }
