@@ -121,6 +121,14 @@ pub struct AccountStatusActive;
 #[tlb_derive(prefix = 0b11, bits_len = 2)]
 pub struct AccountStatusNotExist;
 
+impl ShardAccount {
+    pub const NON_EXIST: ShardAccount = ShardAccount {
+        account: MaybeAccount::None(AccountNone),
+        last_tx_hash: TonHash::ZERO,
+        last_tx_lt: 0,
+    };
+}
+
 impl Default for AccountStatus {
     fn default() -> Self { AccountStatus::NonExist(AccountStatusNotExist) }
 }
