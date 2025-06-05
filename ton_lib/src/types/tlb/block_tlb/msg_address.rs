@@ -98,7 +98,7 @@ impl MsgAddressExt {
 }
 
 impl MsgAddressInt {
-    pub fn workchain(&self) -> i32 {
+    pub fn wc(&self) -> i32 {
         match self {
             MsgAddressInt::Std(addr) => addr.workchain as i32,
             MsgAddressInt::Var(addr) => addr.workchain,

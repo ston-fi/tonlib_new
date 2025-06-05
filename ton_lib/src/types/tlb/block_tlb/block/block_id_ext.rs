@@ -14,7 +14,7 @@ pub struct BlockIdExt {
 impl BlockIdExt {
     pub const ZERO_BLOCK_ID: BlockIdExt = BlockIdExt {
         shard_id: ShardIdent {
-            workchain: TON_MASTERCHAIN_ID,
+            wc: TON_MASTERCHAIN_ID,
             shard: TON_SHARD_FULL,
         },
         seqno: 0,
