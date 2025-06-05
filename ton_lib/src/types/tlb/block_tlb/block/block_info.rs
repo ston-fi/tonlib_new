@@ -2,6 +2,7 @@ use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::cell::ton_hash::TonHash;
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
 use crate::types::tlb::block_tlb::block::block_prev_info::{BlockPrevInfoAfterMerge, PrevBlockInfo};
 use crate::types::tlb::block_tlb::block::shard_ident::ShardIdent;
 use crate::types::tlb::block_tlb::config::config_param_8::GlobalVersion;
@@ -48,6 +49,30 @@ pub struct ExtBlockRef {
     pub seqno: u32,
     pub root_hash: TonHash,
     pub file_hash: TonHash,
+}
+
+impl BlockInfo {
+    pub fn prev_block_ids(&self) -> Result<Vec<BlockIdExt>, TonlibError> {
+        let make_block_id = |ext_ref: ExtBlockRef, shard| BlockIdExt {
+            shard_id: shard,
+            seqno: self.seqno,
+            root_hash: ext_ref.root_hash,
+            file_hash: ext_ref.file_hash,
+        };
+        let prev_ids = match &self.prev_ref {
+            PrevBlockInfo::Regular(ext_ref) => {
+                vec![make_block_id(ext_ref.clone(), self.shard.clone())]
+            }
+            PrevBlockInfo::AfterMerge(ext_refs) => {
+                let (shard1, shard2) = self.shard.split()?;
+                vec![
+                    make_block_id(ext_refs.prev1.clone(), shard1),
+                    make_block_id(ext_refs.prev2.clone(), shard2),
+                ]
+            }
+        };
+        Ok(prev_ids)
+    }
 }
 
 impl TLB for BlockInfo {
