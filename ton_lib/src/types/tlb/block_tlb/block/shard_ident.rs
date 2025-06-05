@@ -14,7 +14,6 @@ pub struct ShardIdent {
 impl ShardIdent {
     pub fn new(wc: i32, shard: u64) -> Self { Self { wc, shard } }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
-    pub fn prefix_len(&self) -> usize { 63 - self.shard.leading_zeros() as usize }
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TonlibError> {
         let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
         if lb & (!0 >> (MAX_SPLIT_DEPTH + 1)) != 0 {
@@ -25,12 +24,16 @@ impl ShardIdent {
     }
 }
 
+impl Default for ShardIdent {
+    fn default() -> Self { Self::new_mc() }
+}
+
 impl TLB for ShardIdent {
     const PREFIX: TLBPrefix = TLBPrefix::new(0b00, 2);
 
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonlibError> {
         let prefix_len_bits: u32 = parser.read_num(6)?;
-        if prefix_len_bits > 60 {
+        if prefix_len_bits > MAX_SPLIT_DEPTH as u32 {
             return Err(TonlibError::TLBWrongData(format!("expecting prefix_len <= 60, got {prefix_len_bits}")));
         }
         let workchain = parser.read_num(32)?;
@@ -44,7 +47,8 @@ impl TLB for ShardIdent {
         if self.shard == 0 {
             return Err(TonlibError::TLBWrongData("shard can't be 0".to_string()));
         }
-        builder.write_num(&self.prefix_len(), 6)?;
+        let prefix_len = 63u32 - self.shard.trailing_zeros();
+        builder.write_num(&prefix_len, 6)?;
         self.wc.write(builder)?;
         let prefix = self.shard - (self.shard & (!self.shard).wrapping_add(1));
         builder.write_num(&prefix, 64)?;

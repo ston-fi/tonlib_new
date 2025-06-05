@@ -15,7 +15,7 @@ const GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
 /// For example, set is_master == false and master_ref != None
 /// Don't do it and everything will be fine
 // https://github.com/ton-blockchain/ton/blob/6f745c04daf8861bb1791cffce6edb1beec62204/crypto/block/block.tlb#L457
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq)]
 pub struct BlockInfo {
     pub version: u32,
     pub not_master: bool,
@@ -55,7 +55,7 @@ impl BlockInfo {
     pub fn prev_block_ids(&self) -> Result<Vec<BlockIdExt>, TonlibError> {
         let make_block_id = |ext_ref: ExtBlockRef, shard| BlockIdExt {
             shard_id: shard,
-            seqno: self.seqno,
+            seqno: ext_ref.seqno,
             root_hash: ext_ref.root_hash,
             file_hash: ext_ref.file_hash,
         };
@@ -297,6 +297,55 @@ mod tests {
         let parsed_back = BlockInfo::from_boc(&parsed_block_info.to_boc()?)?;
         assert_eq!(parsed_block_info, parsed_back);
         assert_eq!(parsed_block_info.cell_hash()?, parsed_back.cell_hash()?);
+        Ok(())
+    }
+
+    #[test]
+    fn test_block_tlb_block_info_prev_block_ids() -> anyhow::Result<()> {
+        let mut block_info = BlockInfo::default();
+        block_info.shard.wc = 0;
+        block_info.shard.shard = 0x8000000000000000;
+        block_info.prev_ref = PrevBlockInfo::AfterMerge(BlockPrevInfoAfterMerge {
+            prev1: ExtBlockRef {
+                end_lt: 1,
+                seqno: 2,
+                root_hash: TonHash::from_slice_sized(&[3u8; 32]),
+                file_hash: TonHash::from_slice_sized(&[4u8; 32]),
+            },
+            prev2: ExtBlockRef {
+                end_lt: 5,
+                seqno: 6,
+                root_hash: TonHash::from_slice_sized(&[7u8; 32]),
+                file_hash: TonHash::from_slice_sized(&[8u8; 32]),
+            },
+        });
+        let prev_block_ids = block_info.prev_block_ids()?;
+        assert_eq!(prev_block_ids.len(), 2);
+        assert_eq!(
+            prev_block_ids[0],
+            BlockIdExt {
+                shard_id: ShardIdent {
+                    wc: 0,
+                    shard: 0x4000000000000000,
+                },
+                seqno: 2,
+                root_hash: TonHash::from_slice_sized(&[3u8; 32]),
+                file_hash: TonHash::from_slice_sized(&[4u8; 32]),
+            }
+        );
+        assert_eq!(
+            prev_block_ids[1],
+            BlockIdExt {
+                shard_id: ShardIdent {
+                    wc: 0,
+                    shard: 0xc000000000000000,
+                },
+                seqno: 6,
+                root_hash: TonHash::from_slice_sized(&[7u8; 32]),
+                file_hash: TonHash::from_slice_sized(&[8u8; 32]),
+            }
+        );
+
         Ok(())
     }
 }
