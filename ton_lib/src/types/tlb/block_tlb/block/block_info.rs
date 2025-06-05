@@ -191,7 +191,7 @@ mod tests {
             seqno: 46991999,
             vert_seqno: 1,
             shard: ShardIdent {
-                workchain: -1,
+                wc: -1,
                 shard: 0x8000000000000000,
             },
             gen_utime: 1745112841,
@@ -240,7 +240,7 @@ mod tests {
             seqno: 52111590,
             vert_seqno: 1,
             shard: ShardIdent {
-                workchain: 0,
+                wc: 0,
                 shard: 0x6000000000000000,
             },
             gen_utime: 1745147839,

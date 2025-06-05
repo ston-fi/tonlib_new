@@ -6,7 +6,7 @@ mod liteapi_serde;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BlockId {
-    pub workchain: i32,
+    pub wc: i32,
     pub shard: u64,
     pub seqno: u32,
 }

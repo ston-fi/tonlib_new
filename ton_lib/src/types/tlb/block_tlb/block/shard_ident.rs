@@ -7,13 +7,14 @@ use crate::types::tlb::{TLBPrefix, TLB};
 // TLBType implementation is quite tricky, it doesn't keep shard as is
 #[derive(Debug, Clone, Eq, Hash, PartialEq)]
 pub struct ShardIdent {
-    pub workchain: i32,
+    pub wc: i32,
     pub shard: u64,
 }
 
 impl ShardIdent {
-    pub fn new(workchain: i32, shard: u64) -> Self { Self { workchain, shard } }
+    pub fn new(workchain: i32, shard: u64) -> Self { Self { wc: workchain, shard } }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
+    pub fn prefix_len(&self) -> usize { 63 - self.shard.leading_zeros() as usize }
 }
 
 impl TLB for ShardIdent {
@@ -28,17 +29,15 @@ impl TLB for ShardIdent {
         let shard_prefix: u64 = parser.read_num(64)?;
         let tag = 1u64 << (63 - prefix_len_bits);
         let shard = (shard_prefix & (!tag).wrapping_add(1)) | tag;
-        Ok(Self { workchain, shard })
+        Ok(Self { wc: workchain, shard })
     }
 
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonlibError> {
         if self.shard == 0 {
             return Err(TonlibError::TLBWrongData("shard can't be 0".to_string()));
         }
-        let prefix_trailing_zeros = self.shard.trailing_zeros();
-        let prefix_len = 63u32 - prefix_trailing_zeros;
-        builder.write_num(&prefix_len, 6)?;
-        self.workchain.write(builder)?;
+        builder.write_num(&self.prefix_len(), 6)?;
+        self.wc.write(builder)?;
         let prefix = self.shard - (self.shard & (!self.shard).wrapping_add(1));
         builder.write_num(&prefix, 64)?;
         Ok(())
@@ -62,7 +61,7 @@ mod tests {
         builder.write_num(&0u64, 64)?; // shard_prefix
         let mc_shard_ident_cell = builder.build()?;
         let mc_shard_ident_parsed = ShardIdent::from_cell(&mc_shard_ident_cell)?;
-        assert_eq!(mc_shard_ident_parsed.workchain, TON_MASTERCHAIN_ID);
+        assert_eq!(mc_shard_ident_parsed.wc, TON_MASTERCHAIN_ID);
         assert_eq!(mc_shard_ident_parsed.shard, TON_SHARD_FULL);
         let mc_shard_ident_cell_serial = mc_shard_ident_parsed.to_cell()?;
         assert_eq!(mc_shard_ident_cell, mc_shard_ident_cell_serial);
@@ -80,7 +79,7 @@ mod tests {
         builder.write_num(&4611686018427387904u64, 64)?; // shard_prefix
         let shard_shard_ident_cell = builder.build()?;
         let mc_shard_ident_parsed = ShardIdent::from_cell(&shard_shard_ident_cell)?;
-        assert_eq!(mc_shard_ident_parsed.workchain, 0);
+        assert_eq!(mc_shard_ident_parsed.wc, 0);
         assert_eq!(mc_shard_ident_parsed.shard, 0x6000000000000000);
         let mc_shard_ident_cell_serial = mc_shard_ident_parsed.to_cell()?;
         assert_eq!(shard_shard_ident_cell, mc_shard_ident_cell_serial);

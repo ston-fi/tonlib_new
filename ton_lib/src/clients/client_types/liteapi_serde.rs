@@ -15,7 +15,7 @@ impl From<TonHash> for Int256 {
 impl From<ton_liteapi::tl::common::BlockId> for BlockId {
     fn from(value: ton_liteapi::tl::common::BlockId) -> Self {
         BlockId {
-            workchain: value.workchain,
+            wc: value.workchain,
             shard: value.shard,
             seqno: value.seqno,
         }
@@ -25,7 +25,7 @@ impl From<ton_liteapi::tl::common::BlockId> for BlockId {
 impl From<BlockId> for ton_liteapi::tl::common::BlockId {
     fn from(value: BlockId) -> Self {
         ton_liteapi::tl::common::BlockId {
-            workchain: value.workchain,
+            workchain: value.wc,
             shard: value.shard,
             seqno: value.seqno,
         }
@@ -46,7 +46,7 @@ impl From<ton_liteapi::tl::common::BlockIdExt> for BlockIdExt {
 impl From<BlockIdExt> for ton_liteapi::tl::common::BlockIdExt {
     fn from(value: BlockIdExt) -> Self {
         ton_liteapi::tl::common::BlockIdExt {
-            workchain: value.shard_id.workchain,
+            workchain: value.shard_id.wc,
             shard: value.shard_id.shard,
             seqno: value.seqno,
             root_hash: value.root_hash.into(),

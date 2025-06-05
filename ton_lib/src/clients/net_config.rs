@@ -61,7 +61,7 @@ impl TonNetConfig {
     pub fn get_init_block_seqno(&self) -> u64 { self.validator.init_block["seqno"].as_u64().unwrap_or(0) }
 
     pub fn set_init_block(&mut self, block_id: &BlockIdExt) {
-        self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_id.workchain);
+        self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_id.wc);
         self.validator.init_block["shard"] = serde_json::json!(block_id.shard_id.shard as i64);
         self.validator.init_block["seqno"] = serde_json::json!(block_id.seqno);
         self.validator.init_block["root_hash"] = serde_json::json!(block_id.root_hash.to_base64());
