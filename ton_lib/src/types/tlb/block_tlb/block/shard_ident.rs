@@ -2,6 +2,7 @@ use crate::bc_constants::{MAX_SPLIT_DEPTH, TON_MASTERCHAIN_ID, TON_SHARD_FULL};
 use crate::cell::build_parse::builder::CellBuilder;
 use crate::cell::build_parse::parser::CellParser;
 use crate::errors::TonlibError;
+use crate::types::tlb::block_tlb::msg_address::MsgAddressInt;
 use crate::types::tlb::{TLBPrefix, TLB};
 
 // TLBType implementation is quite tricky, it doesn't keep shard as is
@@ -14,6 +15,7 @@ pub struct ShardIdent {
 impl ShardIdent {
     pub fn new(wc: i32, shard: u64) -> Self { Self { wc, shard } }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN_ID, TON_SHARD_FULL) }
+    pub fn prefix_len(&self) -> u32 { 63u32 - self.shard.trailing_zeros() }
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TonlibError> {
         let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
         if lb & (!0 >> (MAX_SPLIT_DEPTH + 1)) != 0 {
@@ -21,6 +23,30 @@ impl ShardIdent {
             return Err(TonlibError::CustomError(err_str));
         }
         Ok((ShardIdent::new(self.wc, self.shard - lb), ShardIdent::new(self.wc, self.shard + lb)))
+    }
+    pub fn contains_addr(&self, addr: &MsgAddressInt) -> bool {
+        if addr.wc() != self.wc {
+            return false;
+        }
+        if self.shard == TON_SHARD_FULL {
+            return true;
+        }
+        return false;
+        // let prefix_len = self.prefix_len();
+        // let shard_pfx = self.shard >> (64 - prefix_len);
+        // let addr_pfx = addr.address_hash() >> (64 - prefix_len);
+        // addr_pfx == shard_pfx
+        // if self.prefix == SHARD_FULL {
+        //     true
+        // } else {
+        //     // compare shard prefix and first bits of address
+        //     // (take as many bits of the address as the bits in the prefix)
+        //     let len = self.prefix_len();
+        //     let addr_pfx = acc_addr.get_next_int(len as usize)?;
+        //     let shard_pfx = self.prefix >> (64 - len);
+        //     addr_pfx == shard_pfx
+        // }
+        // self.wc != addr.wc() && (self.shard & addr.shard) == addr.shard
     }
 }
 
@@ -47,8 +73,7 @@ impl TLB for ShardIdent {
         if self.shard == 0 {
             return Err(TonlibError::TLBWrongData("shard can't be 0".to_string()));
         }
-        let prefix_len = 63u32 - self.shard.trailing_zeros();
-        builder.write_num(&prefix_len, 6)?;
+        builder.write_num(&self.prefix_len(), 6)?;
         self.wc.write(builder)?;
         let prefix = self.shard - (self.shard & (!self.shard).wrapping_add(1));
         builder.write_num(&prefix, 64)?;
