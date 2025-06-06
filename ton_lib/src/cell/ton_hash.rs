@@ -2,14 +2,12 @@ use crate::cell::ton_cell_num::TonCellNum;
 use crate::errors::TonlibError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
-use std::fmt::{Debug, Display, UpperHex};
 use std::hash::Hash;
-use std::str::FromStr;
 
 #[derive(Clone, PartialEq, Hash, Eq, Ord, PartialOrd)]
 pub struct TonHash(TonHashData);
 
-#[derive(Debug, PartialOrd, Ord, Clone)]
+#[derive(Clone)]
 enum TonHashData {
     Slice([u8; 32]),
     Vec(Vec<u8>),
@@ -77,16 +75,6 @@ impl TonHash {
     }
 }
 
-impl FromStr for TonHash {
-    type Err = TonlibError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if s.len() == 64 {
-            return from_hex(s);
-        }
-        from_base64(s)
-    }
-}
-
 impl Default for TonHash {
     fn default() -> Self { TonHash::ZERO }
 }
@@ -120,40 +108,46 @@ fn check_bytes_len(bytes: &[u8]) -> Result<(), TonlibError> {
     Ok(())
 }
 
-// Must implement it manually, because we don't distinguish between Vec and Slice
-impl PartialEq for TonHashData {
-    fn eq(&self, other: &Self) -> bool { self.as_slice() == other.as_slice() }
-}
+#[rustfmt::skip]
+mod traits_impl {
+    use std::fmt::{Debug, Display, UpperHex};
+    use std::hash::Hash;
+    use std::str::FromStr;
+    use crate::cell::ton_hash::{from_base64, from_hex, TonHash, TonHashData};
+    use crate::errors::TonlibError;
 
-impl Eq for TonHashData {}
 
-impl Hash for TonHashData {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) { state.write(self.as_slice()); }
-}
 
-impl From<[u8; 32]> for TonHash {
-    fn from(data: [u8; 32]) -> Self { Self(TonHashData::Slice(data)) }
-}
+    impl From<[u8; 32]> for TonHash { fn from(data: [u8; 32]) -> Self { Self(TonHashData::Slice(data)) } }
+    impl From<&[u8; 32]> for TonHash { fn from(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) } }
+    impl FromStr for TonHash {
+        type Err = TonlibError;
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            if s.len() == 64 {
+                return from_hex(s);
+            }
+            from_base64(s)
+        }
+    }
 
-impl AsRef<[u8]> for TonHash {
-    fn as_ref(&self) -> &[u8] { self.as_slice() }
-}
-
-impl UpperHex for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.to_hex().to_uppercase()) }
-}
-
-impl Display for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") }
-}
-
-impl Debug for TonHash {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") }
+    impl AsRef<[u8]> for TonHash { fn as_ref(&self) -> &[u8] { self.as_slice() } }
+    impl UpperHex for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.to_hex().to_uppercase()) } }
+    impl Display for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") } }
+    impl Debug for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") } }
+    
+    // Must implement it manually, because we don't distinguish between Vec and Slice
+    impl PartialEq for TonHashData { fn eq(&self, other: &Self) -> bool { self.as_slice() == other.as_slice() } }
+    impl Eq for TonHashData {}
+    impl Hash for TonHashData { fn hash<H: std::hash::Hasher>(&self, state: &mut H) { state.write(self.as_slice()); } }
+    impl PartialOrd for TonHashData {fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {self.as_slice().partial_cmp(other.as_slice()) } }
+    impl Ord for TonHashData {fn cmp(&self, other: &Self) -> std::cmp::Ordering {self.as_slice().cmp(other.as_slice()) } }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::collections::HashSet;
+    use std::str::FromStr;
     use tokio_test::assert_err;
 
     #[test]
@@ -205,6 +199,30 @@ mod tests {
         let data = [255u8; 32];
         let hash = TonHash::from_str("FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF")?;
         assert_eq!(hash.as_slice(), &data);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_hash_from_base64() -> anyhow::Result<()> {
+        let data = [
+            159, 115, 38, 150, 26, 81, 188, 250, 200, 211, 46, 142, 240, 183, 144, 7, 187, 83, 144, 183, 68, 163, 90,
+            117, 106, 189, 241, 66, 113, 59, 99, 240,
+        ];
+        let base64_str = "n3MmlhpRvPrI0y6O8LeQB7tTkLdEo1p1ar3xQnE7Y/A=";
+        let hash = TonHash::from_str(base64_str)?;
+        assert_eq!(hash.as_slice(), &data);
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_hash_data_hash_eq_impl() -> anyhow::Result<()> {
+        let data1 = [1u8; 32];
+        let data2 = vec![1u8; 32];
+        let hash1 = TonHash::from_slice_sized(&data1);
+        let hash2 = TonHash::from_vec(data2)?;
+        assert_eq!(hash1, hash2);
+        let storage = HashSet::from([hash1, hash2]);
+        assert_eq!(storage.len(), 1);
         Ok(())
     }
 }
