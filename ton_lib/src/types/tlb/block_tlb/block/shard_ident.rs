@@ -31,7 +31,7 @@ impl ShardIdent {
         if self.shard == TON_SHARD_FULL {
             return true;
         }
-        return false;
+        todo!("is not implemented yet");
         // let prefix_len = self.prefix_len();
         // let shard_pfx = self.shard >> (64 - prefix_len);
         // let addr_pfx = addr.address_hash() >> (64 - prefix_len);
