@@ -137,13 +137,19 @@ impl Default for MaybeAccount {
     fn default() -> Self { MaybeAccount::None(AccountNone) }
 }
 
+#[rustfmt::skip]
 impl MaybeAccount {
     pub fn as_active(&self) -> Option<&AccountStateActive> { self.as_account()?.storage.state.as_active() }
     pub fn as_frozen(&self) -> Option<&AccountStateFrozen> { self.as_account()?.storage.state.as_frozen() }
-
     pub fn get_code(&self) -> Option<&TonCellRef> { self.as_active()?.state_init.code.as_ref() }
     pub fn get_data(&self) -> Option<&TonCellRef> { self.as_active()?.state_init.data.as_ref() }
     pub fn get_balance(&self) -> Option<&Coins> { Some(&self.as_account()?.storage.balance.grams) }
+
+    pub fn as_active_mut(&mut self) -> Option<&mut AccountStateActive> { self.as_account_mut()?.storage.state.as_active_mut() }
+    pub fn as_frozen_mut(&mut self) -> Option<&mut AccountStateFrozen> { self.as_account_mut()?.storage.state.as_frozen_mut() }
+    pub fn get_code_mut(&mut self) -> Option<&mut TonCellRef> { self.as_active_mut()?.state_init.code.as_mut() }
+    pub fn get_data_mut(&mut self) -> Option<&mut TonCellRef> { self.as_active_mut()?.state_init.data.as_mut() }
+    pub fn get_balance_mut(&mut self) -> Option<&mut Coins> { Some(&mut self.as_account_mut()?.storage.balance.grams) }
 }
 
 #[cfg(test)]
