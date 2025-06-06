@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.29](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.28...ton_lib-v0.0.29) - 2025-06-06
+
+### Other
+
+- add _mut getters to MaybeAccount
+- :contains_addr
+- add test_block_tlb_block_info_prev_block_ids
+- :split, prev_block_ids()
+- rename workchain -> wc
+- add ShardAccount::NON_EXIST
+- add test_get_wallet_data_result_from_stack_bigint_balance_int
+
 ## [0.0.28](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.27...ton_lib-v0.0.28) - 2025-06-03
 
 ### Other
