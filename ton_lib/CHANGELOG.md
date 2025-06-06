@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.30](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.29...ton_lib-v0.0.30) - 2025-06-06
+
+### Other
+
+- cleanup TonHash traits
+
 ## [0.0.29](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.28...ton_lib-v0.0.29) - 2025-06-06
 
 ### Other
