@@ -3,18 +3,18 @@ use crate::emulators::emul_bc_config::EmulatorBCConfig;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone)]
-pub struct EmulOrdinalArgs {
+pub struct TXEmulOrdArgs {
     pub in_msg_boc: Vec<u8>,
-    pub emul_args: EmulArgs,
+    pub emul_args: TXEmulArgs,
 }
 
-pub struct EmulTickTockArgs {
+pub struct TXEmulTickTockArgs {
     pub is_tock: bool,
-    pub emul_args: EmulArgs,
+    pub emul_args: TXEmulArgs,
 }
 
 #[derive(Debug, Clone)]
-pub struct EmulArgs {
+pub struct TXEmulArgs {
     pub shard_account_boc: Vec<u8>,
     pub bc_config: EmulatorBCConfig,
     pub rand_seed: TonHash,
@@ -25,7 +25,7 @@ pub struct EmulArgs {
     pub libs_boc: Option<Vec<u8>>,
 }
 
-impl Display for EmulArgs {
+impl Display for TXEmulArgs {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let shard_acc_str = hex::encode(&self.shard_account_boc);
 
@@ -46,13 +46,13 @@ impl Display for EmulArgs {
     }
 }
 
-impl Display for EmulOrdinalArgs {
+impl Display for TXEmulOrdArgs {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("in_msg_boc : {}, emul_args: {}", hex::encode(&self.in_msg_boc), &self.emul_args))
     }
 }
 
-impl Display for EmulTickTockArgs {
+impl Display for TXEmulTickTockArgs {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.write_fmt(format_args!("is_tock: {}, emul_args: {}", self.is_tock, &self.emul_args))
     }
