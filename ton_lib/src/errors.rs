@@ -106,17 +106,17 @@ pub enum TonlibError {
     #[error("TLWrongUsage: {0}")]
     TLWrongUsage(String),
 
-    // TVM
-    #[error("TVMEmulatorCreationFailed: tvm_emulator_create returns null")]
-    TVMEmulatorCreationFailed,
+    // Emulators
+    #[error("TVMEmulatorCreationFailed: emulator_create returns null")]
+    EmulatorCreationFailed,
     #[error("TVMEmulatorSetFailed: fail to set param: {0}")]
-    TVMEmulatorSetFailed(&'static str),
-    #[error("TVMEmulatorError: {0}")]
-    TVMEmulatorError(String),
-    #[error("TVMEmulatorResponseParseError: {0}")]
-    TVMEmulatorResponseParseError(String),
-    #[error("TVMRunGetMethodError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
-    TVMRunGetMethodError {
+    EmulatorSetParamFailed(&'static str),
+    #[error("EmulatorNullResponse: emulator returns nullptr")]
+    EmulatorNullResponse,
+    #[error("TVMEmulatorResponseParseError: {field}, raw_response: {raw_response}")]
+    EmulatorParseResponseError { field: &'static str, raw_response: String },
+    #[error("EmulatorEmulationError: vm_exit_code: {vm_exit_code:?}, response_raw: {response_raw}")]
+    EmulatorEmulationError {
         vm_exit_code: Option<i32>,
         response_raw: String,
     },

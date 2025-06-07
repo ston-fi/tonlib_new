@@ -1,6 +1,7 @@
-use crate::emulators::tvm::c7_register::TVMEmulatorC7;
-use crate::emulators::tvm::method_id::TVMGetMethodID;
-use crate::emulators::tvm::response::{
+use crate::emulators::emul_utils::{convert_emulator_response, make_b64_c_str, set_param_failed};
+use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
+use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
+use crate::emulators::tvm::tvm_response::{
     TVMRunGetMethodResponse, TVMRunGetMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
 };
 use crate::errors::TonlibError;
@@ -26,7 +27,7 @@ impl TVMEmulator {
         let data = CString::new(STANDARD.encode(data_boc.as_ref()))?;
         let ptr = unsafe { tvm_emulator_create(code.as_ptr(), data.as_ptr(), DEFAULT_TVM_LOG_VERBOSITY) };
         if ptr.is_null() {
-            return Err(TonlibError::TVMEmulatorCreationFailed);
+            return Err(TonlibError::EmulatorCreationFailed);
         }
         let mut emulator = TVMEmulator { ptr };
         emulator.set_c7(c7)?;
@@ -41,7 +42,7 @@ impl TVMEmulator {
         };
         match success {
             true => Ok(()),
-            false => Err(TonlibError::TVMEmulatorSetFailed("C7")),
+            false => set_param_failed("c7"),
         }
     }
 
@@ -49,7 +50,7 @@ impl TVMEmulator {
         let success = unsafe { tvm_emulator_set_debug_enabled(self.ptr, enabled as i32) };
         match success {
             true => Ok(()),
-            false => Err(TonlibError::TVMEmulatorSetFailed("debug_enabled")),
+            false => set_param_failed("debug_enabled"),
         }
     }
 
@@ -57,7 +58,7 @@ impl TVMEmulator {
         let success = unsafe { tvm_emulator_set_gas_limit(self.ptr, limit) };
         match success {
             true => Ok(()),
-            false => Err(TonlibError::TVMEmulatorSetFailed("gas_limit")),
+            false => set_param_failed("gas_limit"),
         }
     }
 
@@ -66,7 +67,7 @@ impl TVMEmulator {
         let success = unsafe { tvm_emulator_set_libraries(self.ptr, libs.as_ptr()) };
         match success {
             true => Ok(()),
-            false => Err(TonlibError::TVMEmulatorSetFailed("libraries")),
+            false => set_param_failed("libs"),
         }
     }
 
@@ -76,10 +77,9 @@ impl TVMEmulator {
     {
         let tvm_method = method.into();
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack: {stack_boc:?}");
-        let stack = CString::new(STANDARD.encode(stack_boc))?;
-
-        let c_str = unsafe { tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr()) };
-        let json_str = convert_emulator_response(c_str)?;
+        let stack = make_b64_c_str(stack_boc)?;
+        let response_ptr = unsafe { tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr()) };
+        let json_str = convert_emulator_response(response_ptr)?;
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
         TVMRunGetMethodResponse::from_json(json_str)?.into_success()
     }
@@ -96,10 +96,9 @@ impl TVMEmulator {
 
     pub fn send_ext_msg(&mut self, msg_boc: &[u8]) -> Result<TVMSendMsgSuccess, TonlibError> {
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}");
-        let msg = CString::new(STANDARD.encode(msg_boc))?;
-
-        let c_str = unsafe { tvm_emulator_send_external_message(self.ptr, msg.as_ptr()) };
-        let json_str = convert_emulator_response(c_str)?;
+        let msg = make_b64_c_str(msg_boc)?;
+        let response_ptr = unsafe { tvm_emulator_send_external_message(self.ptr, msg.as_ptr()) };
+        let json_str = convert_emulator_response(response_ptr)?;
         log::trace!("[TVMEmulator][send_ext_msg]: msg_boc: {msg_boc:?}, rsp: {json_str}");
         TVMSendMsgResponse::from_json(json_str)?.into_success()
     }
@@ -108,24 +107,14 @@ impl TVMEmulator {
 impl Drop for TVMEmulator {
     fn drop(&mut self) { unsafe { tvm_emulator_destroy(self.ptr) }; }
 }
-
-// no multithread access to internal pointer => it's safe
 unsafe impl Send for TVMEmulator {}
 unsafe impl Sync for TVMEmulator {}
-
-fn convert_emulator_response(c_str: *const std::os::raw::c_char) -> Result<String, TonlibError> {
-    let json_str = unsafe {
-        let json_str = std::ffi::CStr::from_ptr(c_str).to_str()?.to_string();
-        libc::free(c_str as *mut std::ffi::c_void); // emulator doesn't free the string
-        json_str
-    };
-    Ok(json_str)
-}
 
 #[cfg(test)]
 mod tests {
     use crate::cell::ton_cell::{TonCell, TonCellRef};
-    use crate::emulators::tvm::c7_register::{EmulatorBCConfig, TVMEmulatorC7};
+    use crate::emulators::emul_bc_config::EmulatorBCConfig;
+    use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
     use crate::emulators::tvm::tvm_emulator::TVMEmulator;
     use crate::errors::TonlibError;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
@@ -229,7 +218,7 @@ mod tests {
 
         // no libs - should fail
         let emulator_error = assert_err!(emulator.run_get_method("get_wallet_address", &stack.to_boc()?));
-        if let TonlibError::TVMRunGetMethodError {
+        if let TonlibError::EmulatorEmulationError {
             vm_exit_code,
             response_raw,
         } = emulator_error

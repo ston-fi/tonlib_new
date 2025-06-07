@@ -1,3 +1,4 @@
+use crate::emulators::emul_utils::require_field;
 use crate::errors::TonlibError;
 use crate::types::tlb::block_tlb::tvm::tvm_stack::TVMStack;
 use crate::types::tlb::TLB;
@@ -37,22 +38,22 @@ impl TVMRunGetMethodResponse {
 
     pub fn into_success(self) -> Result<TVMRunGetMethodSuccess, TonlibError> {
         if !self.success {
-            return Err(TonlibError::TVMRunGetMethodError {
+            return Err(TonlibError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
         }
-        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code")?;
+        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code", &self.raw_response)?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TonlibError::TVMRunGetMethodError {
+            return Err(TonlibError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
         }
 
         let vm_log = self.vm_log;
-        let stack_boc_base64 = require_field(self.stack, "stack")?;
-        let gas_used = require_field(self.gas_used, "gas_used")?.parse::<i32>()?;
+        let stack_boc_base64 = require_field(self.stack, "stack", &self.raw_response)?;
+        let gas_used = require_field(self.gas_used, "gas_used", &self.raw_response)?.parse::<i32>()?;
 
         Ok(TVMRunGetMethodSuccess {
             vm_log,
@@ -117,15 +118,17 @@ impl TVMSendMsgResponse {
 
     pub fn into_success(self) -> Result<TVMSendMsgSuccess, TonlibError> {
         if !self.success {
-            let error = require_field(self.error, "error is None")?;
-            return Err(TonlibError::TVMEmulatorError(error));
+            return Err(TonlibError::EmulatorEmulationError {
+                vm_exit_code: self.vm_exit_code,
+                response_raw: self.raw_response,
+            });
         }
 
-        let accepted = require_field(self.accepted, "accepted")?;
-        let vm_log = require_field(self.vm_log, "vm_log")?;
-        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code")?;
+        let accepted = require_field(self.accepted, "accepted", &self.raw_response)?;
+        let vm_log = require_field(self.vm_log, "vm_log", &self.raw_response)?;
+        let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code", &self.raw_response)?;
         let missing_library = self.missing_library;
-        let gas_used = require_field(self.gas_used, "gas_used")?.parse::<i32>()?;
+        let gas_used = require_field(self.gas_used, "gas_used", &self.raw_response)?.parse::<i32>()?;
         let actions_boc_base64 = self.actions;
         Ok(TVMSendMsgSuccess {
             new_code_boc_base64: self.new_code_boc_base64,
@@ -139,8 +142,4 @@ impl TVMSendMsgResponse {
             raw_response: self.raw_response,
         })
     }
-}
-
-fn require_field<T>(val: Option<T>, field: &'static str) -> Result<T, TonlibError> {
-    val.ok_or(TonlibError::TVMEmulatorResponseParseError(format!("{field} is None")))
 }

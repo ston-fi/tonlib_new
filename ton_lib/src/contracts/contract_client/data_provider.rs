@@ -1,8 +1,8 @@
 use crate::cell::ton_hash::TonHash;
 use crate::clients::client_types::{TxId, TxIdLTHash};
 use crate::contracts::contract_client::types::ContractState;
-use crate::emulators::tvm::c7_register::EmulatorBCConfig;
-use crate::emulators::tvm::response::TVMRunGetMethodSuccess;
+use crate::emulators::emul_bc_config::EmulatorBCConfig;
+use crate::emulators::tvm::tvm_response::TVMRunGetMethodSuccess;
 use crate::errors::TonlibError;
 use crate::types::ton_address::TonAddress;
 use async_trait::async_trait;
