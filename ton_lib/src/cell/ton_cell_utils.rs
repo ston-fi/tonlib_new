@@ -9,7 +9,7 @@ pub struct TonCellUtils;
 
 impl TonCellUtils {
     /// Result vector will contain only unique hashes
-    pub fn extract_lib_ids<'a, I>(cells_iter: I) -> Result<Vec<TonHash>, TonlibError>
+    pub fn extract_lib_ids<'a, I>(cells_iter: I) -> Result<HashSet<TonHash>, TonlibError>
     where
         I: IntoIterator<Item = &'a TonCell>,
     {
@@ -18,16 +18,16 @@ impl TonCellUtils {
 
         let mut queue = VecDeque::from_iter(cells_iter);
 
-        while let Some(cell_ref) = queue.pop_front() {
-            if !visited.insert(cell_ref.hash()) {
+        while let Some(cell) = queue.pop_front() {
+            if !visited.insert(cell.hash()) {
                 continue;
             }
-            if let Some(lib_id) = Self::read_lib_id(cell_ref)? {
+            if let Some(lib_id) = Self::read_lib_id(cell)? {
                 result.insert(lib_id);
             }
-            queue.extend(cell_ref.refs.iter().map(|x| x.deref()));
+            queue.extend(cell.refs.iter().map(Deref::deref));
         }
-        Ok(result.into_iter().collect())
+        Ok(result)
     }
 
     pub fn read_lib_id(cell: &TonCell) -> Result<Option<TonHash>, TonlibError> {
@@ -53,13 +53,13 @@ mod tests {
         )?;
         let cells = vec![&code];
         let lib_ids = TonCellUtils::extract_lib_ids(cells)?;
-        assert_eq!(lib_ids, vec![expected_lib_id.clone()]);
+        assert_eq!(lib_ids, HashSet::from([expected_lib_id.clone()]));
 
         // check accepted formats
         let code_ref = code.clone().into_ref();
         let cells = vec![code_ref.deref(), &code];
         let lib_ids = TonCellUtils::extract_lib_ids(cells)?;
-        assert_eq!(lib_ids, vec![expected_lib_id.clone()]);
+        assert_eq!(lib_ids, HashSet::from([expected_lib_id.clone()]));
         Ok(())
     }
 

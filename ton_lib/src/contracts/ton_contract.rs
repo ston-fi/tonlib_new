@@ -73,7 +73,7 @@ pub trait TonContractTrait: Send + Sync + Sized {
         let cells = [code_cell.as_ref(), data_cell.as_ref()].into_iter().flatten();
         let lib_ids = TonCellUtils::extract_lib_ids(cells)?;
         if !lib_ids.is_empty() {
-            if let Some(libs_boc) = ctx.client.get_libs_boc(&lib_ids).await? {
+            if let Some(libs_boc) = ctx.client.get_libs_boc(&lib_ids.into_iter().collect::<Vec<_>>()).await? {
                 emulator.set_libs(&libs_boc)?;
             }
         }
