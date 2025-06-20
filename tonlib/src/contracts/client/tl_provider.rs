@@ -7,45 +7,52 @@ use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::error::TLError;
 use async_trait::async_trait;
 use moka::future::Cache;
-use parking_lot::RwLock;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use ton_lib_core::cell::{TonCell, TonHash};
 use ton_lib_core::error::TLCoreError;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
+use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, ContractMethodArgs, ContractMethodResponse};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxId};
+use crate::emulators::tvm::tvm_response::{TVMGetMethodSuccess};
 
 pub struct TLProvider {
     tl_client: TLClient,
-    max_seen_mc_seqno: RwLock<u32>,
     block_stream: BlockStream,
 }
 
 impl TLProvider {
     pub async fn new(tl_client: TLClient, stream_from_seqno: u32) -> Result<Self, TLError> {
         let block_stream = BlockStream::new(tl_client.clone(), stream_from_seqno, None).await?;
-        Self {
+        Ok(Self {
             tl_client,
-            max_seen_mc_seqno: RwLock::new(0),
-            block_stream: BlockStream::new(),
+            block_stream,
+        })
+    }
+
+    async fn get_config_boc(&self) -> Result<Vec<u8>, TLCoreError> { Ok(self.tl_client.get_config_boc_all(0).await?) }
+
+    async fn get_libs_boc(&self, lib_ids: &[TonHash]) -> Result<Option<Vec<u8>>, TLCoreError> {
+        let libs_dict = self.tl_client.get_libs(lib_ids.to_vec()).await?;
+        libs_dict.map(|x| x.to_boc()).transpose()
+    }
+    
+    async fn emulate_get_method(&self, code: &[u8], data: Option<&[u8]>, c7: &TVMEmulatorC7, libs: Option<&[u8]>, stack: &[u8]) -> Result<TVMGetMethodSuccess, TLError> {
+        let data = data.unwrap_or(&[]);
+        let mut emulator = TVMEmulator::new(&code, &data, c7)?;
+        if let Some(libs_boc) = libs {
+            emulator.set_libs(libs_boc)?;
         }
+        emulator.run_get_method("get_wallet_address", stack)
     }
 }
 
-#[async_trait]
-impl ContractProvider for TLDataProvider {
-    async fn get_latest_mc_seqno(&self) -> Result<u32, TLCoreError> {
-        let last_seqno = self.tl_client.get_mc_info().await?.last.seqno;
-        if last_seqno > *self.max_seen_mc_seqno.read() {
-            *self.max_seen_mc_seqno.write() = last_seqno;
-            return Ok(last_seqno);
-        }
-        Ok(*self.max_seen_mc_seqno.read())
-    }
 
-    async fn get_state(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<ContractState, TLCoreError> {
+#[async_trait]
+impl ContractProvider for TLProvider {
+
+    async fn get_state(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLCoreError> {
         let state_raw = match tx_id {
             Some(id) => self.tl_client.get_account_state_raw_by_tx(address.clone(), id.clone().try_into()?).await,
             None => self.tl_client.get_account_state_raw(address.clone()).await,
@@ -66,7 +73,7 @@ impl ContractProvider for TLDataProvider {
             _ => Some(TonHash::from_vec(state_raw.frozen_hash)?),
         };
 
-        Ok(ContractState {
+        Ok(Arc::new(ContractState {
             address: address.clone(),
             mc_seqno: state_raw.block_id.seqno,
             last_tx_id: state_raw.last_tx_id.into(),
@@ -74,28 +81,17 @@ impl ContractProvider for TLDataProvider {
             data_boc,
             frozen_hash,
             balance: state_raw.balance,
-        })
+        }))
     }
 
-    async fn get_latest_txs(&self, _mc_seqno: u32) -> Result<HashMap<TonAddress, TxId>, TLCoreError> {
-        // let block_txs = self.0.get_b
-        todo!()
-    }
-
-    async fn run_get_method(
-        &self,
-        address: &TonAddress,
-        tx_id: Option<&TxId>,
-        _method: i32,
-        _stack_boc: Vec<u8>,
-    ) -> Result<String, TLCoreError> {
-        let state = self.get_state(address, tx_id).await?;
+    async fn run_get_method(&self, args: ContractMethodArgs) -> Result<ContractMethodResponse, TLCoreError> {
+        let state = self.get_state(&args.address, args).await?;
         let code_boc = state.code_boc.as_deref().unwrap_or(&[]);
         let code_cell = state.code_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
-
+    
         let data_boc = state.data_boc.as_deref().unwrap_or(&[]);
         let data_cell = state.data_boc.as_ref().map(|x| TonCell::from_boc(x)).transpose()?;
-
+    
         let mut emulator = match c7 {
             Some(c7) => TVMEmulator::new(code_boc, data_boc, c7)?,
             None => {
@@ -113,16 +109,13 @@ impl ContractProvider for TLDataProvider {
         }
         todo!()
     }
-}
-
-impl TLDataProvider {
-    async fn get_config_boc(&self) -> Result<Vec<u8>, TLCoreError> { Ok(self.tl_client.get_config_boc_all(0).await?) }
-
-    async fn get_libs_boc(&self, lib_ids: &[TonHash]) -> Result<Option<Vec<u8>>, TLCoreError> {
-        let libs_dict = self.tl_client.get_libs(lib_ids.to_vec()).await?;
-        libs_dict.map(|x| x.to_boc()).transpose()
+    
+    async fn get_cache_stats(&self) -> Result<HashMap<String, usize>, TLCoreError> {
+        Ok(HashMap::default())
     }
 }
+
+
 
 #[derive(Default)]
 pub(super) struct CacheStatsLocal {

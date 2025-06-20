@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use ton_lib_core::traits::tlb::TLB;
 
 #[derive(Debug)]
-pub struct TVMRunGetMethodSuccess {
+pub struct TVMGetMethodSuccess {
     pub vm_exit_code: i32,
     pub vm_log: Option<String>,
     pub stack_boc_base64: String,
@@ -17,7 +17,7 @@ pub struct TVMRunGetMethodSuccess {
 
 #[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct TVMRunGetMethodResponse {
+pub struct TVMGetMethodResponse {
     pub success: bool,
     pub vm_exit_code: Option<i32>,
     pub vm_log: Option<String>,
@@ -29,14 +29,14 @@ pub struct TVMRunGetMethodResponse {
     pub raw_response: String,
 }
 
-impl TVMRunGetMethodResponse {
+impl TVMGetMethodResponse {
     pub fn from_json(json: String) -> Result<Self, TLError> {
         let mut value: Self = serde_json::from_str(&json)?;
         value.raw_response = json;
         Ok(value)
     }
 
-    pub fn into_success(self) -> Result<TVMRunGetMethodSuccess, TLError> {
+    pub fn into_success(self) -> Result<TVMGetMethodSuccess, TLError> {
         if !self.success {
             return Err(TLError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
@@ -55,7 +55,7 @@ impl TVMRunGetMethodResponse {
         let stack_boc_base64 = require_field(self.stack, "stack", &self.raw_response)?;
         let gas_used = require_field(self.gas_used, "gas_used", &self.raw_response)?.parse::<i32>()?;
 
-        Ok(TVMRunGetMethodSuccess {
+        Ok(TVMGetMethodSuccess {
             vm_log,
             vm_exit_code,
             stack_boc_base64,
@@ -65,7 +65,7 @@ impl TVMRunGetMethodResponse {
     }
 }
 
-impl TVMRunGetMethodSuccess {
+impl TVMGetMethodSuccess {
     pub fn stack_parsed(&self) -> Result<TVMStack, TLError> { Ok(TVMStack::from_boc_base64(&self.stack_boc_base64)?) }
 
     pub fn stack_boc(&self) -> Result<Vec<u8>, TLError> {

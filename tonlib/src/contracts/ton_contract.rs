@@ -2,14 +2,14 @@ use crate::block_tlb::TVMStack;
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
 use crate::error::TLError;
 use std::sync::Arc;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, GetMethodArgs, GetMethodState};
+use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, ContractMethodArgs, ContractMethodState};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxId, TxIdLTAddress};
 
 pub struct ContractCtx {
     pub client: Arc<dyn ContractProvider>,
     pub address: TonAddress,
-    pub state: GetMethodState,
+    pub state: ContractMethodState,
 }
 
 #[async_trait::async_trait]
@@ -19,15 +19,15 @@ pub trait TonContract: Send + Sync + Sized {
 
     fn new(client: Arc<dyn ContractProvider>, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
         match tx_id {
-            Some(tx_id) => Self::from_state(client, address, GetMethodState::TxId(tx_id)),
-            None => Self::from_state(client, address, GetMethodState::Latest),
+            Some(tx_id) => Self::from_state(client, address, ContractMethodState::TxId(tx_id)),
+            None => Self::from_state(client, address, ContractMethodState::Latest),
         }
     }
 
     fn from_state(
         client: Arc<dyn ContractProvider>,
         address: TonAddress,
-        state: GetMethodState,
+        state: ContractMethodState,
     ) -> Result<Self, TLError> {
         Ok(Self::from_ctx(ContractCtx { client, address, state }))
     }
@@ -35,9 +35,9 @@ pub trait TonContract: Send + Sync + Sized {
     async fn get_state(&self) -> Result<Arc<ContractState>, TLError> {
         let ctx = self.ctx();
         let tx_id = match &ctx.state {
-            GetMethodState::Latest => None,
-            GetMethodState::TxId(tx_id) => Some(tx_id),
-            GetMethodState::Custom {
+            ContractMethodState::Latest => None,
+            ContractMethodState::TxId(tx_id) => Some(tx_id),
+            ContractMethodState::Custom {
                 code_boc,
                 data_boc,
                 balance,
@@ -64,9 +64,9 @@ pub trait TonContract: Send + Sync + Sized {
         M: Into<TVMGetMethodID> + Send,
     {
         let ctx = self.ctx();
-        let args = GetMethodArgs {
+        let args = ContractMethodArgs {
             address: ctx.address.clone(),
-            state: ctx.state.clone(),
+            method_state: ctx.state.clone(),
             method_id: method.into().to_id(),
             stack_boc: stack.map(|x| x.to_boc()).transpose()?,
         };

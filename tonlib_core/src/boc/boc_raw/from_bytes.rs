@@ -27,7 +27,7 @@ impl BOCRaw {
             // size:(## 3) { size <= 4 }
             let size = header & 0b0000_0111;
             if size > 4 {
-                return Err(TLCoreError::Custom(format!("Invalid BoC header: size({size}) <= 4")));
+                return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: size({size}) <= 4")));
             }
 
             (has_idx, has_crc32c, has_cache_bits, size)
@@ -36,19 +36,19 @@ impl BOCRaw {
         //   off_bytes:(## 8) { off_bytes <= 8 }
         let off_bytes = reader.read::<u8>()?;
         if off_bytes > 8 {
-            return Err(TLCoreError::Custom(format!("Invalid BoC header: off_bytes({off_bytes}) <= 8")));
+            return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: off_bytes({off_bytes}) <= 8")));
         }
         //cells:(##(size * 8))
         let cells_cnt = read_var_size(&mut reader, size)?;
         //   roots:(##(size * 8)) { roots >= 1 }
         let roots_cnt = read_var_size(&mut reader, size)?;
         if roots_cnt < 1 {
-            return Err(TLCoreError::Custom(format!("Invalid BoC header: roots({roots_cnt}) >= 1")));
+            return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: roots({roots_cnt}) >= 1")));
         }
         //   absent:(##(size * 8)) { roots + absent <= cells }
         let absent = read_var_size(&mut reader, size)?;
         if roots_cnt + absent > cells_cnt {
-            return Err(TLCoreError::Custom(format!(
+            return Err(TLCoreError::BOCWrongData(format!(
                 "Invalid header: roots({roots_cnt}) + absent({absent}) <= cells({cells_cnt})"
             )));
         }
@@ -122,7 +122,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     let cell_type = match is_exotic {
         true => {
             if data.is_empty() {
-                return Err(TLCoreError::Custom("Exotic cell must have at least 1 byte".to_string()));
+                return Err(TLCoreError::BOCWrongData("Exotic cell must have at least 1 byte".to_string()));
             }
             CellType::new_exotic(data[0])?
         }

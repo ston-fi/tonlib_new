@@ -1,13 +1,13 @@
 use crate::block_tlb::TVMStack;
 use crate::contracts::client::stats::{CacheStats, CacheStatsLocal};
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
-use crate::emulators::tvm::tvm_response::TVMRunGetMethodSuccess;
+use crate::emulators::tvm::tvm_response::TVMGetMethodSuccess;
 use crate::error::TLError;
 use moka::future::Cache;
 use std::collections::HashMap;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, GetMethodArgs};
+use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, ContractMethodArgs};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxId};
 
@@ -35,13 +35,13 @@ impl ContractClient {
     {
         let method_id = method.into().to_id();
         let stack_boc = stack.into().as_ref().map(|s| s.as_ref().to_boc()).transpose()?;
-        let args = GetMethodArgs::new(address.clone(), tx_id.cloned(), method_id, stack_boc);
+        let args = ContractMethodArgs::new(address.clone(), tx_id.cloned(), method_id, stack_boc);
         let rsp = self.0.run_get_method(args).await?;
         Ok(TVMStack::from_boc(&rsp.stack_boc)?)
     }
 
     pub async fn get_cache_stats(&self) -> Result<HashMap<String, usize>, TLError> {
-        Ok(self.0.get_cache_state().await?)
+        Ok(self.0.get_cache_stats().await?)
     }
 }
 

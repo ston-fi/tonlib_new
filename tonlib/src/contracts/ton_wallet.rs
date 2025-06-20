@@ -5,7 +5,7 @@ use ton_lib_core::cell::TonHash;
 use ton_lib_core::ton_contract;
 
 #[ton_contract]
-pub struct WalletContract {}
+pub struct WalletContract;
 
 impl WalletContract {
     pub async fn seqno(&self) -> Result<u32, TLError> {

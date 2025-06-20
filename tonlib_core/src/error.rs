@@ -64,6 +64,10 @@ pub enum TLCoreError {
     TLBEnumOutOfOptions, // TODO collect errors from all options
     #[error("TLBObjectNoValue: No internal value found (method: {0})")]
     TLBObjectNoValue(String),
+    
+    // contracts
+    #[error("ContractError: {0}")]
+    ContractError(String),
 
     // General errors
     #[error("Custom: {0}")]

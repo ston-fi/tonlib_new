@@ -2,7 +2,7 @@ use crate::emulators::emul_utils::{convert_emulator_response, make_b64_c_str, se
 use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
 use crate::emulators::tvm::tvm_response::{
-    TVMRunGetMethodResponse, TVMRunGetMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
+    TVMGetMethodResponse, TVMGetMethodSuccess, TVMSendMsgResponse, TVMSendMsgSuccess,
 };
 use crate::error::TLError;
 use base64::engine::general_purpose::STANDARD;
@@ -71,7 +71,7 @@ impl TVMEmulator {
         }
     }
 
-    pub fn run_get_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMRunGetMethodSuccess, TLError>
+    pub fn run_get_method<T>(&mut self, method: T, stack_boc: &[u8]) -> Result<TVMGetMethodSuccess, TLError>
     where
         T: Into<TVMGetMethodID>,
     {
@@ -81,7 +81,7 @@ impl TVMEmulator {
         let response_ptr = unsafe { tvm_emulator_run_get_method(self.ptr, tvm_method.to_id(), stack.as_ptr()) };
         let json_str = convert_emulator_response(response_ptr)?;
         log::trace!("[TVMEmulator][run_get_method]: method: {tvm_method}, stack_boc: {stack_boc:?}, rsp: {json_str}");
-        TVMRunGetMethodResponse::from_json(json_str)?.into_success()
+        TVMGetMethodResponse::from_json(json_str)?.into_success()
     }
 
     pub fn send_int_msg(&mut self, msg_boc: &[u8], amount: u64) -> Result<TVMSendMsgSuccess, TLError> {
@@ -226,7 +226,7 @@ mod tests {
             assert_eq!(vm_exit_code, Some(9));
             assert!(response_raw.contains("D29017573B8132BE742E9C02DABE2311FB3DF9F077E661D3EE24D431058B8830"));
         } else {
-            panic!("Expected TVMRunGetMethodError, got: {:?}", emulator_error);
+            panic!("Expected TVMGetMethodError, got: {:?}", emulator_error);
         }
 
         // add required lib

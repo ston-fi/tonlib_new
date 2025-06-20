@@ -4,5 +4,5 @@ use crate::contracts::ton_contract::TonContract;
 use ton_lib_core::ton_contract;
 
 #[ton_contract]
-pub struct JettonWallet {}
+pub struct JettonWallet;
 impl GetWalletData for JettonWallet {}
