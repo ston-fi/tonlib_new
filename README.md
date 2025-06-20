@@ -3,12 +3,12 @@
 [![Crates.io](https://img.shields.io/crates/v/ton_lib.svg)](https://crates.io/crates/ton_lib)
 [![codecov](https://codecov.io/gh/sild/ton_lib_rs/branch/main/graph/badge.svg)](https://codecov.io/gh/sild/ton_lib_rs)
 
-This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlibjson) implementation.
+This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](tonlib/src/clients/tonlibjson) implementation.
 
 ## Features
 
-### [cell](ton_lib/src/cell) module
-Build and read custom cells using [TonCell](ton_lib/src/cell/ton_cell.rs), and serialize them to bytes using [BOC](ton_lib/src/cell/boc/mod.rs):
+### [cell](tonlib/src/cell) module
+Build and read custom cells using [TonCell](tonlib/src/cell/ton_cell.rs), and serialize them to bytes using [BOC](tonlib/src/cell/boc/mod.rs):
 
 ```rust
 fn main() -> anyhow::Result<()> {
@@ -25,15 +25,15 @@ fn main() -> anyhow::Result<()> {
 
 ---
 
-### [types](ton_lib/src/types) module
+### [types](tonlib/src/types) module
 Contains 3 different layers:
 
-1. [tlb](ton_lib/src/types/tlb):  
+1. [tlb](tonlib/src/types/tlb):  
    The `TLBType` trait allows you to implement `serde` for your objects automatically.  
    It also includes a collection of predefined TLB types.  
    (Apologies for the `Dict` implementation — it's still in progress.)
 
-2. [client_types](ton_lib/src/types/client_types):  
+2. [client_types](tonlib/src/types/client_types):  
    Additional types for clients. (try don't use them!)
 
 3. The rest:  
@@ -61,11 +61,11 @@ fn main() {
 
 ---
 
-### [clients](ton_lib/src/clients) module
-- [LiteClient](ton_lib/src/clients/lite):  
+### [clients](tonlib/src/clients) module
+- [LiteClient](tonlib/src/clients/lite):  
   A "native" lite-node client that uses ADNL. More straightforward to use, but less flexible.
 
-- [TLClient](ton_lib/src/clients/tonlibjson):  
+- [TLClient](tonlib/src/clients/tonlibjson):  
   A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
   A bit tricky to use at times, but offers more features.\
   **Does not support `smc` methods - use `MethodEmulator` instead.**
@@ -88,7 +88,7 @@ async fn main() -> anyhow::Result<()> {
 
 ---
 
-### [emulators](ton_lib/src/emulators) module
-- [TVMEmulator](ton_lib/src/emulators/tvm/tvm_emulator.rs): `run_get_method`, `send_int_msg`, `send_ext_msg`\
-Check [tvm_emulator_tests](ton_lib/src/emulators/tvm/test_tvm_emulator.rs) for usage examples
-- [TXEmulator](ton_lib/src/emulators/tx/tx_emulator.rs): WIP
+### [emulators](tonlib/src/emulators) module
+- [TVMEmulator](tonlib/src/emulators/tvm/tvm_emulator.rs): `run_get_method`, `send_int_msg`, `send_ext_msg`\
+Check [tvm_emulator_tests](tonlib/src/emulators/tvm/test_tvm_emulator.rs) for usage examples
+- [TXEmulator](tonlib/src/emulators/tx/tx_emulator.rs): WIP
