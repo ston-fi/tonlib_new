@@ -8,7 +8,8 @@ use std::sync::Arc;
 #[async_trait]
 pub trait ContractProvider: Send + Sync {
     /// if tx_id is None, returns latest state
-    async fn get_state(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLCoreError>;
+    async fn get_contract(&self, address: &TonAddress, tx_id: Option<&TxId>)
+        -> Result<Arc<ContractState>, TLCoreError>;
     async fn run_get_method(&self, args: ContractMethodArgs) -> Result<ContractMethodResponse, TLCoreError>;
     async fn get_cache_stats(&self) -> Result<HashMap<String, usize>, TLCoreError>;
 }
@@ -35,11 +36,6 @@ impl ContractMethodArgs {
             stack_boc,
         }
     }
-
-    pub fn with_stack(mut self, stack_boc: Vec<u8>) -> Self {
-        self.stack_boc = Some(stack_boc);
-        self
-    }
 }
 
 #[derive(Debug, Clone)]
@@ -47,6 +43,7 @@ pub enum ContractMethodState {
     Latest,
     TxId(TxId),
     Custom {
+        mc_seqno: u32,
         code_boc: Vec<u8>,
         data_boc: Option<Vec<u8>>,
         balance: i64,

@@ -74,8 +74,8 @@ impl TonNetConfig {
     pub fn get_init_block_seqno(&self) -> u64 { self.validator.init_block["seqno"].as_u64().unwrap_or(0) }
 
     pub fn set_init_block(&mut self, block_id: &BlockIdExt) {
-        self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_id.wc);
-        self.validator.init_block["shard"] = serde_json::json!(block_id.shard_id.shard as i64);
+        self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_ident.wc);
+        self.validator.init_block["shard"] = serde_json::json!(block_id.shard_ident.shard as i64);
         self.validator.init_block["seqno"] = serde_json::json!(block_id.seqno);
         self.validator.init_block["root_hash"] = serde_json::json!(block_id.root_hash.to_base64());
         self.validator.init_block["file_hash"] = serde_json::json!(block_id.file_hash.to_base64());
@@ -102,6 +102,8 @@ fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TLError> {
         } else {
             log::warn!("env_var {env_var_name} is set, but path {path} is not available");
         }
+    } else {
+        log::info!("env_var {env_var_name} is not set, using default net config");
     }
     Ok(net_conf)
 }

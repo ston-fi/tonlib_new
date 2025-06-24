@@ -1,5 +1,5 @@
-use crate::contracts::ton_contract::ContractCtx;
-use crate::contracts::ton_contract::TonContract;
+use crate::contracts::traits::ContractCtx;
+use crate::contracts::traits::ContractTrait;
 use crate::error::TLError;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::ton_contract;

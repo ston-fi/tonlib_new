@@ -5,7 +5,7 @@ use ton_lib_core::TLBDerive;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, TLBDerive)]
 pub struct BlockIdExt {
-    pub shard_id: ShardIdent,
+    pub shard_ident: ShardIdent,
     pub seqno: u32,
     pub root_hash: TonHash,
     pub file_hash: TonHash,
@@ -13,7 +13,7 @@ pub struct BlockIdExt {
 
 impl BlockIdExt {
     pub const ZERO_BLOCK_ID: BlockIdExt = BlockIdExt {
-        shard_id: ShardIdent {
+        shard_ident: ShardIdent {
             wc: TON_MC_ID,
             shard: TON_SHARD_FULL,
         },

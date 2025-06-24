@@ -129,14 +129,10 @@ async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphor
         match config.connection_check {
             LiteNodeFilter::Healthy => match conn.get_mc_info().await {
                 Ok(info) => match conn.get_block_header(info.last).await {
-                    Ok(_) => break Ok(conn),
-                    Err(err) => {
-                        log::info!("Dropping connection to unhealthy node: {:?}", err);
-                    }
+                    Ok(_) => break conn,
+                    Err(err) => log::info!("Dropping connection to unhealthy node: {err:?}"),
                 },
-                Err(err) => {
-                    log::info!("Dropping connection to unhealthy node: {:?}", err);
-                }
+                Err(err) => log::info!("Dropping connection to unhealthy node: {err:?}"),
             },
             LiteNodeFilter::Archive => {
                 let block_id = TLBlockId {
@@ -146,14 +142,15 @@ async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphor
                 };
                 conn.sync().await?;
                 match conn.lookup_block(1, block_id, 0, 0).await {
-                    Ok(_) => break Ok(conn),
-                    Err(err) => log::info!("Dropping connection to unhealthy node: {:?}", err),
+                    Ok(_) => break conn,
+                    Err(err) => log::info!("Dropping connection to non-archive node: {err:?}"),
                 }
             }
         };
     };
+    log::info!("Connection {} established", conn.inner.tonlibjson_wrapper.tag());
     sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
-    conn
+    Ok(conn)
 }
 
 async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TLError> {

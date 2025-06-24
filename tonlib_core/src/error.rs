@@ -64,7 +64,7 @@ pub enum TLCoreError {
     TLBEnumOutOfOptions, // TODO collect errors from all options
     #[error("TLBObjectNoValue: No internal value found (method: {0})")]
     TLBObjectNoValue(String),
-    
+
     // contracts
     #[error("ContractError: {0}")]
     ContractError(String),
@@ -92,6 +92,8 @@ pub enum TLCoreError {
     NulError(#[from] std::ffi::NulError),
     #[error("{0}")]
     SerdeJson(#[from] serde_json::Error),
+    #[error("{0}")]
+    SystemTimeError(#[from] std::time::SystemTimeError),
 
     #[error("{0}")]
     ParseBigIntError(#[from] num_bigint::ParseBigIntError),
@@ -101,4 +103,6 @@ pub enum TLCoreError {
     BoxedError(#[from] Box<dyn std::error::Error + Send + Sync>),
     #[error("{0}")]
     ArcError(#[from] Arc<dyn std::error::Error + Send + Sync>),
+    #[error("{0}")]
+    ArcSelf(#[from] Arc<TLCoreError>),
 }

@@ -1,7 +1,7 @@
 use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
 use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_base64;
 use crate::clients::tl_client::tl::types::{
-    TLAccountAddress, TLBlockId, TLBlocksAccountTxId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
+    TLAccountAddress, TLAccountTxId, TLBlockId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
 };
 use crate::clients::tl_client::tl::Base64Standard;
 
@@ -174,7 +174,7 @@ pub enum TLRequest {
         id: BlockIdExt,
         mode: u32,
         count: u32,
-        after: TLBlocksAccountTxId,
+        after: TLAccountTxId,
     },
 
     // tonlib_api.tl, line 330
@@ -184,7 +184,7 @@ pub enum TLRequest {
         id: BlockIdExt,
         mode: u32,
         count: u32,
-        after: TLBlocksAccountTxId,
+        after: TLAccountTxId,
     },
 
     // tonlib_api.tl, line 331

@@ -27,7 +27,7 @@ impl MCBlockExtra {
         for (wc, shards) in &self.shard_hashes {
             for (shard_pfx, descr) in shards {
                 shard_ids.push(BlockIdExt {
-                    shard_id: ShardIdent::from_pfx(*wc, shard_pfx),
+                    shard_ident: ShardIdent::from_pfx(*wc, shard_pfx),
                     seqno: descr.seqno,
                     root_hash: TonHash::from_slice_sized(descr.root_hash.as_slice_sized()),
                     file_hash: TonHash::from_slice_sized(descr.file_hash.as_slice_sized()),

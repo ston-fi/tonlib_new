@@ -1,7 +1,7 @@
 use crate::contracts::methods::get_jetton_data::GetJettonData;
 use crate::contracts::methods::get_wallet_address::GetWalletAddress;
-use crate::contracts::ton_contract::ContractCtx;
-use crate::contracts::ton_contract::TonContract;
+use crate::contracts::traits::ContractCtx;
+use crate::contracts::traits::ContractTrait;
 use ton_lib_core::ton_contract;
 
 #[ton_contract]

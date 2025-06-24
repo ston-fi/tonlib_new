@@ -32,7 +32,7 @@ impl From<BlockId> for ton_liteapi::tl::common::BlockId {
 impl From<ton_liteapi::tl::common::BlockIdExt> for BlockIdExt {
     fn from(value: ton_liteapi::tl::common::BlockIdExt) -> Self {
         BlockIdExt {
-            shard_id: ShardIdent::new(value.workchain, value.shard),
+            shard_ident: ShardIdent::new(value.workchain, value.shard),
             seqno: value.seqno,
             root_hash: value.root_hash.0.into(),
             file_hash: value.file_hash.0.into(),
@@ -43,8 +43,8 @@ impl From<ton_liteapi::tl::common::BlockIdExt> for BlockIdExt {
 impl From<BlockIdExt> for ton_liteapi::tl::common::BlockIdExt {
     fn from(value: BlockIdExt) -> Self {
         ton_liteapi::tl::common::BlockIdExt {
-            workchain: value.shard_id.wc,
-            shard: value.shard_id.shard,
+            workchain: value.shard_ident.wc,
+            shard: value.shard_ident.shard,
             seqno: value.seqno,
             root_hash: Int256(*value.root_hash.as_slice_sized()),
             file_hash: Int256(*value.file_hash.as_slice_sized()),

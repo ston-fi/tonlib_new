@@ -3,8 +3,8 @@ use crate::clients::tl_client::connection::TLConnection;
 use crate::clients::tl_client::tl::request::TLRequest;
 use crate::clients::tl_client::tl::response::TLResponse;
 use crate::clients::tl_client::tl::types::{
-    TLBlockId, TLBlocksAccountTxId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLBlocksTxs, TLFullAccountState,
-    TLRawFullAccountState, TLRawTxs, TLTxId,
+    TLAccountTxId, TLBlockId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLFullAccountState,
+    TLRawFullAccountState, TLRawTxs, TLShortTxId, TLTxId,
 };
 use crate::clients::tl_client::RetryStrategy;
 use crate::error::TLError;
@@ -16,7 +16,7 @@ use tokio_retry::RetryIf;
 use ton_lib_core::cell::{TonCellRef, TonHash};
 use ton_lib_core::constants::{TON_MC_ID, TON_SHARD_FULL};
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::{TonAddress, TxIdLTAddress};
+use ton_lib_core::types::TonAddress;
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
@@ -26,7 +26,7 @@ pub trait TLClientTrait: Send + Sync {
         let retry_strat = self.get_retry_strategy();
         let fi = FixedInterval::new(retry_strat.retry_waiting);
         let strategy = fi.take(retry_strat.retry_count);
-        RetryIf::spawn(strategy, || async { self.get_connection().exec_impl(req).await }, retry_condition).await
+        RetryIf::spawn(strategy, || self.get_connection().exec_impl(req), retry_condition).await
     }
 
     async fn get_mc_info(&self) -> Result<TLBlocksMCInfo, TLError> {
@@ -80,7 +80,7 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_txs(&self, address: TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TLError> {
+    async fn get_account_txs(&self, address: TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TLError> {
         let req = TLRequest::RawGetTxs {
             account_address: address.into(),
             from_transaction_id: from_tx,
@@ -88,7 +88,7 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
-    async fn get_txs_v2(
+    async fn get_account_txs_v2(
         &self,
         address: TonAddress,
         from_tx: TLTxId,
@@ -139,31 +139,35 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLBlocksShards)
     }
 
-    /// Returns up to specified number of ids of transactions in specified block.
-    ///
-    /// * `block_id`: ID of the block to retrieve transactions for (either masterchain or shard).
-    /// * `mode`: Use `7` to get first chunk of transactions or `7 + 128` for subsequent chunks.
-    /// * `count`: Maximum mumber of transactions to retrieve.
-    /// * `after`: Specify `NULL_BLOCKS_ACCOUNT_TRANSACTION_ID` to get the first chunk
-    ///             or id of the last retrieved tx for subsequent chunks.
-    ///
-    async fn get_block_txs(
-        &self,
-        block_id: BlockIdExt,
-        mode: u32,
-        count: u32,
-        after: TxIdLTAddress,
-    ) -> Result<TLBlocksTxs, TLError> {
-        let req = TLRequest::BlocksGetTxs {
-            id: block_id,
-            mode,
-            count,
-            after: TLBlocksAccountTxId {
-                account: after.address,
-                lt: after.lt,
-            },
+    // TODO add tests
+    async fn get_block_txs(&self, block_id: &BlockIdExt) -> Result<Vec<TLShortTxId>, TLError> {
+        let mut after = TLAccountTxId {
+            address_hash: TonHash::ZERO,
+            lt: 0,
         };
-        unwrap_tl_response!(self.exec(&req).await?, TLBlocksTxs)
+        let mut incomplete = true;
+        let mut txs = vec![];
+        while incomplete {
+            let mode = if after.lt == 0 { 7 } else { 7 + 128 };
+            let req = TLRequest::BlocksGetTxs {
+                id: block_id.clone(),
+                mode,
+                count: 256,
+                after,
+            };
+            let response = unwrap_tl_response!(self.exec(&req).await?, TLBlocksTxs)?;
+            if response.txs.is_empty() {
+                break;
+            }
+            let last = &response.txs.last().unwrap();
+            after = TLAccountTxId {
+                address_hash: last.address_hash.clone(),
+                lt: last.lt,
+            };
+            txs.extend(response.txs);
+            incomplete = response.incomplete;
+        }
+        Ok(txs)
     }
 
     async fn get_block_header(&self, block_id: BlockIdExt) -> Result<TLBlocksHeader, TLError> {

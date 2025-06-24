@@ -1,34 +1,31 @@
 use crate::block_tlb::TVMStack;
+use crate::contracts::contract_client::ContractClient;
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
 use crate::error::TLError;
 use std::sync::Arc;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState, ContractMethodArgs, ContractMethodState};
+use ton_lib_core::traits::contract_provider::{ContractMethodArgs, ContractMethodState, ContractState};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxId, TxIdLTAddress};
 
 pub struct ContractCtx {
-    pub client: Arc<dyn ContractProvider>,
+    pub client: ContractClient,
     pub address: TonAddress,
     pub state: ContractMethodState,
 }
 
 #[async_trait::async_trait]
-pub trait TonContract: Send + Sync + Sized {
+pub trait ContractTrait: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    fn new(client: Arc<dyn ContractProvider>, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
+    fn new(client: ContractClient, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
         match tx_id {
             Some(tx_id) => Self::from_state(client, address, ContractMethodState::TxId(tx_id)),
             None => Self::from_state(client, address, ContractMethodState::Latest),
         }
     }
 
-    fn from_state(
-        client: Arc<dyn ContractProvider>,
-        address: TonAddress,
-        state: ContractMethodState,
-    ) -> Result<Self, TLError> {
+    fn from_state(client: ContractClient, address: TonAddress, state: ContractMethodState) -> Result<Self, TLError> {
         Ok(Self::from_ctx(ContractCtx { client, address, state }))
     }
 
@@ -38,13 +35,14 @@ pub trait TonContract: Send + Sync + Sized {
             ContractMethodState::Latest => None,
             ContractMethodState::TxId(tx_id) => Some(tx_id),
             ContractMethodState::Custom {
+                mc_seqno,
                 code_boc,
                 data_boc,
                 balance,
             } => {
                 return Ok(Arc::new(ContractState {
                     address: ctx.address.clone(),
-                    mc_seqno: 0,
+                    mc_seqno: *mc_seqno,
                     last_tx_id: TxId::LTAddress(TxIdLTAddress {
                         lt: 0,
                         address: ctx.address.clone(),

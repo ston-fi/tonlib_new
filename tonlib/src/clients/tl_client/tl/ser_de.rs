@@ -1,6 +1,5 @@
 use serde::de::IntoDeserializer;
 use serde::{de::Error, Deserialize, Deserializer, Serialize, Serializer};
-use serde_aux::prelude::deserialize_number_from_string;
 use std::str::FromStr;
 
 pub(super) mod serde_ton_address_hex {
@@ -15,17 +14,17 @@ pub(super) mod serde_ton_address_hex {
     }
 }
 
-pub(super) mod serde_ton_address_base64 {
-    use super::*;
-    use ton_lib_core::types::TonAddress;
-
-    pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
-        serializer.serialize_str(hash.to_string().as_str())
-    }
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonAddress, D::Error> {
-        TonAddress::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
-    }
-}
+// pub(super) mod serde_ton_address_base64 {
+//     use super::*;
+//     use ton_lib_core::types::TonAddress;
+//
+//     pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
+//         serializer.serialize_str(hash.to_string().as_str())
+//     }
+//     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TonAddress, D::Error> {
+//         TonAddress::from_str(&String::deserialize(deserializer)?).map_err(Error::custom)
+//     }
+// }
 
 pub(super) mod serde_ton_hash_base64 {
     use super::*;
@@ -58,6 +57,7 @@ pub(super) mod serde_block_id_ext {
     use super::*;
     use crate::block_tlb::{BlockIdExt, ShardIdent};
     use crate::clients::tl_client::tl::Base64Standard;
+    use serde_aux::prelude::deserialize_number_from_string;
     use ton_lib_core::cell::TonHash;
 
     // tonlib_api.tl_api, line 51
@@ -75,8 +75,8 @@ pub(super) mod serde_block_id_ext {
 
     pub fn serialize<S: Serializer>(data: &BlockIdExt, serializer: S) -> Result<S::Ok, S::Error> {
         TLBlockIdExt {
-            workchain: data.shard_id.wc,
-            shard: data.shard_id.shard as i64,
+            workchain: data.shard_ident.wc,
+            shard: data.shard_ident.shard as i64,
             seqno: data.seqno as i32,
             root_hash: data.root_hash.as_slice().to_vec(),
             file_hash: data.file_hash.as_slice().to_vec(),
@@ -87,7 +87,7 @@ pub(super) mod serde_block_id_ext {
     pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<BlockIdExt, D::Error> {
         let tl_block_id_ext = TLBlockIdExt::deserialize(deserializer)?;
         Ok(BlockIdExt {
-            shard_id: ShardIdent {
+            shard_ident: ShardIdent {
                 wc: tl_block_id_ext.workchain,
                 shard: tl_block_id_ext.shard as u64,
             },
@@ -131,8 +131,7 @@ pub(super) mod serde_block_id_ext_vec_opt {
         let opt = Option::<Vec<serde_json::Value>>::deserialize(deserializer)?;
         match opt {
             Some(v) => {
-                let vec =
-                    serde_block_id_ext_vec::deserialize(v.into_deserializer()).map_err(serde::de::Error::custom)?;
+                let vec = serde_block_id_ext_vec::deserialize(v.into_deserializer()).map_err(Error::custom)?;
                 Ok(Some(vec))
             }
             None => Ok(None),

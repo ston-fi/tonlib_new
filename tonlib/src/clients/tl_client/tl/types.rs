@@ -81,7 +81,8 @@ pub struct TLTxId {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
     #[serde(with = "serde_ton_hash_base64")]
-    pub hash: TonHash,
+    #[serde(rename = "hash")]
+    pub tx_hash: TonHash,
 }
 
 impl TryFrom<TxId> for TLTxId {
@@ -90,7 +91,7 @@ impl TryFrom<TxId> for TLTxId {
         match tx_id {
             TxId::LTHash(id) => Ok(Self {
                 lt: id.lt,
-                hash: id.hash,
+                tx_hash: id.hash,
             }),
             rest => Err(TLError::TLWrongArgs(format!("tl_client doesn't support {rest:?} as tx_id"))),
         }
@@ -101,7 +102,7 @@ impl From<TLTxId> for TxId {
     fn from(tl_tx_id: TLTxId) -> Self {
         TxId::LTHash(TxIdLTHash {
             lt: tl_tx_id.lt,
-            hash: tl_tx_id.hash,
+            hash: tl_tx_id.tx_hash,
         })
     }
 }
@@ -480,23 +481,26 @@ pub struct TLBlocksShards {
 
 // tonlib_api.tl_api, line 221
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLBlocksAccountTxId {
-    #[serde(with = "serde_ton_address_base64")]
-    pub account: TonAddress,
+pub struct TLAccountTxId {
+    #[serde(with = "serde_ton_hash_base64")]
+    #[serde(rename = "account")]
+    pub address_hash: TonHash,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
 }
 
 // tonlib_api.tl_api, line 222
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct TLBlocksShortTxId {
+pub struct TLShortTxId {
     pub mode: u32,
-    #[serde(with = "Base64Standard")]
-    pub account: Vec<u8>,
+    #[serde(with = "serde_ton_hash_base64")]
+    #[serde(rename = "account")]
+    pub address_hash: TonHash,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub lt: i64,
-    #[serde(with = "Base64Standard")]
-    pub hash: Vec<u8>,
+    #[serde(with = "serde_ton_hash_base64")]
+    #[serde(rename = "hash")]
+    pub tx_hash: TonHash,
 }
 
 // tonlib_api.tl_api, line 223
@@ -507,7 +511,7 @@ pub struct TLBlocksTxs {
     pub req_count: i32,
     pub incomplete: bool,
     #[serde(rename = "transactions")]
-    pub txs: Vec<TLBlocksShortTxId>,
+    pub txs: Vec<TLShortTxId>,
 }
 
 // tonlib_api.tl_api, line 224

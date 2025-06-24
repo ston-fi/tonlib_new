@@ -14,14 +14,14 @@ pub(crate) fn ton_contract_impl(_attr: TokenStream, item: TokenStream) -> TokenS
     if let syn::Fields::Unnamed(_) = &new_fields {
         panic!("ton_contract derive does not support tuple structs, use named fields instead");
     };
-    
+
     if let syn::Fields::Unit = new_fields {
         new_fields = syn::Fields::Named(FieldsNamed {
             named: syn::punctuated::Punctuated::new(),
             brace_token: syn::token::Brace::default(),
         })
     };
-    
+
     if let syn::Fields::Named(fields) = &mut new_fields {
         fields.named.push(syn::parse_quote! {
             contract_ctx: ContractCtx
@@ -34,7 +34,7 @@ pub(crate) fn ton_contract_impl(_attr: TokenStream, item: TokenStream) -> TokenS
         #(#attrs)*
         #vis struct #struct_name #generics #new_fields
 
-        impl #impl_generics TonContract for #struct_name #ty_generics #where_clause {
+        impl #impl_generics ContractTrait for #struct_name #ty_generics #where_clause {
             fn ctx(&self) -> &ContractCtx {
                 &self.contract_ctx
             }

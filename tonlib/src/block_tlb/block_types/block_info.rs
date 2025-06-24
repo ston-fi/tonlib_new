@@ -52,7 +52,7 @@ pub struct ExtBlockRef {
 impl BlockInfo {
     pub fn prev_block_ids(&self) -> Result<Vec<BlockIdExt>, TLCoreError> {
         let make_block_id = |ext_ref: ExtBlockRef, shard| BlockIdExt {
-            shard_id: shard,
+            shard_ident: shard,
             seqno: ext_ref.seqno,
             root_hash: ext_ref.root_hash,
             file_hash: ext_ref.file_hash,
@@ -320,7 +320,7 @@ mod tests {
         assert_eq!(
             prev_block_ids[0],
             BlockIdExt {
-                shard_id: ShardIdent {
+                shard_ident: ShardIdent {
                     wc: 0,
                     shard: 0x4000000000000000,
                 },
@@ -332,7 +332,7 @@ mod tests {
         assert_eq!(
             prev_block_ids[1],
             BlockIdExt {
-                shard_id: ShardIdent {
+                shard_ident: ShardIdent {
                     wc: 0,
                     shard: 0xc000000000000000,
                 },

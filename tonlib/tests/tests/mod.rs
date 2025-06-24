@@ -1,5 +1,5 @@
 mod test_contract_client;
-#[cfg(feature = "contracts")]
+#[cfg(feature = "tonlibjson")]
 mod test_contracts;
 mod test_lite_client;
 #[cfg(feature = "tonlibjson")]
