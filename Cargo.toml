@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "ton_lib_macros",
-    "ton_lib_core",
-    "ton_lib",
-    "examples",
     "benches",
+    "examples",
+    "ton_lib",
+    "ton_lib_core",
+    "ton_lib_macros",
 ]
 
 [workspace.package]
