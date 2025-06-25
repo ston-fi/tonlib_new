@@ -1,17 +1,17 @@
 [workspace]
 resolver = "2"
 members = [
-    "ton_lib_macros",
-    "ton_lib",
+    "tonlib_macros",
+    "tonlib",
     "examples",
     "benches"
-]
+, "tonlib_core"]
 
 [workspace.package]
 description = "A collection of types and utilities for interacting with the TON network"
 keywords = ["ton", "the-open-network", "blockchain", "crypto"]
 edition = "2021"
-authors = ["Sild <silddev@icloud.com"]
+authors = ["Sild <silddev@pm.com"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/sild/ton_lib_rs"
 rust-version = "1.81"

@@ -1,0 +1,26 @@
+[package]
+name = "ton_lib_macros"
+version = "0.0.17"
+description.workspace = true
+keywords.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+publish = true
+
+[dependencies]
+syn = { version = "2.0", features = ["full", "extra-traits"] }
+quote = "1.0"
+deluxe = "0.5"
+proc-macro2 = "1.0"
+proc-macro-crate = "3.3"
+convert_case = "0.8"
+
+[lib]
+proc-macro = true
+
+[dev-dependencies]
+ton_lib = { path = "../tonlib", version = "0" } # for doctest
