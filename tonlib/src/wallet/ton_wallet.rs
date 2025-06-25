@@ -31,12 +31,12 @@ impl TonWallet {
     pub fn new_with_params(
         version: WalletVersion,
         key_pair: KeyPair,
-        wc: i32,
+        workchain: i32,
         wallet_id: i32,
     ) -> Result<Self, TLError> {
         let code = WalletVersion::get_code(version)?.clone();
         let data = WalletVersion::get_default_data(version, &key_pair, wallet_id)?;
-        let address = StateInit::new(code, data).derive_address(wc)?;
+        let address = StateInit::new(code, data).derive_address(workchain)?;
 
         Ok(TonWallet {
             key_pair,

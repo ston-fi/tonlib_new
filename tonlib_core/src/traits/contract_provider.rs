@@ -45,12 +45,7 @@ impl ContractMethodArgs {
 pub enum ContractMethodState {
     Latest,
     TxId(TxIdLTHash),
-    Custom {
-        mc_seqno: u32,
-        code_boc: Vec<u8>,
-        data_boc: Option<Vec<u8>>,
-        balance: i64,
-    },
+    Custom(Arc<ContractState>),
 }
 
 #[derive(Debug, Clone)]

@@ -44,8 +44,8 @@ impl StateInit {
         }
     }
 
-    pub fn derive_address(&self, wc: i32) -> Result<TonAddress, TLCoreError> {
-        Ok(TonAddress::new(wc, self.cell_hash()?))
+    pub fn derive_address(&self, workchain: i32) -> Result<TonAddress, TLCoreError> {
+        Ok(TonAddress::new(workchain, self.cell_hash()?))
     }
 }
 

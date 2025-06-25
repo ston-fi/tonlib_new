@@ -45,20 +45,7 @@ impl ContractProvider for TLProvider {
         let state = match args.method_state {
             ContractMethodState::Latest => self.get_contract(&args.address, None).await?,
             ContractMethodState::TxId(id) => self.get_contract(&args.address, Some(&id)).await?,
-            ContractMethodState::Custom {
-                mc_seqno,
-                code_boc,
-                data_boc,
-                balance,
-            } => Arc::new(ContractState {
-                address: args.address.clone(),
-                mc_seqno,
-                last_tx_id: TxIdLTHash::ZERO,
-                code_boc: Some(code_boc),
-                data_boc,
-                frozen_hash: None,
-                balance,
-            }),
+            ContractMethodState::Custom(state) => state,
         };
         let stack = args.stack_boc.as_deref().unwrap_or(TVMStack::EMPTY_BOC);
         let success = self.emulate_get_method(&state, args.method_id, stack).await?;

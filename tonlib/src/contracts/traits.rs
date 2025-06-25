@@ -34,22 +34,7 @@ pub trait ContractTrait: Send + Sync + Sized {
         let tx_id = match &ctx.state {
             ContractMethodState::Latest => None,
             ContractMethodState::TxId(tx_id) => Some(tx_id),
-            ContractMethodState::Custom {
-                mc_seqno,
-                code_boc,
-                data_boc,
-                balance,
-            } => {
-                return Ok(Arc::new(ContractState {
-                    address: ctx.address.clone(),
-                    mc_seqno: *mc_seqno,
-                    last_tx_id: TxIdLTHash::ZERO,
-                    code_boc: Some(code_boc.clone()),
-                    data_boc: data_boc.clone(),
-                    frozen_hash: None,
-                    balance: *balance,
-                }))
-            }
+            ContractMethodState::Custom(state) => return Ok(state.clone()),
         };
         Ok(ctx.client.get_state(&ctx.address, tx_id).await?)
     }
