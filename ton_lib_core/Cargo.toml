@@ -12,7 +12,7 @@ readme.workspace = true
 publish.workspace = true
 
 [dependencies]
-ton_lib_macros = { path = "../tonlib_macros", version = "0" }
+ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
 
 bitstream-io = "4.1"
 thiserror = "2.0"

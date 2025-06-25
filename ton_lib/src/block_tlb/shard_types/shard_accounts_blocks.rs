@@ -6,7 +6,7 @@ pub struct ShardAccountBlocks; // TODO
                                // use crate::types::tlb::adapters::dict_val_adapters::DictValAdapterTLB;
                                // use crate::types::tlb::adapters::dict_key_adapters::DictKeyAdapterTonHash;
                                // use std::collections::HashMap;
-                               // use tonlib_macros::TLBDerive;
+                               // use ton_lib_macros::TLBDerive;
                                // use crate::cell::ton_hash::TonHash;
                                // use crate::types::tlb::block_tlb::coins::CurrencyCollection;
                                // use crate::types::tlb::block_tlb::hash_update::HashUpdate;

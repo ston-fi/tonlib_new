@@ -28,7 +28,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
         Err(e) => return e.into_compile_error(),
     };
 
-    let found_crate = crate_name("ton_lib_core").expect("tonlib crate not found");
+    let found_crate = crate_name("ton_lib_core").expect("ton_lib crate not found");
 
     let crate_path = match found_crate {
         FoundCrate::Itself => quote::quote! { crate },

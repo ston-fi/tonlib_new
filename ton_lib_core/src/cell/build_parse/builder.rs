@@ -392,10 +392,10 @@ mod tests {
     fn test_builder_build_cell_library() -> anyhow::Result<()> {
         let mut builder = TonCell::builder_typed(CellType::LibraryRef);
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
-        assert_err!(builder.build()); // no tonlib prefix
+        assert_err!(builder.build()); // no ton_lib prefix
 
         let mut builder = TonCell::builder_typed(CellType::LibraryRef);
-        builder.write_num(&2, 8)?; // tonlib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
+        builder.write_num(&2, 8)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         let lib_cell = assert_ok!(builder.build());
 

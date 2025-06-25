@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "tonlib_macros",
-    "tonlib",
+    "ton_lib_macros",
+    "ton_lib",
     "examples",
     "benches"
-, "tonlib_core"]
+, "ton_lib_core"]
 
 [workspace.package]
 description = "A collection of types and utilities for interacting with the TON network"
