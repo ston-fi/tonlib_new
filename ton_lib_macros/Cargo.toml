@@ -28,4 +28,4 @@ convert_case = "0.8"
 proc-macro = true
 
 [dev-dependencies]
-ton_lib = { path = "/ton_lib", version = "0" } # for doctest
+ton_lib = { path = "../ton_lib", version = "0" } # for doctest
