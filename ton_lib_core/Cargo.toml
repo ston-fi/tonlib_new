@@ -11,6 +11,12 @@ rust-version.workspace = true
 readme.workspace = true
 publish.workspace = true
 
+include = [
+    "Cargo.toml",
+    "src/*",
+    "resources/*",
+]
+
 [dependencies]
 ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
 
