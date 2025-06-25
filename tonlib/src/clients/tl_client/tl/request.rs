@@ -1,7 +1,8 @@
 use crate::clients::tl_client::tl::ser_de::serde_block_id_ext;
 use crate::clients::tl_client::tl::ser_de::serde_ton_hash_vec_base64;
+use crate::clients::tl_client::tl::ser_de::serde_tx_id_lt_hash;
 use crate::clients::tl_client::tl::types::{
-    TLAccountAddress, TLAccountTxId, TLBlockId, TLOptions, TLSmcLibraryQueryExt, TLTxId,
+    TLAccountAddress, TLAccountTxId, TLBlockId, TLOptions, TLSmcLibraryQueryExt,
 };
 use crate::clients::tl_client::tl::Base64Standard;
 
@@ -11,6 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use strum::IntoStaticStr;
 use ton_lib_core::cell::TonHash;
+use ton_lib_core::types::TxIdLTHash;
 
 #[derive(IntoStaticStr, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(tag = "@type", rename_all = "camelCase")]
@@ -48,21 +50,27 @@ pub enum TLRequest {
     #[serde(rename = "raw.getAccountStateByTransaction")]
     RawGetAccountStateByTx {
         account_address: TLAccountAddress,
-        transaction_id: TLTxId,
+        #[serde(rename = "transaction_id")]
+        #[serde(with = "serde_tx_id_lt_hash")]
+        tx_id: TxIdLTHash,
     },
 
     // tonlib_api.tl, line 268
     #[serde(rename = "raw.getTransactions")]
     RawGetTxs {
         account_address: TLAccountAddress,
-        from_transaction_id: TLTxId,
+        #[serde(rename = "from_transaction_id")]
+        #[serde(with = "serde_tx_id_lt_hash")]
+        from_tx_id: TxIdLTHash,
     },
 
     // tonlib_api.tl, line 269
     #[serde(rename = "raw.getTransactionsV2")]
     RawGetTxsV2 {
         account_address: TLAccountAddress,
-        from_transaction_id: TLTxId,
+        #[serde(rename = "from_transaction_id")]
+        #[serde(with = "serde_tx_id_lt_hash")]
+        from_tx_id: TxIdLTHash,
         count: u32,
         try_decode_messages: bool,
     },
@@ -103,7 +111,9 @@ pub enum TLRequest {
     #[serde(rename = "smc.loadByTransaction")]
     SmcLoadByTransaction {
         account_address: TLAccountAddress,
-        transaction_id: TLTxId,
+        #[serde(rename = "transaction_id")]
+        #[serde(with = "serde_tx_id_lt_hash")]
+        tx_id: TxIdLTHash,
     },
 
     // tonlib_api.tl, line 308

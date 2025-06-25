@@ -11,7 +11,7 @@ async fn test_tl_provider() -> anyhow::Result<()> {
     let head_seqno = tl_client.get_mc_info().await?.last.seqno;
 
     let provider_config = TLProviderConfig::new_no_cache(head_seqno);
-    let data_provider = TLProvider::new(provider_config, tl_client.clone()).await?;
-    let _ctr_cli = ContractClient::new(data_provider)?;
+    let tl_provider = TLProvider::new(provider_config, tl_client.clone()).await?;
+    let _ctr_cli = ContractClient::new(tl_provider)?;
     Ok(())
 }

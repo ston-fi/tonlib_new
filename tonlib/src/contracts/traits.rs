@@ -5,7 +5,7 @@ use crate::error::TLError;
 use std::sync::Arc;
 use ton_lib_core::traits::contract_provider::{ContractMethodArgs, ContractMethodState, ContractState};
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::{TonAddress, TxId, TxIdLTAddress};
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 pub struct ContractCtx {
     pub client: ContractClient,
@@ -18,7 +18,7 @@ pub trait ContractTrait: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
+    fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<Self, TLError> {
         match tx_id {
             Some(tx_id) => Self::from_state(client.clone(), address, ContractMethodState::TxId(tx_id)),
             None => Self::from_state(client.clone(), address, ContractMethodState::Latest),
@@ -43,10 +43,7 @@ pub trait ContractTrait: Send + Sync + Sized {
                 return Ok(Arc::new(ContractState {
                     address: ctx.address.clone(),
                     mc_seqno: *mc_seqno,
-                    last_tx_id: TxId::LTAddress(TxIdLTAddress {
-                        lt: 0,
-                        address: ctx.address.clone(),
-                    }),
+                    last_tx_id: TxIdLTHash::ZERO,
                     code_boc: Some(code_boc.clone()),
                     data_boc: data_boc.clone(),
                     frozen_hash: None,

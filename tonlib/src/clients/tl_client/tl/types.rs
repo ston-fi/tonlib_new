@@ -4,11 +4,10 @@ use std::borrow::Cow;
 use std::fmt::Debug;
 
 use crate::block_tlb::BlockIdExt;
-use crate::error::TLError;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::types::{TonAddress, TxId, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 // tonlib_api.tl_api, line 23
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -75,38 +74,6 @@ pub struct TLBlockId {
     pub seqno: i32,
 }
 
-// tonlib_api.tl_api, line 48
-#[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Hash, Debug)]
-pub struct TLTxId {
-    #[serde(deserialize_with = "deserialize_number_from_string")]
-    pub lt: i64,
-    #[serde(with = "serde_ton_hash_base64")]
-    #[serde(rename = "hash")]
-    pub tx_hash: TonHash,
-}
-
-impl TryFrom<TxId> for TLTxId {
-    type Error = TLError;
-    fn try_from(tx_id: TxId) -> Result<Self, Self::Error> {
-        match tx_id {
-            TxId::LTHash(id) => Ok(Self {
-                lt: id.lt,
-                tx_hash: id.hash,
-            }),
-            rest => Err(TLError::TLWrongArgs(format!("tl_client doesn't support {rest:?} as tx_id"))),
-        }
-    }
-}
-
-impl From<TLTxId> for TxId {
-    fn from(tl_tx_id: TLTxId) -> Self {
-        TxId::LTHash(TxIdLTHash {
-            lt: tl_tx_id.lt,
-            hash: tl_tx_id.tx_hash,
-        })
-    }
-}
-
 // tonlib_api.tl_api, line 53
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct TLRawFullAccountState {
@@ -117,7 +84,8 @@ pub struct TLRawFullAccountState {
     #[serde(with = "Base64Standard")]
     pub data: Vec<u8>,
     #[serde(rename = "last_transaction_id")]
-    pub last_tx_id: TLTxId,
+    #[serde(with = "serde_tx_id_lt_hash")]
+    pub last_tx_id: TxIdLTHash,
     #[serde(with = "serde_block_id_ext")]
     pub block_id: BlockIdExt,
     #[serde(with = "Base64Standard")]
@@ -153,7 +121,8 @@ pub struct TLRawTx {
     #[serde(with = "Base64Standard")]
     pub data: Vec<u8>,
     #[serde(rename = "transaction_id")]
-    pub tx_id: TLTxId,
+    #[serde(with = "serde_tx_id_lt_hash")]
+    pub tx_id: TxIdLTHash,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub fee: i64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -171,7 +140,8 @@ pub struct TLRawTxs {
     #[serde(rename = "transactions")]
     pub txs: Vec<TLRawTx>,
     #[serde(rename = "previous_transaction_id")]
-    pub prev_tx_id: TLTxId,
+    #[serde(with = "serde_tx_id_lt_hash")]
+    pub last_tx_id: TxIdLTHash,
 }
 // tonlib_api.tl_api, line 58
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -323,7 +293,8 @@ pub struct TLFullAccountState {
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub balance: i64,
     #[serde(rename = "last_transaction_id")]
-    pub last_tx_id: TLTxId,
+    #[serde(with = "serde_tx_id_lt_hash")]
+    pub last_tx_id: TxIdLTHash,
     #[serde(with = "serde_block_id_ext")]
     pub block_id: BlockIdExt,
     #[serde(deserialize_with = "deserialize_number_from_string")]

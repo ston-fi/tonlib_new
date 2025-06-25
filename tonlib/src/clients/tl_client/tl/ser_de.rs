@@ -139,6 +139,38 @@ pub(super) mod serde_block_id_ext_vec_opt {
     }
 }
 
+pub(super) mod serde_tx_id_lt_hash {
+    use serde::de::Error;
+    use serde::{Deserialize, Deserializer, Serialize, Serializer};
+    use std::str::FromStr;
+    use ton_lib_core::cell::TonHash;
+    use ton_lib_core::types::TxIdLTHash;
+
+    pub fn serialize<S: Serializer>(data: &TxIdLTHash, serializer: S) -> Result<S::Ok, S::Error> {
+        let json_val = serde_json::json!({
+            "lt": data.lt.to_string(),
+            "hash": data.hash.to_base64(),
+        });
+        json_val.serialize(serializer)
+    }
+
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TxIdLTHash, D::Error> {
+        let json_val: serde_json::Value = Deserialize::deserialize(deserializer)?;
+        let lt = json_val
+            .get("lt")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| Error::custom("Missing or invalid 'lt' field"))?
+            .parse::<i64>()
+            .map_err(Error::custom)?;
+        let hash = json_val
+            .get("hash")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| Error::custom("Missing or invalid 'hash' field"))?;
+        let hash = TonHash::from_str(hash).map_err(Error::custom)?;
+        Ok(TxIdLTHash { lt, hash })
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

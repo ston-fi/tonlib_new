@@ -19,8 +19,7 @@ use ton_lib_core::traits::contract_provider::{
     ContractMethodArgs, ContractMethodResponse, ContractMethodState, ContractProvider, ContractState,
 };
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::TonAddress;
-use ton_lib_core::types::{TxId, TxIdLTAddress};
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 pub struct TLProvider {
     tl_client: TLClient,
@@ -28,24 +27,12 @@ pub struct TLProvider {
     bc_config: EmulBCConfig,
 }
 
-impl TLProvider {
-    pub async fn new(config: TLProviderConfig, tl_client: TLClient) -> Result<Self, TLError> {
-        let bc_config = tl_client.get_config_boc_all(0).await?;
-        let cache = StateCache::new(config, tl_client.clone()).await?;
-        Ok(Self {
-            tl_client,
-            cache,
-            bc_config: EmulBCConfig::from_boc(&bc_config)?,
-        })
-    }
-}
-
 #[async_trait]
 impl ContractProvider for TLProvider {
     async fn get_contract(
         &self,
         address: &TonAddress,
-        tx_id: Option<&TxId>,
+        tx_id: Option<&TxIdLTHash>,
     ) -> Result<Arc<ContractState>, TLCoreError> {
         let state = match tx_id {
             Some(id) => self.cache.get_by_tx(address, id).await,
@@ -66,10 +53,7 @@ impl ContractProvider for TLProvider {
             } => Arc::new(ContractState {
                 address: args.address.clone(),
                 mc_seqno,
-                last_tx_id: TxId::LTAddress(TxIdLTAddress {
-                    lt: 0,
-                    address: args.address.clone(),
-                }),
+                last_tx_id: TxIdLTHash::ZERO,
                 code_boc: Some(code_boc),
                 data_boc,
                 frozen_hash: None,
@@ -92,6 +76,17 @@ impl ContractProvider for TLProvider {
 }
 
 impl TLProvider {
+    pub async fn new(config: TLProviderConfig, tl_client: TLClient) -> Result<Self, TLError> {
+        let bc_config = tl_client.get_config_boc_all(0).await?;
+        log::info!("[tl_provider]: bc_config received ({} bytes)", bc_config.len());
+        let cache = StateCache::new(config, tl_client.clone()).await?;
+        Ok(Self {
+            tl_client,
+            cache,
+            bc_config: EmulBCConfig::from_boc(&bc_config)?,
+        })
+    }
+
     async fn emulate_get_method(
         &self,
         state: &ContractState,

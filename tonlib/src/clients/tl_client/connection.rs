@@ -148,7 +148,7 @@ async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphor
             }
         };
     };
-    log::info!("Connection {} established", conn.inner.tonlibjson_wrapper.tag());
+    log::debug!("Connection {} established", conn.inner.tonlibjson_wrapper.tag());
     sys_tonlib_set_verbosity_level(config.tonlib_verbosity_level);
     Ok(conn)
 }

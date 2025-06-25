@@ -14,14 +14,13 @@ use std::time::Duration;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::contract_provider::ContractState;
-use ton_lib_core::types::TxId;
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 pub(crate) struct StateCache {
     pub tl_client: TLClient,
-    pub latest_tx_cache: Cache<TonAddress, TxId>,
+    pub latest_tx_cache: Cache<TonAddress, TxIdLTHash>,
     pub state_latest_cache: Cache<TonAddress, Arc<ContractState>>,
-    pub state_by_tx_cache: Cache<TxId, Arc<ContractState>>,
+    pub state_by_tx_cache: Cache<TxIdLTHash, Arc<ContractState>>,
     pub cache_stats: CacheStats,
 }
 
@@ -51,7 +50,11 @@ impl StateCache {
         Ok(state)
     }
 
-    pub(crate) async fn get_by_tx(&self, address: &TonAddress, tx_id: &TxId) -> Result<Arc<ContractState>, TLError> {
+    pub(crate) async fn get_by_tx(
+        &self,
+        address: &TonAddress,
+        tx_id: &TxIdLTHash,
+    ) -> Result<Arc<ContractState>, TLError> {
         self.cache_stats.state_by_tx_req.fetch_add(1, Relaxed);
         Ok(self.state_by_tx_cache.try_get_with_by_ref(tx_id, self.load_contract(address, Some(tx_id))).await?)
     }
@@ -59,12 +62,12 @@ impl StateCache {
     async fn load_contract(
         &self,
         address: &TonAddress,
-        tx_id: Option<&TxId>,
+        tx_id: Option<&TxIdLTHash>,
     ) -> Result<Arc<ContractState>, TLCoreError> {
         let account_state = match tx_id {
             Some(tx_id) => {
                 self.cache_stats.state_by_tx_miss.fetch_add(1, Relaxed);
-                self.tl_client.get_account_state_raw_by_tx(address.clone(), tx_id.clone().try_into()?).await?
+                self.tl_client.get_account_state_raw_by_tx(address.clone(), tx_id.clone()).await?
             }
             None => {
                 self.cache_stats.state_latest_miss.fetch_add(1, Relaxed);
@@ -89,7 +92,7 @@ impl StateCache {
         Ok(Arc::new(ContractState {
             address: address.clone(),
             mc_seqno: account_state.block_id.seqno,
-            last_tx_id: account_state.last_tx_id.into(),
+            last_tx_id: account_state.last_tx_id,
             code_boc,
             data_boc,
             frozen_hash,
@@ -157,7 +160,7 @@ async fn recent_tx_loop(weak_inner: Weak<StateCache>, mut stream: BlockStream, i
         }
 
         let update_cache_futs = txs_by_addr_latest.into_iter().map(|(address, tx_id)| async move {
-            inner_ref.latest_tx_cache.insert(address.clone(), TxId::LTHash(tx_id)).await;
+            inner_ref.latest_tx_cache.insert(address.clone(), tx_id).await;
             inner_ref.state_latest_cache.invalidate(&address).await;
         });
         join_all(update_cache_futs).await;

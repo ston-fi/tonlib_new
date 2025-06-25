@@ -4,7 +4,7 @@ use crate::clients::tl_client::tl::request::TLRequest;
 use crate::clients::tl_client::tl::response::TLResponse;
 use crate::clients::tl_client::tl::types::{
     TLAccountTxId, TLBlockId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLFullAccountState,
-    TLRawFullAccountState, TLRawTxs, TLShortTxId, TLTxId,
+    TLRawFullAccountState, TLRawTxs, TLShortTxId,
 };
 use crate::clients::tl_client::RetryStrategy;
 use crate::error::TLError;
@@ -16,7 +16,7 @@ use tokio_retry::RetryIf;
 use ton_lib_core::cell::{TonCellRef, TonHash};
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::TonAddress;
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
@@ -104,19 +104,19 @@ pub trait TLClientTrait: Send + Sync {
     async fn get_account_state_raw_by_tx(
         &self,
         address: TonAddress,
-        tx_id: TLTxId,
+        tx_id: TxIdLTHash,
     ) -> Result<TLRawFullAccountState, TLError> {
         let req = TLRequest::RawGetAccountStateByTx {
             account_address: address.into(),
-            transaction_id: tx_id,
+            tx_id,
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_account_txs(&self, address: TonAddress, from_tx: TLTxId) -> Result<TLRawTxs, TLError> {
+    async fn get_account_txs(&self, address: TonAddress, from_tx: TxIdLTHash) -> Result<TLRawTxs, TLError> {
         let req = TLRequest::RawGetTxs {
             account_address: address.into(),
-            from_transaction_id: from_tx,
+            from_tx_id: from_tx,
         };
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
@@ -124,7 +124,7 @@ pub trait TLClientTrait: Send + Sync {
     async fn get_account_txs_v2(
         &self,
         address: TonAddress,
-        from_tx: TLTxId,
+        from_tx: TxIdLTHash,
         count: usize,
         try_decode_msg: bool,
     ) -> Result<TLRawTxs, TLError> {
@@ -133,7 +133,7 @@ pub trait TLClientTrait: Send + Sync {
         }
         let req = TLRequest::RawGetTxsV2 {
             account_address: address.into(),
-            from_transaction_id: from_tx.clone(),
+            from_tx_id: from_tx,
             count: count as u32,
             try_decode_messages: try_decode_msg,
         };

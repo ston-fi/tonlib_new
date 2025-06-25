@@ -4,7 +4,7 @@ use std::sync::Arc;
 use ton_lib_core::traits::contract_provider::{
     ContractMethodArgs, ContractMethodResponse, ContractProvider, ContractState,
 };
-use ton_lib_core::types::{TonAddress, TxId};
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 // just a wrapper around ContractProvider for convenience
 #[derive(Clone)]
@@ -15,7 +15,11 @@ impl ContractClient {
         Ok(ContractClient(Arc::new(data_provider)))
     }
 
-    pub async fn get_state(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLError> {
+    pub async fn get_state(
+        &self,
+        address: &TonAddress,
+        tx_id: Option<&TxIdLTHash>,
+    ) -> Result<Arc<ContractState>, TLError> {
         Ok(self.0.get_contract(address, tx_id).await?)
     }
 
