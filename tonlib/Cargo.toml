@@ -22,7 +22,6 @@ include = [
 [features]
 default = ["tonlibjson"]
 tonlibjson = ["dep:tonlib-sys"]
-#serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
 
 
 [dependencies]
@@ -61,7 +60,7 @@ async-trait = "0.1"
 futures-util = "0.3"
 libc = "0.2"
 tokio-retry = "0.3"
-sha2 = "0.10.9"
+sha2 = "0.10"
 
 
 [dev-dependencies]

@@ -33,7 +33,7 @@ impl BlockStream {
         Ok(stream)
     }
 
-    // mc_block_id always last
+    // mc_block_id always first
     pub async fn next(&mut self) -> Result<Option<Vec<BlockIdExt>>, TLError> {
         let next_mc_seqno = self.prev_mc_seqno + 1;
         if next_mc_seqno > self.to_mc_seqno {
@@ -43,14 +43,14 @@ impl BlockStream {
         let conn = self.find_connection(next_mc_seqno).await?;
         let mc_block_id = conn.lookup_mc_block(next_mc_seqno).await?;
         let shard_ids = conn.get_block_shards(mc_block_id.clone()).await?.shards;
-        println!("shard for mc_seqno: {}: {:?}", mc_block_id.seqno, shard_ids);
         let unseen_shards = self.get_unseen_shards(conn, next_mc_seqno, shard_ids.clone()).await?;
 
         self.prev_mc_seqno = next_mc_seqno;
         self.prev_shards = shard_ids.into_iter().collect();
 
-        let mut result: Vec<BlockIdExt> = unseen_shards.into_iter().collect();
+        let mut result = Vec::with_capacity(unseen_shards.len() + 1);
         result.push(mc_block_id);
+        result.extend(unseen_shards);
         Ok(Some(result))
     }
 

@@ -18,17 +18,17 @@ async fn test_tl_client_default() -> anyhow::Result<()> {
     let mc_info = client.get_mc_info().await?;
     assert_ne!(mc_info.last.seqno, 0);
 
+    assert_block_stream(&client).await?;
+
     // tl_client methods
-    // another node may be behind
-    assert_tl_client_lookup_mc_block(&client, mc_info.last.seqno - 100).await?;
+    assert_tl_client_lookup_mc_block(&client, mc_info.last.seqno - 100).await?; // another node may be behind
+    assert_tl_client_get_block_header(&client, &mc_info.last).await?;
     assert_tl_client_get_config(&client).await?;
     assert_tl_client_get_libs(&client).await?;
     assert_tl_client_get_account_state(&client).await?;
     assert_tl_client_get_account_txs(&client).await?;
     assert_tl_client_get_block_txs(&client).await?;
 
-    // block_stream
-    assert_block_stream(&client).await?;
     Ok(())
 }
 
@@ -81,14 +81,16 @@ async fn assert_block_stream(tl_client: &TLClient) -> anyhow::Result<()> {
     ]);
 
     let given_vec = block_stream.next().await?.unwrap();
-    assert_eq!(given_vec.last().unwrap().shard_ident.workchain, -1);
-    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
+    assert_eq!(given_vec.first().unwrap().shard_ident.workchain, -1);
+    let given_set =
+        given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
     let expected_set = &expected_shards[&3_800_234];
     assert_eq!(expected_set, &given_set);
 
     let given_vec = block_stream.next().await?.unwrap();
-    assert_eq!(given_vec.last().unwrap().shard_ident.workchain, -1);
-    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
+    assert_eq!(given_vec.first().unwrap().shard_ident.workchain, -1);
+    let given_set =
+        given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
     let expected_set = &expected_shards[&3_800_235];
     assert_eq!(expected_set, &given_set);
 
@@ -99,6 +101,12 @@ async fn assert_block_stream(tl_client: &TLClient) -> anyhow::Result<()> {
 async fn assert_tl_client_lookup_mc_block(client: &TLClient, seqno: u32) -> anyhow::Result<()> {
     let block = client.lookup_mc_block(seqno).await?;
     assert_eq!(block.seqno, seqno);
+    Ok(())
+}
+
+async fn assert_tl_client_get_block_header(client: &TLClient, block_id: &BlockIdExt) -> anyhow::Result<()> {
+    let header = client.get_block_header(block_id.clone()).await?;
+    assert_eq!(&header.id, block_id);
     Ok(())
 }
 

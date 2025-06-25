@@ -37,7 +37,8 @@ pub(crate) async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow:
         true => TLClientConfig::new_mainnet(archive_only),
         false => TLClientConfig::new_testnet(archive_only),
     };
-    config.connections_count = 2;
+    config.connections_count = 10;
+    config.retry_strategy.retry_count = 10;
     let client = TLClient::new(config).await?;
     sys_tonlib_set_verbosity_level(0);
     Ok(client)

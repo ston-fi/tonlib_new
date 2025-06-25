@@ -18,10 +18,10 @@ pub trait ContractTrait: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    fn new(client: ContractClient, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
+    fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxId>) -> Result<Self, TLError> {
         match tx_id {
-            Some(tx_id) => Self::from_state(client, address, ContractMethodState::TxId(tx_id)),
-            None => Self::from_state(client, address, ContractMethodState::Latest),
+            Some(tx_id) => Self::from_state(client.clone(), address, ContractMethodState::TxId(tx_id)),
+            None => Self::from_state(client.clone(), address, ContractMethodState::Latest),
         }
     }
 

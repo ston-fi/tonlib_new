@@ -11,7 +11,9 @@ use ton_lib_core::types::{TonAddress, TxId};
 pub struct ContractClient(Arc<dyn ContractProvider>);
 
 impl ContractClient {
-    pub fn new(data_provider: Arc<dyn ContractProvider>) -> Result<Self, TLError> { Ok(ContractClient(data_provider)) }
+    pub fn new(data_provider: impl ContractProvider) -> Result<Self, TLError> {
+        Ok(ContractClient(Arc::new(data_provider)))
+    }
 
     pub async fn get_state(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLError> {
         Ok(self.0.get_contract(address, tx_id).await?)

@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 #[async_trait]
-pub trait ContractProvider: Send + Sync {
+pub trait ContractProvider: Send + Sync + 'static {
     /// if tx_id is None, returns latest state
     async fn get_contract(&self, address: &TonAddress, tx_id: Option<&TxId>)
         -> Result<Arc<ContractState>, TLCoreError>;

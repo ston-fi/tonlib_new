@@ -1,6 +1,7 @@
 use crate::block_tlb::TVMStack;
 use crate::clients::tl_client::tl::client::TLClientTrait;
 use crate::clients::tl_client::TLClient;
+use crate::contracts::tl_provider::provider_cache::StateCache;
 use crate::contracts::tl_provider::provider_config::TLProviderConfig;
 use crate::emulators::emul_bc_config::EmulBCConfig;
 use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
@@ -11,16 +12,15 @@ use async_trait::async_trait;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::collections::HashMap;
-use std::sync::{Arc};
+use std::sync::Arc;
 use ton_lib_core::cell::{TonCell, TonCellUtils, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::contract_provider::{
     ContractMethodArgs, ContractMethodResponse, ContractMethodState, ContractProvider, ContractState,
 };
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::{TonAddress};
+use ton_lib_core::types::TonAddress;
 use ton_lib_core::types::{TxId, TxIdLTAddress};
-use crate::contracts::tl_provider::provider_cache::StateCache;
 
 pub struct TLProvider {
     tl_client: TLClient,
@@ -42,7 +42,11 @@ impl TLProvider {
 
 #[async_trait]
 impl ContractProvider for TLProvider {
-    async fn get_contract(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLCoreError> {
+    async fn get_contract(
+        &self,
+        address: &TonAddress,
+        tx_id: Option<&TxId>,
+    ) -> Result<Arc<ContractState>, TLCoreError> {
         let state = match tx_id {
             Some(id) => self.cache.get_by_tx(address, id).await,
             None => self.cache.get_latest(address).await,
@@ -81,12 +85,19 @@ impl ContractProvider for TLProvider {
     }
 
     async fn get_cache_stats(&self) -> Result<HashMap<String, usize>, TLCoreError> {
-        Ok(self.cache.cache_stats.to_hashmap())
+        let latest_entry_count = self.cache.state_latest_cache.entry_count() as usize;
+        let by_tx_entry_count = self.cache.state_by_tx_cache.entry_count() as usize;
+        Ok(self.cache.cache_stats.export(latest_entry_count, by_tx_entry_count))
     }
 }
 
 impl TLProvider {
-    async fn emulate_get_method(&self, state: &ContractState, method: i32, stack: &[u8]) -> Result<TVMGetMethodSuccess, TLError> {
+    async fn emulate_get_method(
+        &self,
+        state: &ContractState,
+        method: i32,
+        stack: &[u8],
+    ) -> Result<TVMGetMethodSuccess, TLError> {
         let code_boc = match &state.code_boc {
             Some(boc) => boc,
             None => return Err(TLCoreError::ContractError("code is None at state: {state:?}".to_string()).into()),

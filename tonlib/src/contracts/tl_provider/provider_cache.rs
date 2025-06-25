@@ -1,6 +1,7 @@
 use crate::clients::block_stream::BlockStream;
 use crate::clients::tl_client::tl::client::TLClientTrait;
 use crate::clients::tl_client::TLClient;
+use crate::contracts::tl_provider::cache_stats::CacheStats;
 use crate::contracts::tl_provider::provider_config::TLProviderConfig;
 use crate::error::TLError;
 use futures_util::future::{join_all, try_join_all};
@@ -10,12 +11,11 @@ use std::hash::Hash;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
-use ton_lib_core::cell::{ TonHash};
+use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::contract_provider::ContractState;
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
 use ton_lib_core::types::TxId;
-use crate::contracts::tl_provider::cache_stats::CacheStats;
+use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 pub(crate) struct StateCache {
     pub tl_client: TLClient,
@@ -35,13 +35,12 @@ impl StateCache {
             state_latest_cache: init_cache(capacity, ttl),
             state_by_tx_cache: init_cache(capacity, ttl),
             cache_stats: CacheStats::default(),
-            
         });
         let weak = Arc::downgrade(&cache);
         tokio::spawn(recent_tx_loop(weak, block_stream, config.idle_on_error));
         Ok(cache)
     }
-    
+
     pub(crate) async fn get_latest(&self, address: &TonAddress) -> Result<Arc<ContractState>, TLError> {
         self.cache_stats.state_latest_req.fetch_add(1, Relaxed);
         let state = if let Some(id) = self.latest_tx_cache.get(address).await {
@@ -57,7 +56,11 @@ impl StateCache {
         Ok(self.state_by_tx_cache.try_get_with_by_ref(tx_id, self.load_contract(address, Some(tx_id))).await?)
     }
 
-    async fn load_contract(&self, address: &TonAddress, tx_id: Option<&TxId>) -> Result<Arc<ContractState>, TLCoreError> {
+    async fn load_contract(
+        &self,
+        address: &TonAddress,
+        tx_id: Option<&TxId>,
+    ) -> Result<Arc<ContractState>, TLCoreError> {
         let account_state = match tx_id {
             Some(tx_id) => {
                 self.cache_stats.state_by_tx_miss.fetch_add(1, Relaxed);
@@ -115,7 +118,7 @@ async fn recent_tx_loop(weak_inner: Weak<StateCache>, mut stream: BlockStream, i
                 break;
             }
             Err(err) => {
-                log::warn!("[tx_update_loop] error getting next block: {:?}", err);
+                log::warn!("[tx_update_loop] error getting next block: {err:?}");
                 tokio::time::sleep(idle_on_error).await;
                 continue;
             }
@@ -161,7 +164,6 @@ async fn recent_tx_loop(weak_inner: Weak<StateCache>, mut stream: BlockStream, i
     }
     log::info!("[recent_tx_loop] completed");
 }
-
 
 fn init_cache<K, V>(capacity: u64, ttl: Duration) -> Cache<K, V>
 where

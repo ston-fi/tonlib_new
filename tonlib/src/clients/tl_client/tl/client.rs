@@ -21,6 +21,7 @@ use ton_lib_core::types::TonAddress;
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
     fn get_connection(&self) -> &TLConnection;
+    fn get_retry_strategy(&self) -> &RetryStrategy;
 
     async fn exec(&self, req: &TLRequest) -> Result<TLResponse, TLError> {
         let retry_strat = self.get_retry_strategy();
@@ -52,6 +53,38 @@ pub trait TLClientTrait: Send + Sync {
             seqno: seqno as i32,
         };
         self.lookup_block(1, block_id, 0, 0).await
+    }
+
+    async fn get_block_header(&self, block_id: BlockIdExt) -> Result<TLBlocksHeader, TLError> {
+        let req = TLRequest::GetBlockHeader { id: block_id };
+        unwrap_tl_response!(self.exec(&req).await?, TLBlocksHeader)
+    }
+
+    /// May return less libraries when requested
+    /// Check it on user side if you need it
+    /// If no libraries found, returns None
+    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<Option<LibsDict>, TLError> {
+        let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
+        let result = unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)?;
+        if result.result.is_empty() {
+            return Ok(None);
+        }
+        let mut libs_dict = LibsDict::default();
+        for lib in result.result {
+            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
+        }
+        Ok(Some(libs_dict))
+    }
+
+    async fn get_config_boc_param(&self, mode: u32, param: u32) -> Result<Vec<u8>, TLError> {
+        let req = TLRequest::GetConfigParam { mode, param };
+        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
+    }
+
+    // TODO find out about mode. Use 0 by default - it works well
+    async fn get_config_boc_all(&self, mode: u32) -> Result<Vec<u8>, TLError> {
+        let req = TLRequest::GetConfigAll { mode };
+        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
     }
 
     async fn get_account_state(&self, address: TonAddress) -> Result<TLFullAccountState, TLError> {
@@ -107,39 +140,11 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_response!(self.exec(&req).await?, TLRawTxs)
     }
 
-    async fn send_msg(&self, body: Vec<u8>) -> Result<TonHash, TLError> {
-        let req = TLRequest::RawSendMsgReturnHash { body };
-        let rsp = unwrap_tl_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;
-        Ok(TonHash::from_vec(rsp.hash)?)
-    }
-
-    async fn sync(&self) -> Result<BlockIdExt, TLError> {
-        let req = TLRequest::Sync {};
-        unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
-    }
-
-    /// May return less libraries when requested
-    /// Check it on user side if you need it
-    /// If no libraries found, returns None
-    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<Option<LibsDict>, TLError> {
-        let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
-        let result = unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)?;
-        if result.result.is_empty() {
-            return Ok(None);
-        }
-        let mut libs_dict = LibsDict::default();
-        for lib in result.result {
-            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
-        }
-        Ok(Some(libs_dict))
-    }
-
     async fn get_block_shards(&self, block_id: BlockIdExt) -> Result<TLBlocksShards, TLError> {
         let req = TLRequest::BlocksGetShards { id: block_id };
         unwrap_tl_response!(self.exec(&req).await?, TLBlocksShards)
     }
 
-    // TODO add tests
     async fn get_block_txs(&self, block_id: &BlockIdExt) -> Result<Vec<TLShortTxId>, TLError> {
         let mut after = TLAccountTxId {
             address_hash: TonHash::ZERO,
@@ -170,22 +175,18 @@ pub trait TLClientTrait: Send + Sync {
         Ok(txs)
     }
 
-    async fn get_block_header(&self, block_id: BlockIdExt) -> Result<TLBlocksHeader, TLError> {
-        let req = TLRequest::GetBlockHeader { id: block_id };
-        unwrap_tl_response!(self.exec(&req).await?, TLBlocksHeader)
+    // TODO is not tested
+    async fn send_msg(&self, body: Vec<u8>) -> Result<TonHash, TLError> {
+        let req = TLRequest::RawSendMsgReturnHash { body };
+        let rsp = unwrap_tl_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;
+        Ok(TonHash::from_vec(rsp.hash)?)
     }
 
-    async fn get_config_boc_param(&self, mode: u32, param: u32) -> Result<Vec<u8>, TLError> {
-        let req = TLRequest::GetConfigParam { mode, param };
-        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
+    // TODO is not tested
+    async fn sync(&self) -> Result<BlockIdExt, TLError> {
+        let req = TLRequest::Sync {};
+        unwrap_tl_response!(self.exec(&req).await?, TLBlockIdExt)
     }
-    // TODO find out about mode. Use 0 by default - it works well
-    async fn get_config_boc_all(&self, mode: u32) -> Result<Vec<u8>, TLError> {
-        let req = TLRequest::GetConfigAll { mode };
-        Ok(unwrap_tl_response!(self.exec(&req).await?, TLConfigInfo)?.config.bytes)
-    }
-
-    fn get_retry_strategy(&self) -> &RetryStrategy;
 }
 
 fn retry_condition(error: &TLError) -> bool {

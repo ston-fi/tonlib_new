@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display, Formatter};
 use ton_lib_core::bail_tonlib;
 use ton_lib_core::bits_utils::BitsUtils;
 use ton_lib_core::cell::{CellBuilder, CellParser};
-use ton_lib_core::constants::{TON_MAX_SPLIT_DEPTH, TON_MASTERCHAIN, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_MAX_SPLIT_DEPTH, TON_SHARD_FULL};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::types::tlb_core::MsgAddressInt;

@@ -1,4 +1,4 @@
-pub mod provider_config;
+mod cache_stats;
 pub mod provider;
 mod provider_cache;
-mod cache_stats;
+pub mod provider_config;
