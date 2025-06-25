@@ -11,6 +11,11 @@ rust-version.workspace = true
 readme.workspace = true
 publish = true
 
+include = [
+    "Cargo.toml",
+    "src/*",
+]
+
 [dependencies]
 syn = { version = "2.0", features = ["full", "extra-traits"] }
 quote = "1.0"
