@@ -81,14 +81,14 @@ async fn assert_block_stream(tl_client: &TLClient) -> anyhow::Result<()> {
     ]);
 
     let given_vec = block_stream.next().await?.unwrap();
-    assert_eq!(given_vec.last().unwrap().shard_ident.wc, -1);
-    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.wc, x.shard_ident.shard as i64, x.seqno)).collect();
+    assert_eq!(given_vec.last().unwrap().shard_ident.workchain, -1);
+    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
     let expected_set = &expected_shards[&3_800_234];
     assert_eq!(expected_set, &given_set);
 
     let given_vec = block_stream.next().await?.unwrap();
-    assert_eq!(given_vec.last().unwrap().shard_ident.wc, -1);
-    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.wc, x.shard_ident.shard as i64, x.seqno)).collect();
+    assert_eq!(given_vec.last().unwrap().shard_ident.workchain, -1);
+    let given_set = given_vec.into_iter().map(|x| (x.shard_ident.workchain, x.shard_ident.shard as i64, x.seqno)).collect();
     let expected_set = &expected_shards[&3_800_235];
     assert_eq!(expected_set, &given_set);
 
@@ -165,7 +165,7 @@ async fn assert_tl_client_get_block_txs(client: &TLClient) -> anyhow::Result<()>
     // https://ton.cx/block/-1:8000000000000000:48930047
     let mc_block_id = BlockIdExt {
         shard_ident: ShardIdent {
-            wc: -1,
+            workchain: -1,
             shard: 0x8000000000000000,
         },
         seqno: 48930047,
@@ -181,7 +181,7 @@ async fn assert_tl_client_get_block_txs(client: &TLClient) -> anyhow::Result<()>
     // https://ton.cx/block/0:6000000000000000:54144203
     let shard_block_id = BlockIdExt {
         shard_ident: ShardIdent {
-            wc: 0,
+            workchain: 0,
             shard: 0x2000000000000000,
         },
         seqno: 54144203,

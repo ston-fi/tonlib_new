@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display, Formatter};
 use ton_lib_core::bail_tonlib;
 use ton_lib_core::bits_utils::BitsUtils;
 use ton_lib_core::cell::{CellBuilder, CellParser};
-use ton_lib_core::constants::{TON_MAX_SPLIT_DEPTH, TON_MC_ID, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MAX_SPLIT_DEPTH, TON_MASTERCHAIN, TON_SHARD_FULL};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::types::tlb_core::MsgAddressInt;
@@ -16,7 +16,7 @@ pub struct ShardPfx {
 // TLBType implementation is quite tricky, it doesn't keep shard as is
 #[derive(Clone, Eq, Hash, PartialEq)]
 pub struct ShardIdent {
-    pub wc: i32,
+    pub workchain: i32,
     pub shard: u64,
 }
 
@@ -34,24 +34,24 @@ impl Debug for ShardPfx {
 }
 
 impl ShardIdent {
-    pub fn new(wc: i32, shard: u64) -> Self { Self { wc, shard } }
-    pub fn from_pfx(wc: i32, shard_pfx: &ShardPfx) -> Self {
+    pub fn new(workchain: i32, shard: u64) -> Self { Self { workchain, shard } }
+    pub fn from_pfx(workchain: i32, shard_pfx: &ShardPfx) -> Self {
         Self {
-            wc,
+            workchain,
             shard: shard_pfx.to_shard(),
         }
     }
-    pub fn new_mc() -> Self { Self::new(TON_MC_ID, TON_SHARD_FULL) }
+    pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN, TON_SHARD_FULL) }
     pub fn prefix_len(&self) -> u32 { 63u32 - self.shard.trailing_zeros() }
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TLCoreError> {
         let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
         if lb & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
             bail_tonlib!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
         }
-        Ok((ShardIdent::new(self.wc, self.shard - lb), ShardIdent::new(self.wc, self.shard + lb)))
+        Ok((ShardIdent::new(self.workchain, self.shard - lb), ShardIdent::new(self.workchain, self.shard + lb)))
     }
     pub fn contains_addr(&self, addr: &MsgAddressInt) -> bool {
-        if addr.wc() != self.wc {
+        if addr.wc() != self.workchain {
             return false;
         }
         if self.shard == TON_SHARD_FULL {
@@ -90,7 +90,7 @@ impl TLB for ShardIdent {
             return Err(TLCoreError::TLBWrongData("shard can't be 0".to_string()));
         }
         builder.write_num(&self.prefix_len(), 6)?;
-        self.wc.write(builder)?;
+        self.workchain.write(builder)?;
         let prefix = self.shard - (self.shard & (!self.shard).wrapping_add(1));
         builder.write_num(&prefix, 64)?;
         Ok(())
@@ -103,7 +103,7 @@ impl Debug for ShardIdent {
 
 impl Display for ShardIdent {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "ShardIdent(wc: {}, shard: 0x{:016X})", self.wc, self.shard)
+        write!(f, "ShardIdent(wc: {}, shard: 0x{:016X})", self.workchain, self.shard)
     }
 }
 
@@ -121,11 +121,11 @@ mod tests {
         let mut builder = TonCell::builder();
         builder.write_num(&0u32, 2)?; // ShardIdent prefix
         builder.write_num(&0u32, 6)?; // shard_pfx_bits
-        builder.write_num(&TON_MC_ID, 32)?; // workchain
+        builder.write_num(&TON_MASTERCHAIN, 32)?; // workchain
         builder.write_num(&0u64, 64)?; // shard_prefix
         let mc_shard_ident_cell = builder.build()?;
         let mc_shard_ident_parsed = ShardIdent::from_cell(&mc_shard_ident_cell)?;
-        assert_eq!(mc_shard_ident_parsed.wc, TON_MC_ID);
+        assert_eq!(mc_shard_ident_parsed.workchain, TON_MASTERCHAIN);
         assert_eq!(mc_shard_ident_parsed.shard, TON_SHARD_FULL);
         let mc_shard_ident_cell_serial = mc_shard_ident_parsed.to_cell()?;
         assert_eq!(mc_shard_ident_cell, mc_shard_ident_cell_serial);
@@ -143,7 +143,7 @@ mod tests {
         builder.write_num(&4611686018427387904u64, 64)?; // shard_prefix, 0x4000000000000000u64
         let shard_shard_ident_cell = builder.build()?;
         let mc_shard_ident_parsed = ShardIdent::from_cell(&shard_shard_ident_cell)?;
-        assert_eq!(mc_shard_ident_parsed.wc, 0);
+        assert_eq!(mc_shard_ident_parsed.workchain, 0);
         assert_eq!(mc_shard_ident_parsed.shard, 0x6000000000000000);
         let mc_shard_ident_cell_serial = mc_shard_ident_parsed.to_cell()?;
         assert_eq!(shard_shard_ident_cell, mc_shard_ident_cell_serial);
@@ -154,9 +154,9 @@ mod tests {
     fn test_block_tlb_shard_ident_split() -> anyhow::Result<()> {
         let shard_ident = ShardIdent::new(0, 0x8000000000000000);
         let (left, right) = shard_ident.split()?;
-        assert_eq!(left.wc, 0);
+        assert_eq!(left.workchain, 0);
         assert_eq!(left.shard, 0x4000000000000000);
-        assert_eq!(right.wc, 0);
+        assert_eq!(right.workchain, 0);
         assert_eq!(right.shard, 0xC000000000000000);
 
         let (left2, right2) = left.split()?;

@@ -14,7 +14,7 @@ use async_trait::async_trait;
 use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
 use ton_lib_core::cell::{TonCellRef, TonHash};
-use ton_lib_core::constants::{TON_MC_ID, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 
@@ -47,7 +47,7 @@ pub trait TLClientTrait: Send + Sync {
 
     async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TLError> {
         let block_id = TLBlockId {
-            workchain: TON_MC_ID,
+            workchain: TON_MASTERCHAIN,
             shard: TON_SHARD_FULL as i64,
             seqno: seqno as i32,
         };

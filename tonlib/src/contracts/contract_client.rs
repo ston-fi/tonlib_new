@@ -6,7 +6,7 @@ use ton_lib_core::traits::contract_provider::{
 };
 use ton_lib_core::types::{TonAddress, TxId};
 
-// just wrapper around ContractProvider for convenience
+// just a wrapper around ContractProvider for convenience
 #[derive(Clone)]
 pub struct ContractClient(Arc<dyn ContractProvider>);
 

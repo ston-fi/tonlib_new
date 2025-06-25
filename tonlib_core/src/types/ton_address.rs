@@ -18,14 +18,14 @@ const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TonAddress {
-    pub wc: i32,
+    pub workchain: i32,
     pub hash: TonHash,
 }
 
 impl TonAddress {
     pub const ZERO: Self = TonAddress::new(0, TonHash::ZERO);
 
-    pub const fn new(wc: i32, hash: TonHash) -> Self { Self { wc, hash } }
+    pub const fn new(workchain: i32, hash: TonHash) -> Self { Self { workchain, hash } }
 
     pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TLCoreError> {
         match msg_address.into() {
@@ -38,7 +38,7 @@ impl TonAddress {
         }
     }
 
-    pub fn to_hex(&self) -> String { format!("{}:{}", self.wc, hex::encode(self.hash.as_slice())) }
+    pub fn to_hex(&self) -> String { format!("{}:{}", self.workchain, hex::encode(self.hash.as_slice())) }
 
     pub fn to_base64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
         let mut buf = [0; 36];
@@ -49,7 +49,7 @@ impl TonAddress {
             (false, false) => 0xD1,
         };
         buf[0] = tag;
-        buf[1] = (self.wc & 0xff) as u8;
+        buf[1] = (self.workchain & 0xff) as u8;
         buf[2..34].clone_from_slice(self.hash.as_slice());
         let crc = CRC_16_XMODEM.checksum(&buf[0..34]);
         buf[34] = ((crc >> 8) & 0xff) as u8;
@@ -71,7 +71,7 @@ impl TonAddress {
     pub fn to_msg_address_int(&self) -> MsgAddressInt {
         MsgAddressIntStd {
             anycast: None,
-            workchain: self.wc as i8,
+            workchain: self.workchain as i8,
             address: self.hash.clone(),
         }
         .into()
@@ -164,7 +164,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TLCoreError> {
     }
 
     let address = TonAddress {
-        wc: bytes[1] as i8 as i32,
+        workchain: bytes[1] as i8 as i32,
         hash: TonHash::from_slice(&bytes[2..34])?,
     };
     Ok(address)

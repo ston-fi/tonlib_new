@@ -212,7 +212,7 @@ mod tests {
             seqno: 46991999,
             vert_seqno: 1,
             shard: ShardIdent {
-                wc: -1,
+                workchain: -1,
                 shard: 0x8000000000000000,
             },
             gen_utime: 1745112841,
@@ -261,7 +261,7 @@ mod tests {
             seqno: 52111590,
             vert_seqno: 1,
             shard: ShardIdent {
-                wc: 0,
+                workchain: 0,
                 shard: 0x6000000000000000,
             },
             gen_utime: 1745147839,
@@ -299,7 +299,7 @@ mod tests {
     #[test]
     fn test_block_tlb_block_info_prev_block_ids() -> anyhow::Result<()> {
         let mut block_info = BlockInfo::default();
-        block_info.shard.wc = 0;
+        block_info.shard.workchain = 0;
         block_info.shard.shard = 0x8000000000000000;
         block_info.prev_ref = PrevBlockInfo::AfterMerge(BlockPrevInfoAfterMerge {
             prev1: ExtBlockRef {
@@ -321,7 +321,7 @@ mod tests {
             prev_block_ids[0],
             BlockIdExt {
                 shard_ident: ShardIdent {
-                    wc: 0,
+                    workchain: 0,
                     shard: 0x4000000000000000,
                 },
                 seqno: 2,
@@ -333,7 +333,7 @@ mod tests {
             prev_block_ids[1],
             BlockIdExt {
                 shard_ident: ShardIdent {
-                    wc: 0,
+                    workchain: 0,
                     shard: 0xc000000000000000,
                 },
                 seqno: 6,

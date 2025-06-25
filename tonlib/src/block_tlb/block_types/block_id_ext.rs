@@ -1,6 +1,6 @@
 use crate::block_tlb::ShardIdent;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::constants::{TON_MC_ID, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
 use ton_lib_core::TLBDerive;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, TLBDerive)]
@@ -14,7 +14,7 @@ pub struct BlockIdExt {
 impl BlockIdExt {
     pub const ZERO_BLOCK_ID: BlockIdExt = BlockIdExt {
         shard_ident: ShardIdent {
-            wc: TON_MC_ID,
+            workchain: TON_MASTERCHAIN,
             shard: TON_SHARD_FULL,
         },
         seqno: 0,

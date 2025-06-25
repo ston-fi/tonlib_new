@@ -20,7 +20,7 @@ use crate::sys_utils::sys_tonlib_set_verbosity_level;
 use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
-use ton_lib_core::constants::{TON_MC_ID, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
 
 static CONNECTION_COUNTER: AtomicU64 = AtomicU64::new(0);
 
@@ -136,7 +136,7 @@ async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphor
             },
             LiteNodeFilter::Archive => {
                 let block_id = TLBlockId {
-                    workchain: TON_MC_ID,
+                    workchain: TON_MASTERCHAIN,
                     shard: TON_SHARD_FULL as i64,
                     seqno: 1,
                 };

@@ -75,7 +75,7 @@ pub(super) mod serde_block_id_ext {
 
     pub fn serialize<S: Serializer>(data: &BlockIdExt, serializer: S) -> Result<S::Ok, S::Error> {
         TLBlockIdExt {
-            workchain: data.shard_ident.wc,
+            workchain: data.shard_ident.workchain,
             shard: data.shard_ident.shard as i64,
             seqno: data.seqno as i32,
             root_hash: data.root_hash.as_slice().to_vec(),
@@ -88,7 +88,7 @@ pub(super) mod serde_block_id_ext {
         let tl_block_id_ext = TLBlockIdExt::deserialize(deserializer)?;
         Ok(BlockIdExt {
             shard_ident: ShardIdent {
-                wc: tl_block_id_ext.workchain,
+                workchain: tl_block_id_ext.workchain,
                 shard: tl_block_id_ext.shard as u64,
             },
             seqno: tl_block_id_ext.seqno as u32,

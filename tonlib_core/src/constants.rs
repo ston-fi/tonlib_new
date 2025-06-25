@@ -2,7 +2,7 @@ use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::sync::LazyLock;
 
-pub const TON_MC_ID: i32 = -1;
+pub const TON_MASTERCHAIN: i32 = -1;
 pub const TON_SHARD_FULL: u64 = 0x8000_0000_0000_0000u64;
 pub const TON_MAX_SPLIT_DEPTH: u8 = 60;
 

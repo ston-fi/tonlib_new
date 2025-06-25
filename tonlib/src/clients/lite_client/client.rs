@@ -15,7 +15,7 @@ use std::time::Duration;
 use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
 use ton_lib_core::cell::{TonCellRef, TonHash};
-use ton_lib_core::constants::{TON_MC_ID, TON_SHARD_FULL};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
@@ -48,7 +48,7 @@ impl LiteClient {
     }
 
     pub async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TLError> {
-        self.lookup_block(TON_MC_ID, TON_SHARD_FULL, seqno).await
+        self.lookup_block(TON_MASTERCHAIN, TON_SHARD_FULL, seqno).await
     }
 
     pub async fn lookup_block(&self, wc: i32, shard: u64, seqno: u32) -> Result<BlockIdExt, TLError> {
@@ -89,7 +89,7 @@ impl LiteClient {
         let req = Request::GetAccountState(GetAccountState {
             id: self.lookup_mc_block(mc_seqno).await?.into(),
             account: AccountId {
-                workchain: address.wc,
+                workchain: address.workchain,
                 id: Int256(*address.hash.as_slice_sized()),
             },
         });

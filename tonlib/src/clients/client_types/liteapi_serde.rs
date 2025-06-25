@@ -43,7 +43,7 @@ impl From<ton_liteapi::tl::common::BlockIdExt> for BlockIdExt {
 impl From<BlockIdExt> for ton_liteapi::tl::common::BlockIdExt {
     fn from(value: BlockIdExt) -> Self {
         ton_liteapi::tl::common::BlockIdExt {
-            workchain: value.shard_ident.wc,
+            workchain: value.shard_ident.workchain,
             shard: value.shard_ident.shard,
             seqno: value.seqno,
             root_hash: Int256(*value.root_hash.as_slice_sized()),
