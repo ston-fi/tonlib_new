@@ -14,7 +14,7 @@ pub struct ContractCtx {
 }
 
 #[async_trait::async_trait]
-pub trait ContractTrait: Send + Sync + Sized {
+pub trait TonContract: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
