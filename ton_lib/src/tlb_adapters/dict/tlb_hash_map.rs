@@ -1,3 +1,4 @@
+use crate::error::TLError;
 use crate::tlb_adapters::dict::data_builder::DictDataBuilder;
 use crate::tlb_adapters::dict::data_parser::DictDataParser;
 use crate::tlb_adapters::{DictKeyAdapter, DictValAdapter};
@@ -21,7 +22,7 @@ impl<KA, VA, K, V> TLBHashMap<KA, VA, K, V>
 where
     KA: DictKeyAdapter<K>,
     VA: DictValAdapter<V>,
-    K: Eq + Hash + Ord,
+    K: Eq + Hash,
 {
     pub fn new(key_bits_len: u32) -> Self {
         Self {
@@ -44,16 +45,17 @@ where
         if data.is_empty() {
             return Err(TLCoreError::TLBWrongData("empty HashMap can't be written".to_string()));
         }
-        let mut keys: Vec<_> = data.keys().collect();
-        keys.sort_unstable();
-        let mut values_sorted = Vec::with_capacity(data.len());
-        for key in &keys {
-            let value = data.get(key).unwrap();
+        let mut key_value_pairs =
+            data.iter().map(|(k, v)| Ok::<_, TLError>((KA::make_key(k)?, v))).collect::<Result<Vec<_>, _>>()?;
+        key_value_pairs.sort_by_key(|(x, _)| x.clone());
+
+        let mut keys_sorted = Vec::with_capacity(key_value_pairs.len());
+        let mut values_sorted = Vec::with_capacity(key_value_pairs.len());
+        for (key, value) in key_value_pairs {
+            keys_sorted.push(key);
             values_sorted.push(value);
         }
-        let keys_sorted = keys.into_iter().map(|k| KA::make_key(k)).collect::<Result<Vec<_>, TLCoreError>>()?;
-        let data_builder =
-            DictDataBuilder::<V, VA>::new(self.key_bits_len as usize, keys_sorted, values_sorted.as_slice())?;
+        let data_builder = DictDataBuilder::<V, VA>::new(self.key_bits_len as usize, keys_sorted, &values_sorted)?;
         let dict_data_cell = data_builder.build()?;
         builder.write_cell(&dict_data_cell)
     }

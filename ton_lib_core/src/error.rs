@@ -4,7 +4,7 @@ use std::sync::Arc;
 use thiserror::Error;
 
 #[macro_export]
-macro_rules! bail_tonlib {
+macro_rules! bail_tl_core {
     ($($arg:tt)*) => {
         return Err(TLCoreError::Custom(format!($($arg)*)))
     };
@@ -90,8 +90,6 @@ pub enum TLCoreError {
     Utf8Error(#[from] std::str::Utf8Error),
     #[error("{0}")]
     NulError(#[from] std::ffi::NulError),
-    #[error("{0}")]
-    SerdeJson(#[from] serde_json::Error),
     #[error("{0}")]
     SystemTimeError(#[from] std::time::SystemTimeError),
 

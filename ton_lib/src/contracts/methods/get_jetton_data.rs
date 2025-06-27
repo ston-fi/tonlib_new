@@ -1,5 +1,5 @@
 use crate::block_tlb::{Coins, TVMStack};
-use crate::contracts::traits::ContractTrait;
+use crate::contracts::ton_contract::TonContract;
 use crate::error::TLError;
 use async_trait::async_trait;
 use std::ops::Deref;
@@ -8,7 +8,7 @@ use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 
 #[async_trait]
-pub trait GetJettonData: ContractTrait {
+pub trait GetJettonData: TonContract {
     async fn get_jetton_data(&self) -> Result<GetJettonDataResult, TLError> {
         let rsp_stack = self.run_get_method("get_jetton_data", None).await?;
         GetJettonDataResult::from_stack(rsp_stack)

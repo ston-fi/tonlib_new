@@ -1,14 +1,15 @@
+use crate::bail_tl;
+use crate::error::TLError;
 use num_bigint::BigUint;
-use ton_lib_core::bail_tonlib;
 use ton_lib_core::cell::TonCell;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::MsgAddressInt;
+use ton_lib_core::types::TonAddress;
 
 pub trait DictKeyAdapter<K> {
-    fn make_key(src_key: &K) -> Result<BigUint, TLCoreError>;
-    fn extract_key(dict_key: &BigUint) -> Result<K, TLCoreError>;
+    fn make_key(src_key: &K) -> Result<BigUint, TLError>;
+    fn extract_key(dict_key: &BigUint) -> Result<K, TLError>;
 }
 
 pub struct DictKeyAdapterTonHash; // properly tested in LibsDict & account
@@ -17,9 +18,9 @@ pub struct DictKeyAdapterAddress;
 pub struct DictKeyAdapterString; // TODO is not covered by tests
 
 impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
-    fn make_key(src_key: &TonHash) -> Result<BigUint, TLCoreError> { Ok(BigUint::from_bytes_be(src_key.as_slice())) }
+    fn make_key(src_key: &TonHash) -> Result<BigUint, TLError> { Ok(BigUint::from_bytes_be(src_key.as_slice())) }
 
-    fn extract_key(dict_key: &BigUint) -> Result<TonHash, TLCoreError> {
+    fn extract_key(dict_key: &BigUint) -> Result<TonHash, TLError> {
         let mut hash_bytes = vec![0; TonHash::BYTES_LEN];
         let key_bytes = dict_key.to_bytes_be();
         if key_bytes.len() > TonHash::BYTES_LEN {
@@ -29,45 +30,58 @@ impl DictKeyAdapter<TonHash> for DictKeyAdapterTonHash {
                 key_bytes.len(),
                 dict_key
             );
-            return Err(TLCoreError::TLBWrongData(err_str));
+            return Err(TLError::Custom(err_str));
         }
         let offset = TonHash::BYTES_LEN - key_bytes.len();
         hash_bytes.as_mut_slice()[offset..].copy_from_slice(key_bytes.as_slice());
-        TonHash::from_slice(&hash_bytes)
+        Ok(TonHash::from_slice(&hash_bytes)?)
     }
 }
 
 impl DictKeyAdapter<MsgAddressInt> for DictKeyAdapterAddress {
-    fn make_key(src_key: &MsgAddressInt) -> Result<BigUint, TLCoreError> {
+    fn make_key(src_key: &MsgAddressInt) -> Result<BigUint, TLError> {
         let cell = src_key.to_cell()?;
         Ok(BigUint::from_bytes_le(&cell.data))
     }
 
-    fn extract_key(dict_key: &BigUint) -> Result<MsgAddressInt, TLCoreError> {
+    fn extract_key(dict_key: &BigUint) -> Result<MsgAddressInt, TLError> {
         let mut builder = TonCell::builder();
         builder.write_num(dict_key, 267)?;
-        MsgAddressInt::from_cell(&builder.build()?)
+        Ok(MsgAddressInt::from_cell(&builder.build()?)?)
+    }
+}
+
+impl DictKeyAdapter<TonAddress> for DictKeyAdapterAddress {
+    fn make_key(src_key: &TonAddress) -> Result<BigUint, TLError> {
+        let cell = src_key.to_cell()?;
+        Ok(BigUint::from_bytes_le(&cell.data))
+    }
+
+    fn extract_key(dict_key: &BigUint) -> Result<TonAddress, TLError> {
+        let mut builder = TonCell::builder();
+        builder.write_num(dict_key, 267)?;
+        Ok(TonAddress::from_cell(&builder.build()?)?)
     }
 }
 
 impl<T: Clone + Into<BigUint> + TryFrom<BigUint>> DictKeyAdapter<T> for DictKeyAdapterInto {
-    fn make_key(src_key: &T) -> Result<BigUint, TLCoreError> { Ok(src_key.clone().into()) }
+    fn make_key(src_key: &T) -> Result<BigUint, TLError> { Ok(src_key.clone().into()) }
 
-    fn extract_key(dict_key: &BigUint) -> Result<T, TLCoreError> {
+    fn extract_key(dict_key: &BigUint) -> Result<T, TLError> {
         match T::try_from(dict_key.clone()) {
             Ok(key) => Ok(key),
-            Err(_) => bail_tonlib!("fail to extract dict key"),
+            Err(_) => bail_tl!("fail to extract dict key"),
         }
     }
 }
 
 impl DictKeyAdapter<String> for DictKeyAdapterString {
-    fn make_key(src_key: &String) -> Result<BigUint, TLCoreError> {
+    fn make_key(src_key: &String) -> Result<BigUint, TLError> {
         let bytes = src_key.as_bytes();
         Ok(BigUint::from_bytes_le(bytes))
     }
 
-    fn extract_key(dict_key: &BigUint) -> Result<String, TLCoreError> {
+    fn extract_key(dict_key: &BigUint) -> Result<String, TLError> {
         let bytes = dict_key.to_bytes_le();
         Ok(String::from_utf8(bytes)?)
     }

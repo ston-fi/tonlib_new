@@ -1,7 +1,7 @@
 use crate::error::TLError;
 use crate::wallet::WalletVersion::*;
 use crate::wallet::*;
-use ton_lib_core::bail_tonlib;
+use ton_lib_core::bail_tl_core;
 use ton_lib_core::cell::{TonCell, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
@@ -39,7 +39,7 @@ impl WalletVersion {
             V5R1 => WalletV5Data::new(wallet_id, public_key).to_cell_ref(),
             HLV2R2 => WalletHLV2R2Data::new(wallet_id, public_key).to_cell_ref(),
             HLV1R1 | HLV1R2 | HLV2 | HLV2R1 => {
-                bail_tonlib!("initial_data for {version:?} is unsupported");
+                bail_tl_core!("initial_data for {version:?} is unsupported");
             }
         }
     }

@@ -10,8 +10,8 @@ use ton_lib::contracts::methods::get_wallet_address::GetWalletAddress;
 use ton_lib::contracts::methods::get_wallet_data::GetWalletData;
 use ton_lib::contracts::tl_provider::provider::TLProvider;
 use ton_lib::contracts::tl_provider::provider_config::TLProviderConfig;
-use ton_lib::contracts::ton_wallet::WalletContract;
-use ton_lib::contracts::traits::ContractTrait;
+use ton_lib::contracts::ton_contract::TonContract;
+use ton_lib::contracts::ton_wallet::TonWalletContract;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::TonAddress;
 
@@ -48,7 +48,7 @@ async fn assert_jetton_master(ctr_cli: &ContractClient) -> anyhow::Result<()> {
 
 async fn assert_wallet_contract(ctr_cli: &ContractClient) -> anyhow::Result<()> {
     let wallet = TonAddress::from_str("UQAj-peZGPH-cC25EAv4Q-h8cBXszTmkch6ba6wXC8BM40qt")?;
-    let contract = WalletContract::new(ctr_cli, wallet, None)?;
+    let contract = TonWalletContract::new(ctr_cli, wallet, None)?;
     let seqno = contract.seqno().await?;
     assert!(seqno > 0);
     let public_key = contract.get_public_key().await?;

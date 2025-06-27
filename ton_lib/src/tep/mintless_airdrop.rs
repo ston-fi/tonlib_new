@@ -4,13 +4,13 @@ use crate::tlb_adapters::DictKeyAdapterAddress;
 use crate::tlb_adapters::DictValAdapterTLB;
 use crate::tlb_adapters::TLBHashMap;
 use std::collections::HashMap;
-use ton_lib_core::types::tlb_core::MsgAddressInt;
+use ton_lib_core::types::TonAddress;
 use ton_lib_core::TLBDerive;
 
 #[derive(Clone, Debug, TLBDerive)]
 pub struct MintlessAirdropDict {
     #[tlb_derive(adapter = "TLBHashMap::<DictKeyAdapterAddress, DictValAdapterTLB, _, _>::new(267)")]
-    pub data: HashMap<MsgAddressInt, MintlessAirdropData>,
+    pub data: HashMap<TonAddress, MintlessAirdropData>,
 }
 
 #[derive(Clone, Debug, PartialEq, TLBDerive)]

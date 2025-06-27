@@ -1,13 +1,13 @@
-use crate::contracts::traits::ContractCtx;
-use crate::contracts::traits::ContractTrait;
+use crate::contracts::ton_contract::ContractCtx;
+use crate::contracts::ton_contract::TonContract;
 use crate::error::TLError;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::ton_contract;
 
 #[ton_contract]
-pub struct WalletContract;
+pub struct TonWalletContract;
 
-impl WalletContract {
+impl TonWalletContract {
     pub async fn seqno(&self) -> Result<u32, TLError> {
         let mut rsp_stack = self.run_get_method("seqno", None).await?;
         let seqno_int = rsp_stack.pop_tiny_int()?;

@@ -1,5 +1,5 @@
 use crate::block_tlb::{TVMStack, TVMStackValue};
-use crate::contracts::traits::ContractTrait;
+use crate::contracts::ton_contract::TonContract;
 use crate::error::TLError;
 use async_trait::async_trait;
 use num_bigint::BigInt;
@@ -9,7 +9,7 @@ use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 
 #[async_trait]
-pub trait GetWalletData: ContractTrait {
+pub trait GetWalletData: TonContract {
     async fn get_wallet_data(&self) -> Result<GetWalletDataResult, TLError> {
         let rsp_stack = self.run_get_method("get_wallet_data", None).await?;
         GetWalletDataResult::from_stack(rsp_stack)
