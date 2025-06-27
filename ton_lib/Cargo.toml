@@ -1,6 +1,6 @@
 [package]
 name = "ton_lib"
-version = "0.0.31"
+version = "0.0.33"
 description.workspace = true
 keywords.workspace = true
 edition.workspace = true
@@ -26,7 +26,7 @@ tonlibjson = ["dep:tonlib-sys"]
 
 [dependencies]
 # Internal
-ton_lib_core = { path = "../ton_lib_core", version = "0.0.1" }
+ton_lib_core = { path = "../ton_lib_core", version = "0.0" }
 tonlib-sys = { version = "2025.4.1", features = ["with_debug_info"], optional = true }
 
 
