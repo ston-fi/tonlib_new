@@ -1,5 +1,5 @@
 use std::fmt::{Debug, Display, Formatter};
-use ton_lib_core::bail_tonlib;
+use ton_lib_core::bail_tl_core;
 use ton_lib_core::bits_utils::BitsUtils;
 use ton_lib_core::cell::{CellBuilder, CellParser};
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_MAX_SPLIT_DEPTH, TON_SHARD_FULL};
@@ -46,7 +46,7 @@ impl ShardIdent {
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TLCoreError> {
         let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
         if lb & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
-            bail_tonlib!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
+            bail_tl_core!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
         }
         Ok((ShardIdent::new(self.workchain, self.shard - lb), ShardIdent::new(self.workchain, self.shard + lb)))
     }

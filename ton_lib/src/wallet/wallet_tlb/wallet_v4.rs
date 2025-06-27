@@ -2,7 +2,7 @@ use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{read_up_to_4_msgs, write_u
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::{bail_tonlib, TLBDerive};
+use ton_lib_core::{bail_tl_core, TLBDerive};
 
 #[derive(Debug, PartialEq, Clone, TLBDerive)]
 pub struct WalletV4Data {
@@ -42,7 +42,7 @@ impl TLB for WalletV4ExtMsgBody {
         let msg_seqno = TLB::read(parser)?;
         let opcode = TLB::read(parser)?;
         if opcode != 0 {
-            bail_tonlib!("Unsupported opcode: {opcode}");
+            bail_tl_core!("Unsupported opcode: {opcode}");
         }
         let (msgs_modes, msgs) = read_up_to_4_msgs(parser)?;
         Ok(Self {
@@ -57,7 +57,7 @@ impl TLB for WalletV4ExtMsgBody {
 
     fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
         if self.opcode != 0 {
-            bail_tonlib!("Unsupported opcode: {}", self.opcode);
+            bail_tl_core!("Unsupported opcode: {}", self.opcode);
         }
         self.subwallet_id.write(dst)?;
         self.valid_until.write(dst)?;

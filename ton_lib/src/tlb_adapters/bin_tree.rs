@@ -74,7 +74,6 @@ impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
         }
         if let Some(val) = data.get(&cur_key) {
             builder.write_bit(false)?;
-            println!("save_key: {cur_key:?}");
             return VA::write(builder, val);
         }
         builder.write_bit(true)?;
@@ -158,7 +157,6 @@ mod tests {
         let mut builder = TonCell::builder();
         BinTree::<DictValAdapterNum<32>, u32>::write(&mut builder, &data)?;
         let cell = builder.build()?;
-        println!("{:?}", cell);
         let mut parser = cell.parser();
         let parsed_data = BinTree::<DictValAdapterNum<32>, u32>::read(&mut parser)?;
         assert_eq!(data, parsed_data);

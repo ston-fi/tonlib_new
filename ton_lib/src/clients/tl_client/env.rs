@@ -64,7 +64,7 @@ async fn update_init_block(config: &mut TLClientConfig) -> Result<(), TLError> {
 fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TLError> {
     let block_cell = TonCell::from_boc(&block.data)?;
     if block_cell.refs.is_empty() {
-        return Err(TLError::CustomError("No refs in block cell".to_string()));
+        return Err(TLError::Custom("No refs in block cell".to_string()));
         // TODO make proper block parser
     }
     let mut parser = block_cell.refs[0].parser();

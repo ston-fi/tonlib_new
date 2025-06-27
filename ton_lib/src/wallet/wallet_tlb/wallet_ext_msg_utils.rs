@@ -1,5 +1,5 @@
 use crate::block_tlb::{OutAction, OutActionSendMsg, OutList};
-use ton_lib_core::bail_tonlib;
+use ton_lib_core::bail_tl_core;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
@@ -29,7 +29,7 @@ pub(super) fn read_up_to_4_msgs(parser: &mut CellParser) -> Result<(Vec<u8>, Vec
 }
 pub(super) fn validate_msgs_count(msgs: &[TonCellRef], msgs_modes: &[u8], max_cnt: usize) -> Result<(), TLCoreError> {
     if msgs.len() > max_cnt || msgs_modes.len() != msgs.len() {
-        bail_tonlib!("wrong msgs: modes_len={}, msgs_len={}, max_len={max_cnt}", msgs_modes.len(), msgs.len());
+        bail_tl_core!("wrong msgs: modes_len={}, msgs_len={}, max_len={max_cnt}", msgs_modes.len(), msgs.len());
     }
     Ok(())
 }
@@ -49,7 +49,7 @@ impl TLB for InnerRequest {
         }
         let out_actions = TLB::from_cell(parser.read_next_ref()?)?;
         if parser.read_bit()? {
-            bail_tonlib!("other_actions parsing is unsupported");
+            bail_tl_core!("other_actions parsing is unsupported");
         }
         Ok(Self {
             out_actions: Some(out_actions),
@@ -78,7 +78,7 @@ pub(super) fn parse_inner_request(request: InnerRequest) -> Result<(Vec<TonCellR
             msgs.push(action_send_msg.out_msg.clone());
             msgs_modes.push(action_send_msg.mode);
         } else {
-            bail_tonlib!("Unsupported OutAction: {action:?}");
+            bail_tl_core!("Unsupported OutAction: {action:?}");
         }
     }
 

@@ -72,7 +72,7 @@ impl TonWallet {
         let message_hash = ext_in_body.cell_hash()?;
         let sign = match signature(message_hash.as_slice(), self.key_pair.secret_key.as_slice()) {
             Ok(signature) => signature,
-            Err(err) => return Err(TLError::CustomError(format!("{err:?}"))),
+            Err(err) => return Err(TLError::Custom(format!("{err:?}"))),
         };
         WalletVersion::sign_msg(self.version, ext_in_body, &sign)
     }

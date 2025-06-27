@@ -114,7 +114,7 @@ fn pbkdf2_sha512(key: Vec<u8>, salt: &str, rounds: u32, output_len_bytes: usize)
         pbkdf2_hmac::<Sha512>(key.as_slice(), salt.as_bytes(), params.rounds, out);
         Ok(())
     })
-    .map_err(|err| TLError::CustomError(format!("Fail to parse hash: {err}")))?;
+    .map_err(|err| TLError::Custom(format!("Fail to parse hash: {err}")))?;
     Ok(output.as_bytes().to_vec())
 }
 

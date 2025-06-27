@@ -1,5 +1,9 @@
-mod tep_0064;
-mod tep_0074;
+pub mod jetton;
+pub mod nft;
+pub mod sbt;
 
-pub use tep_0064::*;
-pub use tep_0074::*;
+mod mintless_airdrop;
+mod snake_format;
+
+pub use mintless_airdrop::*;
+pub use snake_format::*;

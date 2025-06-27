@@ -119,7 +119,7 @@ mod tests {
     use crate::error::TLError;
     use crate::libs_dict::LibsDict;
     use crate::sys_utils::sys_tonlib_set_verbosity_level;
-    use crate::tep::JettonTransferMsg;
+    use crate::tep::jetton::JettonTransferMsg;
     use num_bigint::BigInt;
     use std::ops::{Deref, Neg};
     use std::str::FromStr;

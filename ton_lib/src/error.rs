@@ -8,15 +8,19 @@ use ton_lib_core::types::{TonAddress, TxIdLTHash};
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::types::LiteError;
 
+#[macro_export]
+macro_rules! bail_tl {
+    ($($arg:tt)*) => {
+        return Err(TLError::Custom(format!($($arg)*)))
+    };
+}
+
 #[derive(Error, Debug)]
 pub enum TLError {
     #[error("TLCoreError: {0}")]
     TLCoreError(#[from] TLCoreError),
     #[error("TLCoreError: {0}")]
     TLCoreArcError(#[from] Arc<TLCoreError>),
-    // boc
-    #[error("BOCEmpty: can't parse BOC from empty slice")]
-    BOCEmpty,
     #[error("NetRequestTimeout: {msg}, timeout={timeout:?}")]
     NetRequestTimeout { msg: String, timeout: Duration },
 
@@ -90,7 +94,7 @@ pub enum TLError {
         tx_id: Option<TxIdLTHash>,
     },
     #[error("CustomError: {0}")]
-    CustomError(String),
+    Custom(String),
 
     #[error("{0}")]
     HmacInvalidLen(#[from] crypto_common::InvalidLength),

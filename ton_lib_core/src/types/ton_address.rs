@@ -2,7 +2,7 @@ use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::TonHash;
 
-use crate::bail_tonlib;
+use crate::bail_tl_core;
 use crate::bits_utils::BitsUtils;
 use crate::error::TLCoreError;
 use crate::traits::tlb::TLB;
@@ -63,7 +63,7 @@ impl TonAddress {
 
     pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TLCoreError> {
         if self != &TonAddress::ZERO {
-            bail_tonlib!("Can't convert non-zero address={self} to MsgAddressNone");
+            bail_tl_core!("Can't convert non-zero address={self} to MsgAddressNone");
         }
         Ok(MsgAddressNone {})
     }
@@ -75,6 +75,13 @@ impl TonAddress {
             address: self.hash.clone(),
         }
         .into()
+    }
+
+    pub fn to_msg_address(&self) -> MsgAddress {
+        if self == &TonAddress::ZERO {
+            return MsgAddress::NONE;
+        }
+        MsgAddress::Int(self.to_msg_address_int())
     }
 }
 
