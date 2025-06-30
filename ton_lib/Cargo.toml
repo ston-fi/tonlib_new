@@ -32,7 +32,7 @@ contracts = ["dep:moka"]
 ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
 
 # External
-tonlib-sys = { version = "2025.4.1", features = ["with_debug_info"], optional = true }
+tonlib-sys = { version = "2025.6.0", features = ["with_debug_info"], optional = true }
 bitstream-io = "4.1"
 parking_lot = "0.12"
 thiserror = "2.0"
