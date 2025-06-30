@@ -1,18 +1,10 @@
 use super::connection::Connection;
-use crate::cell::ton_cell::TonCellRef;
-use crate::cell::ton_hash::TonHash;
+use crate::block_tlb::{BlockIdExt, MaybeAccount};
 use crate::clients::client_types::MasterchainInfo;
-use crate::clients::lite_client::config::LiteClientConfig;
-use crate::errors::TonlibError;
-use crate::types::tlb::block_tlb::account::MaybeAccount;
-use crate::types::tlb::block_tlb::block::block_id_ext::BlockIdExt;
-use crate::types::tlb::primitives::libs_dict::LibsDict;
-use crate::types::tlb::TLB;
-use crate::types::ton_address::TonAddress;
-use crate::{
-    bc_constants::{TON_MASTERCHAIN_ID, TON_SHARD_FULL},
-    unwrap_lite_response,
-};
+use crate::clients::lite_client::config::{LiteClientConfig, LiteReqParams};
+use crate::error::TLError;
+use crate::libs_dict::LibsDict;
+use crate::unwrap_lite_response;
 use auto_pool::config::{AutoPoolConfig, PickStrategy};
 use auto_pool::pool::AutoPool;
 use std::cmp::max;
@@ -22,6 +14,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
+use ton_lib_core::cell::{TonCellRef, TonHash};
+use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
+use ton_lib_core::error::TLCoreError;
+use ton_lib_core::traits::tlb::TLB;
+use ton_lib_core::types::TonAddress;
 use ton_liteapi::tl::common::{AccountId, Int256};
 use ton_liteapi::tl::request::{
     GetAccountState, GetBlock, GetLibraries, LookupBlock, Request, WaitMasterchainSeqno, WrappedRequest,
@@ -38,23 +35,23 @@ pub struct LiteClient {
 
 // converts ton_block -> ton_liteapi objects under the hood
 impl LiteClient {
-    pub fn new(config: LiteClientConfig) -> Result<Self, TonlibError> {
+    pub fn new(config: LiteClientConfig) -> Result<Self, TLError> {
         Ok(Self {
             inner: Arc::new(Inner::new(config)?),
         })
     }
 
-    pub async fn get_mc_info(&self) -> Result<MasterchainInfo, TonlibError> {
-        let rsp = self.exec(Request::GetMasterchainInfo, None).await?;
+    pub async fn get_mc_info(&self) -> Result<MasterchainInfo, TLError> {
+        let rsp = self.exec(Request::GetMasterchainInfo, None, None).await?;
         let mc_info = unwrap_lite_response!(rsp, MasterchainInfo)?;
         Ok(mc_info.into())
     }
 
-    pub async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TonlibError> {
-        self.lookup_block(TON_MASTERCHAIN_ID, TON_SHARD_FULL, seqno).await
+    pub async fn lookup_mc_block(&self, seqno: u32) -> Result<BlockIdExt, TLError> {
+        self.lookup_block(TON_MASTERCHAIN, TON_SHARD_FULL, seqno).await
     }
 
-    pub async fn lookup_block(&self, wc: i32, shard: u64, seqno: u32) -> Result<BlockIdExt, TonlibError> {
+    pub async fn lookup_block(&self, wc: i32, shard: u64, seqno: u32) -> Result<BlockIdExt, TLError> {
         let req = Request::LookupBlock(LookupBlock {
             mode: (),
             id: ton_liteapi::tl::common::BlockId {
@@ -71,15 +68,15 @@ impl LiteClient {
             with_shard_hashes: None,
             with_prev_blk_signatures: None,
         });
-        let rsp = self.exec(req, Some(seqno)).await?;
+        let rsp = self.exec(req, Some(seqno), None).await?;
         let lite_id = unwrap_lite_response!(rsp, BlockHeader)?.id;
         Ok(lite_id.into())
     }
 
-    pub async fn get_block(&self, block_id: BlockIdExt) -> Result<BlockData, TonlibError> {
+    pub async fn get_block(&self, block_id: BlockIdExt, params: Option<LiteReqParams>) -> Result<BlockData, TLError> {
         let seqno = block_id.seqno;
         let req = Request::GetBlock(GetBlock { id: block_id.into() });
-        let rsp = self.exec(req, Some(seqno)).await?;
+        let rsp = self.exec(req, Some(seqno), params).await?;
         unwrap_lite_response!(rsp, BlockData)
     }
 
@@ -87,36 +84,40 @@ impl LiteClient {
         &self,
         address: &TonAddress,
         mc_seqno: u32,
-        timeout: Option<Duration>,
-    ) -> Result<MaybeAccount, TonlibError> {
+        params: Option<LiteReqParams>,
+    ) -> Result<MaybeAccount, TLError> {
         let req = Request::GetAccountState(GetAccountState {
             id: self.lookup_mc_block(mc_seqno).await?.into(),
             account: AccountId {
-                workchain: address.wc,
-                id: address.hash.clone().into(),
+                workchain: address.workchain,
+                id: Int256(*address.hash.as_slice_sized()),
             },
         });
-        let query_timeout = timeout.unwrap_or(self.inner.config.query_timeout);
-        let rsp = self.exec_with_timeout(req, query_timeout, Some(mc_seqno)).await?;
+        let rsp = self.exec_with_timeout(req, Some(mc_seqno), params).await?;
         let account_state_rsp = unwrap_lite_response!(rsp, AccountState)?;
-        MaybeAccount::from_boc(&account_state_rsp.state)
+        Ok(MaybeAccount::from_boc(&account_state_rsp.state)?)
     }
 
-    pub async fn get_libs(&self, lib_ids: &[TonHash]) -> Result<LibsDict, TonlibError> {
-        self.inner.get_libs_impl(lib_ids).await
+    pub async fn get_libs(&self, lib_ids: &[TonHash], params: Option<LiteReqParams>) -> Result<LibsDict, TLError> {
+        self.inner.get_libs_impl(lib_ids, params).await
     }
 
-    pub async fn exec(&self, req: Request, wait_mc_seqno: Option<u32>) -> Result<Response, TonlibError> {
-        self.exec_with_timeout(req, self.inner.config.query_timeout, wait_mc_seqno).await
+    pub async fn exec(
+        &self,
+        req: Request,
+        wait_mc_seqno: Option<u32>,
+        params: Option<LiteReqParams>,
+    ) -> Result<Response, TLError> {
+        self.exec_with_timeout(req, wait_mc_seqno, params).await
     }
 
     pub async fn exec_with_timeout(
         &self,
         request: Request,
-        timeout: Duration,
         wait_mc_seqno: Option<u32>,
-    ) -> Result<Response, TonlibError> {
-        self.inner.exec_with_retries(request, timeout, wait_mc_seqno).await
+        params: Option<LiteReqParams>,
+    ) -> Result<Response, TLError> {
+        self.inner.exec_with_retries(request, wait_mc_seqno, params).await
     }
 }
 
@@ -127,13 +128,13 @@ struct Inner {
 }
 
 impl Inner {
-    fn new(config: LiteClientConfig) -> Result<Self, TonlibError> {
+    fn new(config: LiteClientConfig) -> Result<Self, TLError> {
         let conn_per_node = max(1, config.connections_per_node);
         log::info!(
-            "Creating LiteClient with {} conns per node; nodes_cnt: {}, query_timeout: {:?}",
+            "Creating LiteClient with {} conns per node; nodes_cnt: {}, default_req_params: {:?}",
             conn_per_node,
             config.net_config.lite_endpoints.len(),
-            config.query_timeout,
+            config.default_req_params,
         );
 
         let mut connections = Vec::new();
@@ -160,13 +161,13 @@ impl Inner {
         })
     }
 
-    async fn get_libs_impl(&self, lib_ids: &[TonHash]) -> Result<LibsDict, TonlibError> {
+    async fn get_libs_impl(&self, lib_ids: &[TonHash], params: Option<LiteReqParams>) -> Result<LibsDict, TLError> {
         let mut libs_dict = LibsDict::default();
         for chunk in lib_ids.chunks(16) {
             let request = Request::GetLibraries(GetLibraries {
                 library_list: chunk.iter().map(|x| Int256(*x.as_slice_sized())).collect(),
             });
-            let rsp = self.exec_with_retries(request, self.config.query_timeout, None).await?;
+            let rsp = self.exec_with_retries(request, None, params).await?;
             let result = unwrap_lite_response!(rsp, LibraryResult)?;
             let dict_items = result
                 .result
@@ -174,9 +175,9 @@ impl Inner {
                 .map(|x| {
                     let hash = TonHash::from_slice_sized(&x.hash.0);
                     let lib = TonCellRef::from_boc(x.data.as_slice())?;
-                    Ok::<_, TonlibError>((hash, lib))
+                    Ok::<_, TLCoreError>((hash, lib))
                 })
-                .collect::<Result<Vec<_>, TonlibError>>()?;
+                .collect::<Result<Vec<_>, TLCoreError>>()?;
 
             let req_cnt = chunk.len();
             let rsp_cnt = dict_items.len();
@@ -199,9 +200,9 @@ impl Inner {
     async fn exec_with_retries(
         &self,
         req: Request,
-        req_timeout: Duration,
         wait_seqno: Option<u32>,
-    ) -> Result<Response, TonlibError> {
+        params: Option<LiteReqParams>,
+    ) -> Result<Response, TLError> {
         let wrap_req = WrappedRequest {
             wait_masterchain_seqno: wait_seqno.map(|seqno| WaitMasterchainSeqno {
                 seqno,
@@ -209,19 +210,15 @@ impl Inner {
             }),
             request: req,
         };
+        let req_params = params.as_ref().unwrap_or(&self.config.default_req_params);
         let req_id = self.global_req_id.fetch_add(1, Relaxed);
-        let fi = FixedInterval::new(self.config.retry_waiting);
-        let strategy = fi.take(self.config.retry_count);
-        RetryIf::spawn(strategy, || async { self.exec_impl(req_id, &wrap_req, req_timeout).await }, retry_condition)
-            .await
+        let fi = FixedInterval::new(req_params.retry_waiting);
+        let strategy = fi.take(req_params.retries_count as usize);
+        let exec_request = || async { self.exec_impl(req_id, &wrap_req, req_params.query_timeout).await };
+        RetryIf::spawn(strategy, exec_request, retry_condition).await
     }
 
-    async fn exec_impl(
-        &self,
-        req_id: u64,
-        req: &WrappedRequest,
-        req_timeout: Duration,
-    ) -> Result<Response, TonlibError> {
+    async fn exec_impl(&self, req_id: u64, req: &WrappedRequest, req_timeout: Duration) -> Result<Response, TLError> {
         log::trace!("LiteClient exec_impl: req_id={req_id}, req={:?}", req);
         // pool is configured to spin until get connection
         let mut conn = self.conn_pool.get_async().await.unwrap();
@@ -229,4 +226,4 @@ impl Inner {
     }
 }
 
-fn retry_condition(error: &TonlibError) -> bool { !matches!(error, TonlibError::LiteClientWrongResponse(..)) }
+fn retry_condition(error: &TLError) -> bool { !matches!(error, TLError::LiteClientWrongResponse(..)) }

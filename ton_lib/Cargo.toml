@@ -1,6 +1,6 @@
 [package]
 name = "ton_lib"
-version = "0.0.28"
+version = "0.0.33"
 description.workspace = true
 keywords.workspace = true
 edition.workspace = true
@@ -20,24 +20,25 @@ include = [
 ]
 
 [features]
-default = ["contracts", "tonlibjson", "emulator"]
-emulator = ["dep:tonlib-sys"] # add tvm/tx emulators
-tonlibjson = ["dep:tonlib-sys"] # add tonlibjson client implementations
-contracts = ["dep:moka"]
-#serde_scylla = ["dep:scylla"] # add scylla ser-de for TonHash, TonAddress
+default = ["tonlibjson"]
+tonlibjson = ["dep:tonlib-sys"]
 
 
 [dependencies]
 # Internal
-ton_lib_macros = { path = "../ton_lib_macros", version = "0" }
+ton_lib_core = { path = "../ton_lib_core", version = "0.0" }
+tonlib-sys = { version = "2025.6", features = ["with_debug_info"], optional = true }
+
 
 # External
-tonlib-sys = { version = "2025.6.0", features = ["with_debug_info"], optional = true }
-bitstream-io = "4.1"
+moka = { version = "0.12", features = ["async-lock", "future"]}
+async-recursion = { version = "1" }
 parking_lot = "0.12"
 thiserror = "2.0"
 log = "0.4"
-sha2 = {version = "0.10"}
+hmac = "0.12"
+pbkdf2 = { version = "0.12", features = ["simple"] }
+nacl = "0.5"
 crc = "3.2"
 hex = "0.4"
 base64 = "0.22"
@@ -58,11 +59,9 @@ base64-serde = "0.8"
 async-trait = "0.1"
 futures-util = "0.3"
 libc = "0.2"
-moka = { version = "0.12", features = ["async-lock", "future"], optional = true }
-hmac = "0.12"
-pbkdf2 = { version = "0.12", features = ["simple"] }
-nacl = "0.5"
 tokio-retry = "0.3"
+sha2 = "0.10"
+
 
 [dev-dependencies]
 anyhow = "1.0"
