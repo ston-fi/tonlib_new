@@ -27,7 +27,7 @@ tonlibjson = ["dep:tonlib-sys"]
 [dependencies]
 # Internal
 ton_lib_core = { path = "../ton_lib_core", version = "0.0" }
-tonlib-sys = { version = "2025.4.1", features = ["with_debug_info"], optional = true }
+tonlib-sys = { version = "2025.6", features = ["with_debug_info"], optional = true }
 
 
 # External
