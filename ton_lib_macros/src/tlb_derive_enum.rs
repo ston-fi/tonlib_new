@@ -44,9 +44,11 @@ pub(crate) fn tlb_derive_enum(
         }
     });
 
+    let ident_str = ident.to_string();
+
     let read_impl = quote! {
         #(#variant_readers)*
-        Err(#crate_path::error::TLCoreError::TLBEnumOutOfOptions)
+        Err(#crate_path::error::TLCoreError::TLBEnumOutOfOptions((#ident_str).to_string()))
     };
 
     let write_impl = quote! {
