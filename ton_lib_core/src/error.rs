@@ -60,8 +60,8 @@ pub enum TLCoreError {
         bits_exp: usize,
         bits_left: usize,
     },
-    #[error("TLBEnumOutOfOptions: data doesn't match to any of the options")]
-    TLBEnumOutOfOptions, // TODO collect errors from all options
+    #[error("TLBEnumOutOfOptions: data doesn't match any variant of {0}")]
+    TLBEnumOutOfOptions(String),
     #[error("TLBObjectNoValue: No internal value found (method: {0})")]
     TLBObjectNoValue(String),
 

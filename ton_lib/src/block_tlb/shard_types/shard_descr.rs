@@ -143,18 +143,18 @@ pub enum FutureSplitMerge {
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x0, bits_len = 1)]
+#[tlb_derive(prefix = 0b0, bits_len = 1)]
 pub struct FutureSplitMergeNone;
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x10, bits_len = 2)]
+#[tlb_derive(prefix = 0b10, bits_len = 2)]
 pub struct FutureSplitMergeSplit {
     pub split_utime: u32,
     pub interval: u32,
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x11, bits_len = 2)]
+#[tlb_derive(prefix = 0b11, bits_len = 2)]
 pub struct FutureSplitMergeMerge {
     pub merge_utime: u32,
     pub interval: u32,
