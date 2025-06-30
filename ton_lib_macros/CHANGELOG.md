@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.22](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.21...ton_lib_macros-v0.0.22) - 2025-06-30
+
+### Fixed
+
+- fix rust 1.80 formatting
+- fix FutureSplitMerge TLB impl
+
 ## [0.0.17](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.16...ton_lib_macros-v0.0.17) - 2025-06-02
 
 ### Other
