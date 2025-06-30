@@ -16,6 +16,6 @@ pub struct TLRequestCtx {
 impl Display for TLRequestCtx {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let str = format!("req_id: {}, method: {}, elapsed: {:?}", self.id, self.method, self.send_time.elapsed());
-        write!(f, "{}", str)
+        write!(f, "{str}")
     }
 }

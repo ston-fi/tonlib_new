@@ -85,7 +85,7 @@ mod tests {
             let mut parser = dict_cell.parser();
             let parsed =
                 TLBHashMapE::<DictKeyAdapterInto, DictValAdapterNum<150>, _, _>::new(key_len_bits).read(&mut parser)?;
-            assert_eq!(data, parsed, "key_len_bits: {}", key_len_bits);
+            assert_eq!(data, parsed, "key_len_bits: {key_len_bits}");
         }
         Ok(())
     }

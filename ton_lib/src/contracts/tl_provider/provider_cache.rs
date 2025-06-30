@@ -140,7 +140,7 @@ async fn recent_tx_loop(weak_inner: Weak<StateCache>, mut stream: BlockStream, i
         let txs_by_addr_vec = match try_join_all(txs_by_addr_futs).await {
             Ok(res) => res,
             Err(err) => {
-                log::warn!("[recent_tx_loop] error getting shards_txs: {:?}", err);
+                log::warn!("[recent_tx_loop] error getting shards_txs: {err:?}");
                 tokio::time::sleep(idle_on_error).await;
                 continue;
             }

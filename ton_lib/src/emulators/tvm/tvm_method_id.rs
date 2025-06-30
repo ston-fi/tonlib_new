@@ -50,8 +50,8 @@ impl From<i32> for TVMGetMethodID {
 impl Display for TVMGetMethodID {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self {
-            TVMGetMethodID::Number(n) => write!(f, "#{:08x}", n),
-            TVMGetMethodID::Name(m) => write!(f, "'{}'", m),
+            TVMGetMethodID::Number(n) => write!(f, "#{n:08x}"),
+            TVMGetMethodID::Name(m) => write!(f, "'{m}'"),
         }
     }
 }
@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn test_hex_format() -> anyhow::Result<()> {
         let method_id: TVMGetMethodID = 0x1234beef.into();
-        let s = format!("{}", method_id);
+        let s = format!("{method_id}");
         assert_eq!(s, "#1234beef");
         Ok(())
     }

@@ -226,7 +226,7 @@ mod tests {
             assert_eq!(vm_exit_code, Some(9));
             assert!(response_raw.contains("D29017573B8132BE742E9C02DABE2311FB3DF9F077E661D3EE24D431058B8830"));
         } else {
-            panic!("Expected TVMGetMethodError, got: {:?}", emulator_error);
+            panic!("Expected TVMGetMethodError, got: {emulator_error:?}");
         }
 
         // add required lib

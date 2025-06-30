@@ -62,7 +62,7 @@ impl Display for TonCell {
 }
 
 impl Debug for TonCell {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
 }
 
 // TonCelRef
@@ -80,7 +80,7 @@ impl Display for TonCellRef {
 }
 
 impl Debug for TonCellRef {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self) }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
 }
 
 fn write_cell_display(f: &mut Formatter<'_>, cell: &TonCell, indent_level: usize) -> std::fmt::Result {

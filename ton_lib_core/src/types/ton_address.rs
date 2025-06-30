@@ -200,7 +200,7 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TLCor
     if bits_len < anycast.rewrite_pfx.bits_len as u32 {
         let err_msg =
             format!("rewrite_pfx has {} bits, but address has only {bits_len} bits", anycast.rewrite_pfx.bits_len);
-        let ext_addr_str = format!("address: {msg_address:?}, anycast: {:?}", anycast);
+        let ext_addr_str = format!("address: {msg_address:?}, anycast: {anycast:?}");
         raise_address_error(&ext_addr_str, err_msg)?
     }
 

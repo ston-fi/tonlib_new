@@ -154,8 +154,8 @@ mod tests {
     fn test_ton_hash_display() -> anyhow::Result<()> {
         let data = [255u8; 32];
         let hash = TonHash::from(data);
-        assert_eq!(format!("{}", hash), "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
-        assert_eq!(format!("{:X}", hash), "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+        assert_eq!(format!("{hash}"), "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
+        assert_eq!(format!("{hash:X}"), "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF");
         Ok(())
     }
 

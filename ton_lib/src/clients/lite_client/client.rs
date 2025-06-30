@@ -219,7 +219,7 @@ impl Inner {
     }
 
     async fn exec_impl(&self, req_id: u64, req: &WrappedRequest, req_timeout: Duration) -> Result<Response, TLError> {
-        log::trace!("LiteClient exec_impl: req_id={req_id}, req={:?}", req);
+        log::trace!("LiteClient exec_impl: req_id={req_id}, req={req:?}");
         // pool is configured to spin until get connection
         let mut conn = self.conn_pool.get_async().await.unwrap();
         conn.exec(req.clone(), req_timeout).await
