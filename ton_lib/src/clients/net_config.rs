@@ -84,8 +84,8 @@ impl TonNetConfig {
 
 fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TLError> {
     let env_var_name = match mainnet {
-        true => "TONLIB_NET_CONF_MAINNET_PATH",
-        false => "TONLIB_NET_CONF_TESTNET_PATH",
+        true => "TON_NET_CONF_MAINNET_PATH",
+        false => "TON_NET_CONF_TESTNET_PATH",
     };
     let mut net_conf = match mainnet {
         true => TON_NET_CONF_MAINNET.to_string(),
