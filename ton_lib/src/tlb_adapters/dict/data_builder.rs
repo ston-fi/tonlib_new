@@ -160,10 +160,8 @@ fn prepare_keys(keys: &mut [BigUint], key_bits_len: usize) -> Result<(), TLCoreE
     for key in keys {
         let received_len_bits = key.bits() as usize;
         if received_len_bits > key_bits_len {
-            let err_str = format!(
-                "dict key too long: expected max {} bits, got {} bits, key={}",
-                key_bits_len, received_len_bits, key
-            );
+            let err_str =
+                format!("dict key too long: expected max {key_bits_len} bits, got {received_len_bits} bits, key={key}");
             return Err(TLCoreError::TLBWrongData(err_str));
         }
 

@@ -28,7 +28,7 @@ pub(crate) fn tlb_derive_struct(
             let ident = &field.ident;
             let mut field_attrs: TLBFieldAttrs = match deluxe::extract_attributes(&mut field.attrs) {
                 Ok(desc) => desc,
-                Err(_err) => panic!("Attribute does not exist at position {}", position),
+                Err(_err) => panic!("Attribute does not exist at position {position}"),
             };
 
             let ty_token_stream = field.ty.to_token_stream();

@@ -31,7 +31,7 @@ impl GetWalletDataResult {
         let balance = match stack.pop() {
             Some(TVMStackValue::Int(i)) => i.value,
             Some(TVMStackValue::TinyInt(i)) => BigInt::from(i.value),
-            Some(t) => return Err(TLError::TVMStackWrongType("Int or TinyInt".to_string(), format!("{:?}", t))),
+            Some(t) => return Err(TLError::TVMStackWrongType("Int or TinyInt".to_string(), format!("{t:?}"))),
             None => return Err(TLError::TVMStackEmpty),
         };
 
