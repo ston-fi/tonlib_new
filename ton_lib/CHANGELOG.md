@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.35](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.34...ton_lib-v0.0.35) - 2025-07-01
+
+### Other
+
+- support ShardIdent::merge()
+- lazy_load for cell_hash
+
 ## [0.0.34](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.33...ton_lib-v0.0.34) - 2025-06-30
 
 ### Fixed
