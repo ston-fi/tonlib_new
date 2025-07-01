@@ -117,7 +117,7 @@ impl PartialOrd for TonAddress {
         match (self_hash, other_hash) {
             (Ok(hash0), Ok(hash1)) => Some(hash0.cmp(&hash1)),
             _ => {
-                log::error!("Failed to build cell for addresses: {self:?} and {other:?}");
+                log::error!("Failed to calc hash for addresses: {self:?} and {other:?}");
                 None
             }
         }
@@ -298,6 +298,12 @@ mod tests {
             let parsed_address = TonAddress::from_cell(&cell)?;
             assert_eq!(address, parsed_address);
         }
+        Ok(())
+    }
+
+    #[test]
+    fn test_ton_address_zero_to_string() -> anyhow::Result<()> {
+        assert_eq!(TonAddress::ZERO.to_string(), "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c");
         Ok(())
     }
 }
