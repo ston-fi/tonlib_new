@@ -23,12 +23,12 @@ struct Pruned {
 }
 
 impl<'a> CellMetaBuilder<'a> {
-    pub fn new(cell_type: CellType, data: &'a [u8], data_bits_len: usize, refs: &'a [TonCellRef]) -> Self {
+    pub fn new(cell: &'a TonCell) -> Self {
         Self {
-            cell_type,
-            data,
-            data_bits_len,
-            refs,
+            cell_type: cell.cell_type,
+            data: &cell.data,
+            data_bits_len: cell.data_bits_len,
+            refs: &cell.refs,
         }
     }
 
@@ -355,16 +355,39 @@ mod test {
 
     #[test]
     fn test_refs_descriptor_d1() {
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);
+        let cell_1 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: vec![],
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_1);
         assert_eq!(meta_builder.get_refs_descriptor(0), 0);
         assert_eq!(meta_builder.get_refs_descriptor(3), 96);
 
         let refs = [empty_cell_ref()];
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
+
+        let cell_2 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: refs.to_vec(),
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_2);
         assert_eq!(meta_builder.get_refs_descriptor(3), 97);
 
         let refs = [empty_cell_ref(), empty_cell_ref()];
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
+
+        let cell_3 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: refs.to_vec(),
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_3);
         assert_eq!(meta_builder.get_refs_descriptor(3), 98);
     }
 
@@ -376,7 +399,15 @@ mod test {
 
     #[test]
     fn test_hashes_and_depths() -> anyhow::Result<()> {
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);
+        let cell_1 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: vec![],
+            meta: CellMeta::default(),
+        };
+
+        let meta_builder = CellMetaBuilder::new(&cell_1);
         let level_mask = LevelMask::new(0);
         let (hashes, depths) = meta_builder.calc_hashes_and_depths(level_mask)?;
 

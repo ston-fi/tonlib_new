@@ -32,12 +32,12 @@ impl CellMeta {
         hashes_depths: LazyHashesDepths::Static(([TonCell::EMPTY_CELL_HASH; 4], [0; 4])),
     };
 
-    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TLCoreError> { self.make_builder(cell).validate() }
+    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TLCoreError> { CellMetaBuilder::new(cell).validate() }
 
     pub(crate) fn level_mask(&self, cell: &TonCell) -> LevelMask {
         match &self.level_mask {
             LazyLevelMask::Static(mask) => *mask,
-            LazyLevelMask::Dynamic(once) => *once.get_or_init(|| self.make_builder(cell).calc_level_mask()),
+            LazyLevelMask::Dynamic(once) => *once.get_or_init(|| CellMetaBuilder::new(cell).calc_level_mask()),
         }
     }
 
@@ -55,13 +55,9 @@ impl CellMeta {
             LazyHashesDepths::Static(hashes_depths) => Ok(hashes_depths),
             LazyHashesDepths::Dynamic(once) => once.get_or_try_init(|| {
                 let level_mask = self.level_mask(cell);
-                self.make_builder(cell).calc_hashes_and_depths(level_mask)
+                CellMetaBuilder::new(cell).calc_hashes_and_depths(level_mask)
             }),
         }
-    }
-
-    fn make_builder<'a>(&self, cell: &'a TonCell) -> CellMetaBuilder<'a> {
-        CellMetaBuilder::new(cell.cell_type, &cell.data, cell.data_bits_len, &cell.refs)
     }
 }
 
