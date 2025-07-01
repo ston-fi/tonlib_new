@@ -44,12 +44,23 @@ impl ShardIdent {
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN, TON_SHARD_FULL) }
     pub fn prefix_len(&self) -> u32 { 63u32 - self.shard.trailing_zeros() }
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TLCoreError> {
-        let lb = (self.shard & (!self.shard).wrapping_add(1)) >> 1;
-        if lb & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
+        let lower_bits = self.prefix_lower_bits() >> 1;
+        if lower_bits & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
             bail_tl_core!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
         }
-        Ok((ShardIdent::new(self.workchain, self.shard - lb), ShardIdent::new(self.workchain, self.shard + lb)))
+        Ok((
+            ShardIdent::new(self.workchain, self.shard - lower_bits),
+            ShardIdent::new(self.workchain, self.shard + lower_bits),
+        ))
     }
+    pub fn merge(&self) -> Result<ShardIdent, TLCoreError> {
+        if self.shard == TON_SHARD_FULL {
+            bail_tl_core!("Can't merge shard SHARD_FULL ({})", self.shard);
+        }
+        let lower_bits = self.prefix_lower_bits();
+        Ok(ShardIdent::new(self.workchain, (self.shard - lower_bits) | (lower_bits << 1)))
+    }
+
     pub fn contains_addr(&self, addr: &MsgAddressInt) -> bool {
         if addr.wc() != self.workchain {
             return false;
@@ -60,6 +71,8 @@ impl ShardIdent {
         let pfx_len_bits = self.prefix_len();
         BitsUtils::equal(&self.shard.to_be_bytes(), addr.address_hash(), pfx_len_bits as usize)
     }
+
+    fn prefix_lower_bits(&self) -> u64 { self.shard & (!self.shard).wrapping_add(1) }
 }
 
 impl Default for ShardIdent {
@@ -151,7 +164,7 @@ mod tests {
     }
 
     #[test]
-    fn test_block_tlb_shard_ident_split() -> anyhow::Result<()> {
+    fn test_block_tlb_shard_ident_split_merge() -> anyhow::Result<()> {
         let shard_ident = ShardIdent::new(0, 0x8000000000000000);
         let (left, right) = shard_ident.split()?;
         assert_eq!(left.workchain, 0);
@@ -166,6 +179,15 @@ mod tests {
         let (left3, right3) = right.split()?;
         assert_eq!(left3.shard, 0xa000000000000000);
         assert_eq!(right3.shard, 0xe000000000000000);
+
+        assert_eq!(left3.merge()?, right);
+        assert_eq!(right3.merge()?, right);
+
+        assert_eq!(left2.merge()?, left);
+        assert_eq!(right2.merge()?, left);
+
+        assert_eq!(left.merge()?, shard_ident);
+        assert_eq!(right.merge()?, shard_ident);
         Ok(())
     }
 

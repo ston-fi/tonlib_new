@@ -59,7 +59,11 @@ impl BlockInfo {
         };
         let prev_ids = match &self.prev_ref {
             PrevBlockInfo::Regular(ext_ref) => {
-                vec![make_block_id(ext_ref.clone(), self.shard.clone())]
+                let shard = match self.after_split {
+                    true => self.shard.merge()?,
+                    false => self.shard.clone(),
+                };
+                vec![make_block_id(ext_ref.clone(), shard)]
             }
             PrevBlockInfo::AfterMerge(ext_refs) => {
                 let (shard1, shard2) = self.shard.split()?;
