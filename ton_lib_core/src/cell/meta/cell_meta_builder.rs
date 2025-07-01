@@ -23,12 +23,12 @@ struct Pruned {
 }
 
 impl<'a> CellMetaBuilder<'a> {
-    pub fn new(cell_type: CellType, data: &'a [u8], data_bits_len: usize, refs: &'a [TonCellRef]) -> Self {
+    pub fn new(cell: &'a TonCell) -> Self {
         Self {
-            cell_type,
-            data,
-            data_bits_len,
-            refs,
+            cell_type: cell.cell_type,
+            data: &cell.data,
+            data_bits_len: cell.data_bits_len,
+            refs: &cell.refs,
         }
     }
 
@@ -47,7 +47,7 @@ impl<'a> CellMetaBuilder<'a> {
             CellType::Ordinary => self.calc_level_mask_ordinary(),
             CellType::PrunedBranch => self.calc_level_mask_pruned(),
             CellType::LibraryRef => LevelMask::new(0),
-            CellType::MerkleProof => self.refs[0].meta.level_mask >> 1,
+            CellType::MerkleProof => self.refs[0].level_mask() >> 1,
             CellType::MerkleUpdate => self.calc_level_mask_merkle_update(),
         }
     }
@@ -73,7 +73,7 @@ impl<'a> CellMetaBuilder<'a> {
 
         let level_mask = self.calc_level_mask_pruned();
 
-        if level_mask == LevelMask::MIN_LEVEL || level_mask > LevelMask::MAX_LEVEL {
+        if level_mask <= LevelMask::MIN_LEVEL || level_mask > LevelMask::MAX_LEVEL {
             let err_msg = format!("Pruned Branch cell level must in range [1, 3] (got {level_mask})");
             return Err(TLCoreError::BuilderMeta(err_msg));
         }
@@ -94,8 +94,7 @@ impl<'a> CellMetaBuilder<'a> {
         const LIB_CELL_BITS_LEN: usize = (1 + TonHash::BYTES_LEN) * 8;
 
         if self.data_bits_len != LIB_CELL_BITS_LEN {
-            let err_msg =
-                format!("Library cell must have exactly {LIB_CELL_BITS_LEN} bits, got {}", self.data_bits_len);
+            let err_msg = format!("Lib cell must have exactly {LIB_CELL_BITS_LEN} bits, got {}", self.data_bits_len);
             return Err(TLCoreError::BuilderMeta(err_msg));
         }
 
@@ -136,7 +135,7 @@ impl<'a> CellMetaBuilder<'a> {
     fn calc_level_mask_ordinary(&self) -> LevelMask {
         let mut mask = LevelMask::new(0);
         for cell_ref in self.refs {
-            mask |= cell_ref.meta.level_mask;
+            mask |= cell_ref.level_mask();
         }
         mask
     }
@@ -149,7 +148,7 @@ impl<'a> CellMetaBuilder<'a> {
     }
 
     fn calc_level_mask_merkle_update(&self) -> LevelMask {
-        let refs_lm = self.refs[0].meta.level_mask | self.refs[1].meta.level_mask;
+        let refs_lm = self.refs[0].level_mask() | self.refs[1].level_mask();
         refs_lm >> 1
     }
 
@@ -191,7 +190,7 @@ impl<'a> CellMetaBuilder<'a> {
             } else {
                 let mut max_ref_depth = 0;
                 for cell_ref in self.refs {
-                    let ref_depth = self.get_ref_depth(cell_ref, level_pos);
+                    let ref_depth = self.get_ref_depth(cell_ref, level_pos)?;
                     max_ref_depth = max_ref_depth.max(ref_depth);
                 }
                 max_ref_depth + 1
@@ -245,7 +244,7 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn write_ref_hashes(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TLCoreError> {
         for cell_ref in self.refs {
-            let ref_hash = self.get_ref_hash(cell_ref, level);
+            let ref_hash = self.get_ref_hash(cell_ref, level)?;
             writer.write_bytes(ref_hash.as_slice())?;
         }
 
@@ -254,7 +253,7 @@ impl<'a> CellMetaBuilder<'a> {
 
     fn write_ref_depths(&self, writer: &mut CellBitWriter, level: u8) -> Result<(), TLCoreError> {
         for cell_ref in self.refs {
-            let ref_depth = self.get_ref_depth(cell_ref, level);
+            let ref_depth = self.get_ref_depth(cell_ref, level)?;
             writer.write_var(8, ref_depth / 256)?;
             writer.write_var(8, ref_depth % 256)?;
         }
@@ -293,14 +292,16 @@ impl<'a> CellMetaBuilder<'a> {
         Ok((resolved_hashes, resolved_depths))
     }
 
-    fn get_ref_depth(&self, cell_ref: &TonCell, level: u8) -> u16 {
+    fn get_ref_depth(&self, cell_ref: &TonCell, level: u8) -> Result<u16, TLCoreError> {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.meta.depths[(level as usize + extra_level).min(3)]
+        let lm = (level as usize + extra_level).min(3) as u8;
+        cell_ref.depth_for_level(LevelMask::new(lm))
     }
 
-    fn get_ref_hash(&self, cell_ref: &TonCell, level: u8) -> TonHash {
+    fn get_ref_hash(&self, cell_ref: &'a TonCell, level: u8) -> Result<&'a TonHash, TLCoreError> {
         let extra_level = matches!(self.cell_type, CellType::MerkleProof | CellType::MerkleUpdate) as usize;
-        cell_ref.meta.hashes[(level as usize + extra_level).min(3)].clone()
+        let lm = (level as usize + extra_level).min(3) as u8;
+        cell_ref.hash_for_level(LevelMask::new(lm))
     }
 
     fn calc_pruned_hash_depth(&self, level_mask: LevelMask) -> Result<Vec<Pruned>, TLCoreError> {
@@ -337,8 +338,8 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
     if !full_bytes {
         writer.write_bytes(&data[..data_len - 1])?;
         let last_byte = data[data_len - 1];
-        let l = last_byte | (1 << (8 - rest_bits - 1));
-        writer.write_var(8, l)?;
+        let last_bits = last_byte | (1 << (8 - rest_bits - 1));
+        writer.write_var(8, last_bits)?;
     } else {
         writer.write_bytes(data)?;
     }
@@ -354,16 +355,39 @@ mod test {
 
     #[test]
     fn test_refs_descriptor_d1() {
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);
+        let cell_1 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: vec![],
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_1);
         assert_eq!(meta_builder.get_refs_descriptor(0), 0);
         assert_eq!(meta_builder.get_refs_descriptor(3), 96);
 
         let refs = [empty_cell_ref()];
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
+
+        let cell_2 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: refs.to_vec(),
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_2);
         assert_eq!(meta_builder.get_refs_descriptor(3), 97);
 
         let refs = [empty_cell_ref(), empty_cell_ref()];
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &refs);
+
+        let cell_3 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: refs.to_vec(),
+            meta: CellMeta::default(),
+        };
+        let meta_builder = CellMetaBuilder::new(&cell_3);
         assert_eq!(meta_builder.get_refs_descriptor(3), 98);
     }
 
@@ -375,7 +399,15 @@ mod test {
 
     #[test]
     fn test_hashes_and_depths() -> anyhow::Result<()> {
-        let meta_builder = CellMetaBuilder::new(CellType::Ordinary, &[], 0, &[]);
+        let cell_1 = TonCell {
+            cell_type: CellType::Ordinary,
+            data: vec![],
+            data_bits_len: 0,
+            refs: vec![],
+            meta: CellMeta::default(),
+        };
+
+        let meta_builder = CellMetaBuilder::new(&cell_1);
         let level_mask = LevelMask::new(0);
         let (hashes, depths) = meta_builder.calc_hashes_and_depths(level_mask)?;
 

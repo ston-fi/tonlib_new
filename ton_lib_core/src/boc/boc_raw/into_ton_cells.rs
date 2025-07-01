@@ -18,13 +18,12 @@ impl BOCRaw {
                 refs.push(cells[num_cells - 1 - ref_index].clone());
             }
 
-            let meta = CellMeta::new(cell_raw.cell_type, &cell_raw.data, cell_raw.data_bits_len, &refs)?;
-
             let cell_ref = TonCell {
-                meta,
+                cell_type: cell_raw.cell_type,
                 data: cell_raw.data,
                 data_bits_len: cell_raw.data_bits_len,
                 refs,
+                meta: CellMeta::default(),
             }
             .into_ref();
             cells.push(cell_ref);

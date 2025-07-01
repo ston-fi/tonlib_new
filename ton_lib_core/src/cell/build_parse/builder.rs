@@ -26,13 +26,17 @@ impl CellBuilder {
 
     pub fn build(self) -> Result<TonCell, TLCoreError> {
         let (data, data_bits_len) = build_cell_data(self.data_writer)?;
-        let meta = CellMeta::new(self.cell_type, &data, data_bits_len, &self.refs)?;
-        Ok(TonCell {
-            meta,
+        let cell = TonCell {
+            cell_type: self.cell_type,
             data,
             data_bits_len,
             refs: self.refs,
-        })
+            meta: CellMeta::default(),
+        };
+        // Consider it as a tech debt. We have validation embedded into CellMetaBuilder,
+        // and it's the simples way to use it from builder
+        cell.meta.validate(&cell)?;
+        Ok(cell)
     }
 
     pub fn build_ref(self) -> Result<TonCellRef, TLCoreError> { Ok(self.build()?.into_ref()) }
@@ -331,7 +335,7 @@ mod tests {
         let cell = cell_builder.build()?;
         assert_eq!(cell, TonCell::EMPTY);
         for level in 0..4 {
-            assert_eq!(cell.hash_for_level(LevelMask::new(level)), &TonCell::EMPTY_CELL_HASH);
+            assert_eq!(cell.hash_for_level(LevelMask::new(level))?, &TonCell::EMPTY_CELL_HASH);
         }
         Ok(())
     }
@@ -382,8 +386,8 @@ mod tests {
 
         let exp_hash = TonHash::from_str("5d64a52c76eb32a63a393345a69533f095f945f2d30f371a1f323ac10102c395")?;
         for level in 0..4 {
-            assert_eq!(cell0.hash_for_level(LevelMask::new(level)), &exp_hash);
-            assert_eq!(cell0.meta.depths[level as usize], 3);
+            assert_eq!(cell0.hash_for_level(LevelMask::new(level))?, &exp_hash);
+            assert_eq!(cell0.depth_for_level(LevelMask::new(level))?, 3);
         }
         Ok(())
     }
@@ -392,17 +396,17 @@ mod tests {
     fn test_builder_build_cell_library() -> anyhow::Result<()> {
         let mut builder = TonCell::builder_typed(CellType::LibraryRef);
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
-        assert_err!(builder.build()); // no ton_lib prefix
+        assert_err!(builder.build()); // no lib prefix
 
         let mut builder = TonCell::builder_typed(CellType::LibraryRef);
-        builder.write_num(&2, 8)?; // ton_lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
+        builder.write_num(&2, 8)?; // adding lib prefix https://docs.ton.org/v3/documentation/data-formats/tlb/exotic-cells#library-reference
         builder.write_bits(TonHash::ZERO, TonHash::BITS_LEN)?;
         let lib_cell = assert_ok!(builder.build());
 
         let expected_hash = TonHash::from_str("6f3fd5de541ec62d350d30785ada554a2b13b887a3e4e51896799d0b0c46c552")?;
         for level in 0..4 {
-            assert_eq!(lib_cell.hash_for_level(LevelMask::new(level)), &expected_hash);
-            assert_eq!(lib_cell.meta.depths[level as usize], 0);
+            assert_eq!(lib_cell.hash_for_level(LevelMask::new(level))?, &expected_hash);
+            assert_eq!(lib_cell.depth_for_level(LevelMask::new(level))?, 0);
         }
         Ok(())
     }

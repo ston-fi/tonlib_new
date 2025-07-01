@@ -182,7 +182,7 @@ mod tests {
             if let AccountState::Active(state) = &account.storage.state {
                 let code = state.state_init.code.as_ref().unwrap();
                 assert_eq!(
-                    code.hash(),
+                    code.hash()?,
                     &TonHash::from_str("18d5b6e780ff0bb451254c2c760d09d6e485638cd1407abb97078752c3c1c9ee")?
                 );
             }

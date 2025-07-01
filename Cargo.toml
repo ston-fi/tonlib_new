@@ -4,6 +4,8 @@ members = [
     "ton_lib",
     "ton_lib_core",
     "ton_lib_macros",
+    "benches",
+    "examples",
 ]
 
 [workspace.package]
