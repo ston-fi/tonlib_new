@@ -36,7 +36,7 @@ pub trait TLB: Sized {
     }
 
     // Utilities
-    fn cell_hash(&self) -> Result<TonHash, TLCoreError> { Ok(self.to_cell()?.hash().clone()) }
+    fn cell_hash(&self) -> Result<TonHash, TLCoreError> { Ok(self.to_cell()?.hash()?.clone()) }
 
     /// Reading
     fn from_cell(cell: &TonCell) -> Result<Self, TLCoreError> { Self::read(&mut cell.parser()) }

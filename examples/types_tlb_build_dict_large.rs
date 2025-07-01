@@ -24,8 +24,6 @@ fn main() -> anyhow::Result<()> {
     for i in 0..ITEMS_COUNT {
         data.insert(i, BigUint::from(i));
     }
-    let cell = MyDict { data }.to_cell()?;
-
-    println!("{}", cell.hash());
+    let _cell = MyDict { data }.to_cell()?;
     Ok(())
 }

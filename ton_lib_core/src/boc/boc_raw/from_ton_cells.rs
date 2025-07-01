@@ -15,7 +15,7 @@ struct CellIndexed<'a> {
 
 impl BOCRaw {
     pub fn from_ton_cells(roots: &[TonCellRef]) -> Result<Self, TLCoreError> {
-        let cell_by_hash = build_and_verify_index(roots);
+        let cell_by_hash = build_and_verify_index(roots)?;
 
         // Sort indexed cells by their index value.
         let mut cell_sorted: Vec<_> = cell_by_hash.values().collect();
@@ -41,7 +41,7 @@ impl BOCRaw {
     }
 }
 
-fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed> {
+fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellIndexed>, TLCoreError> {
     let mut cur_cells = vec![];
     for cell in roots {
         cur_cells.push(cell);
@@ -53,7 +53,7 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
     while !cur_cells.is_empty() {
         let mut next_cells = Vec::with_capacity(cur_cells.len() * 4);
         for cell in cur_cells {
-            let hash = cell.hash();
+            let hash = cell.hash()?;
 
             if cells_by_hash.contains_key(hash) {
                 continue; // Skip if already indexed.
@@ -80,7 +80,7 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
         for index_cell in cells_by_hash.values() {
             for ref_pos in 0..index_cell.cell.refs.len() {
                 let ref_cell = &index_cell.cell.refs[ref_pos];
-                let ref_hash = ref_cell.hash();
+                let ref_hash = ref_cell.hash()?;
                 if let Some(indexed) = cells_by_hash.get(ref_hash) {
                     if indexed.index < index_cell.index {
                         *indexed.index.borrow_mut() = new_hash_index;
@@ -92,17 +92,17 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> HashMap<TonHash, CellIndexed>
         }
     }
 
-    cells_by_hash
+    Ok(cells_by_hash)
 }
 
 fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TLCoreError> {
     let refs_positions = raw_cell_refs_indexes(cell, cells_by_hash)?;
     Ok(CellRaw {
-        cell_type: cell.meta.cell_type,
+        cell_type: cell.cell_type,
         data: cell.data.clone(),
         data_bits_len: cell.data_bits_len,
         refs_positions,
-        level_mask: cell.meta.level_mask,
+        level_mask: cell.level_mask(),
     })
 }
 
@@ -119,7 +119,7 @@ fn raw_cell_refs_indexes(
 }
 
 fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TLCoreError> {
-    let hash = cell.hash();
+    let hash = cell.hash()?;
     call_by_hash
         .get(hash)
         .ok_or_else(|| TLCoreError::Custom(format!("cell with hash {hash:?} not found in available hashes")))

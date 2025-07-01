@@ -19,7 +19,7 @@ impl TonCellUtils {
         let mut queue = VecDeque::from_iter(cells_iter);
 
         while let Some(cell) = queue.pop_front() {
-            if !visited.insert(cell.hash()) {
+            if !visited.insert(cell.hash()?) {
                 continue;
             }
             if let Some(lib_id) = Self::read_lib_id(cell)? {
@@ -32,7 +32,7 @@ impl TonCellUtils {
 
     // Read lib_ids from library_cell
     pub fn read_lib_id(cell: &TonCell) -> Result<Option<TonHash>, TLCoreError> {
-        if cell.meta.cell_type != CellType::LibraryRef {
+        if cell.cell_type != CellType::LibraryRef {
             return Ok(None);
         }
         Ok(Some(TonHash::from_slice(&cell.data[1..=32])?))
