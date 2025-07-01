@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.4](https://github.com/Sild/ton_lib_rs/compare/ton_lib_core-v0.0.3...ton_lib_core-v0.0.4) - 2025-07-01
+
+### Other
+
+- add TonAddress::ZERO serial test
+- review fixes
+- lazy_load for cell_hash
+
 ## [0.0.3](https://github.com/Sild/ton_lib_rs/compare/ton_lib_core-v0.0.2...ton_lib_core-v0.0.3) - 2025-06-30
 
 ### Fixed
