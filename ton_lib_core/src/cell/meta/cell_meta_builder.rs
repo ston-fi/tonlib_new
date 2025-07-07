@@ -159,7 +159,7 @@ impl<'a> CellMetaBuilder<'a> {
 
     /// This function replicates unknown logic of resolving cell data
     /// https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/vm/cells/DataCell.cpp#L214
-    pub fn calc_hashes_and_depths(&self, level_mask: LevelMask) -> Result<([TonHash; 4], [u16; 4]), TLCoreError> {
+    pub fn calc_hashes_and_depths(&self, level_mask: LevelMask) -> Result<(Vec<TonHash>, Vec<u16>), TLCoreError> {
         let hash_count = match self.cell_type {
             CellType::PrunedBranch => 1,
             _ => level_mask.hash_count(),
@@ -172,7 +172,8 @@ impl<'a> CellMetaBuilder<'a> {
         let mut depths = Vec::with_capacity(hash_count);
 
         // Iterate through significant levels
-        for (hash_pos, level_pos) in (0..=level_mask.level()).filter(|&i| level_mask.is_significant(i)).enumerate() {
+        let sign_levels = (0..=level_mask.level()).filter(|&i| level_mask.is_significant(i));
+        for (hash_pos, level_pos) in sign_levels.enumerate() {
             if hash_pos < hash_i_offset {
                 continue;
             }
@@ -265,9 +266,9 @@ impl<'a> CellMetaBuilder<'a> {
         hashes: &[TonHash],
         depths: &[u16],
         level_mask: LevelMask,
-    ) -> Result<([TonHash; 4], [u16; 4]), TLCoreError> {
-        let mut resolved_hashes = [TonHash::ZERO; 4];
-        let mut resolved_depths = [0; 4];
+    ) -> Result<(Vec<TonHash>, Vec<u16>), TLCoreError> {
+        let mut resolved_hashes = Vec::from([TonHash::ZERO; 4]);
+        let mut resolved_depths = Vec::from([0; 4]);
 
         for i in 0..4 {
             let hash_index = level_mask.apply(i).hash_index();
