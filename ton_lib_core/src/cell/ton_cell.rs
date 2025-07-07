@@ -51,10 +51,16 @@ impl TonCell {
     pub fn level_mask(&self) -> LevelMask { self.meta.level_mask(self) }
 
     pub fn hash(&self) -> Result<&TonHash, TLCoreError> { self.hash_for_level(LevelMask::MAX_LEVEL) }
+
     pub fn depth(&self) -> Result<u16, TLCoreError> { self.depth_for_level(LevelMask::MAX_LEVEL) }
 
-    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TLCoreError> { self.meta.hash(self, level) }
-    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TLCoreError> { self.meta.depth(self, level) }
+    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TLCoreError> {
+        self.meta.hash_for_level(self, level)
+    }
+
+    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TLCoreError> {
+        self.meta.depth_for_level(self, level)
+    }
 
     pub fn into_ref(self) -> TonCellRef { TonCellRef(self.into()) }
 }
@@ -72,15 +78,13 @@ mod traits_impl {
     use crate::cell::{TonCell, TonCellRef};
 
     // TonCell
-    unsafe impl Sync for TonCell {}
-    unsafe impl Send for TonCell {}
     impl PartialEq for TonCell { fn eq(&self, other: &Self) -> bool { self.hash().is_ok() && other.hash().is_ok() && self.hash().unwrap() == other.hash().unwrap() } }
     impl Eq for TonCell {}
     impl Display for TonCell { fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self, 0) } }
     impl Debug for TonCell { fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") } }
 
     // TonCellRef
-    impl Deref for TonCellRef { type Target = TonCell;fn deref(&self) -> &Self::Target { &self.0 } }
+    impl Deref for TonCellRef { type Target = TonCell; fn deref(&self) -> &Self::Target { &self.0 } }
     impl Display for TonCellRef { fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write_cell_display(f, self.deref(), 0) } }
     impl Debug for TonCellRef { fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") } }
 }

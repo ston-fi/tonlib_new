@@ -39,13 +39,13 @@ log = "0.4"
 hmac = "0.12"
 pbkdf2 = { version = "0.12", features = ["simple"] }
 nacl = "0.5"
-crc = "3.2"
+crc = "3.3"
 hex = "0.4"
 base64 = "0.22"
 num-bigint = { version = "0.4" }
 num-traits = { version = "0.2" }
 ton_liteapi = "0.2"
-tokio = "1.45"
+tokio = "1.46"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 auto_pool = { version = "0.3", features = ["async"] }

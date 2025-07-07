@@ -7,9 +7,9 @@ use once_cell;
 use once_cell::sync::OnceCell;
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) enum LazyHashesDepths {
-    Static(([TonHash; 4], [u16; 4])),
-    Dynamic(OnceCell<([TonHash; 4], [u16; 4])>),
+pub(crate) struct CellMeta {
+    level_mask: LazyLevelMask,
+    hashes_depths: LazyHashesDepths,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -19,9 +19,9 @@ pub(crate) enum LazyLevelMask {
 }
 
 #[derive(Debug, Clone, PartialEq)]
-pub(crate) struct CellMeta {
-    level_mask: LazyLevelMask,
-    hashes_depths: LazyHashesDepths,
+pub(crate) enum LazyHashesDepths {
+    Static(([TonHash; 4], [u16; 4])),
+    Dynamic(OnceCell<(Vec<TonHash>, Vec<u16>)>),
 }
 
 impl CellMeta {
@@ -41,23 +41,25 @@ impl CellMeta {
         }
     }
 
-    pub(crate) fn hash(&self, cell: &TonCell, level: LevelMask) -> Result<&TonHash, TLCoreError> {
+    pub(crate) fn hash_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<&TonHash, TLCoreError> {
         let hashes = &self.get_hashes_depths(cell)?.0;
         Ok(&hashes[level.mask() as usize])
     }
-    pub(crate) fn depth(&self, cell: &TonCell, level: LevelMask) -> Result<u16, TLCoreError> {
+    pub(crate) fn depth_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<u16, TLCoreError> {
         let depths = &self.get_hashes_depths(cell)?.1;
         Ok(depths[level.mask() as usize])
     }
 
-    fn get_hashes_depths(&self, cell: &TonCell) -> Result<&([TonHash; 4], [u16; 4]), TLCoreError> {
-        match &self.hashes_depths {
-            LazyHashesDepths::Static(hashes_depths) => Ok(hashes_depths),
-            LazyHashesDepths::Dynamic(once) => once.get_or_try_init(|| {
-                let level_mask = self.level_mask(cell);
-                CellMetaBuilder::new(cell).calc_hashes_and_depths(level_mask)
-            }),
-        }
+    fn get_hashes_depths(&self, cell: &TonCell) -> Result<(&[TonHash], &[u16]), TLCoreError> {
+        let level_mask = self.level_mask(cell);
+
+        let data = match &self.hashes_depths {
+            LazyHashesDepths::Static(hashes_depths) => return Ok((&hashes_depths.0, &hashes_depths.1)),
+            LazyHashesDepths::Dynamic(once) => {
+                once.get_or_try_init(|| CellMetaBuilder::new(cell).calc_hashes_and_depths(level_mask))
+            }
+        };
+        data.map(|(hashes, depths)| (hashes.as_slice(), depths.as_slice()))
     }
 }
 
