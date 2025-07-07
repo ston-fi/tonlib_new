@@ -154,9 +154,9 @@ mod tests {
     use super::*;
     use crate::block_tlb::{SimpleLib, TickTock};
     use std::collections::HashMap;
-    
+
     use std::str::FromStr;
-    
+
     use ton_lib_core::cell::TonCell;
     use ton_lib_core::traits::tlb::TLB;
     use ton_lib_core::types::tlb_core::{MsgAddressIntStd, VarLen};
