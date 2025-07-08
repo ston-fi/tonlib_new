@@ -107,7 +107,9 @@ pub struct SplitMergeInfo {
 }
 
 impl Default for TxDescr {
-    fn default() -> Self { TxDescrOrd::default().into() }
+    fn default() -> Self {
+        TxDescrOrd::default().into()
+    }
 }
 
 impl TxDescr {
@@ -136,5 +138,7 @@ impl TxDescr {
         }
     }
 
-    pub fn exit_code(&self) -> Option<i32> { self.compute_phase().map(|x| x.compute_phase_vm_info.exit_code) }
+    pub fn exit_code(&self) -> Option<i32> {
+        self.compute_phase().map(|x| x.compute_phase_vm_info.exit_code)
+    }
 }

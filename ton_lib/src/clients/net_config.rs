@@ -42,7 +42,9 @@ pub struct Validator {
 }
 
 impl TonNetConfig {
-    pub fn new(json: &str) -> Result<Self, TLError> { Ok(serde_json::from_str(json)?) }
+    pub fn new(json: &str) -> Result<Self, TLError> {
+        Ok(serde_json::from_str(json)?)
+    }
 
     pub fn get_json(mainnet: bool) -> String {
         match get_default_net_conf_throw(mainnet) {
@@ -69,9 +71,13 @@ impl TonNetConfig {
         TonNetConfig::new(&std::fs::read_to_string(path)?)
     }
 
-    pub fn to_json(&self) -> Result<String, serde_json::Error> { serde_json::to_string(self) }
+    pub fn to_json(&self) -> Result<String, serde_json::Error> {
+        serde_json::to_string(self)
+    }
 
-    pub fn get_init_block_seqno(&self) -> u64 { self.validator.init_block["seqno"].as_u64().unwrap_or(0) }
+    pub fn get_init_block_seqno(&self) -> u64 {
+        self.validator.init_block["seqno"].as_u64().unwrap_or(0)
+    }
 
     pub fn set_init_block(&mut self, block_id: &BlockIdExt) {
         self.validator.init_block["workchain"] = serde_json::json!(block_id.shard_ident.workchain);

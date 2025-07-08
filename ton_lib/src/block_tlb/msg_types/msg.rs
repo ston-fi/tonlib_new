@@ -55,7 +55,9 @@ impl Msg {
         }
     }
 
-    pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
+    pub fn state_init(&self) -> Option<&StateInit> {
+        self.init.as_ref().map(|init| &init.value)
+    }
 
     pub fn cell_hash_normalized(&self) -> Result<TonHash, TLCoreError> {
         match &self.info {

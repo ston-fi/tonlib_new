@@ -127,11 +127,15 @@ impl ShardAccount {
 }
 
 impl Default for AccountStatus {
-    fn default() -> Self { AccountStatus::NonExist(AccountStatusNotExist) }
+    fn default() -> Self {
+        AccountStatus::NonExist(AccountStatusNotExist)
+    }
 }
 
 impl Default for MaybeAccount {
-    fn default() -> Self { MaybeAccount::None(AccountNone) }
+    fn default() -> Self {
+        MaybeAccount::None(AccountNone)
+    }
 }
 
 #[rustfmt::skip]

@@ -44,19 +44,37 @@ impl TonCell {
     ]);
     pub const EMPTY_BOC: &'static [u8] = &[181, 238, 156, 114, 1, 1, 1, 1, 0, 2, 0, 0, 0];
 
-    pub fn builder() -> CellBuilder { CellBuilder::new(CellType::Ordinary) }
-    pub fn builder_typed(cell_type: CellType) -> CellBuilder { CellBuilder::new(cell_type) }
-    pub fn parser(&self) -> CellParser { CellParser::new(self) }
+    pub fn builder() -> CellBuilder {
+        CellBuilder::new(CellType::Ordinary)
+    }
+    pub fn builder_typed(cell_type: CellType) -> CellBuilder {
+        CellBuilder::new(cell_type)
+    }
+    pub fn parser(&self) -> CellParser {
+        CellParser::new(self)
+    }
 
-    pub fn level_mask(&self) -> LevelMask { self.meta.level_mask(self) }
+    pub fn level_mask(&self) -> LevelMask {
+        self.meta.level_mask(self)
+    }
 
-    pub fn hash(&self) -> Result<&TonHash, TLCoreError> { self.hash_for_level(LevelMask::MAX_LEVEL) }
-    pub fn depth(&self) -> Result<u16, TLCoreError> { self.depth_for_level(LevelMask::MAX_LEVEL) }
+    pub fn hash(&self) -> Result<&TonHash, TLCoreError> {
+        self.hash_for_level(LevelMask::MAX_LEVEL)
+    }
+    pub fn depth(&self) -> Result<u16, TLCoreError> {
+        self.depth_for_level(LevelMask::MAX_LEVEL)
+    }
 
-    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TLCoreError> { self.meta.hash(self, level) }
-    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TLCoreError> { self.meta.depth(self, level) }
+    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TLCoreError> {
+        self.meta.hash(self, level)
+    }
+    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TLCoreError> {
+        self.meta.depth(self, level)
+    }
 
-    pub fn into_ref(self) -> TonCellRef { TonCellRef(self.into()) }
+    pub fn into_ref(self) -> TonCellRef {
+        TonCellRef(self.into())
+    }
 }
 
 // TonCelRef

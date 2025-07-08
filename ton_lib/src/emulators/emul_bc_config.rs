@@ -11,15 +11,21 @@ pub struct EmulBCConfig(Arc<CString>);
 impl Deref for EmulBCConfig {
     type Target = CString;
 
-    fn deref(&self) -> &Self::Target { &self.0 }
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
 }
 
 impl From<Arc<CString>> for EmulBCConfig {
-    fn from(config: Arc<CString>) -> Self { Self(config) }
+    fn from(config: Arc<CString>) -> Self {
+        Self(config)
+    }
 }
 
 impl EmulBCConfig {
-    pub fn from_boc(config_boc: &[u8]) -> Result<Self, TLError> { Self::from_boc_base64(&STANDARD.encode(config_boc)) }
+    pub fn from_boc(config_boc: &[u8]) -> Result<Self, TLError> {
+        Self::from_boc_base64(&STANDARD.encode(config_boc))
+    }
     pub fn from_boc_hex(config_boc_hex: &str) -> Result<Self, TLError> {
         Self::from_boc_base64(&STANDARD.encode(hex::decode(config_boc_hex)?))
     }

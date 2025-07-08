@@ -39,7 +39,9 @@ struct Inner {
 
 #[async_trait]
 impl TLClientTrait for TLConnection {
-    fn get_connection(&self) -> &TLConnection { self }
+    fn get_connection(&self) -> &TLConnection {
+        self
+    }
 
     fn get_retry_strategy(&self) -> &RetryStrategy {
         static NO_RETRY: RetryStrategy = RetryStrategy {
@@ -55,7 +57,9 @@ impl TLConnection {
         new_connection_checked(config, semaphore).await
     }
 
-    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TLError> { self.inner.exec_impl(req).await }
+    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TLError> {
+        self.inner.exec_impl(req).await
+    }
 
     async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TLError> {
         let req = TLRequest::Init { options };

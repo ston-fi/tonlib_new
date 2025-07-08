@@ -32,7 +32,9 @@ impl CellMeta {
         hashes_depths: LazyHashesDepths::Static(([TonCell::EMPTY_CELL_HASH; 4], [0; 4])),
     };
 
-    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TLCoreError> { CellMetaBuilder::new(cell).validate() }
+    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TLCoreError> {
+        CellMetaBuilder::new(cell).validate()
+    }
 
     pub(crate) fn level_mask(&self, cell: &TonCell) -> LevelMask {
         match &self.level_mask {

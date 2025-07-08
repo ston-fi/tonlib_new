@@ -10,15 +10,21 @@ use ton_lib_core::traits::tlb::TLB;
 pub struct TLBRef<T: TLB>(PhantomData<T>);
 
 impl<T: TLB> TLBRef<T> {
-    pub fn new() -> Self { TLBRef(PhantomData) }
-    pub fn read(&self, parser: &mut CellParser) -> Result<T, TLCoreError> { T::from_cell(parser.read_next_ref()?) }
+    pub fn new() -> Self {
+        TLBRef(PhantomData)
+    }
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TLCoreError> {
+        T::from_cell(parser.read_next_ref()?)
+    }
     pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TLCoreError> {
         builder.write_ref(val.to_cell_ref()?)
     }
 }
 
 impl<T: TLB> Default for TLBRef<T> {
-    fn default() -> Self { Self::new() }
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 mod tests {

@@ -8,5 +8,7 @@ pub struct TxIdLTHash {
 
 impl TxIdLTHash {
     pub const ZERO: Self = Self::new(0, TonHash::ZERO);
-    pub const fn new(lt: i64, hash: TonHash) -> Self { Self { lt, hash } }
+    pub const fn new(lt: i64, hash: TonHash) -> Self {
+        Self { lt, hash }
+    }
 }

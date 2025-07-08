@@ -9,8 +9,12 @@ use proc_macro::TokenStream;
 
 /// Automatic `TLB` implementation
 #[proc_macro_derive(TLBDerive, attributes(tlb_derive))]
-pub fn tlb_derive(input: TokenStream) -> TokenStream { tlb_derive_impl(input).into() }
+pub fn tlb_derive(input: TokenStream) -> TokenStream {
+    tlb_derive_impl(input).into()
+}
 
 /// Automatic `TonContract` implementation
 #[proc_macro_attribute]
-pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream { ton_contract_impl(_attr, item) }
+pub fn ton_contract(_attr: TokenStream, item: TokenStream) -> TokenStream {
+    ton_contract_impl(_attr, item)
+}

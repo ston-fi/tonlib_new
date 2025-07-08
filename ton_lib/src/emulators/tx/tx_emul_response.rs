@@ -68,5 +68,7 @@ impl TXEmulationSuccess {
     pub fn shard_account_parsed(&self) -> Result<ShardAccount, TLError> {
         Ok(ShardAccount::from_boc_base64(&self.shard_account_boc_b64)?)
     }
-    pub fn tx_parsed(&self) -> Result<Tx, TLCoreError> { Tx::from_boc_base64(&self.tx_boc_b64) }
+    pub fn tx_parsed(&self) -> Result<Tx, TLCoreError> {
+        Tx::from_boc_base64(&self.tx_boc_b64)
+    }
 }

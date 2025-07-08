@@ -50,7 +50,9 @@ pub struct OutActionChangeLibrary {
 }
 
 impl OutList {
-    pub fn new(actions: Vec<OutAction>) -> Self { Self { actions } }
+    pub fn new(actions: Vec<OutAction>) -> Self {
+        Self { actions }
+    }
 }
 
 impl TLB for OutList {

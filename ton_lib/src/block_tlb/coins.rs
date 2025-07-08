@@ -58,7 +58,9 @@ impl Coins {
         })
     }
 
-    pub fn to_u128(&self) -> u128 { self.0.data }
+    pub fn to_u128(&self) -> u128 {
+        self.0.data
+    }
 }
 
 impl CurrencyCollection {
@@ -77,29 +79,41 @@ mod traits_impl {
 
     impl FromStr for CurrencyCollection {
         type Err = TLCoreError;
-        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
+        fn from_str(grams: &str) -> Result<Self, Self::Err> {
+            Ok(Self::new(u128::from_str(grams)?))
+        }
     }
 
     impl Deref for Coins {
         type Target = u128;
-        fn deref(&self) -> &Self::Target { &self.0 }
+        fn deref(&self) -> &Self::Target {
+            &self.0
+        }
     }
 
     impl DerefMut for Coins {
-        fn deref_mut(&mut self) -> &mut Self::Target { &mut self.0 }
+        fn deref_mut(&mut self) -> &mut Self::Target {
+            &mut self.0
+        }
     }
 
     impl<T: Into<u128>> From<T> for Coins {
-        fn from(value: T) -> Self { Coins::new(value) }
+        fn from(value: T) -> Self {
+            Coins::new(value)
+        }
     }
 
     impl FromStr for Coins {
         type Err = TLCoreError;
-        fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
+        fn from_str(grams: &str) -> Result<Self, Self::Err> {
+            Ok(Self::new(u128::from_str(grams)?))
+        }
     }
 
     impl Default for Coins {
-        fn default() -> Self { Coins::ZERO }
+        fn default() -> Self {
+            Coins::ZERO
+        }
     }
 }
 

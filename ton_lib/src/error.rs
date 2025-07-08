@@ -125,5 +125,7 @@ pub enum TLError {
 }
 
 impl From<TLError> for TLCoreError {
-    fn from(err: TLError) -> Self { TLCoreError::Custom(err.to_string()) }
+    fn from(err: TLError) -> Self {
+        TLCoreError::Custom(err.to_string())
+    }
 }

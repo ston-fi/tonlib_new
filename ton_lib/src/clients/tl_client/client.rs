@@ -30,7 +30,9 @@ impl TLClientTrait for TLClient {
         self.inner.connections.choose(&mut rng_lock.deref_mut()).unwrap()
     }
 
-    fn get_retry_strategy(&self) -> &RetryStrategy { &self.inner.config.retry_strategy }
+    fn get_retry_strategy(&self) -> &RetryStrategy {
+        &self.inner.config.retry_strategy
+    }
 }
 
 impl TLClient {

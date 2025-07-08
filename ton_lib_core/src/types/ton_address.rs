@@ -25,7 +25,9 @@ pub struct TonAddress {
 impl TonAddress {
     pub const ZERO: Self = TonAddress::new(0, TonHash::ZERO);
 
-    pub const fn new(workchain: i32, hash: TonHash) -> Self { Self { workchain, hash } }
+    pub const fn new(workchain: i32, hash: TonHash) -> Self {
+        Self { workchain, hash }
+    }
 
     pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TLCoreError> {
         match msg_address.into() {
@@ -38,7 +40,9 @@ impl TonAddress {
         }
     }
 
-    pub fn to_hex(&self) -> String { format!("{}:{}", self.workchain, hex::encode(self.hash.as_slice())) }
+    pub fn to_hex(&self) -> String {
+        format!("{}:{}", self.workchain, hex::encode(self.hash.as_slice()))
+    }
 
     pub fn to_base64(&self, mainnet: bool, bounce: bool, urlsafe: bool) -> String {
         let mut buf = [0; 36];

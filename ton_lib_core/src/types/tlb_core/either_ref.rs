@@ -26,7 +26,9 @@ impl<T> TLBEitherRef<T> {
         }
     }
 
-    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self { Self { value, layout } }
+    pub fn new_with_layout(value: T, layout: EitherRefLayout) -> Self {
+        Self { value, layout }
+    }
 }
 
 impl<T: TLB> TLB for TLBEitherRef<T> {
@@ -75,13 +77,19 @@ impl<T: TLB> TLB for TLBEitherRef<T> {
 
 impl<T> Deref for TLBEitherRef<T> {
     type Target = T;
-    fn deref(&self) -> &Self::Target { &self.value }
+    fn deref(&self) -> &Self::Target {
+        &self.value
+    }
 }
 impl<T> DerefMut for TLBEitherRef<T> {
-    fn deref_mut(&mut self) -> &mut Self::Target { &mut self.value }
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.value
+    }
 }
 impl<T: PartialEq> PartialEq for TLBEitherRef<T> {
-    fn eq(&self, other: &Self) -> bool { self.value == other.value }
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
 }
 
 #[cfg(test)]

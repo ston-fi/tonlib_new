@@ -13,7 +13,9 @@ pub struct WalletV1V2Data {
 }
 
 impl WalletV1V2Data {
-    pub fn new(public_key: TonHash) -> Self { Self { seqno: 0, public_key } }
+    pub fn new(public_key: TonHash) -> Self {
+        Self { seqno: 0, public_key }
+    }
 }
 
 /// https://docs.ton.org/participate/wallets/contracts#wallet-v2

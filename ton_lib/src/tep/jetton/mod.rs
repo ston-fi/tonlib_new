@@ -3,6 +3,7 @@
 mod jetton_burn_msg;
 mod jetton_burn_notification;
 mod jetton_internal_transfer_msg;
+mod jetton_meta_data;
 mod jetton_transfer_msg;
 mod jetton_transfer_notification_msg;
 mod jetton_wallet_msg_body;
@@ -10,5 +11,6 @@ mod jetton_wallet_msg_body;
 pub use jetton_burn_msg::*;
 pub use jetton_burn_notification::*;
 pub use jetton_internal_transfer_msg::*;
+pub use jetton_meta_data::*;
 pub use jetton_transfer_msg::*;
 pub use jetton_transfer_notification_msg::*;

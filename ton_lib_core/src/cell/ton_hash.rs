@@ -18,7 +18,9 @@ impl TonHash {
     pub const BITS_LEN: usize = 256;
     pub const ZERO: TonHash = TonHash::from_slice_sized(&[0u8; 32]);
 
-    pub const fn from_slice_sized(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
+    pub const fn from_slice_sized(data: &[u8; 32]) -> Self {
+        Self(TonHashData::Slice(*data))
+    }
 
     pub fn from_slice(data: &[u8]) -> Result<Self, TLCoreError> {
         check_bytes_len(data)?;
@@ -40,7 +42,9 @@ impl TonHash {
         Self::from_slice(&num.tcn_to_bytes())
     }
 
-    pub fn as_slice(&self) -> &[u8] { self.0.as_slice() }
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
+    }
 
     pub fn as_slice_sized(&self) -> &[u8; 32] {
         match &self.0 {
@@ -63,9 +67,15 @@ impl TonHash {
         }
     }
 
-    pub fn to_vec(&self) -> Vec<u8> { self.as_slice().to_vec() }
-    pub fn to_hex(&self) -> String { hex::encode(self.as_slice()) }
-    pub fn to_base64(&self) -> String { BASE64_STANDARD.encode(self.as_slice()) }
+    pub fn to_vec(&self) -> Vec<u8> {
+        self.as_slice().to_vec()
+    }
+    pub fn to_hex(&self) -> String {
+        hex::encode(self.as_slice())
+    }
+    pub fn to_base64(&self) -> String {
+        BASE64_STANDARD.encode(self.as_slice())
+    }
 
     pub fn into_vec(self) -> Vec<u8> {
         match self.0 {
@@ -76,7 +86,9 @@ impl TonHash {
 }
 
 impl Default for TonHash {
-    fn default() -> Self { TonHash::ZERO }
+    fn default() -> Self {
+        TonHash::ZERO
+    }
 }
 
 impl TonHashData {

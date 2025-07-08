@@ -2,19 +2,27 @@
 pub struct SnakeFormat(pub Vec<u8>);
 
 impl SnakeFormat {
-    pub fn new(data: Vec<u8>) -> Self { Self(data) }
+    pub fn new(data: Vec<u8>) -> Self {
+        Self(data)
+    }
 }
 
 impl From<SnakeFormat> for Vec<u8> {
-    fn from(data: SnakeFormat) -> Self { data.0 }
+    fn from(data: SnakeFormat) -> Self {
+        data.0
+    }
 }
 
 impl From<Vec<u8>> for SnakeFormat {
-    fn from(data: Vec<u8>) -> Self { SnakeFormat(data) }
+    fn from(data: Vec<u8>) -> Self {
+        SnakeFormat(data)
+    }
 }
 
 impl AsRef<[u8]> for SnakeFormat {
-    fn as_ref(&self) -> &[u8] { &self.0 }
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
 }
 
 // impl TLBType for SnakeFormat {

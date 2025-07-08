@@ -226,4 +226,6 @@ impl Inner {
     }
 }
 
-fn retry_condition(error: &TLError) -> bool { !matches!(error, TLError::LiteClientWrongResponse(..)) }
+fn retry_condition(error: &TLError) -> bool {
+    !matches!(error, TLError::LiteClientWrongResponse(..))
+}
