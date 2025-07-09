@@ -8,11 +8,13 @@ use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
 use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::emulators::tvm::tvm_response::TVMGetMethodSuccess;
 use crate::error::TLError;
+use std::ops::Deref;
+
 use async_trait::async_trait;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::collections::HashMap;
-use std::ops::Deref;
+
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::Arc;
 use ton_lib_core::cell::{TonCell, TonCellUtils, TonHash};

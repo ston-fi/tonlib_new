@@ -15,9 +15,7 @@ pub struct BlockStream {
 }
 
 impl BlockStream {
-    pub fn last_mc_seqno(&self) -> u32 {
-        self.prev_mc_seqno
-    }
+    pub fn last_mc_seqno(&self) -> u32 { self.prev_mc_seqno }
 
     pub async fn new(client: TLClient, from_seqno: u32, to_seqno: Option<u32>) -> Result<Self, TLError> {
         let mut stream = Self {

@@ -39,9 +39,7 @@ impl CellBuilder {
         Ok(cell)
     }
 
-    pub fn build_ref(self) -> Result<TonCellRef, TLCoreError> {
-        Ok(self.build()?.into_ref())
-    }
+    pub fn build_ref(self) -> Result<TonCellRef, TLCoreError> { Ok(self.build()?.into_ref()) }
 
     pub fn write_bit(&mut self, data: bool) -> Result<(), TLCoreError> {
         self.ensure_capacity(1)?;
@@ -155,9 +153,7 @@ impl CellBuilder {
         self.write_bits_with_offset(data_bytes, bits_len - padding_bits_len, bits_offset)
     }
 
-    pub fn data_bits_left(&self) -> usize {
-        TonCell::MAX_DATA_BITS_LEN - self.data_bits_len
-    }
+    pub fn data_bits_left(&self) -> usize { TonCell::MAX_DATA_BITS_LEN - self.data_bits_len }
 
     fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TLCoreError> {
         let new_bits_len = self.data_bits_len + bits_len;

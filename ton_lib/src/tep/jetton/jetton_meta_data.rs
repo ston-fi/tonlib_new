@@ -1,10 +1,8 @@
 use ton_lib_core::{
-    cell::{TonCellRef, TonHash},
     traits::tlb::TLB,
     TLBDerive,
 };
 
-use crate::tep::SnakeFormat;
 
 /// Metadata content representation
 /// https://github.com/ton-blockchain/TEPs/blob/master/text/0064-token-data-standard.md

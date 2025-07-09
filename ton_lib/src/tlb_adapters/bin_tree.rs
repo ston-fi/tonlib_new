@@ -11,15 +11,11 @@ use ton_lib_core::traits::tlb::TLB;
 pub struct BinTree<VA: DictValAdapter<T>, T: TLB>(PhantomData<(VA, T)>);
 
 impl<VA: DictValAdapter<T>, T: TLB> Default for BinTree<VA, T> {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
-    pub fn new() -> Self {
-        Self(PhantomData)
-    }
+    pub fn new() -> Self { Self(PhantomData) }
 
     pub fn read(parser: &mut CellParser) -> Result<HashMap<ShardPfx, T>, TLCoreError> {
         let mut val = HashMap::new();

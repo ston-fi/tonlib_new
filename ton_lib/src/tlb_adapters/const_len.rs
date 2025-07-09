@@ -24,9 +24,7 @@ impl<T> ConstLen<T> {
 macro_rules! const_len_num_impl {
     ($src:ty) => {
         impl ConstLen<$src> {
-            pub fn read(&self, parser: &mut CellParser) -> Result<$src, TLCoreError> {
-                parser.read_num(self.bits_len)
-            }
+            pub fn read(&self, parser: &mut CellParser) -> Result<$src, TLCoreError> { parser.read_num(self.bits_len) }
             pub fn write(&self, builder: &mut CellBuilder, val: &$src) -> Result<(), TLCoreError> {
                 builder.write_num(val, self.bits_len)
             }
@@ -63,9 +61,7 @@ const_len_num_impl!(BigInt);
 const_len_num_impl!(BigUint);
 
 impl ConstLen<Vec<u8>> {
-    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TLCoreError> {
-        parser.read_bits(self.bits_len)
-    }
+    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TLCoreError> { parser.read_bits(self.bits_len) }
     pub fn write(&self, builder: &mut CellBuilder, val: &Vec<u8>) -> Result<(), TLCoreError> {
         builder.write_bits(val, self.bits_len)
     }

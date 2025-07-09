@@ -329,9 +329,7 @@ impl<'a> CellMetaBuilder<'a> {
 
 /// Calculates d2 descriptor for cell
 /// See https://docs.ton.org/tvm.pdf 3.1.4 for details
-fn get_bits_descriptor(data_bits_len: usize) -> u8 {
-    (data_bits_len / 8 + data_bits_len.div_ceil(8)) as u8
-}
+fn get_bits_descriptor(data_bits_len: usize) -> u8 { (data_bits_len / 8 + data_bits_len.div_ceil(8)) as u8 }
 
 fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result<(), TLCoreError> {
     let data_len = data.len();
@@ -354,9 +352,7 @@ fn write_data(writer: &mut CellBitWriter, data: &[u8], bit_len: usize) -> Result
 mod test {
     use super::*;
 
-    fn empty_cell_ref() -> TonCellRef {
-        TonCell::EMPTY.into_ref()
-    }
+    fn empty_cell_ref() -> TonCellRef { TonCell::EMPTY.into_ref() }
 
     #[test]
     fn test_refs_descriptor_d1() {

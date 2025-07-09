@@ -34,21 +34,15 @@ impl Debug for ShardPfx {
 }
 
 impl ShardIdent {
-    pub fn new(workchain: i32, shard: u64) -> Self {
-        Self { workchain, shard }
-    }
+    pub fn new(workchain: i32, shard: u64) -> Self { Self { workchain, shard } }
     pub fn from_pfx(workchain: i32, shard_pfx: &ShardPfx) -> Self {
         Self {
             workchain,
             shard: shard_pfx.to_shard(),
         }
     }
-    pub fn new_mc() -> Self {
-        Self::new(TON_MASTERCHAIN, TON_SHARD_FULL)
-    }
-    pub fn prefix_len(&self) -> u32 {
-        63u32 - self.shard.trailing_zeros()
-    }
+    pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN, TON_SHARD_FULL) }
+    pub fn prefix_len(&self) -> u32 { 63u32 - self.shard.trailing_zeros() }
     pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TLCoreError> {
         let lower_bits = self.prefix_lower_bits() >> 1;
         if lower_bits & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
@@ -78,15 +72,11 @@ impl ShardIdent {
         BitsUtils::equal(&self.shard.to_be_bytes(), addr.address_hash(), pfx_len_bits as usize)
     }
 
-    fn prefix_lower_bits(&self) -> u64 {
-        self.shard & (!self.shard).wrapping_add(1)
-    }
+    fn prefix_lower_bits(&self) -> u64 { self.shard & (!self.shard).wrapping_add(1) }
 }
 
 impl Default for ShardIdent {
-    fn default() -> Self {
-        Self::new_mc()
-    }
+    fn default() -> Self { Self::new_mc() }
 }
 
 impl TLB for ShardIdent {
@@ -121,9 +111,7 @@ impl TLB for ShardIdent {
 }
 
 impl Debug for ShardIdent {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{self}")
-    }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { write!(f, "{self}") }
 }
 
 impl Display for ShardIdent {

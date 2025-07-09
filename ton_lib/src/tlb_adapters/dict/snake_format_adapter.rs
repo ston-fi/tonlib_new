@@ -25,9 +25,7 @@ impl TLB for SnakeDataTail {
         Ok(Self { bn, b })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
-        todo!()
-    }
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { todo!() }
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
@@ -51,9 +49,7 @@ impl TLB for SnakeData {
         }
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
-        todo!()
-    }
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { todo!() }
 }
 
 /// tail#_ {bn:#} b:(bits bn) = SnakeData ~0;
@@ -61,7 +57,7 @@ impl TLB for SnakeData {
 
 #[cfg(test)]
 mod tests {
-    use std::cell::Cell;
+    
 
     use ton_lib_core::cell::TonCell;
 

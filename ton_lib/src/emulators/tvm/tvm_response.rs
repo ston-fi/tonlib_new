@@ -66,17 +66,13 @@ impl TVMGetMethodResponse {
 }
 
 impl TVMGetMethodSuccess {
-    pub fn stack_parsed(&self) -> Result<TVMStack, TLError> {
-        Ok(TVMStack::from_boc_base64(&self.stack_boc_base64)?)
-    }
+    pub fn stack_parsed(&self) -> Result<TVMStack, TLError> { Ok(TVMStack::from_boc_base64(&self.stack_boc_base64)?) }
 
     pub fn stack_boc(&self) -> Result<Vec<u8>, TLError> {
         Ok(BASE64_STANDARD.decode(self.stack_boc_base64.as_bytes())?)
     }
 
-    pub fn exit_success(&self) -> bool {
-        self.vm_exit_code == 0 || self.vm_exit_code == 1
-    }
+    pub fn exit_success(&self) -> bool { self.vm_exit_code == 0 || self.vm_exit_code == 1 }
 }
 
 #[derive(Debug)]
@@ -93,9 +89,7 @@ pub struct TVMSendMsgSuccess {
 }
 
 impl TVMSendMsgSuccess {
-    pub fn exit_success(&self) -> bool {
-        self.vm_exit_code == 0 || self.vm_exit_code == 1
-    }
+    pub fn exit_success(&self) -> bool { self.vm_exit_code == 0 || self.vm_exit_code == 1 }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

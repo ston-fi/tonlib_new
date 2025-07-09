@@ -10,9 +10,7 @@ use ton_lib_core::traits::tlb::TLB;
 pub struct TLBRefOpt<T: TLB>(PhantomData<T>);
 
 impl<T: TLB> TLBRefOpt<Option<T>> {
-    pub fn new() -> Self {
-        TLBRefOpt(PhantomData)
-    }
+    pub fn new() -> Self { TLBRefOpt(PhantomData) }
 
     pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TLCoreError> {
         match parser.read_bit()? {
@@ -31,9 +29,7 @@ impl<T: TLB> TLBRefOpt<Option<T>> {
 }
 
 impl<T: TLB> Default for TLBRefOpt<Option<T>> {
-    fn default() -> Self {
-        Self::new()
-    }
+    fn default() -> Self { Self::new() }
 }
 
 #[cfg(test)]

@@ -11,9 +11,7 @@ pub enum TVMGetMethodID {
 }
 
 impl TVMGetMethodID {
-    pub fn from_prototype(prototype: &str) -> TVMGetMethodID {
-        Self::Number(calc_opcode(prototype))
-    }
+    pub fn from_prototype(prototype: &str) -> TVMGetMethodID { Self::Number(calc_opcode(prototype)) }
 
     pub fn as_str(&self) -> Cow<'static, str> {
         match self {
@@ -34,27 +32,19 @@ impl TVMGetMethodID {
 }
 
 impl From<&'static str> for TVMGetMethodID {
-    fn from(value: &'static str) -> Self {
-        TVMGetMethodID::Name(Cow::Borrowed(value))
-    }
+    fn from(value: &'static str) -> Self { TVMGetMethodID::Name(Cow::Borrowed(value)) }
 }
 
 impl From<Cow<'_, str>> for TVMGetMethodID {
-    fn from(value: Cow<'_, str>) -> Self {
-        TVMGetMethodID::Name(Cow::Owned(value.into_owned()))
-    }
+    fn from(value: Cow<'_, str>) -> Self { TVMGetMethodID::Name(Cow::Owned(value.into_owned())) }
 }
 
 impl From<String> for TVMGetMethodID {
-    fn from(value: String) -> Self {
-        TVMGetMethodID::Name(Cow::Owned(value))
-    }
+    fn from(value: String) -> Self { TVMGetMethodID::Name(Cow::Owned(value)) }
 }
 
 impl From<i32> for TVMGetMethodID {
-    fn from(value: i32) -> Self {
-        TVMGetMethodID::Number(value)
-    }
+    fn from(value: i32) -> Self { TVMGetMethodID::Number(value) }
 }
 
 impl Display for TVMGetMethodID {
@@ -67,9 +57,7 @@ impl Display for TVMGetMethodID {
 }
 
 impl Debug for TVMGetMethodID {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        Display::fmt(self, f)
-    }
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result { Display::fmt(self, f) }
 }
 
 fn calc_opcode(command: &str) -> i32 {

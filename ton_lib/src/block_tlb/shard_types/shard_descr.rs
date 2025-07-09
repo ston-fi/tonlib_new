@@ -130,13 +130,9 @@ impl TLB for ShardDescr {
         Ok(())
     }
 
-    fn read(parser: &mut CellParser) -> Result<Self, TLCoreError> {
-        Self::read_definition(parser)
-    }
+    fn read(parser: &mut CellParser) -> Result<Self, TLCoreError> { Self::read_definition(parser) }
 
-    fn write(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
-        self.write_definition(builder)
-    }
+    fn write(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { self.write_definition(builder) }
 }
 
 #[derive(Debug, Clone, PartialEq, TLBDerive)]

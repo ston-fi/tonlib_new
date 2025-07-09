@@ -42,9 +42,7 @@ impl ConfigParams {
 }
 
 impl PartialEq for ConfigParams {
-    fn eq(&self, other: &Self) -> bool {
-        self.config_addr == other.config_addr && self.config == other.config
-    }
+    fn eq(&self, other: &Self) -> bool { self.config_addr == other.config_addr && self.config == other.config }
 }
 
 impl Clone for ConfigParams {

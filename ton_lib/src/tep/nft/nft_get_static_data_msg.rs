@@ -12,13 +12,9 @@ pub struct NftGetStaticDataMsg {
 }
 
 impl Default for NftGetStaticDataMsg {
-    fn default() -> Self {
-        Self::new(0)
-    }
+    fn default() -> Self { Self::new(0) }
 }
 
 impl NftGetStaticDataMsg {
-    pub fn new(query_id: u64) -> Self {
-        NftGetStaticDataMsg { query_id }
-    }
+    pub fn new(query_id: u64) -> Self { NftGetStaticDataMsg { query_id } }
 }
