@@ -49,7 +49,7 @@ impl TLClientConfig {
             },
             connection_check,
             connections_count: 10,
-            max_parallel_requests: 200,
+            max_parallel_requests: 127,
             retry_strategy: RetryStrategy {
                 retry_count: 10,
                 retry_waiting: Duration::from_millis(100),

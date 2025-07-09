@@ -122,10 +122,16 @@ pub enum TLError {
     SerdeJson(#[from] serde_json::Error),
     #[error("{0}")]
     RecvError(#[from] tokio::sync::oneshot::error::RecvError),
+    #[error("{0}")]
+    AcquireError(#[from] tokio::sync::AcquireError),
 }
 
 impl From<TLError> for TLCoreError {
     fn from(err: TLError) -> Self {
         TLCoreError::Custom(err.to_string())
     }
+}
+
+impl From<&TLError> for TLCoreError {
+    fn from(err: &TLError) -> Self { TLCoreError::Custom(err.to_string()) }
 }
