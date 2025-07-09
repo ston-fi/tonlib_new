@@ -5,12 +5,20 @@
 
 This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton_lib/src/clients/tonlibjson) implementation.
 
-## Features
+## TonLibCore
 
-### [cell](ton_lib/src/cell) module
-Build and read custom cells using [TonCell](ton_lib/src/cell/ton_cell.rs), and serialize them to bytes using [BOC](ton_lib/src/cell/boc/mod.rs):
+- [TonCell](ton_lib_core/src/cell/ton_cell.rs)
+- [TonAddress](ton_lib_core/src/types/ton_address.rs)
+- [TLB](ton_lib_core/src/traits/tlb.rs) - Trait allows you read/write arbitrary objects in BOC format
+- [Type](ton_lib_core/src/types) - Few basic types, common and stable enough to be in core
 
+## TonLib
+- [TLClient](ton_lib/src/clients/tl_client/client.rs) - Using `tonlibjson` to interact with TON network
+- [TonContract](ton_lib/src/contracts/ton_contract.rs) - Use it to get data or execute methods on TON contracts
+
+## Basic Usage
 ```rust
+// Build and read custom cells
 fn main() -> anyhow::Result<()> {
     use ton_lib::cell::ton_cell::TonCell;
     let mut builder = TonCell::builder();
@@ -21,25 +29,8 @@ fn main() -> anyhow::Result<()> {
     let data = parser.read_bits(24).unwrap();
     assert_eq!(data, [1, 2, 3]);
 }
-```
 
----
-
-### [types](ton_lib/src/types) module
-Contains 3 different layers:
-
-1. [tlb](ton_lib/src/types/tlb):  
-   The `TLBType` trait allows you to implement `serde` for your objects automatically.  
-   It also includes a collection of predefined TLB types.  
-   (Apologies for the `Dict` implementation — it's still in progress.)
-
-2. [client_types](ton_lib/src/types/client_types):  
-   Additional types for clients. (try don't use them!)
-
-3. The rest:  
-   High-level TON types such as `TonAddress` or `Wallet`.
-
-```rust
+// describe TLB type:
 #[derive(Debug, Clone, PartialEq, TLBDerive)]
 #[tlb_derive(ensure_empty = true)]
 pub struct StateInit {
@@ -57,38 +48,22 @@ fn main() {
     let state_init = StateInit::from_boc_hex(boc_hex).unwrap();
 }
 
-```
+// create & use TLClient
+pub(crate) async fn main() -> anyhow::Result<()> {
+    let mainnet = true; // or false for testnet
+    let archive_only = true; // set to true if you want to use archive nodes only
+    init_logging();
+    let mut config = match mainnet {
+        true => TLClientConfig::new_mainnet(archive_only),
+        false => TLClientConfig::new_testnet(archive_only),
+    };
+    config.connections_count = 10;
+    config.retry_strategy.retry_count = 10;
+    let client = TLClient::new(config).await?;
+    sys_tonlib_set_verbosity_level(0);
 
----
-
-### [clients](ton_lib/src/clients) module
-- [LiteClient](ton_lib/src/clients/lite):  
-  A "native" lite-node client that uses ADNL. More straightforward to use, but less flexible.
-
-- [TLClient](ton_lib/src/clients/tonlibjson):  
-  A client based on the `tonlibjson` library from the TON monorepo (requires `tonlib-sys`).  
-  A bit tricky to use at times, but offers more features.\
-  **Does not support `smc` methods - use `MethodEmulator` instead.**
-
-```rust
-async fn main() -> anyhow::Result<()> {
-    // LiteClient example
-    let config = LiteClientConfig::new(&TON_NET_CONF_MAINNET)?;
-    let lite_client = LiteClient::new(config)?;
-    let mc_info = lite_client.get_mc_info().await?;
-    let block_id = lite_client.lookup_mc_block(mc_info.last.seqno).await?;
-    
-    // TLClient example
-    let config = TLClientConfig::new(TON_NET_CONF_MAINNET, archive_only);
-    let tl_client = TLClientDefault::new(config).await?;
     let mc_info = tl_client.get_mc_info().await?;
     let block = tl_client.lookup_mc_block(mc_info.last.seqno - 100).await?;
+    Ok(())
 }
 ```
-
----
-
-### [emulators](ton_lib/src/emulators) module
-- [TVMEmulator](ton_lib/src/emulators/tvm/tvm_emulator.rs): `run_get_method`, `send_int_msg`, `send_ext_msg`\
-Check [tvm_emulator_tests](ton_lib/src/emulators/tvm/test_tvm_emulator.rs) for usage examples
-- [TXEmulator](ton_lib/src/emulators/tx/tx_emulator.rs): WIP

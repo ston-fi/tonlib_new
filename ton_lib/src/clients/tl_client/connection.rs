@@ -65,7 +65,7 @@ impl TLConnection {
 
 impl Inner {
     pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TLError> {
-        let _permit = self.semaphore.acquire().await;
+        let _permit = self.semaphore.acquire().await?;
         let req_id = self.next_request_id.fetch_add(1, Ordering::Relaxed);
         let tag = self.tonlibjson_wrapper.tag();
 
