@@ -15,6 +15,10 @@ This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib
 ## TonLib
 - [TLClient](ton_lib/src/clients/tl_client/client.rs) - Using `tonlibjson` to interact with TON network
 - [TonContract](ton_lib/src/contracts/ton_contract.rs) - Use it to get data or execute methods on TON contracts
+- [TonWallet](ton_lib/src/wallet/ton_wallet.rs) - Wrapper of wallet to sign and create external messages
+
+## Getting started
+A good example of a simple TON transaction can be found in `examples/ton_transfer.rs`. Please start there. 
 
 ## Basic Usage
 ```rust

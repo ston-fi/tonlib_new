@@ -101,7 +101,7 @@ impl TLProvider {
     ) -> Result<TVMGetMethodSuccess, TLError> {
         let code_boc = match &state.code_boc {
             Some(boc) => boc,
-            None => return Err(TLCoreError::ContractError("code is None at state: {state:?}".to_string()).into()),
+            None => return Err(TLCoreError::ContractError(format!("code is None at state: {state:?}")).into()),
         };
 
         let data_boc = state.data_boc.as_deref().unwrap_or(&[]);
