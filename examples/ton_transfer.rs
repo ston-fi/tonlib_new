@@ -2,7 +2,6 @@ use log::LevelFilter;
 use log4rs::append::console::{ConsoleAppender, Target};
 use log4rs::config::{Appender, Root};
 use log4rs::Config;
-use std::str::FromStr;
 use std::sync::Once;
 use std::time::Duration;
 use tokio;
@@ -24,13 +23,7 @@ use ton_lib::wallet::WalletVersion;
 use ton_lib_core::boc::BOC;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::MsgAddress;
-use ton_lib_core::types::tlb_core::MsgAddressInt;
-use ton_lib_core::types::TonAddress;
-use ton_lib_core::{
-    cell::TonCell,
-    types::tlb_core::{EitherRefLayout, MsgAddressIntStd},
-    *,
-};
+use ton_lib_core::{cell::TonCell, types::tlb_core::EitherRefLayout, *};
 //https://docs.ton.org/v3/guidelines/smart-contracts/howto/wallet#-external-and-internal-messages
 /* Plan:
     - Ton transfer (We will use wallet v4)
@@ -82,7 +75,8 @@ async fn main() -> anyhow::Result<()> {
     // ---------- Wallet initial ----------
     let mnemonic_str: String = std::env::var("MNEMONIC_STR").unwrap();
     let key_pair = make_keypair(&mnemonic_str);
-    let wallet = TonWallet::new(WalletVersion::V4R2, key_pair)?; // Didn't work with W5
+    // To create w5 testnet wallet you need to use TonWallet::new_with_params with WALLET_V5R1_DEFAULT_ID_TESTNET wallet_id
+    let wallet = TonWallet::new(WalletVersion::V4R2, key_pair)?;
 
     // Make testnet client
     let tl_client = make_tl_client(false, false).await?;
@@ -99,17 +93,8 @@ async fn main() -> anyhow::Result<()> {
         ihr_disabled: false,
         bounce: false,
         bounced: false,
-        src: MsgAddress::Int(MsgAddressInt::Std(MsgAddressIntStd {
-            anycast: None,
-            workchain: 0,
-            address: wallet.address.hash.clone(),
-        })),
-        dst: MsgAddressIntStd {
-            anycast: None,
-            workchain: 0,
-            address: wallet.address.hash.clone(),
-        }
-        .into(),
+        src: MsgAddress::NONE,
+        dst: wallet.address.to_msg_address_int().into(),
         value: CurrencyCollection::new(50010u128),
         ihr_fee: Coins::ZERO,
         fwd_fee: Coins::ZERO,
