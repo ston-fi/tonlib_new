@@ -18,7 +18,7 @@ This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib
 - [TonWallet](ton_lib/src/wallet/ton_wallet.rs) - Wrapper of wallet to sign and create external messages
 
 ## Getting started
-A good example of a simple TON transaction can be found in `examples/ton_transfer.rs`. Please start there. Other good examples can be found in [tonlib-rs](https://github.com/ston-fi/tonlib-rs), but they are primarily useful for understanding the concepts, as they are written using that library's specific interfaces.
+A good example of a simple TON transaction can be found in `examples/ton_transfer.rs`. Please start there. 
 
 ## Basic Usage
 ```rust

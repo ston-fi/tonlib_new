@@ -24,7 +24,9 @@ use ton_lib_core::boc::BOC;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::MsgAddress;
 use ton_lib_core::{cell::TonCell, types::tlb_core::EitherRefLayout, *};
-//https://docs.ton.org/v3/guidelines/smart-contracts/howto/wallet#-external-and-internal-messages
+
+// Transaction: https://testnet.tonviewer.com/transaction/3771a86dd5c5238ac93e7f125817379c7a9d1321c79b27ac5e6b2b2d34749af1
+// How external and internal messages work: https://docs.ton.org/v3/guidelines/smart-contracts/howto/wallet#-external-and-internal-messages
 /* Plan:
     - Ton transfer (We will use wallet v4)
         - make an internal message with empty sell. It will signal that it is transfer
@@ -121,6 +123,7 @@ async fn main() -> anyhow::Result<()> {
 
     let ext_cell = wallet.create_ext_in_msg(vec![int_msg_cell_ref.clone()], seqno, expire_at, false)?;
     let bag_of_cells = BOC::new(ext_cell.into_ref());
+    // Transaction: https://testnet.tonviewer.com/transaction/3771a86dd5c5238ac93e7f125817379c7a9d1321c79b27ac5e6b2b2d34749af1
     let _ = tl_client.send_msg(bag_of_cells.to_bytes(true).unwrap()).await?;
 
     Ok(())
