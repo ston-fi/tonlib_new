@@ -117,7 +117,6 @@ mod traits_impl {
     use crate::error::TLCoreError;
 
 
-
     impl From<[u8; 32]> for TonHash { fn from(data: [u8; 32]) -> Self { Self(TonHashData::Slice(data)) } }
     impl From<&[u8; 32]> for TonHash { fn from(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) } }
     impl FromStr for TonHash {

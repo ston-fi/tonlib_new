@@ -1,16 +1,16 @@
 use crate::block_tlb::TVMStack;
-use crate::contracts::contract_client::ContractClient;
+use crate::contracts::client::contract_client::ContractClient;
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
 use crate::error::TLError;
 use std::sync::Arc;
-use ton_lib_core::traits::contract_provider::{ContractMethodArgs, ContractMethodState, ContractState};
+use ton_lib_core::traits::contract_provider::ContractState;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 pub struct ContractCtx {
     pub client: ContractClient,
     pub address: TonAddress,
-    pub state: ContractMethodState,
+    pub state: Arc<ContractState>,
 }
 
 #[async_trait::async_trait]
@@ -18,40 +18,27 @@ pub trait TonContract: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<Self, TLError> {
-        match tx_id {
-            Some(tx_id) => Self::from_state(client.clone(), address, ContractMethodState::TxId(tx_id)),
-            None => Self::from_state(client.clone(), address, ContractMethodState::Latest),
-        }
+    async fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<Self, TLError> {
+        let state = client.get_contract(&address, tx_id.as_ref()).await?;
+        Self::from_state(client.clone(), address, state)
     }
 
-    fn from_state(client: ContractClient, address: TonAddress, state: ContractMethodState) -> Result<Self, TLError> {
+    fn from_state(client: ContractClient, address: TonAddress, state: Arc<ContractState>) -> Result<Self, TLError> {
         Ok(Self::from_ctx(ContractCtx { client, address, state }))
     }
 
-    async fn get_state(&self) -> Result<Arc<ContractState>, TLError> {
-        let ctx = self.ctx();
-        let tx_id = match &ctx.state {
-            ContractMethodState::Latest => None,
-            ContractMethodState::TxId(tx_id) => Some(tx_id),
-            ContractMethodState::Custom(state) => return Ok(state.clone()),
-        };
-        Ok(ctx.client.get_state(&ctx.address, tx_id).await?)
-    }
+    async fn get_state(&self) -> Result<&Arc<ContractState>, TLError> { Ok(&self.ctx().state) }
 
-    async fn run_get_method<M>(&self, method: M, stack: Option<&TVMStack>) -> Result<TVMStack, TLError>
+    async fn emulate_get_method<M>(&self, method: M, stack: Option<&TVMStack>) -> Result<TVMStack, TLError>
     where
         M: Into<TVMGetMethodID> + Send,
     {
         let ctx = self.ctx();
-        let args = ContractMethodArgs {
-            address: ctx.address.clone(),
-            method_state: ctx.state.clone(),
-            method_id: method.into().to_id(),
-            stack_boc: stack.map(|x| x.to_boc()).transpose()?,
-        };
-        let response = ctx.client.run_get_method(args).await?;
-        Ok(TVMStack::from_boc(&response.stack_boc)?)
+        let method_id = method.into().to_id();
+        let stack_raw = stack.map(|s| s.to_boc()).transpose()?;
+        let stack_slice = stack_raw.as_deref();
+        let response = ctx.client.emulate_get_method(&ctx.state, method_id, stack_slice).await?;
+        response.stack_parsed()
     }
 
     async fn get_parsed_data<D: TLB>(&self) -> Result<D, TLError> {
