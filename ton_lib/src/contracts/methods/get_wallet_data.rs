@@ -11,7 +11,7 @@ use ton_lib_core::types::TonAddress;
 #[async_trait]
 pub trait GetWalletData: TonContract {
     async fn get_wallet_data(&self) -> Result<GetWalletDataResult, TLError> {
-        let rsp_stack = self.run_get_method("get_wallet_data", None).await?;
+        let rsp_stack = self.emulate_get_method("get_wallet_data", None).await?;
         GetWalletDataResult::from_stack(rsp_stack)
     }
 }

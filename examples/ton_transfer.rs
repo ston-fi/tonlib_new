@@ -4,26 +4,22 @@ use log4rs::config::{Appender, Root};
 use log4rs::Config;
 use std::sync::Once;
 use std::time::Duration;
-use tokio;
 use ton_lib::block_tlb::{Coins, CommonMsgInfoInt, Msg};
 use ton_lib::block_tlb::{CommonMsgInfo, CurrencyCollection};
 use ton_lib::clients::tl_client::tl::client::TLClientTrait;
 use ton_lib::clients::tl_client::TLClient;
 use ton_lib::clients::tl_client::TLClientConfig;
-use ton_lib::contracts::contract_client::ContractClient;
-use ton_lib::contracts::tl_provider::provider::TLProvider;
-use ton_lib::contracts::tl_provider::provider_config::TLProviderConfig;
+use ton_lib::contracts::client::contract_client::{ContractClient, ContractClientConfig};
+use ton_lib::contracts::client::tl_provider::TLProvider;
 use ton_lib::contracts::ton_contract::TonContract;
 use ton_lib::contracts::ton_wallet::TonWalletContract;
 use ton_lib::sys_utils::sys_tonlib_set_verbosity_level;
-use ton_lib::wallet::KeyPair;
 use ton_lib::wallet::Mnemonic;
 use ton_lib::wallet::TonWallet;
 use ton_lib::wallet::WalletVersion;
-use ton_lib_core::boc::BOC;
+use ton_lib_core::cell::TonCell;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::tlb_core::MsgAddress;
-use ton_lib_core::{cell::TonCell, types::tlb_core::EitherRefLayout, *};
+use ton_lib_core::types::tlb_core::{MsgAddress, TLBEitherRef};
 
 // Transaction: https://testnet.tonviewer.com/transaction/3771a86dd5c5238ac93e7f125817379c7a9d1321c79b27ac5e6b2b2d34749af1
 // How external and internal messages work: https://docs.ton.org/v3/guidelines/smart-contracts/howto/wallet#-external-and-internal-messages
@@ -35,7 +31,7 @@ use ton_lib_core::{cell::TonCell, types::tlb_core::EitherRefLayout, *};
 */
 static LOG: Once = Once::new();
 
-pub(crate) fn init_logging() {
+fn init_logging() {
     LOG.call_once(|| {
         let stderr = ConsoleAppender::builder()
             .target(Target::Stderr)
@@ -53,9 +49,9 @@ pub(crate) fn init_logging() {
     })
 }
 
-pub(crate) async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
+async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
     init_logging();
-    log::info!("Initializing tl_client with mainnet={mainnet}...");
+    log::info!("Initializing tl_client with mainnet={mainnet}, archive_only={archive_only}...");
     let mut config = match mainnet {
         true => TLClientConfig::new_mainnet(archive_only),
         false => TLClientConfig::new_testnet(archive_only),
@@ -67,64 +63,48 @@ pub(crate) async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow:
     Ok(client)
 }
 
-fn make_keypair(mnemonic_str: &str) -> KeyPair {
-    let mnemonic = Mnemonic::from_str(mnemonic_str, None).unwrap();
-    mnemonic.to_key_pair().unwrap()
-}
-
 #[tokio::main(flavor = "current_thread")]
 async fn main() -> anyhow::Result<()> {
-    // ---------- Wallet initial ----------
-    let mnemonic_str: String = std::env::var("MNEMONIC_STR").unwrap();
-    let key_pair = make_keypair(&mnemonic_str);
-    // To create w5 testnet wallet you need to use TonWallet::new_with_params with WALLET_V5R1_DEFAULT_ID_TESTNET wallet_id
+    // ---------- Wallet initialization ----------
+    let mnemonic_str = std::env::var("MNEMONIC_STR")?;
+    let key_pair = Mnemonic::from_str(&mnemonic_str, None)?.to_key_pair()?;
+    // To create w5 wallet for testnet, use TonWallet::new_with_params with WALLET_V5R1_DEFAULT_ID_TESTNET wallet_id
     let wallet = TonWallet::new(WalletVersion::V4R2, key_pair)?;
 
     // Make testnet client
     let tl_client = make_tl_client(false, false).await?;
-    let head_seqno = tl_client.get_mc_info().await?.last.seqno;
-    let provider_config = TLProviderConfig::new_no_cache(head_seqno);
-    let data_provider = TLProvider::new(provider_config, tl_client.clone()).await?;
-    let ctr_cli = ContractClient::new(data_provider)?;
+    let provider = TLProvider::new(tl_client.clone());
+    let ctr_config = ContractClientConfig::new_no_cache(Duration::from_millis(100));
+    let ctr_cli = ContractClient::new(ctr_config, provider)?;
 
-    // ---------- Building internal message ----------
-    let builder = TonCell::builder();
-    let transfer_cell = builder.build()?;
-
-    let internal_message_info = CommonMsgInfo::Int(CommonMsgInfoInt {
-        ihr_disabled: false,
-        bounce: false,
-        bounced: false,
-        src: MsgAddress::NONE,
-        dst: wallet.address.to_msg_address_int().into(),
-        value: CurrencyCollection::new(50010u128),
-        ihr_fee: Coins::ZERO,
-        fwd_fee: Coins::ZERO,
-        created_lt: 0, // lt
-        created_at: 0,
-    });
-
-    let internal_msg = Msg {
-        info: internal_message_info,
+    // ---------- Building transfer_msg ----------
+    let transfer_msg = Msg {
+        info: CommonMsgInfo::Int(CommonMsgInfoInt {
+            ihr_disabled: false,
+            bounce: false,
+            bounced: false,
+            src: MsgAddress::NONE,
+            dst: MsgAddress::Int(wallet.address.to_msg_address_int()),
+            value: CurrencyCollection::new(50010u128),
+            ihr_fee: Coins::ZERO,
+            fwd_fee: Coins::ZERO,
+            created_lt: 0,
+            created_at: 0,
+        }),
         init: None,
-        body: types::tlb_core::TLBEitherRef {
-            value: transfer_cell,
-            layout: EitherRefLayout::ToRef,
-        },
+        body: TLBEitherRef::new(TonCell::EMPTY),
     };
-    let int_msg_cell_ref = internal_msg.to_cell_ref()?;
 
     let expired_at_time = std::time::SystemTime::now() + Duration::from_secs(600);
-    let expire_at = expired_at_time.duration_since(std::time::UNIX_EPOCH).unwrap().as_secs() as u32;
+    let expire_at = expired_at_time.duration_since(std::time::UNIX_EPOCH)?.as_secs() as u32;
 
     // Get current wallet seqno
-    let contract = TonWalletContract::new(&ctr_cli, wallet.address.clone(), None)?;
-    let seqno = contract.seqno().await?;
+    let wallet_ctr = TonWalletContract::new(&ctr_cli, wallet.address.clone(), None).await?;
+    let seqno = wallet_ctr.seqno().await?;
 
-    let ext_cell = wallet.create_ext_in_msg(vec![int_msg_cell_ref.clone()], seqno, expire_at, false)?;
-    let bag_of_cells = BOC::new(ext_cell.into_ref());
+    let ext_in_msg = wallet.create_ext_in_msg(vec![transfer_msg.to_cell_ref()?], seqno, expire_at, false)?;
     // Transaction: https://testnet.tonviewer.com/transaction/3771a86dd5c5238ac93e7f125817379c7a9d1321c79b27ac5e6b2b2d34749af1
-    let _ = tl_client.send_msg(bag_of_cells.to_bytes(true).unwrap()).await?;
+    let _msg_hash = tl_client.send_msg(ext_in_msg.to_boc()?).await?;
 
     Ok(())
 }

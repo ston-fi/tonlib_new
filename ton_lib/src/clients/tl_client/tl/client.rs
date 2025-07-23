@@ -4,18 +4,16 @@ use crate::clients::tl_client::tl::request::TLRequest;
 use crate::clients::tl_client::tl::response::TLResponse;
 use crate::clients::tl_client::tl::types::{
     TLAccountTxId, TLBlockId, TLBlocksHeader, TLBlocksMCInfo, TLBlocksShards, TLFullAccountState,
-    TLRawFullAccountState, TLRawTxs, TLShortTxId,
+    TLRawFullAccountState, TLRawTxs, TLShortTxId, TLSmcLibraryEntry,
 };
 use crate::clients::tl_client::RetryStrategy;
 use crate::error::TLError;
-use crate::libs_dict::LibsDict;
 use crate::unwrap_tl_response;
 use async_trait::async_trait;
 use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
-use ton_lib_core::cell::{TonCellRef, TonHash};
+use ton_lib_core::cell::TonHash;
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
-use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
 #[async_trait]
@@ -62,18 +60,13 @@ pub trait TLClientTrait: Send + Sync {
 
     /// May return less libraries when requested
     /// Check it on user side if you need it
-    /// If no libraries found, returns None
-    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<Option<LibsDict>, TLError> {
+    async fn get_libs(&self, lib_ids: Vec<TonHash>) -> Result<Vec<TLSmcLibraryEntry>, TLError> {
         let req = TLRequest::SmcGetLibraries { library_list: lib_ids };
         let result = unwrap_tl_response!(self.exec(&req).await?, TLSmcLibraryResult)?;
         if result.result.is_empty() {
-            return Ok(None);
+            return Ok(vec![]);
         }
-        let mut libs_dict = LibsDict::default();
-        for lib in result.result {
-            libs_dict.insert(TonHash::from_vec(lib.hash)?, TonCellRef::from_boc(&lib.data)?);
-        }
-        Ok(Some(libs_dict))
+        Ok(result.result)
     }
 
     async fn get_config_boc_param(&self, mode: u32, param: u32) -> Result<Vec<u8>, TLError> {
@@ -175,7 +168,6 @@ pub trait TLClientTrait: Send + Sync {
         Ok(txs)
     }
 
-    // TODO is not tested
     async fn send_msg(&self, body: Vec<u8>) -> Result<TonHash, TLError> {
         let req = TLRequest::RawSendMsgReturnHash { body };
         let rsp = unwrap_tl_response!(self.exec(&req).await?, TLRawExtMessageInfo)?;

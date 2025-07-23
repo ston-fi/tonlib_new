@@ -10,7 +10,7 @@ use ton_lib_core::types::TonAddress;
 #[async_trait]
 pub trait GetJettonData: TonContract {
     async fn get_jetton_data(&self) -> Result<GetJettonDataResult, TLError> {
-        let rsp_stack = self.run_get_method("get_jetton_data", None).await?;
+        let rsp_stack = self.emulate_get_method("get_jetton_data", None).await?;
         GetJettonDataResult::from_stack(rsp_stack)
     }
 }
