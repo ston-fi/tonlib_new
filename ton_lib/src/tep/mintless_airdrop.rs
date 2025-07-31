@@ -6,7 +6,7 @@ use crate::tlb_adapters::TLBHashMap;
 use std::collections::HashMap;
 use ton_lib_core::types::TonAddress;
 use ton_lib_core::TLBDerive;
-
+// TODO not tested
 #[derive(Clone, Debug, TLBDerive)]
 pub struct MintlessAirdropDict {
     #[tlb_derive(adapter = "TLBHashMap::<DictKeyAdapterAddress, DictValAdapterTLB, _, _>::new(267)")]

@@ -3,7 +3,6 @@ pub mod nft;
 pub mod sbt;
 
 mod mintless_airdrop;
-mod snake_format;
+pub mod snake_data;
 
 pub use mintless_airdrop::*;
-pub use snake_format::*;
