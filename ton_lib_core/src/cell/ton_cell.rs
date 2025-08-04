@@ -66,7 +66,7 @@ impl TonCell {
 }
 
 // TonCelRef
-#[derive(Clone, PartialEq)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct TonCellRef(pub Arc<TonCell>);
 pub type TonCellStorage = Vec<TonCellRef>;
 

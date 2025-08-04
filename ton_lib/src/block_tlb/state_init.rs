@@ -21,7 +21,7 @@ pub struct StateInit {
     pub library: HashMap<TonHash, SimpleLib>,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, Eq, TLBDerive)]
 pub struct SimpleLib {
     pub public: bool,
     pub root: TonCellRef,
