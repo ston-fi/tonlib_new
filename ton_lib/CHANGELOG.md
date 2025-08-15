@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.38](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.37...ton_lib-v0.0.38) - 2025-08-15
+
+### Other
+
+- derive basic traits for few structs
+- init meta
+- snake_data support
+- support Eq for SimpleLib
+
 ## [0.0.37](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.36...ton_lib-v0.0.37) - 2025-07-23
 
 ### Fixed
