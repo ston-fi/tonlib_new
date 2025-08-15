@@ -15,6 +15,7 @@ pub trait GetJettonData: TonContract {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetJettonDataResult {
     pub total_supply: Coins,
     pub mintable: bool,

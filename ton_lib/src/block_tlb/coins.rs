@@ -11,7 +11,7 @@ use ton_lib_core::types::tlb_core::VarLenBytes;
 use ton_lib_core::TLBDerive;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Clone, Debug, PartialEq, Eq, TLBDerive)]
 pub struct Coins(VarLenBytes<u128, 4>);
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124

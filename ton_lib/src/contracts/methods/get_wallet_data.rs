@@ -16,6 +16,7 @@ pub trait GetWalletData: TonContract {
     }
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetWalletDataResult {
     pub balance: BigInt,
     pub owner: TonAddress,
