@@ -17,9 +17,7 @@ pub struct SnakeData<const HAS_PREFIX: bool> {
 }
 
 impl<const HAS_PREFIX: bool> AsRef<[u8]> for SnakeData<HAS_PREFIX> {
-    fn as_ref(&self) -> &[u8] {
-        self.as_slice()
-    }
+    fn as_ref(&self) -> &[u8] { self.as_slice() }
 }
 
 #[rustfmt::skip]

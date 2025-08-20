@@ -1,5 +1,4 @@
 use hmac::digest::crypto_common;
-use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;

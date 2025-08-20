@@ -249,7 +249,7 @@ impl LoadMeta<NftCollectionMetaData> for MetaLoader<NftCollectionMetaData> {
 mod tests {
     use anyhow::Ok;
 
-    use crate::tep::{IpfsLoaderConfig, MetaLoader, NftItemMetaData};
+    use crate::tep::meta::meta_loader::{MetaLoader, NftItemMetaData};
 
     #[tokio::test]
     async fn test_meta_data_load_ordinal_https() -> anyhow::Result<()> {
