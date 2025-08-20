@@ -1,4 +1,5 @@
 use hmac::digest::crypto_common;
+use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
@@ -127,7 +128,12 @@ pub enum TLError {
 }
 
 impl From<TLError> for TLCoreError {
-    fn from(err: TLError) -> Self { TLCoreError::Custom(err.to_string()) }
+    fn from(err: TLError) -> Self {
+        match err {
+            TLError::TLCoreError(err) => err,
+            other => TLCoreError::Custom(other.to_string()),
+        }
+    }
 }
 
 impl From<&TLError> for TLCoreError {

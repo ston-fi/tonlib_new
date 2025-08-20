@@ -220,11 +220,13 @@ mod tests {
 
     #[test]
     fn test_ton_wallet_create_external_msg_signed() -> anyhow::Result<()> {
+        const MNEMONIC_STR: &str = "erode enough only more ski hand pass card resemble poverty again stable catalog range rack sight social inject popular ticket invite other usage chimney";
         let key_pair_v3 = make_keypair(MNEMONIC_STR);
         let wallet_v3 = TonWallet::new(WalletVersion::V3R1, key_pair_v3)?;
 
         let key_pair_v5 = make_keypair(MNEMONIC_STR_V5);
         let wallet_v5 = TonWallet::new(WalletVersion::V5R1, key_pair_v5)?;
+        dbg!(&wallet_v5);
 
         let mut builder = TonCell::builder();
         100u32.write(&mut builder)?;

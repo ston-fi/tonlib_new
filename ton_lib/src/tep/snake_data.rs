@@ -16,6 +16,12 @@ pub struct SnakeData<const HAS_PREFIX: bool> {
     pub chunks_len: Vec<usize>,
 }
 
+impl<const HAS_PREFIX: bool> AsRef<[u8]> for SnakeData<HAS_PREFIX> {
+    fn as_ref(&self) -> &[u8] {
+        self.as_slice()
+    }
+}
+
 #[rustfmt::skip]
 impl<const HAS_PREFIX: bool> SnakeData<HAS_PREFIX> {
     pub fn new(data: Vec<u8>) -> Self { Self { data, chunks_len: vec![] } }
@@ -25,7 +31,11 @@ impl<const HAS_PREFIX: bool> SnakeData<HAS_PREFIX> {
 
 impl<const HAS_PREFIX: bool> FromStr for SnakeData<HAS_PREFIX> {
     type Err = TLCoreError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> { Ok(SnakeData::new(s.as_bytes().to_vec())) }
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut snake_data = SnakeData::new(s.as_bytes().to_vec());
+        snake_data.chunks_len = vec![s.len()];
+        Ok(snake_data)
+    }
 }
 
 impl<const HAS_PREFIX: bool> TLB for SnakeData<HAS_PREFIX> {

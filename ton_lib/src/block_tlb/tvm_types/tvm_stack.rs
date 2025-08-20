@@ -45,6 +45,12 @@ impl TVMStack {
     }
     pub fn push_tuple(&mut self, tuple: TVMTuple) { self.push(TVMStackValue::Tuple(tuple)); }
 
+    pub fn pop_checked(&mut self) -> Result<TVMStackValue, TLError> {
+        match self.pop() {
+            None => Err(TLError::TVMStackEmpty),
+            Some(value) => Ok(value),
+        }
+    }
     pub fn pop_tiny_int(&mut self) -> Result<i64, TLError> { extract_stack_val!(self.pop(), TinyInt) }
     pub fn pop_int(&mut self) -> Result<BigInt, TLError> { extract_stack_val!(self.pop(), Int) }
     // extract cell & cell_slice
