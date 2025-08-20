@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.23](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.22...ton_lib_macros-v0.0.23) - 2025-08-20
+
+### Other
+
+- make build works without tonlibjson feature & speedup build
+
 ## [0.0.22](https://github.com/Sild/ton_lib_rs/compare/ton_lib_macros-v0.0.21...ton_lib_macros-v0.0.22) - 2025-06-30
 
 ### Fixed
