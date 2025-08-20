@@ -21,6 +21,7 @@ impl<T: TLB> Default for TLBRef<T> {
     fn default() -> Self { Self::new() }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use ton_lib_core::TLBDerive;

@@ -46,7 +46,7 @@ impl TonCell {
 
     pub fn builder() -> CellBuilder { CellBuilder::new(CellType::Ordinary) }
     pub fn builder_typed(cell_type: CellType) -> CellBuilder { CellBuilder::new(cell_type) }
-    pub fn parser(&self) -> CellParser { CellParser::new(self) }
+    pub fn parser(&'_ self) -> CellParser<'_> { CellParser::new(self) }
 
     pub fn level_mask(&self) -> LevelMask { self.meta.level_mask(self) }
 

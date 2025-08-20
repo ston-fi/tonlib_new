@@ -41,7 +41,7 @@ impl BOCRaw {
     }
 }
 
-fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellIndexed>, TLCoreError> {
+fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellIndexed<'_>>, TLCoreError> {
     let mut cur_cells = vec![];
     for cell in roots {
         cur_cells.push(cell);
