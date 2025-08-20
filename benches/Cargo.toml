@@ -8,9 +8,9 @@ publish = false
 ton_lib = { path = "../ton_lib", version = "0" }
 ton_lib_core = { path = "../ton_lib_core", version = "0" }
 base64 = "0.22"
-criterion = "0.6"
+criterion = "0.7"
 
-tonlib-core = "0.25"
+tonlib-core = "0.26"
 
 
 [[bench]]

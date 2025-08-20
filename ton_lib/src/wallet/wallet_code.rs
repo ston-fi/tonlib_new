@@ -7,7 +7,7 @@ use ton_lib_core::traits::tlb::TLB;
 
 macro_rules! load_code {
     ($path:expr) => {
-        TonCellRef::from_boc_base64(include_str!($path)).unwrap()
+        TonCellRef::from_boc_b64(include_str!($path)).unwrap()
     };
 }
 

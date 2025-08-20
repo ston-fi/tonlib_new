@@ -29,7 +29,7 @@ pub trait TonContract: Send + Sync + Sized {
 
     async fn get_state(&self) -> Result<&Arc<ContractState>, TLError> { Ok(&self.ctx().state) }
 
-    async fn emulate_get_method<M>(&self, method: M, stack: &TVMStack) -> Result<TVMStack, TLError>
+    async fn emulate_get_method<M>(&self, method: M, stack: &TVMStack) -> Result<Vec<u8>, TLError>
     where
         M: Into<TVMGetMethodID> + Send,
     {
@@ -37,7 +37,7 @@ pub trait TonContract: Send + Sync + Sized {
         let method_id = method.into().to_id();
         let stack_boc = stack.to_boc()?;
         let response = ctx.client.emulate_get_method(&ctx.state, method_id, &stack_boc).await?;
-        response.stack_parsed()
+        response.stack_boc()
     }
 
     async fn get_parsed_data<D: TLB>(&self) -> Result<D, TLError> {
