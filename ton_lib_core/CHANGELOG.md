@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8](https://github.com/Sild/ton_lib_rs/compare/ton_lib_core-v0.0.7...ton_lib_core-v0.0.8) - 2025-08-20
+
+### Fixed
+
+- fix clippy
+
+### Other
+
+- add TVMResult trait
+- make build works without tonlibjson feature & speedup build
+
 ## [0.0.7](https://github.com/Sild/ton_lib_rs/compare/ton_lib_core-v0.0.6...ton_lib_core-v0.0.7) - 2025-08-15
 
 ### Other
