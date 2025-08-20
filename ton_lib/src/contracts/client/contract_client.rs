@@ -1,4 +1,3 @@
-use crate::block_tlb::TVMStack;
 use crate::contracts::client::contract_client_cache::ContractClientCache;
 use crate::emulators::emul_bc_config::EmulBCConfig;
 use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
@@ -59,7 +58,7 @@ impl ContractClient {
         &self,
         state: &ContractState,
         method_id: i32,
-        stack_boc: Option<&[u8]>,
+        stack_boc: &[u8],
     ) -> Result<TVMGetMethodSuccess, TLError> {
         let code_boc = match &state.code_boc {
             Some(boc) => boc,
@@ -96,8 +95,7 @@ impl ContractClient {
         if !libs_rsp.is_empty() {
             emulator.set_libs(&LibsDict::new(libs_rsp)?.to_boc()?)?;
         }
-        let stack = stack_boc.unwrap_or(TVMStack::EMPTY_BOC);
-        emulator.run_get_method(method_id, stack)
+        emulator.run_get_method(method_id, stack_boc)
     }
 
     pub fn cache_stats(&self) -> HashMap<String, usize> { self.0.cache.cache_stats() }

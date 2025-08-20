@@ -40,7 +40,7 @@ async fn assert_jetton_master(ctr_cli: &ContractClient) -> anyhow::Result<()> {
     assert_ok!(contract.get_jetton_data().await);
     let owner = TonAddress::from_str("UQAj-peZGPH-cC25EAv4Q-h8cBXszTmkch6ba6wXC8BM40qt")?;
     let wallet = assert_ok!(contract.get_wallet_address(&owner).await);
-    assert_eq!(wallet.to_string(), "EQAmJs8wtwK93thF78iD76RQKf9Z3v2sxM57iwpZZtdQAiVM");
+    assert_eq!(wallet.address.to_string(), "EQAmJs8wtwK93thF78iD76RQKf9Z3v2sxM57iwpZZtdQAiVM");
     Ok(())
 }
 

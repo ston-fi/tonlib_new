@@ -11,7 +11,7 @@ ton_lib_core = { path = "../ton_lib_core", version = "0" }
 hex = "0.4"
 num-bigint = { version = "0.4" }
 anyhow = "1.0"
-tonlib-core = "0.25.2"
+tonlib-core = "0.26"
 tokio = {version = "1.46", features =["rt", "macros"]}
 log4rs = "1.3"
 log = "0.4"
@@ -39,4 +39,5 @@ path = "types_tlb_build_dict_large.rs"
 
 [[example]]
 name = "ton_transfer"
-path = "ton_transfer.rs" 
+path = "ton_transfer.rs"
+
