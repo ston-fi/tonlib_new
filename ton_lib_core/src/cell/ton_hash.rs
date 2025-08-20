@@ -110,7 +110,8 @@ fn check_bytes_len(bytes: &[u8]) -> Result<(), TLCoreError> {
 
 #[rustfmt::skip]
 mod traits_impl {
-    use std::fmt::{Debug, Display, UpperHex};
+    use std::fmt::{Debug, Display, Formatter, UpperHex};
+    use std::fmt::Result as FmtResult;
     use std::hash::Hash;
     use std::str::FromStr;
     use crate::cell::ton_hash::{from_base64, from_hex, TonHash, TonHashData};
@@ -130,16 +131,16 @@ mod traits_impl {
     }
 
     impl AsRef<[u8]> for TonHash { fn as_ref(&self) -> &[u8] { self.as_slice() } }
-    impl UpperHex for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{}", self.to_hex().to_uppercase()) } }
-    impl Display for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "{self:X}") } }
-    impl Debug for TonHash { fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { write!(f, "TonHash[{self:X}]") } }
+    impl UpperHex for TonHash { fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult { write!(f, "{}", self.to_hex().to_uppercase()) } }
+    impl Display for TonHash { fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult { write!(f, "{self:X}") } }
+    impl Debug for TonHash { fn fmt(&self, f: &mut Formatter<'_>) -> FmtResult { write!(f, "TonHash[{self:X}]") } }
     
     // Must implement it manually, because we don't distinguish between Vec and Slice
     impl Eq for TonHashData {}
     impl PartialEq for TonHashData { fn eq(&self, other: &Self) -> bool { self.as_slice() == other.as_slice() } }
     impl Hash for TonHashData { fn hash<H: std::hash::Hasher>(&self, state: &mut H) { state.write(self.as_slice()); } }
     impl Ord for TonHashData {fn cmp(&self, other: &Self) -> std::cmp::Ordering {self.as_slice().cmp(other.as_slice()) } }
-    impl PartialOrd for TonHashData {fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> { Some(self.as_slice().cmp(other.as_slice())) } }
+    impl PartialOrd for TonHashData {fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> { Some(self.cmp(other)) } }
 }
 
 #[cfg(test)]

@@ -14,7 +14,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
+  build_no_features:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Swatinem/rust-cache@v2
+      - run: rustup toolchain install nightly
+      - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
+      - run: cargo +nightly fmt --check
+      - run: cargo test --lib -p ton_lib_core --no-default-features --verbose
+      - run: cargo test --lib -p ton_lib --no-default-features --verbose
+  build_with_features:
     runs-on: ubuntu-latest
     steps:
     - name: Install libraries
@@ -26,9 +39,6 @@ jobs:
       with:
         fetch-depth: 0
     - uses: Swatinem/rust-cache@v2
-    - run: rustup toolchain install nightly
-    - run: rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
-    - run: cargo +nightly fmt --check
     - run: cargo build --all-features --verbose
-    - run: cargo test --lib --all
     - run: cargo test --lib --all --all-features
+

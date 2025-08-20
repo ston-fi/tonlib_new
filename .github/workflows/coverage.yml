@@ -12,7 +12,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  coverage:
+  coverage_ton_lib:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -23,7 +23,7 @@ jobs:
       - name: Install tarpaulin
         run: cargo install cargo-tarpaulin
       - name: Generate coverage
-        run: cargo tarpaulin --no-default-features --out Xml
+        run: cargo tarpaulin -p ton_lib --no-default-features --out Xml
       - name: Upload to Codecov
         uses: codecov/codecov-action@v4
         with:

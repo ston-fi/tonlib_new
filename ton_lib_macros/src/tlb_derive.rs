@@ -28,14 +28,24 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
         Err(e) => return e.into_compile_error(),
     };
 
-    let found_crate = crate_name("ton_lib_core").expect("ton_lib_core crate not found");
-
-    let crate_path = match found_crate {
-        FoundCrate::Itself => quote::quote! { crate },
-        FoundCrate::Name(name) => {
-            let ident = format_ident!("{name}");
-            quote! { #ident }
+    let crate_path = if let Ok(ton_lib_core_crate) = crate_name("ton_lib_core") {
+        match ton_lib_core_crate {
+            FoundCrate::Itself => quote::quote! { crate },
+            FoundCrate::Name(name) => {
+                let ident = format_ident!("{name}");
+                quote! { #ident }
+            }
         }
+    } else if let Ok(ton_lib_crate) = crate_name("ton_lib") {
+        match ton_lib_crate {
+            FoundCrate::Itself => quote::quote! { crate::ton_lib_core },
+            FoundCrate::Name(name) => {
+                let ident = format_ident!("{name}");
+                quote! { #ident::ton_lib_core }
+            }
+        }
+    } else {
+        panic!("Can't find ton_lib_core or ton_lib crate");
     };
 
     let ident = &input.ident;
