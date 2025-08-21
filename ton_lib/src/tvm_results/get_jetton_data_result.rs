@@ -1,4 +1,7 @@
-use crate::block_tlb::{Coins, TVMStack};
+use crate::block_tlb::{Coins, TVMStack, TVMStackValue};
+use crate::error::TLError;
+use crate::tep::MetaDataContent;
+use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::error::TLCoreError;
@@ -11,7 +14,7 @@ pub struct GetJettonDataResult {
     pub total_supply: Coins,
     pub mintable: bool,
     pub admin: TonAddress,
-    pub content: TonCellRef,
+    pub content: MetaDataContent,
     pub wallet_code: TonCellRef,
 }
 
@@ -29,7 +32,7 @@ impl TVMResult for GetJettonDataResult {
         let content = Self::read_jetton_metadata_content(stack.pop_cell()?)?;
         let admin = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let mintable = match stack.pop_checked()? {
-            TVMStackValue::Int(inner) => inner.value != BigInt::zero(),
+            TVMStackValue::Int(inner) => inner.value != BigInt::ZERO,
             TVMStackValue::TinyInt(inner) => inner.value != 0,
             _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
         };

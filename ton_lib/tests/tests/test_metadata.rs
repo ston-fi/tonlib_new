@@ -161,7 +161,7 @@ async fn test_get_wallet_address() -> anyhow::Result<()> {
 
     let owner_address = assert_ok!(TonAddress::from_str("EQB2BtXDXaQuIcMYW7JEWhHmwHfPPwa-eoCdefiAxOhU3pQg"));
     let wallet_address = assert_ok!(contract.get_wallet_address(&owner_address).await);
-    assert_eq!("EQCGY3OVLtD9KRcOsP2ldQDtuY0FMzV7wPoxjrFbayBXc23c", wallet_address.to_string());
+    assert_eq!("EQCGY3OVLtD9KRcOsP2ldQDtuY0FMzV7wPoxjrFbayBXc23c", wallet_address.address.to_string());
     Ok(())
 }
 

@@ -12,7 +12,6 @@ use ton_lib_core::TLBDerive;
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0x595f07bc, bits_len = 32, ensure_empty = true)]
 pub struct JettonBurnMsg {
-    // TODO(TIAZH): Что то надо было написать, я и сам забыл что
     pub query_id: u64,            // arbitrary request number
     pub amount: Coins,            // amount to burn
     pub response_dst: MsgAddress, // address to send confirmation
