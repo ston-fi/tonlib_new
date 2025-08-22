@@ -29,7 +29,7 @@ pub(crate) fn init_logging() {
 }
 
 #[cfg(feature = "tonlibjson")]
-pub(crate) async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow::Result<TLClient> {
+pub(crate) async fn make_tl_client(mainnet: bool, archive_only: bool) -> anyhow::Result<ton_lib::clients::tl_client::TLClient> {
     init_logging();
     log::info!("Initializing tl_client with mainnet={mainnet}...");
     let mut config = match mainnet {
