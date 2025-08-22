@@ -12,6 +12,8 @@ macro_rules! bail_tl_core {
 
 #[derive(Error, Debug)]
 pub enum TLCoreError {
+    #[error("Failed to parse metadata")]
+    MetadataParseError,
     // ton_hash
     #[error("TonHashWrongLen: Expecting {exp} bytes, got {given}")]
     TonHashWrongLen { exp: usize, given: usize },
