@@ -20,7 +20,7 @@ include = [
 ]
 
 [features]
-default = ["tonlibjson"]
+default = []
 tonlibjson = ["dep:tonlib-sys"]
 
 
