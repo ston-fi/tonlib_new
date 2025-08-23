@@ -16,6 +16,10 @@ use std::str::FromStr;
 
 const CRC_16_XMODEM: Crc<u16> = Crc::<u16>::new(&crc::CRC_16_XMODEM);
 
+/// User-friendly representation of TON address
+///
+/// Can be converted to/from TLB MsgAddress (can represent MsgAddressInt and MsgAddressNone)
+/// Default string representation is URL-safe base64 with bounceable mainnet tag
 #[derive(Clone, PartialEq, Eq, Hash)]
 pub struct TonAddress {
     pub workchain: i32,

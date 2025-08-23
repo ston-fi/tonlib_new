@@ -3,8 +3,9 @@ use crate::error::TLCoreError;
 use crate::traits::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
-// https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L33
-// Optimized implementation
+/// https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L33
+///
+/// Sequence of N 1-bits followed by a 0-bit, where N is the length
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct UnaryLen(pub usize);
 

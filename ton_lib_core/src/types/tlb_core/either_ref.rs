@@ -4,7 +4,9 @@ use crate::error::TLCoreError;
 use crate::traits::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
-// Either X ^X
+/// Either X ^X
+///
+/// https://github.com/ton-blockchain/ton/blame/cac968f77dfa5a14e63db40190bda549f0eaf746/crypto/block/block.tlb#L10
 #[derive(Clone, Debug)]
 pub struct TLBEitherRef<T> {
     pub value: T,

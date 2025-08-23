@@ -3,7 +3,9 @@ use crate::cell::CellParser;
 use crate::error::TLCoreError;
 use crate::traits::tlb::TLB;
 
-// https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L11
+/// Either X Y
+///
+/// https://github.com/ton-blockchain/ton/blame/cac968f77dfa5a14e63db40190bda549f0eaf746/crypto/block/block.tlb#L10
 #[derive(Clone, Debug, PartialEq)]
 pub enum TLBEither<L, R> {
     Left(L),
