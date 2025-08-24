@@ -4,7 +4,6 @@ use crate::tep::meta::ipfs_loader::IpfsLoader;
 use crate::tep::meta::metadata_field::META_URI;
 use crate::tep::meta::MetadataContent;
 use crate::tep::meta::*;
-use crate::tep::IpfsLoaderConfig;
 use crate::tep::IpfsLoaderError;
 use reqwest::header;
 use reqwest::header::HeaderValue;
@@ -75,13 +74,19 @@ impl MetaLoaderBuilder {
     }
 
     pub fn build(self) -> MetaLoader {
-        let mut headers = header::HeaderMap::new();
-        headers.insert("user-agent", HeaderValue::from_static("TonlibMetaLoader/0.x"));
-        headers.insert("accept", HeaderValue::from_static("*/*"));
+        let http_client = match self.http_client {
+            Some(client) => client,
+            None => {
+                let mut headers = header::HeaderMap::new();
+                headers.insert("user-agent", HeaderValue::from_static("TonlibMetaLoader/0.x"));
+                headers.insert("accept", HeaderValue::from_static("*/*"));
+                Client::builder().default_headers(headers).build().unwrap()
+            }
+        };
 
         MetaLoader {
-            http_client: self.http_client.or(Client::builder().default_headers(headers).build().ok()).unwrap(),
-            ipfs_loader: self.ipfs_loader.or(IpfsLoader::new(&IpfsLoaderConfig::default()).ok()).unwrap(),
+            http_client: http_client,
+            ipfs_loader: self.ipfs_loader.unwrap_or_default(),
         }
     }
 }
@@ -91,7 +96,7 @@ impl MetaLoader {
         MetaLoaderBuilder::new()
     }
 
-    pub async fn load_json_meta_from_uri(&self, uri: &str) -> Result<String, MetaLoaderError> {
+    pub async fn load_external_meta(&self, uri: &str) -> Result<String, MetaLoaderError> {
         log::trace!("Downloading metadata from {}", uri);
         let meta_str: String = if uri.starts_with("ipfs://") {
             let path: String = uri.chars().skip(7).collect();
@@ -110,54 +115,25 @@ impl MetaLoader {
 
         Ok(meta_str)
     }
-}
 
-// ------------------------------------JETTON META DATA----------------------------------------
-impl MetaLoader {
     pub async fn load<T: Metadata>(&self, content: &MetadataContent) -> Result<T, MetaLoaderError> {
         match content {
             MetadataContent::External(MetadataExternal { uri }) => {
-                let json = self.load_json_meta_from_uri(&uri.as_str()).await?;
-                Ok(T::from_offchain(&json)?)
+                let json = self.load_external_meta(&uri.as_str()).await?;
+                Ok(T::from_json(&json)?)
             }
             MetadataContent::Internal(MetadataInternal { data: dict }) => {
                 if dict.contains_key(&*META_URI) {
                     let uri = String::from_utf8_lossy(dict.get(&*META_URI).unwrap().as_slice()).to_string();
-                    match self.load_json_meta_from_uri(uri.as_str()).await {
+                    match self.load_external_meta(uri.as_str()).await {
                         Ok(json) => Ok(T::from_data(Some(&dict), Some(&json))?),
-                        Err(_) => Ok(T::from_onchain(&dict)?),
+                        Err(_) => Ok(T::from_dict(&dict)?),
                     }
                 } else {
-                    Ok(T::from_onchain(&dict)?)
+                    Ok(T::from_dict(&dict)?)
                 }
             }
             content => Err(MetaLoaderError::ContentLayoutUnsupported(content.clone())),
         }
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use anyhow::Ok;
-
-    use crate::tep::meta::meta_loader::{MetaLoader, NftItemMetadata};
-
-    #[tokio::test]
-    async fn test_meta_data_load_ordinal_https() -> anyhow::Result<()> {
-        let loader = MetaLoader::default();
-
-        let metadata = loader
-            .load_json_meta_from_uri("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/95/meta.json")
-            .await?;
-
-        let expected_meta = NftItemMetadata {
-            name: Some(String::from("TON Smart Challenge #2 Winners Trophy")),
-            description: Some(String::from("TON Smart Challenge #2 Winners Trophy 93 place out of 181")),
-            image: Some(String::from("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/images/943e994f91227c3fdbccbc6d8635bfaab256fbb4")),
-            content_url: Some(String::from("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/content/84f7f698b337de3bfd1bc4a8118cdfd8226bbadf")),
-            attributes: Some(serde_json::Value::Array(vec![]))
-        };
-        assert_eq!(expected_meta, serde_json::from_str(&metadata)?);
-        Ok(())
     }
 }

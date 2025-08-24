@@ -11,10 +11,11 @@ use ton_lib::contracts::jetton_master::JettonMaster;
 use ton_lib::contracts::methods::get_jetton_data::GetJettonData;
 use ton_lib::contracts::methods::get_wallet_address::GetWalletAddress;
 use ton_lib::contracts::ton_contract::TonContract;
-use ton_lib::tep::meta_loader::MetaLoader;
 use ton_lib::tep::JettonMetadata;
+use ton_lib::tep::MetaLoader;
 use ton_lib::tep::MetadataContent;
 use ton_lib::tep::MetadataExternal;
+use ton_lib::tep::NftItemMetadata;
 use ton_lib::tep::SnakeData;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::TonAddress;
@@ -182,5 +183,27 @@ async fn assert_jetton_image_data(ctr_cli: &ContractClient) -> anyhow::Result<()
     let img_hash = hasher.finalize()[..].to_vec();
     assert_eq!(target_image_hash.as_slice(), img_hash.as_slice());
 
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_meta_data_load_ordinal_https() -> anyhow::Result<()> {
+    let loader = MetaLoader::default();
+
+    let metadata =
+        loader.load_external_meta("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/95/meta.json").await?;
+
+    let expected_meta = NftItemMetadata {
+        name: Some(String::from("TON Smart Challenge #2 Winners Trophy")),
+        description: Some(String::from("TON Smart Challenge #2 Winners Trophy 93 place out of 181")),
+        image: Some(String::from(
+            "https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/images/943e994f91227c3fdbccbc6d8635bfaab256fbb4",
+        )),
+        content_url: Some(String::from(
+            "https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/content/84f7f698b337de3bfd1bc4a8118cdfd8226bbadf",
+        )),
+        attributes: Some(serde_json::Value::Array(vec![])),
+    };
+    assert_eq!(expected_meta, serde_json::from_str(&metadata)?);
     Ok(())
 }

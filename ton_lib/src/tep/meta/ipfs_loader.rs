@@ -49,9 +49,33 @@ impl IpfsLoaderConfig {
 
 impl Default for IpfsLoaderConfig {
     fn default() -> Self {
-        Self {
-            connection_type: IpfsConnectionType::HttpGateway,
-            base_url: "https://cloudflare-ipfs.com/ipfs/".to_string(),
+        Self::http_gateway("https://cloudflare-ipfs.com/ipfs/")
+    }
+}
+
+#[derive(Default)]
+pub struct IpfsLoaderBuilder {
+    ipfs_loader_config: Option<IpfsLoaderConfig>,
+    client: Option<reqwest::Client>,
+}
+
+impl IpfsLoaderBuilder {
+    pub fn with_config(mut self, config: IpfsLoaderConfig) -> Self {
+        self.ipfs_loader_config = Some(config);
+        self
+    }
+
+    pub fn with_client(mut self, client: reqwest::Client) -> Self {
+        self.client = Some(client);
+        self
+    }
+
+    pub fn build(self) -> IpfsLoader {
+        let config = self.ipfs_loader_config.unwrap_or_default();
+        IpfsLoader {
+            connection_type: config.connection_type,
+            base_url: config.base_url,
+            client: self.client.unwrap_or(reqwest::Client::builder().build().unwrap()),
         }
     }
 }
@@ -63,17 +87,24 @@ pub struct IpfsLoader {
     client: reqwest::Client,
 }
 
-impl IpfsLoader {
-    pub fn new(config: &IpfsLoaderConfig) -> Result<Self, IpfsLoaderError> {
-        Ok(Self {
-            connection_type: config.connection_type.clone(),
-            base_url: config.base_url.clone(),
-            client: reqwest::Client::builder().build()?,
-        })
+impl Default for IpfsLoader {
+    fn default() -> Self {
+        let cfg = IpfsLoaderConfig::default();
+        Self {
+            connection_type: cfg.connection_type,
+            base_url: cfg.base_url,
+            client: Default::default(),
+        }
     }
+}
 
-    #[allow(clippy::should_implement_trait)]
-    pub fn default() -> Result<Self, IpfsLoaderError> { Self::new(&IpfsLoaderConfig::default()) }
+impl IpfsLoader {
+    pub fn builder() -> IpfsLoaderBuilder {
+        IpfsLoaderBuilder::default()
+    }
+    pub fn new() -> Self {
+        Self::builder().build()
+    }
 
     pub async fn load(&self, path: &str) -> Result<Vec<u8>, IpfsLoaderError> {
         let response = match self.connection_type {

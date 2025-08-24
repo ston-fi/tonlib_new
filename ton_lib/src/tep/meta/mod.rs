@@ -1,7 +1,8 @@
 mod ipfs_loader;
-pub mod meta_loader;
-pub mod metadata;
+mod meta_loader;
+mod metadata;
 mod metadata_field;
 
 pub use ipfs_loader::*;
+pub use meta_loader::*;
 pub use metadata::*;

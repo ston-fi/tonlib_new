@@ -42,17 +42,17 @@ impl Metadata for JettonMetadata {
                     decimals: META_DECIMALS.use_string_or(None, dict).map(|v| v.parse::<u8>().unwrap()),
                 })
             }
-            (Some(dict), None) => Self::from_onchain(dict),
-            (None, Some(external_meta)) => Self::from_offchain(external_meta),
+            (Some(dict), None) => Self::from_dict(dict),
+            (None, Some(external_meta)) => Self::from_json(external_meta),
             (None, None) => Err(TLCoreError::MetadataParseError),
         }
     }
 
-    fn from_offchain(offchain: &str) -> Result<Self, TLCoreError> {
+    fn from_json(offchain: &str) -> Result<Self, TLCoreError> {
         serde_json::from_str(&offchain).map_err(|_| TLCoreError::MetadataParseError)
     }
 
-    fn from_onchain(onchain: &HashMap<TonHash, impl AsRef<[u8]>>) -> Result<Self, TLCoreError> {
+    fn from_dict(onchain: &HashMap<TonHash, impl AsRef<[u8]>>) -> Result<Self, TLCoreError> {
         let decimals = META_DECIMALS
             .use_string_or(None, onchain)
             .map(|v| v.parse::<u8>())
