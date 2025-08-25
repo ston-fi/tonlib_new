@@ -22,7 +22,7 @@ impl TVMResult for GetJettonDataResult {
     fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
         let mut stack = TVMStack::from_boc(boc)?;
         let wallet_code = stack.pop_cell()?;
-        let content = MetadataContent::from_cell(&*stack.pop_cell()?)?;
+        let content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let admin = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let mintable = match stack.pop_checked()? {
             TVMStackValue::Int(inner) => inner.value != BigInt::ZERO,
