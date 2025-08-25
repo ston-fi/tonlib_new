@@ -225,6 +225,7 @@ mod tests {
 
         let key_pair_v5 = make_keypair(MNEMONIC_STR_V5);
         let wallet_v5 = TonWallet::new(WalletVersion::V5R1, key_pair_v5)?;
+        dbg!(&wallet_v5);
 
         let mut builder = TonCell::builder();
         100u32.write(&mut builder)?;

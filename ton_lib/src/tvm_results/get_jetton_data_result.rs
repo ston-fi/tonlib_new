@@ -1,4 +1,7 @@
-use crate::block_tlb::{Coins, TVMStack};
+use crate::block_tlb::{Coins, TVMStack, TVMStackValue};
+use crate::error::TLError;
+use crate::tep::metadata::metadata_content::MetadataContent;
+use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::error::TLCoreError;
@@ -11,7 +14,7 @@ pub struct GetJettonDataResult {
     pub total_supply: Coins,
     pub mintable: bool,
     pub admin: TonAddress,
-    pub content: TonCellRef,
+    pub content: MetadataContent,
     pub wallet_code: TonCellRef,
 }
 
@@ -19,10 +22,24 @@ impl TVMResult for GetJettonDataResult {
     fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
         let mut stack = TVMStack::from_boc(boc)?;
         let wallet_code = stack.pop_cell()?;
-        let content = stack.pop_cell()?;
+        let content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let admin = TonAddress::from_cell(stack.pop_cell()?.deref())?;
-        let mintable = stack.pop_tiny_int()? != 0;
-        let total_supply = Coins::from_signed(stack.pop_tiny_int()?)?;
+        let mintable = match stack.pop_checked()? {
+            TVMStackValue::Int(inner) => inner.value != BigInt::ZERO,
+            TVMStackValue::TinyInt(inner) => inner.value != 0,
+            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
+        };
+
+        let total_supply = match stack.pop_checked()? {
+            TVMStackValue::Int(inner) => Coins::from_signed::<i128>(inner.value.try_into().map_err(|_| {
+                TLError::TVMStackWrongType(
+                    String::from("Cannot convert TVMInt to coins, it is maybe wrong answer"),
+                    String::from(""),
+                )
+            })?)?,
+            TVMStackValue::TinyInt(inner) => Coins::from_signed(inner.value)?,
+            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
+        };
 
         Ok(Self {
             total_supply,
@@ -48,7 +65,6 @@ mod test {
             result.admin,
             TonAddress::from_str("0:6440fe3c69410383963945173c4b11479bf0b9b4d7090e58777bda581c2f9998")?
         );
-        assert_eq!(result.content, TonCellRef::from_boc_hex("b5ee9c7201010701007d00010300c00102012002030143bff872ebdb514d9c97c283b7f0ae5179029e2b6119c39462719e4f46ed8f7413e640040143bff7407e978f01a40711411b1acb773a96bdd93fa83bb5ca8435013c8c4b3ac91f400601020005003e68747470733a2f2f7465746865722e746f2f757364742d746f6e2e6a736f6e00040036")?);
         Ok(())
     }
 }

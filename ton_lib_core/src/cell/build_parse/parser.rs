@@ -5,6 +5,7 @@ use bitstream_io::{BigEndian, BitRead, BitReader};
 use num_traits::Zero;
 use std::io::{Cursor, SeekFrom};
 
+#[derive(Debug)]
 pub struct CellParser<'a> {
     pub cell: &'a TonCell,
     pub next_ref_pos: usize,
