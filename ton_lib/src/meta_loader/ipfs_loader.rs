@@ -4,7 +4,7 @@ use thiserror::Error;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Error)] // TODO(TIAZH): Probably another file
+#[derive(Debug, Error)]
 pub enum IpfsLoaderError {
     #[error("Failed to load IPFS object (path: {path}, status: {status}, message: {message})")]
     IpfsLoadObjectFailed {
@@ -68,13 +68,13 @@ impl IpfsLoaderBuilder {
         self
     }
 
-    pub fn build(self) -> IpfsLoader {
+    pub fn build(self) -> Result<IpfsLoader, IpfsLoaderError> {
         let config = self.ipfs_loader_config.unwrap_or_default();
-        IpfsLoader {
+        Ok(IpfsLoader {
             connection_type: config.connection_type,
             base_url: config.base_url,
-            client: self.client.unwrap_or(reqwest::Client::builder().build().unwrap()),
-        }
+            client: self.client.unwrap_or(reqwest::Client::builder().build()?),
+        })
     }
 }
 
@@ -98,7 +98,6 @@ impl Default for IpfsLoader {
 
 impl IpfsLoader {
     pub fn builder() -> IpfsLoaderBuilder { IpfsLoaderBuilder::default() }
-    pub fn new() -> Self { Self::builder().build() }
 
     pub async fn load(&self, path: &str) -> Result<Vec<u8>, IpfsLoaderError> {
         let response = match self.connection_type {

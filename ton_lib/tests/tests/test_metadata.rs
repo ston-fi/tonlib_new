@@ -51,7 +51,7 @@ async fn assert_get_jetton_content_uri(ctr_cli: &ContractClient) -> anyhow::Resu
             uri: SnakeData::<false>::from_str("https://tarantini.dev/ston/moon.json")?
         })
     );
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("MOON"));
     assert_eq!(content_res.decimals.unwrap(), 0x9);
@@ -63,7 +63,7 @@ async fn assert_get_jetton_content_internal_uri(ctr_cli: &ContractClient) -> any
     let contract = JettonMaster::new(&ctr_cli, fnz_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("FNZ"));
     assert_eq!(content_res.decimals.unwrap(), 0x9);
@@ -75,7 +75,7 @@ async fn assert_get_jetton_content_internal_uri_jusdt(ctr_cli: &ContractClient) 
     let contract = JettonMaster::new(&ctr_cli, jusdt_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("jUSDT"));
     assert_eq!(content_res.decimals, Some(6));
@@ -87,7 +87,7 @@ async fn assert_get_jetton_content_empty_external_meta(ctr_cli: &ContractClient)
     let contract = JettonMaster::new(&ctr_cli, jusdt_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("BLKC"));
     assert_eq!(content_res.decimals, Some(8));
@@ -108,7 +108,7 @@ async fn test_get_jetton_content_ipfs_uri() -> anyhow::Result<()> {
     let contract = JettonMaster::new(&ctr_cli, bolt_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("BOLT"));
     log::info!("{:?}", content_res);
@@ -124,7 +124,7 @@ async fn assert_get_semi_chain_layout_jetton_content(ctr_cli: &ContractClient) -
     let contract = JettonMaster::new(&ctr_cli, jusdc_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     log::info!("content_res: {:?}", content_res);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("jUSDC"));
@@ -149,7 +149,7 @@ async fn assert_get_jetton_data_invalid_utf8_sequence(ctr_cli: &ContractClient) 
 
     let res = assert_ok!(contract.get_jetton_data().await);
     log::info!("DATA: {:?}", res);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("DuRove's"));
     assert_eq!(content_res.decimals.unwrap(), 0x9);
@@ -159,7 +159,7 @@ async fn assert_get_jetton_data_invalid_utf8_sequence(ctr_cli: &ContractClient) 
 
     let res = assert_ok!(contract.get_jetton_data().await);
     log::info!("DATA: {:?}", res);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
     assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("TFH"));
     assert_eq!(content_res.decimals.unwrap(), 0x9);
@@ -171,7 +171,7 @@ async fn assert_jetton_image_data(ctr_cli: &ContractClient) -> anyhow::Result<()
     let contract = JettonMaster::new(&ctr_cli, jusdc_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
-    let meta_loader = MetaLoader::default();
+    let meta_loader = MetaLoader::builder().build()?;
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
 
     let target_image_hash: TonHash = TonHash::from([
@@ -188,7 +188,7 @@ async fn assert_jetton_image_data(ctr_cli: &ContractClient) -> anyhow::Result<()
 
 #[tokio::test]
 async fn test_meta_data_load_ordinal_https() -> anyhow::Result<()> {
-    let loader = MetaLoader::default();
+    let loader = MetaLoader::builder().build()?;
 
     let metadata =
         loader.load_external_meta("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/95/meta.json").await?;

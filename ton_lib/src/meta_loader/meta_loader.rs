@@ -46,10 +46,6 @@ pub struct MetaLoader {
     ipfs_loader: IpfsLoader,
 }
 
-impl Default for MetaLoader {
-    fn default() -> Self { MetaLoaderBuilder::new().build() }
-}
-
 pub struct MetaLoaderBuilder {
     http_client: Option<reqwest::Client>,
     ipfs_loader: Option<IpfsLoader>,
@@ -72,7 +68,7 @@ impl MetaLoaderBuilder {
         self
     }
 
-    pub fn build(self) -> MetaLoader {
+    pub fn build(self) -> Result<MetaLoader, MetaLoaderError> {
         let http_client = match self.http_client {
             Some(client) => client,
             None => {
@@ -85,13 +81,13 @@ impl MetaLoaderBuilder {
 
         let ipfs_loader = match self.ipfs_loader {
             Some(ipfs_loader) => ipfs_loader,
-            None => IpfsLoader::builder().with_client(http_client.clone()).build(),
+            None => IpfsLoader::builder().with_client(http_client.clone()).build()?,
         };
 
-        MetaLoader {
+        Ok(MetaLoader {
             http_client,
             ipfs_loader,
-        }
+        })
     }
 }
 

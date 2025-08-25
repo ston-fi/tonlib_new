@@ -10,15 +10,10 @@ use ton_lib_core::traits::metadata::Metadata;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct NftItemMetadata {
-    ///  Optional. UTF8 string. Identifies the asset.
     pub name: Option<String>,
-    /// Optional. UTF8 string. Describes the asset.
     pub description: Option<String>,
-    /// Optional. ASCII string. A URI pointing to a resource with mime type image.
     pub image: Option<String>,
-    /// Optional. No description in TEP64 yet
     pub content_url: Option<String>,
-    /// Optional. No description in TEP64 yet
     pub attributes: Option<Value>,
 }
 

@@ -1,7 +1,6 @@
 use crate::cell::TonHash;
 use crate::error::TLCoreError;
 use std::collections::HashMap;
-use std::fmt::Debug;
 pub trait Metadata: Sized {
     fn from_data(dict: &HashMap<TonHash, impl AsRef<[u8]>>, json: Option<&str>) -> Result<Self, TLCoreError>;
 

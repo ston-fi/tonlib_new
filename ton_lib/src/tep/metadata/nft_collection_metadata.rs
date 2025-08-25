@@ -11,15 +11,10 @@ use crate::tep::metadata::metadata_fields::*;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct NftCollectionMetadata {
-    /// Optional. ASCII string. A URI pointing to a resource with mime type image.
     pub image: Option<String>,
-    /// Optional. UTF8 string. Identifies the asset.
     pub name: Option<String>,
-    /// Optional. UTF8 string. Describes the asset.
     pub description: Option<String>,
-    /// Optional. No description in TEP64 yet
     pub social_links: Option<Value>,
-    /// Optional. No description in TEP64 yet
     pub marketplace: Option<String>,
 }
 
