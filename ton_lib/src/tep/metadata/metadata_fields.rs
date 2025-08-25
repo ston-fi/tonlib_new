@@ -9,9 +9,7 @@ pub struct MetadataField(TonHash);
 
 impl Deref for MetadataField {
     type Target = TonHash;
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
+    fn deref(&self) -> &Self::Target { &self.0 }
 }
 
 impl MetadataField {

@@ -8,7 +8,5 @@ pub trait Metadata: Sized {
     fn from_json(json: &str) -> Result<Self, TLCoreError> {
         Self::from_data(&HashMap::<TonHash, Vec<u8>>::new(), Some(json))
     }
-    fn from_dict(dict: &HashMap<TonHash, impl AsRef<[u8]>>) -> Result<Self, TLCoreError> {
-        Self::from_data(dict, None)
-    }
+    fn from_dict(dict: &HashMap<TonHash, impl AsRef<[u8]>>) -> Result<Self, TLCoreError> { Self::from_data(dict, None) }
 }

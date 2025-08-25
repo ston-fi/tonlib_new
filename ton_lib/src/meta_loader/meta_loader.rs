@@ -47,9 +47,7 @@ pub struct MetaLoader {
 }
 
 impl Default for MetaLoader {
-    fn default() -> Self {
-        MetaLoaderBuilder::new().build()
-    }
+    fn default() -> Self { MetaLoaderBuilder::new().build() }
 }
 
 pub struct MetaLoaderBuilder {
@@ -98,9 +96,7 @@ impl MetaLoaderBuilder {
 }
 
 impl MetaLoader {
-    pub fn builder() -> MetaLoaderBuilder {
-        MetaLoaderBuilder::new()
-    }
+    pub fn builder() -> MetaLoaderBuilder { MetaLoaderBuilder::new() }
 
     pub async fn load_external_meta(&self, uri: &str) -> Result<String, MetaLoaderError> {
         log::trace!("Downloading metadata from {}", uri);
