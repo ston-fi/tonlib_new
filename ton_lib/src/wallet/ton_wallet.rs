@@ -220,7 +220,6 @@ mod tests {
 
     #[test]
     fn test_ton_wallet_create_external_msg_signed() -> anyhow::Result<()> {
-        const MNEMONIC_STR: &str = "";
         let key_pair_v3 = make_keypair(MNEMONIC_STR);
         let wallet_v3 = TonWallet::new(WalletVersion::V3R1, key_pair_v3)?;
 
