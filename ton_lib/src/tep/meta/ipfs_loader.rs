@@ -48,9 +48,7 @@ impl IpfsLoaderConfig {
 }
 
 impl Default for IpfsLoaderConfig {
-    fn default() -> Self {
-        Self::http_gateway("https://cloudflare-ipfs.com/ipfs/")
-    }
+    fn default() -> Self { Self::http_gateway("https://cloudflare-ipfs.com/ipfs/") }
 }
 
 #[derive(Default)]
@@ -99,12 +97,8 @@ impl Default for IpfsLoader {
 }
 
 impl IpfsLoader {
-    pub fn builder() -> IpfsLoaderBuilder {
-        IpfsLoaderBuilder::default()
-    }
-    pub fn new() -> Self {
-        Self::builder().build()
-    }
+    pub fn builder() -> IpfsLoaderBuilder { IpfsLoaderBuilder::default() }
+    pub fn new() -> Self { Self::builder().build() }
 
     pub async fn load(&self, path: &str) -> Result<Vec<u8>, IpfsLoaderError> {
         let response = match self.connection_type {
