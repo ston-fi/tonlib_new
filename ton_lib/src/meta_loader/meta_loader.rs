@@ -1,17 +1,18 @@
-use std::num::ParseIntError;
-
-use crate::tep::meta::ipfs_loader::IpfsLoader;
-use crate::tep::meta::metadata_field::META_URI;
-use crate::tep::meta::MetadataContent;
-use crate::tep::meta::*;
-use crate::tep::IpfsLoaderError;
 use reqwest::header;
 use reqwest::header::HeaderValue;
 use reqwest::Client;
 use reqwest::StatusCode;
+use std::num::ParseIntError;
 use thiserror::Error;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::metadata::Metadata;
+
+use crate::meta_loader::IpfsLoader;
+use crate::meta_loader::IpfsLoaderError;
+use crate::tep::metadata::metadata_content::MetadataContent;
+use crate::tep::metadata::metadata_content::MetadataExternal;
+use crate::tep::metadata::metadata_content::MetadataInternal;
+use crate::tep::metadata::metadata_fields::META_URI;
 
 #[derive(Debug, Error)]
 pub enum MetaLoaderError {
@@ -46,7 +47,9 @@ pub struct MetaLoader {
 }
 
 impl Default for MetaLoader {
-    fn default() -> Self { MetaLoaderBuilder::new().build() }
+    fn default() -> Self {
+        MetaLoaderBuilder::new().build()
+    }
 }
 
 pub struct MetaLoaderBuilder {
@@ -82,15 +85,22 @@ impl MetaLoaderBuilder {
             }
         };
 
+        let ipfs_loader = match self.ipfs_loader {
+            Some(ipfs_loader) => ipfs_loader,
+            None => IpfsLoader::builder().with_client(http_client.clone()).build(),
+        };
+
         MetaLoader {
-            http_client: http_client,
-            ipfs_loader: self.ipfs_loader.unwrap_or_default(),
+            http_client,
+            ipfs_loader,
         }
     }
 }
 
 impl MetaLoader {
-    pub fn builder() -> MetaLoaderBuilder { MetaLoaderBuilder::new() }
+    pub fn builder() -> MetaLoaderBuilder {
+        MetaLoaderBuilder::new()
+    }
 
     pub async fn load_external_meta(&self, uri: &str) -> Result<String, MetaLoaderError> {
         log::trace!("Downloading metadata from {}", uri);
@@ -122,7 +132,7 @@ impl MetaLoader {
                 if dict.contains_key(&*META_URI) {
                     let uri = String::from_utf8_lossy(dict.get(&*META_URI).unwrap().as_slice()).to_string();
                     match self.load_external_meta(uri.as_str()).await {
-                        Ok(json) => Ok(T::from_data(Some(&dict), Some(&json))?),
+                        Ok(json) => Ok(T::from_data(&dict, Some(&json))?),
                         Err(_) => Ok(T::from_dict(&dict)?),
                     }
                 } else {

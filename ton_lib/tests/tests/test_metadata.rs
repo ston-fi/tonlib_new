@@ -11,12 +11,12 @@ use ton_lib::contracts::jetton_master::JettonMaster;
 use ton_lib::contracts::methods::get_jetton_data::GetJettonData;
 use ton_lib::contracts::methods::get_wallet_address::GetWalletAddress;
 use ton_lib::contracts::ton_contract::TonContract;
-use ton_lib::tep::JettonMetadata;
-use ton_lib::tep::MetaLoader;
-use ton_lib::tep::MetadataContent;
-use ton_lib::tep::MetadataExternal;
-use ton_lib::tep::NftItemMetadata;
-use ton_lib::tep::SnakeData;
+use ton_lib::meta_loader::MetaLoader;
+use ton_lib::tep::metadata::jetton_metadata::JettonMetadata;
+use ton_lib::tep::metadata::metadata_content::MetadataContent;
+use ton_lib::tep::metadata::metadata_content::MetadataExternal;
+use ton_lib::tep::metadata::nft_item_metadata::NftItemMetadata;
+use ton_lib::tep::snake_data::SnakeData;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::TonAddress;
 
