@@ -18,7 +18,7 @@ pub enum MetadataContent {
 #[tlb_derive(prefix = 0x0, bits_len = 8)]
 pub struct MetadataInternal {
     #[tlb_derive(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLBRef, _, _>::new(256)")]
-    pub data: HashMap<TonHash, SnakeData<true>>,
+    pub data: HashMap<TonHash, SnakeData<false>>,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]

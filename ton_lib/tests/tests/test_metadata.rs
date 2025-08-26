@@ -59,7 +59,7 @@ async fn assert_get_jetton_content_uri(ctr_cli: &ContractClient) -> anyhow::Resu
 }
 
 async fn assert_get_jetton_content_internal_uri(ctr_cli: &ContractClient) -> anyhow::Result<()> {
-    let fnz_jetton = TonAddress::from_str("EQDCJL0iQHofcBBvFBHdVG233Ri2V4kCNFgfRT-gqAd3Oc86")?;
+    let fnz_jetton = TonAddress::from_str("EQDCJL0iQHofcBBvFBHdVG233Ri2V4kCNFgfRT-gqAd3Oc86")?; // TODO TIAZH Download contract, serialize metadata
     let contract = JettonMaster::new(&ctr_cli, fnz_jetton, None).await?;
 
     let res = assert_ok!(contract.get_jetton_data().await);
