@@ -21,7 +21,6 @@ pub struct GetNftDataResult {
 impl TVMResult for GetNftDataResult {
     fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
         let mut stack = TVMStack::from_boc(boc)?;
-        dbg!(&stack);
         let individual_content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let owner_address: TonAddress = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let collection_address = TonAddress::from_cell(stack.pop_cell()?.deref())?;

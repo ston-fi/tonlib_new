@@ -7,7 +7,6 @@ use std::time::Duration;
 use ton_lib::clients::lite_client::client::LiteClient;
 use ton_lib::clients::lite_client::config::LiteClientConfig;
 use ton_lib::clients::net_config::TonNetConfig;
-use ton_lib::clients::tl_client::TLClient;
 
 static LOG: Once = Once::new();
 

@@ -1,4 +1,4 @@
-use crate::tep::snake_data::SnakeData;
+use crate::tep::metadata::snake_data::SnakeData;
 use crate::tlb_adapters::DictKeyAdapterTonHash;
 use crate::tlb_adapters::DictValAdapterTLBRef;
 use crate::tlb_adapters::TLBHashMapE;
@@ -18,13 +18,13 @@ pub enum MetadataContent {
 #[tlb_derive(prefix = 0x0, bits_len = 8)]
 pub struct MetadataInternal {
     #[tlb_derive(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLBRef, _, _>::new(256)")]
-    pub data: HashMap<TonHash, SnakeData<false>>,
+    pub data: HashMap<TonHash, SnakeData>,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]
 #[tlb_derive(prefix = 0x1, bits_len = 8)]
 pub struct MetadataExternal {
-    pub uri: SnakeData<false>,
+    pub uri: SnakeData,
 }
 
 #[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]

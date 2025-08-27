@@ -1,4 +1,6 @@
+use crate::tep::metadata::metadata::Metadata;
 use crate::tep::metadata::metadata_fields::*;
+use crate::tep::metadata::snake_data::SnakeData;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;
@@ -6,7 +8,6 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
-use ton_lib_core::traits::metadata::Metadata;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct NftItemMetadata {
@@ -18,7 +19,7 @@ pub struct NftItemMetadata {
 }
 
 impl Metadata for NftItemMetadata {
-    fn from_data(dict: &HashMap<TonHash, impl AsRef<[u8]>>, json: Option<&str>) -> Result<Self, TLCoreError> {
+    fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
         let mut external_meta: Option<NftItemMetadata> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
         Ok(NftItemMetadata {

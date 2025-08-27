@@ -9,7 +9,5 @@ pub trait Metadata: Sized {
     fn from_json(json: &str) -> Result<Self, TLCoreError> {
         Self::from_data(&HashMap::<TonHash, SnakeData>::new(), Some(json))
     }
-    fn from_dict(dict: &HashMap<TonHash, SnakeData>) -> Result<Self, TLCoreError> {
-        Self::from_data(dict, None)
-    }
+    fn from_dict(dict: &HashMap<TonHash, SnakeData>) -> Result<Self, TLCoreError> { Self::from_data(dict, None) }
 }

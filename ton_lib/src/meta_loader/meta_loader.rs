@@ -5,10 +5,10 @@ use reqwest::StatusCode;
 use std::num::ParseIntError;
 use thiserror::Error;
 use ton_lib_core::error::TLCoreError;
-use ton_lib_core::traits::metadata::Metadata;
 
 use crate::meta_loader::IpfsLoader;
 use crate::meta_loader::IpfsLoaderError;
+use crate::tep::metadata::metadata::Metadata;
 use crate::tep::metadata::metadata_content::MetadataContent;
 use crate::tep::metadata::metadata_content::MetadataExternal;
 use crate::tep::metadata::metadata_content::MetadataInternal;

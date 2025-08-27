@@ -16,9 +16,7 @@ pub struct SnakeData {
 }
 
 impl AsRef<[u8]> for SnakeData {
-    fn as_ref(&self) -> &[u8] {
-        self.as_slice()
-    }
+    fn as_ref(&self) -> &[u8] { self.as_slice() }
 }
 
 #[rustfmt::skip]
@@ -38,9 +36,7 @@ impl SnakeData {
 
 impl FromStr for SnakeData {
     type Err = TLCoreError;
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        Ok(SnakeData::new(s.as_bytes().to_vec()))
-    }
+    fn from_str(s: &str) -> Result<Self, Self::Err> { Ok(SnakeData::new(s.as_bytes().to_vec())) }
 }
 
 impl TLB for SnakeData {

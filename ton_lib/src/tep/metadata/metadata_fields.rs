@@ -2,8 +2,11 @@ use serde_json::Value;
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::ops::Deref;
+use std::str::FromStr;
 use std::sync::LazyLock;
 use ton_lib_core::cell::TonHash;
+
+use crate::tep::metadata::snake_data::SnakeData;
 
 pub struct MetadataField(TonHash);
 
@@ -21,23 +24,23 @@ impl MetadataField {
         MetadataField(key)
     }
 
-    pub fn use_string_or(&self, src: Option<String>, dict: &HashMap<TonHash, impl AsRef<[u8]>>) -> Option<String> {
+    pub fn use_string_or(&self, src: Option<String>, dict: &HashMap<TonHash, SnakeData>) -> Option<String> {
         if src.is_some() {
             return src;
         };
 
         match dict.get(&self.0) {
             None => None,
-            Some(slice) => String::from_utf8(slice.as_ref().to_vec()).ok(),
+            Some(slice) => String::from_str(slice.as_str().deref()).ok(),
         }
     }
 
-    pub fn use_value_or(&self, src: Option<Value>, dict: &HashMap<TonHash, impl AsRef<[u8]>>) -> Option<Value> {
+    pub fn use_value_or(&self, src: Option<Value>, dict: &HashMap<TonHash, SnakeData>) -> Option<Value> {
         src.or_else(|| {
             dict.get(&self.0)
                 .map(|attr_str| {
                     Some(Value::Array(vec![Value::String(
-                        String::from_utf8_lossy(attr_str.as_ref()).to_string().clone(),
+                        String::from_utf8_lossy(attr_str.as_str().as_bytes()).to_string().clone(),
                     )]))
                 })
                 .unwrap_or_default()
