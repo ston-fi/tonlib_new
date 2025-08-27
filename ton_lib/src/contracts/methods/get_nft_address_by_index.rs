@@ -11,7 +11,7 @@ pub trait GetNftAddressByIndex: TonContract {
         let mut stack = TVMStack::default();
         stack.push_tiny_int(index);
 
-        let stack_boc = self.emulate_get_method("get_nft_address_by_index", &TVMStack::EMPTY).await?;
+        let stack_boc = self.emulate_get_method("get_nft_address_by_index", &stack).await?;
         Ok(GetNftAddressByIndexResult::from_boc(&stack_boc)?)
     }
 }
