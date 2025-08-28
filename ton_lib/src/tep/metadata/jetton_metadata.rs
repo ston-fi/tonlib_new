@@ -5,9 +5,10 @@ use std::collections::HashMap;
 use std::fmt::Debug;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
-use ton_lib_core::traits::metadata::Metadata;
 
+use crate::tep::metadata::metadata::Metadata;
 use crate::tep::metadata::metadata_fields::*;
+use crate::tep::metadata::snake_data::SnakeData;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct JettonMetadata {
@@ -23,13 +24,13 @@ pub struct JettonMetadata {
 }
 
 impl Metadata for JettonMetadata {
-    fn from_data(dict: &HashMap<TonHash, impl AsRef<[u8]>>, json: Option<&str>) -> Result<Self, TLCoreError> {
+    fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
         let mut external_meta: Option<JettonMetadata> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
 
         let decimals = match external_meta.as_mut().and_then(|x| x.decimals.take()) {
             Some(dec) => Some(dec),
-            None => META_DECIMALS.use_string_or(None, dict).map(|v| v.parse::<u8>().unwrap()),
+            None => META_DECIMALS.use_string_or(None, dict).map(|v| v.as_str().parse::<u8>().unwrap()),
         };
 
         Ok(JettonMetadata {
