@@ -15,10 +15,6 @@ pub struct SnakeData {
     pub chunks_len: Vec<usize>,
 }
 
-impl AsRef<[u8]> for SnakeData {
-    fn as_ref(&self) -> &[u8] { self.as_slice() }
-}
-
 #[rustfmt::skip]
 impl SnakeData {
     pub fn new(data: Vec<u8>) -> Self { Self { data, chunks_len: vec![] } }
@@ -94,6 +90,8 @@ impl SnakeData {
 
 #[cfg(test)]
 mod tests {
+    use std::str::FromStr;
+
     use ton_lib_core::cell::TonCell;
     use ton_lib_core::traits::tlb::TLB;
 
@@ -142,6 +140,11 @@ mod tests {
         assert_eq!(cell.data_bits_len, 1016);
         assert_eq!(cell.refs[0].data.len(), 1);
         assert_eq!(cell.refs[0].data_bits_len, 8);
+
+        // from_str
+
+        assert_eq!(SnakeData::from_str("my awesome snakedata")?.as_str(), "my awesome snakedata");
+
         Ok(())
     }
 }
