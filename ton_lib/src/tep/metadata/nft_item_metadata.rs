@@ -10,7 +10,7 @@ use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
-pub struct NftItemMetadata {
+pub struct NFTItemMetadata {
     pub name: Option<String>,
     pub description: Option<String>,
     pub image: Option<String>,
@@ -18,11 +18,11 @@ pub struct NftItemMetadata {
     pub attributes: Option<Value>,
 }
 
-impl Metadata for NftItemMetadata {
+impl Metadata for NFTItemMetadata {
     fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
-        let mut external_meta: Option<NftItemMetadata> =
+        let mut external_meta: Option<NFTItemMetadata> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
-        Ok(NftItemMetadata {
+        Ok(NFTItemMetadata {
             name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
             description: META_DESCRIPTION
                 .use_string_or(external_meta.as_mut().and_then(|x| x.description.take()), dict),

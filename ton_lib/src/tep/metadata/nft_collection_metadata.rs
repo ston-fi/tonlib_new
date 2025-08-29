@@ -11,7 +11,7 @@ use crate::tep::metadata::metadata_fields::*;
 use crate::tep::metadata::snake_data::SnakeData;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
-pub struct NftCollectionMetadata {
+pub struct NFTCollectionMetadata {
     pub image: Option<String>,
     pub name: Option<String>,
     pub description: Option<String>,
@@ -19,12 +19,12 @@ pub struct NftCollectionMetadata {
     pub marketplace: Option<String>,
 }
 
-impl Metadata for NftCollectionMetadata {
+impl Metadata for NFTCollectionMetadata {
     fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
-        let mut external_meta: Option<NftCollectionMetadata> =
+        let mut external_meta: Option<NFTCollectionMetadata> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
 
-        Ok(NftCollectionMetadata {
+        Ok(NFTCollectionMetadata {
             image: META_IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
             name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
             description: META_DESCRIPTION

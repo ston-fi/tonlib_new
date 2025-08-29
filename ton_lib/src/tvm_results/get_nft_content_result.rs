@@ -2,17 +2,16 @@ use std::ops::Deref;
 
 use crate::block_tlb::TVMStack;
 use crate::tep::metadata::metadata_content::MetadataContent;
-use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::traits::tvm_result::TVMResult;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct GetNftContentResult {
+pub struct GetNFTContentResult {
     pub full_content: MetadataContent,
 }
 
-impl TVMResult for GetNftContentResult {
+impl TVMResult for GetNFTContentResult {
     fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
         let mut stack = TVMStack::from_boc(boc)?;
         let full_content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
@@ -24,17 +23,15 @@ impl TVMResult for GetNftContentResult {
 #[cfg(test)]
 mod test {
     use super::*;
-    use std::str::FromStr;
 
     #[test]
     fn test_get_nft_full_content() -> anyhow::Result<()> {
-        //let result = GetJettonDataResult::from_boc_hex("b5ee9c720102100100010100020800000503010e02020302030209040f1470200405010300c006011201ffffffffffffffff070253705148e3baabcb0800c881fc78d28207072c728a2e7896228f37e17369ae121cb0eef7b4b0385f3330400e08020120090a0112010005148e3baabcb00b01000f0143bff872ebdb514d9c97c283b7f0ae5179029e2b6119c39462719e4f46ed8f7413e6400c0143bff7407e978f01a40711411b1acb773a96bdd93fa83bb5ca8435013c8c4b3ac91f400d00000102000f000400360842028f452d7a4dfd74066b682365177259ed05734435be76b5fd4bd5d8af2b7c3d68003e68747470733a2f2f7465746865722e746f2f757364742d746f6e2e6a736f6e")?;
-        //assert_eq!(result.total_supply, Coins::from_str("1429976002510000")?);
-        //assert!(result.mintable);
-        //assert_eq!(
-        //    result.admin,
-        //    TonAddress::from_str("0:6440fe3c69410383963945173c4b11479bf0b9b4d7090e58777bda581c2f9998")?
-        //);
+        // EQAbNqfCuv4Chy6D-2UBKzi3qYvVPrB-STOzBGQo5AKh4P9u
+        let result = GetNFTContentResult::from_boc_hex("b5ee9c72010105010055000208000001030102000001800168747470733a2f2f746f6e73746174696f6e2e6170702f6e66742d6170692f6170692f76312f6e6674732f544f4e25323073746174696f6e2532307362742f030100040006343131")?;
+        assert_eq!(
+            &result.full_content.as_external().unwrap().uri.as_str(),
+            "https://tonstation.app/nft-api/api/v1/nfts/TON%20station%20sbt/411"
+        );
         Ok(())
     }
 }

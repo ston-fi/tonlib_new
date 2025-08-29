@@ -7,14 +7,14 @@ use ton_lib_core::TLBDerive;
 /// ```
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0x2fcb26a2, bits_len = 32, ensure_empty = true)]
-pub struct NftGetStaticDataMsg {
+pub struct NFTGetStaticDataMsg {
     pub query_id: u64,
 }
 
-impl Default for NftGetStaticDataMsg {
+impl Default for NFTGetStaticDataMsg {
     fn default() -> Self { Self::new(0) }
 }
 
-impl NftGetStaticDataMsg {
-    pub fn new(query_id: u64) -> Self { NftGetStaticDataMsg { query_id } }
+impl NFTGetStaticDataMsg {
+    pub fn new(query_id: u64) -> Self { NFTGetStaticDataMsg { query_id } }
 }

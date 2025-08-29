@@ -1,6 +1,7 @@
 use crate::block_tlb::{TVMCell, TVMCellSlice, TVMInt, TVMStackValue, TVMTinyInt, TVMTuple};
 use crate::error::TLError;
 use num_bigint::BigInt;
+use num_traits::FromPrimitive;
 use std::fmt::Display;
 use std::ops::{Deref, DerefMut};
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef};
@@ -51,8 +52,20 @@ impl TVMStack {
             Some(value) => Ok(value),
         }
     }
+
     pub fn pop_tiny_int(&mut self) -> Result<i64, TLError> { extract_stack_val!(self.pop(), TinyInt) }
     pub fn pop_int(&mut self) -> Result<BigInt, TLError> { extract_stack_val!(self.pop(), Int) }
+
+    pub fn pop_int_or_tiny_int(&mut self) -> Result<BigInt, TLError> {
+        match self.pop_checked()? {
+            TVMStackValue::Int(inner) => Ok(inner.value),
+            TVMStackValue::TinyInt(inner) => {
+                BigInt::from_i64(inner.value).ok_or(TLError::Custom("Unabled to convert BigInt from i64".to_string()))
+            }
+            other => Err(TLError::TVMStackWrongType(String::from("TinyInt or Int type"), other.to_string()))?,
+        }
+    }
+
     // extract cell & cell_slice
     pub fn pop_cell(&mut self) -> Result<TonCellRef, TLError> {
         match self.pop() {

@@ -12,13 +12,13 @@ use ton_lib_core::TLBDerive;
 /// ```
 #[derive(Clone, Debug, PartialEq, TLBDerive)]
 #[tlb_derive(prefix = 0x05138d91, bits_len = 32, ensure_empty = true)]
-pub struct NftOwnershipAssignedMsg {
+pub struct NFTOwnershipAssignedMsg {
     pub query_id: u64,
     pub prev_owner: TonAddress,
     pub forward_payload: TLBEitherRef<TonCell>,
 }
 
-impl NftOwnershipAssignedMsg {
+impl NFTOwnershipAssignedMsg {
     pub fn new(prev_owner: &TonAddress) -> Self {
         Self {
             query_id: 0,

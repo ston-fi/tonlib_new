@@ -1,4 +1,4 @@
-use crate::block_tlb::{TVMStack, TVMStackValue};
+use crate::block_tlb::TVMStack;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;
@@ -21,15 +21,7 @@ impl TVMResult for GetWalletDataResult {
         let wallet_code = stack.pop_cell()?;
         let master = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let owner = TonAddress::from_cell(stack.pop_cell()?.deref())?;
-        let balance = match stack.pop() {
-            Some(TVMStackValue::Int(i)) => i.value,
-            Some(TVMStackValue::TinyInt(i)) => BigInt::from(i.value),
-            Some(t) => {
-                let err_str = format!("Int or TinyInt expected, got {t:?}");
-                return Err(TLCoreError::TLBWrongData(err_str));
-            }
-            None => return Err(TLCoreError::TLBWrongData("Empty stack".to_string())),
-        };
+        let balance = stack.pop_int_or_tiny_int()?;
 
         Ok(Self {
             balance,

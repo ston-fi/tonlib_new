@@ -1,4 +1,4 @@
-use crate::block_tlb::{Coins, TVMStack, TVMStackValue};
+use crate::block_tlb::{Coins, TVMStack};
 use crate::error::TLError;
 use crate::tep::metadata::metadata_content::MetadataContent;
 use num_bigint::BigInt;
@@ -24,22 +24,14 @@ impl TVMResult for GetJettonDataResult {
         let wallet_code = stack.pop_cell()?;
         let content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let admin = TonAddress::from_cell(stack.pop_cell()?.deref())?;
-        let mintable = match stack.pop_checked()? {
-            TVMStackValue::Int(inner) => inner.value != BigInt::ZERO,
-            TVMStackValue::TinyInt(inner) => inner.value != 0,
-            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
-        };
+        let mintable = stack.pop_int_or_tiny_int()? != BigInt::ZERO;
 
-        let total_supply = match stack.pop_checked()? {
-            TVMStackValue::Int(inner) => Coins::from_signed::<i128>(inner.value.try_into().map_err(|_| {
-                TLError::TVMStackWrongType(
-                    String::from("Cannot convert TVMInt to coins, it is maybe wrong answer"),
-                    String::from(""),
-                )
-            })?)?,
-            TVMStackValue::TinyInt(inner) => Coins::from_signed(inner.value)?,
-            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
-        };
+        let total_supply = Coins::from_signed::<i128>(stack.pop_int_or_tiny_int()?.try_into().map_err(|_| {
+            TLError::TVMStackWrongType(
+                String::from("TVMint that is convertible to coins"),
+                String::from("Not convertible"),
+            )
+        })?)?;
 
         Ok(Self {
             total_supply,
