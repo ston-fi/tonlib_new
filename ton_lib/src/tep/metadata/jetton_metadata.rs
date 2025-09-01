@@ -43,7 +43,7 @@ impl Metadata for JettonMetadata {
             image_data: external_meta
                 .as_mut()
                 .and_then(|x| x.image_data.take())
-                .or(dict.get(&*META_IMAGE_DATA).map(|elem| elem.as_str().as_bytes().to_vec())),
+                .or(dict.get(&*META_IMAGE_DATA).map(|elem| elem.as_slice().to_vec())),
             decimals,
         })
     }
