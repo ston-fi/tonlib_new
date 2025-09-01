@@ -195,9 +195,9 @@ async fn assert_get_nft_address_by_index_is_valid(ctr_cli: &ContractClient) -> a
     let address = TonAddress::from_str("EQB2iHQ9lmJ9zvYPauxN9hVOfHL3c_fuN5AyRq5Pm84UH6jC")?;
     let contract = NFTCollectionContract::new(ctr_cli, address, None).await?;
 
-    let res_0 = assert_ok!(contract.get_nft_address_by_index(BigInt::from(0)).await);
-    let res_2 = assert_ok!(contract.get_nft_address_by_index(BigInt::from(2)).await);
-    let res_1 = assert_ok!(contract.get_nft_address_by_index(BigInt::from(1)).await);
+    let res_0 = assert_ok!(contract.get_nft_address_by_index(0).await);
+    let res_2 = assert_ok!(contract.get_nft_address_by_index(2).await);
+    let res_1 = assert_ok!(contract.get_nft_address_by_index(1).await);
 
     let expected_addr_0 = assert_ok!(TonAddress::from_str("EQBKwtMZSZurMxGp7FLZ_lM9t54_ECEsS46NLR3qfIwwTnKW"));
     let expected_addr_1 = assert_ok!(TonAddress::from_str("EQB6rnPIZr8dXmLy0xVp4lTe1AlYRwOUghEG9zzCcCkCp8IS"));
