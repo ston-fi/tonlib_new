@@ -1,8 +1,6 @@
-use crate::block_tlb::{TVMStack, TVMStackValue};
-use crate::error::TLError;
+use crate::block_tlb::TVMStack;
 use crate::tep::metadata::metadata_content::MetadataContent;
 use num_bigint::BigInt;
-use num_traits::FromPrimitive;
 use std::ops::Deref;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
@@ -10,7 +8,7 @@ use ton_lib_core::traits::tvm_result::TVMResult;
 use ton_lib_core::types::TonAddress;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct GetNftDataResult {
+pub struct GetNFTDataResult {
     pub init: bool,
     pub index: BigInt,
     pub collection_address: TonAddress,
@@ -18,25 +16,14 @@ pub struct GetNftDataResult {
     pub individual_content: MetadataContent,
 }
 
-impl TVMResult for GetNftDataResult {
+impl TVMResult for GetNFTDataResult {
     fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
         let mut stack = TVMStack::from_boc(boc)?;
         let individual_content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let owner_address: TonAddress = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let collection_address = TonAddress::from_cell(stack.pop_cell()?.deref())?;
-        let index = match stack.pop_checked()? {
-            TVMStackValue::Int(inner) => inner.value,
-            TVMStackValue::TinyInt(inner) => BigInt::from_i64(inner.value)
-                .ok_or(TLCoreError::Custom("Unabled to converse bigint from i64".to_string()))?,
-            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
-        };
-
-        let init = match stack.pop_checked()? {
-            // TODO TIAZH probably get_bool
-            TVMStackValue::Int(inner) => inner.value != BigInt::ZERO,
-            TVMStackValue::TinyInt(inner) => inner.value != 0,
-            _ => Err(TLError::TVMStackWrongType(String::from("Not tinyInt or Int type"), String::from("")))?,
-        };
+        let index = stack.pop_int_or_tiny_int()?;
+        let init = stack.pop_int_or_tiny_int()? != BigInt::ZERO;
 
         Ok(Self {
             init,
@@ -54,14 +41,23 @@ mod test {
     use std::str::FromStr;
 
     #[test]
-    fn test_get_jetton_data_result() -> anyhow::Result<()> {
-        //let result = GetJettonDataResult::from_boc_hex("b5ee9c720102100100010100020800000503010e02020302030209040f1470200405010300c006011201ffffffffffffffff070253705148e3baabcb0800c881fc78d28207072c728a2e7896228f37e17369ae121cb0eef7b4b0385f3330400e08020120090a0112010005148e3baabcb00b01000f0143bff872ebdb514d9c97c283b7f0ae5179029e2b6119c39462719e4f46ed8f7413e6400c0143bff7407e978f01a40711411b1acb773a96bdd93fa83bb5ca8435013c8c4b3ac91f400d00000102000f000400360842028f452d7a4dfd74066b682365177259ed05734435be76b5fd4bd5d8af2b7c3d68003e68747470733a2f2f7465746865722e746f2f757364742d746f6e2e6a736f6e")?;
-        //assert_eq!(result.total_supply, Coins::from_str("1429976002510000")?);
-        //assert!(result.mintable);
-        //assert_eq!(
-        //    result.admin,
-        //    TonAddress::from_str("0:6440fe3c69410383963945173c4b11479bf0b9b4d7090e58777bda581c2f9998")?
-        //);
+    fn test_get_nft_data_result() -> anyhow::Result<()> {
+        // NFT EQBUXuQI612W1e71Gk5atugejGqteQeDa8hA9tTwREcXWQiv Plush Pepe 298
+        let result = GetNFTDataResult::from_boc_hex("b5ee9c7201020c0100012900020800000503010b0209040010b02002030209044020b02004050243800ff871ab7ff40fbb13c42d16e4ed204c78cfeed4d8aa8726a2316b60d9860afd6806070144020025a4c2e585379af593ec3ec86a6c380963c7edc0a648c69f730fa85542b3007308008325a4c2e585379af593ec3ec86a6c380963c7edc0a648c69f730fa85542b300738008df41d350c802832d4bcfacde3f07ffb621e50b377e5d5375d577e29b39c1aa100201400b09004b00050064800d1e740eda68a3431fa83c0b8e3698040a8ba8d64eae0c9ccb04bbda18937e0590011201ffffffffffffffff0a00200d706c757368706570652d3239380100000000620168747470733a2f2f6e66742e667261676d656e742e636f6d2f676966742f706c757368706570652d3239382e6a736f6e")?;
+        assert_eq!(result.init, true);
+        assert_eq!(
+            result.index,
+            BigInt::from_str("17026683442852985036293000817890672620529067535828542797724775561309021470835")?
+        );
+
+        assert_eq!(
+            result.collection_address,
+            TonAddress::from_boc_hex(
+                "b5ee9c720101010100240000438008df41d350c802832d4bcfacde3f07ffb621e50b377e5d5375d577e29b39c1aa10"
+            )?
+        );
+        assert_eq!(result.individual_content, MetadataContent::from_boc_hex("b5ee9c720101010100330000620168747470733a2f2f6e66742e667261676d656e742e636f6d2f676966742f706c757368706570652d3239382e6a736f6e")?);
+
         Ok(())
     }
 }

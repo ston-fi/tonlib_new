@@ -6,7 +6,7 @@ use std::str::FromStr;
 use tokio_test::assert_ok;
 use ton_lib::meta_loader::MetaLoader;
 use ton_lib::tep::metadata::jetton_metadata::JettonMetadata;
-use ton_lib::tep::metadata::nft_item_metadata::NftItemMetadata;
+use ton_lib::tep::metadata::nft_item_metadata::NFTItemMetadata;
 use ton_lib::tep::metadata::snake_data::SnakeData;
 use ton_lib::tvm_results::GetJettonDataResult;
 use ton_lib::tvm_results::GetWalletAddressResult;
@@ -77,14 +77,8 @@ async fn assert_get_jetton_content_empty_external_meta() -> anyhow::Result<()> {
 // this test is ignored due restrictions of cloudflare-ipfs.com
 // TODO: Need to refactor this test when restore it. Delete make_tl_client
 //#[tokio::test]
-//#[ignore]
-//async fn test_get_jetton_content_ipfs_uri() -> anyhow::Result<()> {
+//async fn assert_get_jetton_content_ipfs_uri() -> anyhow::Result<()> {
 //    init_logging();
-//    let tl_client = make_tl_client(true, true).await?;
-//    let config = ContractClientConfig::new_no_cache(Duration::from_millis(100));
-//    let data_provider = TLProvider::new(tl_client.clone());
-//    let ctr_cli = ContractClient::new(config, data_provider)?;
-//
 //    let bolt_jetton = TonAddress::from_str("EQD0vdSA_NedR9uvbgN9EikRX-suesDxGeFg69XQMavfLqIw")?;
 //    let contract = JettonMaster::new(&ctr_cli, bolt_jetton, None).await?;
 //
@@ -92,8 +86,6 @@ async fn assert_get_jetton_content_empty_external_meta() -> anyhow::Result<()> {
 //    let meta_loader = MetaLoader::builder().build()?;
 //    let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
 //    assert_eq!(content_res.symbol.as_ref().unwrap(), &String::from("BOLT"));
-//    log::info!("{:?}", content_res);
-//    log::info!("{:?}", content_res.image_data);
 //    assert_eq!(content_res.decimals.unwrap(), 0x9);
 //
 //    log::info!("{:?}", res);
@@ -143,11 +135,12 @@ async fn assert_jetton_image_data() -> anyhow::Result<()> {
     let content_res: JettonMetadata = assert_ok!(meta_loader.load(&res.content).await);
 
     let target_image_hash: TonHash = TonHash::from([
-        43, 249, 154, 153, 211, 30, 132, 160, 181, 232, 174, 179, 98, 255, 187, 211, 220, 112, 10, 49, 93, 23, 128,
-        139, 155, 43, 161, 133, 248, 195, 75, 61,
+        45, 186, 67, 118, 224, 166, 76, 84, 0, 203, 69, 175, 47, 34, 164, 184, 36, 229, 51, 193, 17, 18, 84, 70, 179,
+        240, 137, 163, 42, 147, 119, 220,
     ]);
+
     let mut hasher: Sha256 = Sha256::new();
-    hasher.update(content_res.image_data.unwrap());
+    hasher.update(&content_res.image_data.unwrap()[1..]);
     let img_hash = hasher.finalize()[..].to_vec();
     assert_eq!(target_image_hash.as_slice(), img_hash.as_slice());
 
@@ -161,7 +154,7 @@ async fn test_meta_data_load_ordinal_https() -> anyhow::Result<()> {
     let metadata =
         loader.load_external_meta("https://s.getgems.io/nft/b/c/62fba50217c3fe3cbaad9e7f/95/meta.json").await?;
 
-    let expected_meta = NftItemMetadata {
+    let expected_meta = NFTItemMetadata {
         name: Some(String::from("TON Smart Challenge #2 Winners Trophy")),
         description: Some(String::from("TON Smart Challenge #2 Winners Trophy 93 place out of 181")),
         image: Some(String::from(
