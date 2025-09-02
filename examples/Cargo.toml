@@ -35,7 +35,11 @@ path = "cell_perf_build_cell.rs"
 
 [[example]]
 name = "types_tlb_build_dict_large"
-path = "types_tlb_build_dict_large.rs" 
+path = "types_tlb_build_dict_large.rs"
+
+[[example]]
+name = "read_tx_data"
+path = "read_tx_data.rs"
 
 [[example]]
 name = "ton_transfer"
