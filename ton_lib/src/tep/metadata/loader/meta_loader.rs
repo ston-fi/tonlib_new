@@ -6,15 +6,15 @@ use thiserror::Error;
 use ton_lib_core::error::TLCoreError;
 
 use crate::tep::metadata::loader::ipfs_loader::{IpfsLoader, IpfsLoaderError};
-use crate::tep::metadata::MetadataContent;
+use crate::tep::metadata::Metadata;
 use crate::tep::metadata::MetadataExternal;
 use crate::tep::metadata::MetadataInternal;
-use crate::tep::metadata::{Metadata, MetadataField};
+use crate::tep::metadata::{MetadataContent, META_URI};
 
 #[derive(Debug, Error)]
 pub enum MetaLoaderError {
     #[error("Unsupported content layout (Metadata content: {0:?})")]
-    ContentLayoutUnsupported(MetadataContent),
+    ContentLayoutUnsupported(Box<MetadataContent>),
 
     #[error("Failed to load jetton metadata (URI: {uri}, response status code: {status})")]
     LoadMetadataFailed { uri: String, status: StatusCode },
@@ -115,17 +115,24 @@ impl MetaLoader {
                 Ok(T::from_json(&json)?)
             }
             MetadataContent::Internal(MetadataInternal { data: dict }) => {
-                if dict.contains_key(&*MetadataField::URI) {
-                    let uri = String::from_utf8_lossy(dict.get(&*MetadataField::URI).unwrap().as_slice()).to_string();
-                    match self.load_external_meta(uri.as_str()).await {
-                        Ok(json) => Ok(T::from_data(dict, Some(&json))?),
-                        Err(_) => Ok(T::from_dict(dict)?),
+                let uri = match dict.get(&META_URI) {
+                    Some(uri) => uri,
+                    None => return Ok(T::from_dict(dict)?),
+                };
+                let uri_str = uri.as_str();
+
+                let json = match self.load_external_meta(&uri_str).await {
+                    Ok(json) => json,
+                    Err(err) => {
+                        log::warn!(
+                            "Failed to load metadata from internal META_URI {uri_str}: {err}, use internal data only"
+                        );
+                        return Ok(T::from_dict(dict)?);
                     }
-                } else {
-                    Ok(T::from_dict(dict)?)
-                }
+                };
+                Ok(T::from_data(dict, Some(&json))?)
             }
-            content => Err(MetaLoaderError::ContentLayoutUnsupported(content.clone())),
+            content => Err(MetaLoaderError::ContentLayoutUnsupported(Box::new(content.clone()))),
         }
     }
 }

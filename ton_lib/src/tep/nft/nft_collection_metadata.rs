@@ -25,13 +25,13 @@ impl Metadata for NFTCollectionMetadata {
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
 
         Ok(NFTCollectionMetadata {
-            image: MetadataField::IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
-            name: MetadataField::NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
-            description: MetadataField::DESCRIPTION
+            image: META_IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
+            name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
+            description: META_DESCRIPTION
                 .use_string_or(external_meta.as_mut().and_then(|x| x.description.take()), dict),
-            social_links: MetadataField::SOCIAL_LINKS
+            social_links: META_SOCIAL_LINKS
                 .use_value_or(external_meta.as_mut().and_then(|x| x.social_links.take()), dict),
-            marketplace: MetadataField::MARKETPLACE
+            marketplace: META_MARKETPLACE
                 .use_string_or(external_meta.as_mut().and_then(|x| x.marketplace.take()), dict),
         })
     }

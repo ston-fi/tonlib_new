@@ -20,17 +20,15 @@ pub struct NFTItemMetadata {
 
 impl Metadata for NFTItemMetadata {
     fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
-        let mut external_meta: Option<NFTItemMetadata> =
+        let mut external_meta: Option<Self> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
         Ok(NFTItemMetadata {
-            name: MetadataField::NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
-            description: MetadataField::DESCRIPTION
+            name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
+            description: META_DESCRIPTION
                 .use_string_or(external_meta.as_mut().and_then(|x| x.description.take()), dict),
-            content_url: MetadataField::URI
-                .use_string_or(external_meta.as_mut().and_then(|x| x.content_url.take()), dict),
-            image: MetadataField::IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
-            attributes: MetadataField::ATTRIBUTES
-                .use_value_or(external_meta.as_mut().and_then(|x| x.attributes.take()), dict),
+            content_url: META_URI.use_string_or(external_meta.as_mut().and_then(|x| x.content_url.take()), dict),
+            image: META_IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
+            attributes: META_ATTRIBUTES.use_value_or(external_meta.as_mut().and_then(|x| x.attributes.take()), dict),
         })
     }
 }

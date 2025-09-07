@@ -29,20 +29,20 @@ impl Metadata for JettonMetadata {
 
         let decimals = match external_meta.as_mut().and_then(|x| x.decimals.take()) {
             Some(dec) => Some(dec),
-            None => MetadataField::DECIMALS.use_string_or(None, dict).map(|v| v.as_str().parse::<u8>().unwrap()),
+            None => META_DECIMALS.use_string_or(None, dict).map(|v| v.as_str().parse::<u8>().unwrap()),
         };
 
         Ok(JettonMetadata {
-            name: MetadataField::NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
-            uri: MetadataField::URI.use_string_or(external_meta.as_mut().and_then(|x| x.uri.take()), dict),
-            symbol: MetadataField::SYMBOL.use_string_or(external_meta.as_mut().and_then(|x| x.symbol.take()), dict),
-            description: MetadataField::DESCRIPTION
+            name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),
+            uri: META_URI.use_string_or(external_meta.as_mut().and_then(|x| x.uri.take()), dict),
+            symbol: META_SYMBOL.use_string_or(external_meta.as_mut().and_then(|x| x.symbol.take()), dict),
+            description: META_DESCRIPTION
                 .use_string_or(external_meta.as_mut().and_then(|x| x.description.take()), dict),
-            image: MetadataField::IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
+            image: META_IMAGE.use_string_or(external_meta.as_mut().and_then(|x| x.image.take()), dict),
             image_data: external_meta
                 .as_mut()
                 .and_then(|x| x.image_data.take())
-                .or(dict.get(&*MetadataField::IMAGE_DATA).map(|elem| elem.as_slice().to_vec())),
+                .or(dict.get(&META_IMAGE_DATA).map(|elem| elem.as_slice().to_vec())),
             decimals,
         })
     }
