@@ -1,6 +1,6 @@
-use crate::tep::metadata::metadata::Metadata;
-use crate::tep::metadata::metadata_fields::*;
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::metadata::Metadata;
+use crate::tep::metadata::*;
+use crate::tep::snake_data::SnakeData;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;

@@ -1,7 +1,7 @@
 use crate::block_tlb::TVMStack;
 use crate::contracts::ton_contract::TonContract;
 use crate::error::TLError;
-use crate::tvm_results::GetJettonDataResult;
+use crate::tep::tvm_results::GetJettonDataResult;
 use async_trait::async_trait;
 use ton_lib_core::traits::tvm_result::TVMResult;
 

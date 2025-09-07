@@ -6,7 +6,7 @@ use std::str::FromStr;
 use std::sync::LazyLock;
 use ton_lib_core::cell::TonHash;
 
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::snake_data::SnakeData;
 
 pub struct MetadataField(TonHash);
 

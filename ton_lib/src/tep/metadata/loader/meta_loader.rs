@@ -1,18 +1,16 @@
 use reqwest::header;
 use reqwest::header::HeaderValue;
-use reqwest::Client;
 use reqwest::StatusCode;
 use std::num::ParseIntError;
 use thiserror::Error;
 use ton_lib_core::error::TLCoreError;
 
-use crate::meta_loader::IpfsLoader;
-use crate::meta_loader::IpfsLoaderError;
-use crate::tep::metadata::metadata::Metadata;
-use crate::tep::metadata::metadata_content::MetadataContent;
-use crate::tep::metadata::metadata_content::MetadataExternal;
-use crate::tep::metadata::metadata_content::MetadataInternal;
-use crate::tep::metadata::metadata_fields::META_URI;
+use crate::tep::metadata::loader::ipfs_loader::{IpfsLoader, IpfsLoaderError};
+use crate::tep::metadata::Metadata;
+use crate::tep::metadata::MetadataContent;
+use crate::tep::metadata::MetadataExternal;
+use crate::tep::metadata::MetadataInternal;
+use crate::tep::metadata::META_URI;
 
 #[derive(Debug, Error)]
 pub enum MetaLoaderError {
@@ -69,15 +67,12 @@ impl MetaLoaderBuilder {
     }
 
     pub fn build(self) -> Result<MetaLoader, MetaLoaderError> {
-        let http_client = match self.http_client {
-            Some(client) => client,
-            None => {
-                let mut headers = header::HeaderMap::new();
-                headers.insert("user-agent", HeaderValue::from_static("TonlibMetaLoader/0.x"));
-                headers.insert("accept", HeaderValue::from_static("*/*"));
-                Client::builder().default_headers(headers).build().unwrap()
-            }
-        };
+        let http_client = self.http_client.unwrap_or_else(|| {
+            let mut headers = header::HeaderMap::new();
+            headers.insert("user-agent", HeaderValue::from_static("tonlib-rs/1.x"));
+            headers.insert("accept", HeaderValue::from_static("*/*"));
+            reqwest::Client::builder().default_headers(headers).build().unwrap()
+        });
 
         let ipfs_loader = match self.ipfs_loader {
             Some(ipfs_loader) => ipfs_loader,
@@ -124,11 +119,11 @@ impl MetaLoader {
                 if dict.contains_key(&*META_URI) {
                     let uri = String::from_utf8_lossy(dict.get(&*META_URI).unwrap().as_slice()).to_string();
                     match self.load_external_meta(uri.as_str()).await {
-                        Ok(json) => Ok(T::from_data(&dict, Some(&json))?),
-                        Err(_) => Ok(T::from_dict(&dict)?),
+                        Ok(json) => Ok(T::from_data(dict, Some(&json))?),
+                        Err(_) => Ok(T::from_dict(dict)?),
                     }
                 } else {
-                    Ok(T::from_dict(&dict)?)
+                    Ok(T::from_dict(dict)?)
                 }
             }
             content => Err(MetaLoaderError::ContentLayoutUnsupported(content.clone())),

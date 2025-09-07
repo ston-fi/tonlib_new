@@ -6,9 +6,8 @@ use std::fmt::Debug;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
 
-use crate::tep::metadata::metadata::Metadata;
-use crate::tep::metadata::metadata_fields::*;
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::metadata::*;
+use crate::tep::snake_data::SnakeData;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct JettonMetadata {
