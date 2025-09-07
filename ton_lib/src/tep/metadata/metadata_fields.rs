@@ -16,6 +16,18 @@ impl Deref for MetadataField {
 }
 
 impl MetadataField {
+    pub const NAME: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("name"));
+    pub const DESCRIPTION: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("description"));
+    pub const IMAGE: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("image"));
+    pub const SYMBOL: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("symbol"));
+    pub const IMAGE_DATA: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("image_data"));
+    pub const DECIMALS: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("decimals"));
+    pub const URI: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("uri"));
+    pub const CONTENT_URL: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("content_url"));
+    pub const ATTRIBUTES: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("attributes"));
+    pub const SOCIAL_LINKS: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("social_links"));
+    pub const MARKETPLACE: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("marketplace"));
+
     fn new(name: &str) -> MetadataField {
         let mut hasher = Sha256::new();
         hasher.update(name);
@@ -47,14 +59,3 @@ impl MetadataField {
         })
     }
 }
-pub const META_NAME: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("name"));
-pub const META_DESCRIPTION: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("description"));
-pub const META_IMAGE: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("image"));
-pub const META_SYMBOL: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("symbol"));
-pub const META_IMAGE_DATA: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("image_data"));
-pub const META_DECIMALS: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("decimals"));
-pub const META_URI: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("uri"));
-pub const META_CONTENT_URL: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("content_url"));
-pub const META_ATTRIBUTES: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("attributes"));
-pub const META_SOCIAL_LINKS: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("social_links"));
-pub const META_MARKETPLACE: LazyLock<MetadataField> = LazyLock::new(|| MetadataField::new("marketplace"));

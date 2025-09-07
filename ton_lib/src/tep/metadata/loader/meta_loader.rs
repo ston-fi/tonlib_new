@@ -6,11 +6,10 @@ use thiserror::Error;
 use ton_lib_core::error::TLCoreError;
 
 use crate::tep::metadata::loader::ipfs_loader::{IpfsLoader, IpfsLoaderError};
-use crate::tep::metadata::Metadata;
 use crate::tep::metadata::MetadataContent;
 use crate::tep::metadata::MetadataExternal;
 use crate::tep::metadata::MetadataInternal;
-use crate::tep::metadata::META_URI;
+use crate::tep::metadata::{Metadata, MetadataField};
 
 #[derive(Debug, Error)]
 pub enum MetaLoaderError {
@@ -116,8 +115,8 @@ impl MetaLoader {
                 Ok(T::from_json(&json)?)
             }
             MetadataContent::Internal(MetadataInternal { data: dict }) => {
-                if dict.contains_key(&*META_URI) {
-                    let uri = String::from_utf8_lossy(dict.get(&*META_URI).unwrap().as_slice()).to_string();
+                if dict.contains_key(&*MetadataField::URI) {
+                    let uri = String::from_utf8_lossy(dict.get(&*MetadataField::URI).unwrap().as_slice()).to_string();
                     match self.load_external_meta(uri.as_str()).await {
                         Ok(json) => Ok(T::from_data(dict, Some(&json))?),
                         Err(_) => Ok(T::from_dict(dict)?),
