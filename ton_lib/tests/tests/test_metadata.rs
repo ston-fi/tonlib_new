@@ -4,12 +4,12 @@ use sha2::Digest;
 use sha2::Sha256;
 use std::str::FromStr;
 use tokio_test::assert_ok;
-use ton_lib::meta_loader::MetaLoader;
-use ton_lib::tep::metadata::jetton_metadata::JettonMetadata;
-use ton_lib::tep::metadata::nft_item_metadata::NFTItemMetadata;
-use ton_lib::tep::metadata::snake_data::SnakeData;
-use ton_lib::tvm_results::GetJettonDataResult;
-use ton_lib::tvm_results::GetWalletAddressResult;
+use ton_lib::tep::jetton::JettonMetadata;
+use ton_lib::tep::metadata::MetaLoader;
+use ton_lib::tep::nft::NFTItemMetadata;
+use ton_lib::tep::snake_data::SnakeData;
+use ton_lib::tep::tvm_results::GetJettonDataResult;
+use ton_lib::tep::tvm_results::GetWalletAddressResult;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::traits::tvm_result::TVMResult;
 

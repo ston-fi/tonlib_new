@@ -26,42 +26,42 @@ tonlibjson = ["dep:tonlib-sys"]
 
 [dependencies]
 # Internal
-ton_lib_core = { path = "../ton_lib_core", version = "0.0" }
-tonlib-sys = { version = "2025.7", features = ["with_debug_info"], optional = true }
+ton_lib_core.workspace = true
+tonlib-sys = { workspace = true, optional = true }
 
 
 # External
-moka = { version = "0.12", features = ["async-lock", "future"]}
-async-recursion = { version = "1" }
-parking_lot = "0.12"
-thiserror = "2.0"
-log = "0.4"
-hmac = "0.12"
-pbkdf2 = { version = "0.12", features = ["simple"] }
-nacl = "0.5"
-crc = "3.3"
-hex = "0.4"
-base64 = "0.22"
-num-bigint = { version = "0.4" }
-num-traits = { version = "0.2" }
-ton_liteapi = "0.2"
-tokio = "1.46"
-serde = { version = "1", features = ["derive"] }
-serde_json = "1"
-auto_pool = { version = "0.3", features = ["async"] }
-adnl = "2.0"
-tokio-tower = "0.6"
-tower = { version = "0.5", features = ["util"] }
-rand = "0.9"
-strum = { version = "0.27", features = ["derive"] }
-serde-aux = "4.7"
-base64-serde = "0.8"
-async-trait = "0.1"
-futures-util = "0.3"
-libc = "0.2"
-tokio-retry = "0.3"
-sha2 = "0.10"
-reqwest = "0.12.22"
+moka.workspace = true
+async-recursion.workspace = true
+parking_lot.workspace = true
+thiserror.workspace = true
+log.workspace = true
+hmac.workspace = true
+pbkdf2.workspace = true
+nacl.workspace = true
+crc.workspace = true
+hex.workspace = true
+base64.workspace = true
+num-bigint.workspace = true
+num-traits.workspace = true
+ton_liteapi.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+auto_pool.workspace = true
+adnl.workspace = true
+tokio-tower.workspace = true
+tower.workspace = true
+rand.workspace = true
+strum.workspace = true
+serde-aux.workspace = true
+base64-serde.workspace = true
+async-trait.workspace = true
+futures-util.workspace = true
+libc.workspace = true
+tokio-retry.workspace = true
+sha2.workspace = true
+reqwest.workspace = true
 
 
 [dev-dependencies]

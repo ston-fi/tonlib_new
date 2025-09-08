@@ -1,6 +1,6 @@
-use crate::tep::metadata::metadata::Metadata;
-use crate::tep::metadata::metadata_fields::*;
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::metadata::Metadata;
+use crate::tep::metadata::*;
+use crate::tep::snake_data::SnakeData;
 use serde::Deserialize;
 use serde::Serialize;
 use serde_json::Value;
@@ -20,7 +20,7 @@ pub struct NFTItemMetadata {
 
 impl Metadata for NFTItemMetadata {
     fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError> {
-        let mut external_meta: Option<NFTItemMetadata> =
+        let mut external_meta: Option<Self> =
             json.map(serde_json::from_str).transpose().map_err(|_| TLCoreError::MetadataParseError)?;
         Ok(NFTItemMetadata {
             name: META_NAME.use_string_or(external_meta.as_mut().and_then(|x| x.name.take()), dict),

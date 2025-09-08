@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use ton_lib_core::{cell::TonHash, error::TLCoreError};
 
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::snake_data::SnakeData;
 pub trait Metadata: Sized {
     fn from_data(dict: &HashMap<TonHash, SnakeData>, json: Option<&str>) -> Result<Self, TLCoreError>;
 

@@ -95,7 +95,7 @@ mod tests {
     use ton_lib_core::cell::TonCell;
     use ton_lib_core::traits::tlb::TLB;
 
-    use crate::tep::metadata::snake_data::SnakeData;
+    use crate::tep::snake_data::SnakeData;
 
     #[test]
     fn test_snake_data() -> anyhow::Result<()> {

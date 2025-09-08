@@ -1,6 +1,6 @@
 use crate::block_tlb::{Coins, TVMStack};
 use crate::error::TLError;
-use crate::tep::metadata::metadata_content::MetadataContent;
+use crate::tep::metadata::MetadataContent;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;

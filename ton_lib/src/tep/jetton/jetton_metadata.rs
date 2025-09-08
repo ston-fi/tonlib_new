@@ -6,9 +6,8 @@ use std::fmt::Debug;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::error::TLCoreError;
 
-use crate::tep::metadata::metadata::Metadata;
-use crate::tep::metadata::metadata_fields::*;
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::metadata::*;
+use crate::tep::snake_data::SnakeData;
 
 #[derive(Serialize, PartialEq, Eq, Deserialize, Debug, Clone)]
 pub struct JettonMetadata {
@@ -43,7 +42,7 @@ impl Metadata for JettonMetadata {
             image_data: external_meta
                 .as_mut()
                 .and_then(|x| x.image_data.take())
-                .or(dict.get(&*META_IMAGE_DATA).map(|elem| elem.as_slice().to_vec())),
+                .or(dict.get(&META_IMAGE_DATA).map(|elem| elem.as_slice().to_vec())),
             decimals,
         })
     }

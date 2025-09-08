@@ -18,10 +18,9 @@ use ton_lib::contracts::nft_collection_contract::NFTCollectionContract;
 use ton_lib::contracts::nft_item_contract::NFTItemContract;
 use ton_lib::contracts::ton_contract::TonContract;
 use ton_lib::contracts::ton_wallet::TonWalletContract;
-use ton_lib::meta_loader::MetaLoader;
-use ton_lib::tep::metadata::metadata_content::{MetadataContent, MetadataInternal};
-use ton_lib::tep::metadata::nft_item_metadata::NFTItemMetadata;
-use ton_lib::tep::metadata::snake_data::SnakeData;
+use ton_lib::tep::metadata::{MetaLoader, MetadataContent, MetadataInternal};
+use ton_lib::tep::nft::NFTItemMetadata;
+use ton_lib::tep::snake_data::SnakeData;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::TonAddress;
 

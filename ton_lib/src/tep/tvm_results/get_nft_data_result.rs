@@ -1,5 +1,5 @@
 use crate::block_tlb::TVMStack;
-use crate::tep::metadata::metadata_content::MetadataContent;
+use crate::tep::metadata::MetadataContent;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::error::TLCoreError;

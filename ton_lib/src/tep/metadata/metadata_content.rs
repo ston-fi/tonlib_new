@@ -1,4 +1,4 @@
-use crate::tep::metadata::snake_data::SnakeData;
+use crate::tep::snake_data::SnakeData;
 use crate::tlb_adapters::DictKeyAdapterTonHash;
 use crate::tlb_adapters::DictValAdapterTLBRef;
 use crate::tlb_adapters::TLBHashMapE;
