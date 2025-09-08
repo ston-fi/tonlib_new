@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.40](https://github.com/ston-fi/ton-rs/compare/ton_lib-v0.0.39...ton_lib-v0.0.40) - 2025-09-08
+
+### Fixed
+
+- fixed deps
+- fix format and build
+
+### Other
+
+- cleanup metadata field
+- metadata fields as class members
+- refactor dir-tree struct
+- Fixed tests naming
+- Changed interface of function
+- Fixed image test
+- Resolved all conversation, added load_full_nft_content, added tests
+- Added nft methods and tests for them. Working commit. Additional unit tests needed
+- Moved snake_data.rs and metadata.rs
+- Fixed contract methods
+- dirty
+- Merge pull request #84 from lexain12/jetton-loader
+- resolved conversations
+- Cargo fmt
+- Fixed test
+- Resolve last conversations
+- Fixed according to consistency
+- Cargo fmt
+- Resolved part of conversations
+- RIP
+- Resolved threads, refactored metaloader
+- Added jetton parser/loader, dirt commit, need to rearrange files
+
 ## [0.0.39](https://github.com/Sild/ton_lib_rs/compare/ton_lib-v0.0.38...ton_lib-v0.0.39) - 2025-08-20
 
 ### Fixed
