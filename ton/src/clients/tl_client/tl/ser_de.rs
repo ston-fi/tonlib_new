@@ -16,7 +16,7 @@ pub(super) mod serde_ton_address_hex {
 
 // pub(super) mod serde_ton_address_base64 {
 //     use super::*;
-//     use ton_lib_core::types::TonAddress;
+//     use ton_core::types::TonAddress;
 //
 //     pub fn serialize<S: Serializer>(hash: &TonAddress, serializer: S) -> Result<S::Ok, S::Error> {
 //         serializer.serialize_str(hash.to_string().as_str())
