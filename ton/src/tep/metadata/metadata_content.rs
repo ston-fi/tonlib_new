@@ -5,29 +5,29 @@ use crate::tlb_adapters::TLBHashMapE;
 use std::collections::HashMap;
 use std::fmt::Debug;
 use ton_lib_core::cell::{TonCell, TonHash};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]
+#[derive(PartialEq, Eq, Debug, Clone, TLB)]
 pub enum MetadataContent {
     Internal(MetadataInternal),
     External(MetadataExternal),
     Unsupported(MetadataUnsupported),
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x0, bits_len = 8)]
+#[derive(PartialEq, Eq, Debug, Clone, TLB)]
+#[tlb(prefix = 0x0, bits_len = 8)]
 pub struct MetadataInternal {
-    #[tlb_derive(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLBRef, _, _>::new(256)")]
+    #[tlb(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLBRef, _, _>::new(256)")]
     pub data: HashMap<TonHash, SnakeData>,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x1, bits_len = 8)]
+#[derive(PartialEq, Eq, Debug, Clone, TLB)]
+#[tlb(prefix = 0x1, bits_len = 8)]
 pub struct MetadataExternal {
     pub uri: SnakeData,
 }
 
-#[derive(PartialEq, Eq, Debug, Clone, TLBDerive)]
+#[derive(PartialEq, Eq, Debug, Clone, TLB)]
 pub struct MetadataUnsupported {
     pub cell: TonCell,
 }

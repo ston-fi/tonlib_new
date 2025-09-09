@@ -90,7 +90,7 @@ mod tests {
     use super::*;
     use ton_lib_core::cell::TonCell;
     use ton_lib_core::traits::tlb::TLB;
-    use ton_lib_core::TLBDerive;
+    use ton_lib_core::TLB;
 
     #[test]
     fn test_const_len() -> anyhow::Result<()> {
@@ -103,9 +103,9 @@ mod tests {
         Ok(())
     }
 
-    #[derive(TLBDerive)]
+    #[derive(TLB)]
     struct TestType {
-        #[tlb_derive(bits_len = 4)]
+        #[tlb(bits_len = 4)]
         a: u32,
     }
 

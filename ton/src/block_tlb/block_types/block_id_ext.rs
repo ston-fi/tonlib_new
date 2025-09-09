@@ -1,9 +1,9 @@
 use crate::block_tlb::ShardIdent;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, TLB)]
 pub struct BlockIdExt {
     pub shard_ident: ShardIdent,
     pub seqno: u32,

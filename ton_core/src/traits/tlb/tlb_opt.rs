@@ -28,9 +28,9 @@ impl<T: TLB> TLB for Option<T> {
 mod tests {
     use super::*;
     use crate::cell::TonCell;
-    use ton_lib_macros::TLBDerive;
+    use ton_lib_macros::TLB;
 
-    #[derive(Debug, PartialEq, TLBDerive)]
+    #[derive(Debug, PartialEq, TLB)]
     struct TestType1(i32);
 
     #[test]

@@ -4,7 +4,7 @@ use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::TLBEither;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L399
 #[derive(Debug, PartialEq, Clone, Default)]
@@ -13,7 +13,7 @@ pub struct OutList {
 }
 
 // https://github.com/ton-blockchain/ton/blob/2a68c8610bf28b43b2019a479a70d0606c2a0aa1/crypto/block/block.tlb#L408
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
+#[derive(Debug, PartialEq, Clone, TLB)]
 pub enum OutAction {
     SendMsg(OutActionSendMsg),
     SetCode(OutActionSetCode),
@@ -21,30 +21,30 @@ pub enum OutAction {
     ChangeLibrary(OutActionChangeLibrary),
 }
 
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x0ec3c86d, bits_len = 32)]
+#[derive(Debug, PartialEq, Clone, TLB)]
+#[tlb(prefix = 0x0ec3c86d, bits_len = 32)]
 pub struct OutActionSendMsg {
     pub mode: u8,
     pub out_msg: TonCellRef,
 }
 
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0xad4de08e, bits_len = 32)]
+#[derive(Debug, PartialEq, Clone, TLB)]
+#[tlb(prefix = 0xad4de08e, bits_len = 32)]
 pub struct OutActionSetCode {
     pub new_code: TonCellRef,
 }
 
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x36e6b809, bits_len = 32)]
+#[derive(Debug, PartialEq, Clone, TLB)]
+#[tlb(prefix = 0x36e6b809, bits_len = 32)]
 pub struct OutActionReserveCurrency {
     pub mode: u8,
     pub currency_collection: CurrencyCollection,
 }
 
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
-#[tlb_derive(prefix = 0x26fa1dd4, bits_len = 32)]
+#[derive(Debug, PartialEq, Clone, TLB)]
+#[tlb(prefix = 0x26fa1dd4, bits_len = 32)]
 pub struct OutActionChangeLibrary {
-    #[tlb_derive(bits_len = 7)]
+    #[tlb(bits_len = 7)]
     pub mode: u8,
     pub library: TLBEither<TonHash, TonCellRef>,
 }

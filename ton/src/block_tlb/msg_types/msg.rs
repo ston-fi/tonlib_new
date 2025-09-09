@@ -3,11 +3,11 @@ use crate::block_tlb::*;
 use ton_lib_core::cell::{TonCell, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::tlb_core::{EitherRefLayout, MsgAddress, MsgAddressExt, MsgAddressInt, TLBEitherRef};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::types::tlb_core::*;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L157
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct Msg {
     pub info: CommonMsgInfo,
     pub init: Option<TLBEitherRef<StateInit>>,

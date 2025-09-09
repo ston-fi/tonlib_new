@@ -37,7 +37,7 @@ mod tests {
     use super::*;
     use crate::tlb_adapters::TLBRef;
     use ton_lib_core::cell::TonCell;
-    use ton_lib_core::TLBDerive;
+    use ton_lib_core::TLB;
 
     #[test]
     fn test_tlb_ref() -> anyhow::Result<()> {
@@ -52,11 +52,11 @@ mod tests {
         Ok(())
     }
 
-    #[derive(PartialEq, Debug, TLBDerive)]
+    #[derive(PartialEq, Debug, TLB)]
     struct TestStruct {
-        #[tlb_derive(adapter = "TLBRef::<u8>::new()")]
+        #[tlb(adapter = "TLBRef::<u8>::new()")]
         pub a: u8,
-        #[tlb_derive(adapter = "TLBRef")]
+        #[tlb(adapter = "TLBRef")]
         pub b: u8,
     }
 

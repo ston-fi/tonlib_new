@@ -1,7 +1,7 @@
 use crate::block_tlb::Coins;
 use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::types::tlb_core::MsgAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// ```raw
 /// burn#595f07bc query_id:uint64 amount:(VarUInteger 16)
@@ -9,8 +9,8 @@ use ton_lib_core::TLBDerive;
 /// custom_payload:(Maybe ^Cell)
 /// = InternalMsgBody;
 /// ```
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x595f07bc, bits_len = 32, ensure_empty = true)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0x595f07bc, bits_len = 32, ensure_empty = true)]
 pub struct JettonBurnMsg {
     pub query_id: u64,            // arbitrary request number
     pub amount: Coins,            // amount to burn

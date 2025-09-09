@@ -67,7 +67,7 @@ impl TLB for TonHash {
 mod tests {
     use super::*;
     use tokio_test::assert_err;
-    use ton_lib_macros::TLBDerive;
+    use ton_lib_macros::TLB;
 
     #[test]
     fn test_tlb_cell() -> anyhow::Result<()> {
@@ -135,7 +135,7 @@ mod tests {
         assert_eq!(lib_child_cell_ref.to_boc_hex()?, lib_child_hex);
 
         // using extra tlb-object
-        #[derive(Debug, PartialEq, TLBDerive)]
+        #[derive(Debug, PartialEq, TLB)]
         struct TestStruct {
             cell: TonCellRef,
         }
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn test_tlb_from_boc_nice_error() -> anyhow::Result<()> {
         // using extra tlb-object
-        #[derive(Debug, PartialEq, TLBDerive)]
+        #[derive(Debug, PartialEq, TLB)]
         struct TestStruct;
         let err = assert_err!(TestStruct::from_boc(&[0x00, 0x01, 0x02]));
         assert!(err.to_string().contains("Fail to read"));

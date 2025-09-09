@@ -7,27 +7,27 @@ use ton_lib_core::cell::{TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L281
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct StateInit {
-    #[tlb_derive(bits_len = 5)]
+    #[tlb(bits_len = 5)]
     pub split_depth: Option<u8>,
     pub tick_tock: Option<TickTock>,
     pub code: Option<TonCellRef>,
     pub data: Option<TonCellRef>,
-    #[tlb_derive(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
+    #[tlb(adapter = "TLBHashMapE::<DictKeyAdapterTonHash, DictValAdapterTLB, _, _>::new(256)")]
     pub library: HashMap<TonHash, SimpleLib>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, Eq, TLB)]
 pub struct SimpleLib {
     pub public: bool,
     pub root: TonCellRef,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct TickTock {
     pub tick: bool,
     pub tock: bool,

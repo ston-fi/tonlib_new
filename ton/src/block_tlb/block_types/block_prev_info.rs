@@ -1,18 +1,18 @@
 use crate::block_tlb::block_types::block_info::ExtBlockRef;
 use crate::tlb_adapters::TLBRef;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum PrevBlockInfo {
     Regular(ExtBlockRef),
     AfterMerge(BlockPrevInfoAfterMerge), // is not tested
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct BlockPrevInfoAfterMerge {
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub prev1: ExtBlockRef,
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub prev2: ExtBlockRef,
 }
 

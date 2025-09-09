@@ -1,7 +1,7 @@
 use crate::tep::nft::*;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Clone, Debug, PartialEq, TLB)]
 pub enum NFTMsgBody {
     Excesses(NFTExcessesMsg),
     GetStaticData(NFTGetStaticDataMsg),

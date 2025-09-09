@@ -6,27 +6,27 @@ use std::collections::HashMap;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L291
-#[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b0111, bits_len = 4)]
+#[derive(Default, Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0b0111, bits_len = 4)]
 pub struct Tx {
     pub account_addr: TonHash,
     pub lt: u64,
     pub prev_tx_hash: TonHash,
     pub prev_tx_lt: u64,
     pub now: u32,
-    #[tlb_derive(bits_len = 15)]
+    #[tlb(bits_len = 15)]
     pub out_msgs_cnt: u16,
     pub orig_status: AccountStatus,
     pub end_status: AccountStatus,
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub msgs: TxMsgs,
     pub total_fees: CurrencyCollection,
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub state_update: HashUpdate,
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub descr: TxDescr,
 }
 

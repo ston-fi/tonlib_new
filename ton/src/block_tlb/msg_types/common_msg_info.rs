@@ -1,26 +1,26 @@
 use crate::block_tlb::*;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::tlb_core::{MsgAddress, MsgAddressExt, MsgAddressInt, MsgAddressIntStd};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L155
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum CommonMsgInfo {
     Int(CommonMsgInfoInt),
     ExtIn(CommonMsgInfoExtIn),
     ExtOut(CommonMsgInfoExtOut), // is not tested
 }
 
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b10, bits_len = 2)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0b10, bits_len = 2)]
 pub struct CommonMsgInfoExtIn {
     pub src: MsgAddressExt,
     pub dst: MsgAddressInt,
     pub import_fee: Coins,
 }
 
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b0, bits_len = 1)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0b0, bits_len = 1)]
 pub struct CommonMsgInfoInt {
     pub ihr_disabled: bool,
     pub bounce: bool,
@@ -34,8 +34,8 @@ pub struct CommonMsgInfoInt {
     pub created_at: u32,
 }
 
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b11, bits_len = 2)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0b11, bits_len = 2)]
 pub struct CommonMsgInfoExtOut {
     pub src: MsgAddressInt,
     pub dst: MsgAddressExt,

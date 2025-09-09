@@ -6,7 +6,7 @@ use quote::{format_ident, quote};
 use syn::Data;
 
 #[derive(deluxe::ExtractAttributes)]
-#[deluxe(attributes(tlb_derive))]
+#[deluxe(attributes(tlb))]
 pub(crate) struct TLBHeaderAttrs {
     pub(crate) prefix: Option<usize>,      // use 0 as default
     pub(crate) bits_len: Option<usize>,    // use 0 as default
@@ -14,7 +14,7 @@ pub(crate) struct TLBHeaderAttrs {
 }
 
 #[derive(deluxe::ExtractAttributes)]
-#[deluxe(attributes(tlb_derive))]
+#[deluxe(attributes(tlb))]
 pub(crate) struct TLBFieldAttrs {
     pub(crate) bits_len: Option<u32>, // alias for ConstLen adapter
     pub(crate) adapter: Option<String>,
@@ -28,7 +28,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
         Err(e) => return e.into_compile_error(),
     };
 
-    let crate_path = if let Ok(ton_lib_core_crate) = crate_name("ton_core") {
+    let crate_path = if let Ok(ton_lib_core_crate) = crate_name("ton_lib_core") {
         match ton_lib_core_crate {
             FoundCrate::Itself => quote::quote! { crate },
             FoundCrate::Name(name) => {
@@ -36,7 +36,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
                 quote! { #ident }
             }
         }
-    } else if let Ok(ton_lib_crate) = crate_name("ton") {
+    } else if let Ok(ton_lib_crate) = crate_name("ton_lib") {
         match ton_lib_crate {
             FoundCrate::Itself => quote::quote! { crate::ton_lib_core },
             FoundCrate::Name(name) => {
@@ -53,7 +53,7 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
     let (read_def_tokens, write_def_tokens, extra_impl_tokens) = match &mut input.data {
         Data::Struct(data) => tlb_derive_struct(&header_attrs, data),
         Data::Enum(data) => tlb_derive_enum(&crate_path, ident, data),
-        _ => panic!("TLBDerive only supports structs and enums"),
+        _ => panic!("TLB derive macros only supports structs and enums"),
     };
 
     let prefix_val = header_attrs.prefix.unwrap_or(0);

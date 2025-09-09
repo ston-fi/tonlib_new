@@ -2,10 +2,10 @@ use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{read_up_to_4_msgs, write_u
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// WalletVersion::V3R1 | WalletVersion::V3R2
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
+#[derive(Debug, PartialEq, Clone, TLB)]
 pub struct WalletV3Data {
     pub seqno: u32,
     pub wallet_id: i32,

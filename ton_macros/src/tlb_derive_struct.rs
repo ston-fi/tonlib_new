@@ -37,6 +37,7 @@ pub(crate) fn tlb_derive_struct(
                 let adapter_str = format!("ConstLen::<{ty_token_stream}>::new({bits_len})");
                 field_attrs.adapter = Some(adapter_str);
             }
+            println!("{:?}", field_attrs.adapter);
 
             if let Some(adapter) = field_attrs.adapter {
                 // well-known aliases

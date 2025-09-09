@@ -1,7 +1,7 @@
 use super::*;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum JettonWalletMsgBody {
     Burn(JettonBurnMsg),
     BurnNotification(JettonBurnNotification),

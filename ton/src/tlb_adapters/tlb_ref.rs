@@ -24,13 +24,13 @@ impl<T: TLB> Default for TLBRef<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ton_lib_core::TLBDerive;
+    use ton_lib_core::TLB;
 
-    #[derive(TLBDerive, PartialEq, Debug)]
+    #[derive(TLB, PartialEq, Debug)]
     struct TestStruct {
-        #[tlb_derive(adapter = "TLBRef::<u8>::new()")]
+        #[tlb(adapter = "TLBRef::<u8>::new()")]
         pub a: u8,
-        #[tlb_derive(adapter = "TLBRef")]
+        #[tlb(adapter = "TLBRef")]
         pub b: u8,
     }
 

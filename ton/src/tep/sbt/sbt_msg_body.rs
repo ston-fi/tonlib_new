@@ -4,9 +4,9 @@ use crate::tep::sbt::sbt_ownership_proof_msg::SbtOwnershipProofMsg;
 use crate::tep::sbt::sbt_prove_ownership_msg::SbtProveOwnershipMsg;
 use crate::tep::sbt::sbt_request_owner_msg::SbtRequestOwnerMsg;
 use crate::tep::sbt::sbt_revoke_msg::SbtRevokeMsg;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Clone, Debug, PartialEq, TLB)]
 pub enum SbtMsgBody {
     Destroy(SbtDestroyMsg),
     OwnerInfo(SbtOwnerInfoMsg),

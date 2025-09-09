@@ -1,6 +1,6 @@
 use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::types::tlb_core::MsgAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// ```raw
 /// request_owner#d0c3bfea
@@ -10,8 +10,8 @@ use ton_lib_core::TLBDerive;
 ///   with_content:Bool
 /// = InternalMsgBody;
 /// ```
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0xd0c3bfea, bits_len = 32, ensure_empty = true)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0xd0c3bfea, bits_len = 32, ensure_empty = true)]
 pub struct SbtRequestOwnerMsg {
     pub query_id: u64,
     pub dst: MsgAddress, // address of the contract to which the ownership of SBT should be proven

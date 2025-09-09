@@ -91,12 +91,12 @@ mod tests {
     use super::*;
     use crate::cell::TonCell;
     use tokio_test::assert_ok;
-    use ton_lib_macros::TLBDerive;
+    use ton_lib_macros::TLB;
 
-    #[derive(Debug, PartialEq, TLBDerive)]
+    #[derive(Debug, PartialEq, TLB)]
     struct TestType1(i32);
 
-    #[derive(Debug, PartialEq, TLBDerive)]
+    #[derive(Debug, PartialEq, TLB)]
     struct TestType2(i64);
 
     #[test]
@@ -143,7 +143,7 @@ mod tests {
             Some(Box<Item>),
         }
 
-        #[derive(Debug, PartialEq, Clone, TLBDerive)]
+        #[derive(Debug, PartialEq, Clone, TLB)]
         struct Item {
             next: TLBEitherRef<TonCell>,
             number1: u128,

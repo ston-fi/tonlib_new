@@ -2,7 +2,7 @@ use crate::block_tlb::Coins;
 use ton_lib_core::cell::{TonCell, TonCellRef};
 use ton_lib_core::types::tlb_core::TLBEitherRef;
 use ton_lib_core::types::TonAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// Creates a body for jetton transfer according to TL-B schema:
 ///
@@ -16,8 +16,8 @@ use ton_lib_core::TLBDerive;
 ///   forward_payload:(Either Cell ^Cell)
 /// = InternalMsgBody;
 /// ```
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x5fcc3d14, bits_len = 32, ensure_empty = true)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0x5fcc3d14, bits_len = 32, ensure_empty = true)]
 pub struct NFTTransferMsg {
     pub query_id: u64,
     pub new_owner: TonAddress,    // address of the new owner of the NFT item.

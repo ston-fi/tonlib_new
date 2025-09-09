@@ -2,11 +2,11 @@ use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{read_up_to_4_msgs, write_u
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// Is not covered by tests and basically unsupported
 /// WalletVersion::V1R1 | WalletVersion::V1R2 | WalletVersion::V1R3 | WalletVersion::V2R1 | WalletVersion::V2R2
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
+#[derive(Debug, PartialEq, Clone, TLB)]
 pub struct WalletV1V2Data {
     pub seqno: u32,
     pub public_key: TonHash,

@@ -1,7 +1,7 @@
 use crate::block_tlb::Coins;
 use ton_lib_core::cell::TonCell;
 use ton_lib_core::types::tlb_core::{MsgAddress, TLBEitherRef};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// ```raw
 /// internal_transfer#178d4519  query_id:uint64 amount:(VarUInteger 16)
@@ -11,8 +11,8 @@ use ton_lib_core::TLBDerive;
 /// forward_payload:(Either Cell ^Cell)
 /// = InternalMsgBody;
 /// ```
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x178d4519, bits_len = 32, ensure_empty = true)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0x178d4519, bits_len = 32, ensure_empty = true)]
 pub struct JettonInternalTransferMsg {
     pub query_id: u64,
     pub amount: Coins,

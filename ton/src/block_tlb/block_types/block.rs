@@ -2,18 +2,18 @@ use crate::block_tlb::BlockExtra;
 use crate::block_tlb::BlockInfo;
 use crate::tlb_adapters::TLBRef;
 use ton_lib_core::cell::TonCellRef;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 // https://github.com/ton-blockchain/ton/blob/6f745c04daf8861bb1791cffce6edb1beec62204/crypto/block/block.tlb#L462
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x11ef55aa, bits_len = 32)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0x11ef55aa, bits_len = 32)]
 pub struct Block {
     pub global_id: i32,
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub info: BlockInfo,
     pub value_flow: TonCellRef,   // TODO
     pub state_update: TonCellRef, // TODO
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub extra: BlockExtra,
 }
 

@@ -2,11 +2,11 @@ use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{build_inner_request, parse
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// WalletVersion::V5R1
 /// https://github.com/ton-blockchain/wallet-contract-v5/blob/main/types.tlb#L29
-#[derive(Debug, PartialEq, Clone, TLBDerive)]
+#[derive(Debug, PartialEq, Clone, TLB)]
 pub struct WalletV5Data {
     pub sign_allowed: bool,
     pub seqno: u32,

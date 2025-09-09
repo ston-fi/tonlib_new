@@ -8,17 +8,17 @@ use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::types::tlb_core::VarLenBytes;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L116
-#[derive(Clone, Debug, PartialEq, Eq, TLBDerive)]
+#[derive(Clone, Debug, PartialEq, Eq, TLB)]
 pub struct Coins(VarLenBytes<u128, 4>);
 
 /// https://github.com/ton-blockchain/ton/blob/050a984163a53df16fb03f66cc445c34bfed48ed/crypto/block/block.tlb#L124
-#[derive(Default, Clone, Debug, PartialEq, TLBDerive)]
+#[derive(Default, Clone, Debug, PartialEq, TLB)]
 pub struct CurrencyCollection {
     pub grams: Coins,
-    #[tlb_derive(adapter = "TLBHashMapE::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
+    #[tlb(adapter = "TLBHashMapE::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32)")]
     pub other: HashMap<u32, VarLenBytes<BigUint, 5>>,
 }
 

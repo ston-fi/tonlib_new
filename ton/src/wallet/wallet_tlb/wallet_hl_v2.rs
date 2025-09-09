@@ -1,8 +1,8 @@
 use ton_lib_core::cell::{TonCellRef, TonHash};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// WalletVersion::HighloadV2R2, not tested
-#[derive(Clone, Debug, TLBDerive)]
+#[derive(Clone, Debug, TLB)]
 pub struct WalletHLV2R2Data {
     pub wallet_id: i32,
     pub last_cleaned_time: u64,

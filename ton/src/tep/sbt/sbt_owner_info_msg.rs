@@ -2,7 +2,7 @@ use crate::tlb_adapters::ConstLen;
 use num_bigint::BigUint;
 use ton_lib_core::cell::TonCellRef;
 use ton_lib_core::types::tlb_core::MsgAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// ```raw
 /// owner_info#0dd607e3
@@ -15,11 +15,11 @@ use ton_lib_core::TLBDerive;
 ///   content:(Maybe ^Cell)
 /// = InternalMsgBody;
 /// ```
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x0dd607e3, bits_len = 32, ensure_empty = true)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0x0dd607e3, bits_len = 32, ensure_empty = true)]
 pub struct SbtOwnerInfoMsg {
     pub query_id: u64,
-    #[tlb_derive(bits_len = 256)]
+    #[tlb(bits_len = 256)]
     pub item_id: BigUint,
     pub initiator: MsgAddress, // address of request initiator
     pub owner: MsgAddress,

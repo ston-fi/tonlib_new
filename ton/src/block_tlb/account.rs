@@ -2,11 +2,11 @@ use crate::block_tlb::{Coins, CurrencyCollection, StateInit};
 use crate::tlb_adapters::TLBRef;
 use ton_lib_core::cell::{TonCellRef, TonHash};
 use ton_lib_core::types::tlb_core::{MsgAddressInt, VarLenBytes};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
-#[derive(Default, Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Default, Debug, Clone, PartialEq, TLB)]
 pub struct ShardAccount {
-    #[tlb_derive(adapter = "TLBRef")]
+    #[tlb(adapter = "TLBRef")]
     pub account: MaybeAccount,
     pub last_tx_hash: TonHash,
     pub last_tx_lt: u64,
@@ -14,32 +14,32 @@ pub struct ShardAccount {
 
 // https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L259
 // intentionally implemented as enum - Account can't be used directly
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum MaybeAccount {
     None(AccountNone),
     #[rustfmt::skip]
     Account(Box::<Account>),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b0, bits_len = 1)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b0, bits_len = 1)]
 pub struct AccountNone;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b1, bits_len = 1)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b1, bits_len = 1)]
 pub struct Account {
     pub addr: MsgAddressInt,
     pub storage_stat: StorageInfo,
     pub storage: AccountStorage,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct StorageUsed {
     pub cells: VarLenBytes<u64, 3>,
     pub bits: VarLenBytes<u64, 3>,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct StorageInfo {
     pub used: StorageUsed,
     pub storage_extra: MaybeStorageExtraInfo,
@@ -47,54 +47,54 @@ pub struct StorageInfo {
     pub due_payment: Option<Coins>,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct AccountStorage {
     pub last_tx_lt: u64,
     pub balance: CurrencyCollection,
     pub state: AccountState,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum MaybeStorageExtraInfo {
     None(StorageExtraInfoNone),
     Info(StorageExtraInfo),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b000, bits_len = 3)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b000, bits_len = 3)]
 pub struct StorageExtraInfoNone;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b001, bits_len = 3)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b001, bits_len = 3)]
 pub struct StorageExtraInfo {
     pub dict_hash: TonHash,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum AccountState {
     Uninit(AccountStateUninit),
     Frozen(AccountStateFrozen),
     Active(AccountStateActive),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b00, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b00, bits_len = 2)]
 pub struct AccountStateUninit;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b01, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b01, bits_len = 2)]
 pub struct AccountStateFrozen {
     pub state_hash: TonHash,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b1, bits_len = 1)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b1, bits_len = 1)]
 pub struct AccountStateActive {
     pub state_init: StateInit,
 }
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L271
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum AccountStatus {
     Uninit(AccountStatusUninit),
     Frozen(AccountStatusFrozen),
@@ -102,20 +102,20 @@ pub enum AccountStatus {
     NonExist(AccountStatusNotExist),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b00, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b00, bits_len = 2)]
 pub struct AccountStatusUninit;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b01, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b01, bits_len = 2)]
 pub struct AccountStatusFrozen;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b10, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b10, bits_len = 2)]
 pub struct AccountStatusActive;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b11, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b11, bits_len = 2)]
 pub struct AccountStatusNotExist;
 
 impl ShardAccount {

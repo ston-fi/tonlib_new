@@ -5,42 +5,42 @@ use crate::error::TLCoreError;
 use crate::traits::tlb::{TLBPrefix, TLB};
 use crate::types::tlb_core::VarLenBits;
 use std::convert::Into;
-use ton_lib_macros::TLBDerive;
+use ton_lib_macros::TLB;
 
 /// https://github.com/ton-blockchain/ton/blob/59a8cf0ae5c3062d14ec4c89a04fee80b5fd05c1/crypto/block/block.tlb#L100
 /// Implemented in _core because TonAddress depends on it
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum MsgAddress {
     Int(MsgAddressInt),
     Ext(MsgAddressExt),
 }
 
 // Ext
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum MsgAddressExt {
     None(MsgAddressNone),
     Extern(MsgAddressExtern),
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b00, bits_len = 2)]
+#[derive(Debug, Clone, Copy, PartialEq, TLB)]
+#[tlb(prefix = 0b00, bits_len = 2)]
 pub struct MsgAddressNone;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b01, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b01, bits_len = 2)]
 pub struct MsgAddressExtern {
     pub address: VarLenBits<Vec<u8>, 9>,
 }
 
 // Int
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLB)]
 pub enum MsgAddressInt {
     Std(MsgAddressIntStd),
     Var(MsgAddressIntVar),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLBDerive)]
-#[tlb_derive(prefix = 0b10, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLB)]
+#[tlb(prefix = 0b10, bits_len = 2)]
 pub struct MsgAddressIntStd {
     pub anycast: Option<Anycast>,
     pub workchain: i8,
@@ -121,7 +121,7 @@ mod from_impl {
     impl From<MsgAddressIntVar> for MsgAddress { fn from(value: MsgAddressIntVar) -> Self { Self::Int(value.into()) } }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Ord, PartialOrd, TLB)]
 pub struct Anycast {
     pub rewrite_pfx: VarLenBits<Vec<u8>, 5>,
 }

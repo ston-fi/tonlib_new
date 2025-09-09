@@ -8,7 +8,7 @@ use crate::ton_contract::ton_contract_impl;
 use proc_macro::TokenStream;
 
 /// Automatic `TLB` implementation
-#[proc_macro_derive(TLBDerive, attributes(tlb_derive))]
+#[proc_macro_derive(TLB, attributes(tlb))]
 pub fn tlb_derive(input: TokenStream) -> TokenStream { tlb_derive_impl(input).into() }
 
 /// Automatic `TonContract` implementation

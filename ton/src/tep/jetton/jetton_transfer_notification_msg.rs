@@ -2,15 +2,15 @@ use crate::block_tlb::Coins;
 use ton_lib_core::cell::TonCell;
 use ton_lib_core::types::tlb_core::TLBEitherRef;
 use ton_lib_core::types::TonAddress;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 /// ```raw
 /// transfer_notification#7362d09c query_id:uint64 amount:(VarUInteger 16)
 /// sender:MsgAddress forward_payload:(Either Cell ^Cell)
 /// = InternalMsgBody;
 /// ```
-#[derive(Clone, Debug, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0x7362d09c, bits_len = 32, ensure_empty = true)]
+#[derive(Clone, Debug, PartialEq, TLB)]
+#[tlb(prefix = 0x7362d09c, bits_len = 32, ensure_empty = true)]
 pub struct JettonTransferNotificationMsg {
     pub query_id: u64,                          // should be equal with request's query_id
     pub amount: Coins,                          // amount of transferred jettons

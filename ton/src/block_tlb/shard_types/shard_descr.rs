@@ -2,7 +2,7 @@ use crate::block_tlb::CurrencyCollection;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum ShardDescrTag {
@@ -135,26 +135,26 @@ impl TLB for ShardDescr {
     fn write(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { self.write_definition(builder) }
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub enum FutureSplitMerge {
     None(FutureSplitMergeNone),
     Split(FutureSplitMergeSplit),
     Merge(FutureSplitMergeMerge),
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b0, bits_len = 1)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b0, bits_len = 1)]
 pub struct FutureSplitMergeNone;
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b10, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b10, bits_len = 2)]
 pub struct FutureSplitMergeSplit {
     pub split_utime: u32,
     pub interval: u32,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
-#[tlb_derive(prefix = 0b11, bits_len = 2)]
+#[derive(Debug, Clone, PartialEq, TLB)]
+#[tlb(prefix = 0b11, bits_len = 2)]
 pub struct FutureSplitMergeMerge {
     pub merge_utime: u32,
     pub interval: u32,

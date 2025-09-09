@@ -5,7 +5,7 @@ use crate::block_tlb::ShardIdent;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonHash};
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
-use ton_lib_core::TLBDerive;
+use ton_lib_core::TLB;
 
 const GEN_SOFTWARE_EXISTS_FLAG: u8 = 1;
 
@@ -41,7 +41,7 @@ pub struct BlockInfo {
     pub prev_vert_ref: Option<ExtBlockRef>,
 }
 
-#[derive(Debug, Clone, PartialEq, TLBDerive)]
+#[derive(Debug, Clone, PartialEq, TLB)]
 pub struct ExtBlockRef {
     pub end_lt: u64,
     pub seqno: u32,
