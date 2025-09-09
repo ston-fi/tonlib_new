@@ -1,10 +1,10 @@
 use crate::block_tlb::TVMStack;
 use crate::tep::metadata::MetadataContent;
+use crate::tep::tvm_results::tvm_result::TVMResult;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::traits::tvm_result::TVMResult;
 use ton_lib_core::types::TonAddress;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -17,8 +17,7 @@ pub struct GetNFTDataResult {
 }
 
 impl TVMResult for GetNFTDataResult {
-    fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
-        let mut stack = TVMStack::from_boc(boc)?;
+    fn from_stack(stack: &mut TVMStack) -> Result<Self, TLCoreError> {
         let individual_content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let owner_address: TonAddress = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let collection_address = TonAddress::from_cell(stack.pop_cell()?.deref())?;

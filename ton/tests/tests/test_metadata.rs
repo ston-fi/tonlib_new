@@ -8,10 +8,10 @@ use ton_lib::tep::jetton::JettonMetadata;
 use ton_lib::tep::metadata::MetaLoader;
 use ton_lib::tep::nft::NFTItemMetadata;
 use ton_lib::tep::snake_data::SnakeData;
+use ton_lib::tep::tvm_results::TVMResult;
 use ton_lib::tep::tvm_results::GetJettonDataResult;
 use ton_lib::tep::tvm_results::GetWalletAddressResult;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::traits::tvm_result::TVMResult;
 
 #[tokio::test]
 async fn test_get_jetton_metadata_complex() -> anyhow::Result<()> {

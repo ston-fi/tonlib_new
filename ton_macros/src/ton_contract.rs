@@ -11,7 +11,7 @@ pub(crate) fn ton_contract_impl(_attr: TokenStream, item: TokenStream) -> TokenS
     let generics = &input.generics;
     let (impl_generics, ty_generics, where_clause) = generics.split_for_impl();
 
-    let found_crate = crate_name("ton").expect("ton crate not found");
+    let found_crate = crate_name("ton_lib").expect("ton crate not found");
 
     let crate_path = match found_crate {
         FoundCrate::Itself => quote::quote! { crate },

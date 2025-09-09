@@ -2,9 +2,9 @@ use std::ops::Deref;
 
 use crate::block_tlb::TVMStack;
 use crate::tep::metadata::MetadataContent;
+use crate::tep::tvm_results::tvm_result::TVMResult;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::traits::tvm_result::TVMResult;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GetNFTContentResult {
@@ -12,10 +12,8 @@ pub struct GetNFTContentResult {
 }
 
 impl TVMResult for GetNFTContentResult {
-    fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
-        let mut stack = TVMStack::from_boc(boc)?;
+    fn from_stack(stack: &mut TVMStack) -> Result<Self, TLCoreError> {
         let full_content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
-
         Ok(Self { full_content })
     }
 }

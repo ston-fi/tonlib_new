@@ -1,9 +1,9 @@
 use crate::block_tlb::TVMStack;
 use crate::tep::metadata::MetadataContent;
+use crate::tep::tvm_results::tvm_result::TVMResult;
 use std::ops::Deref;
 use ton_lib_core::error::TLCoreError;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::traits::tvm_result::TVMResult;
 use ton_lib_core::types::TonAddress;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -14,8 +14,7 @@ pub struct GetCollectionDataResult {
 }
 
 impl TVMResult for GetCollectionDataResult {
-    fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
-        let mut stack = TVMStack::from_boc(boc)?;
+    fn from_stack(stack: &mut TVMStack) -> Result<Self, TLCoreError> {
         let owner_address = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let collection_content = MetadataContent::from_cell(&*stack.pop_cell()?)?;
         let next_item_index = stack.pop_tiny_int()?;

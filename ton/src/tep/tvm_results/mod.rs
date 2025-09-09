@@ -7,6 +7,7 @@ mod get_nft_content_result;
 mod get_nft_data_result;
 mod get_wallet_address_result;
 mod get_wallet_data_result;
+mod tvm_result;
 
 pub use get_collection_data_result::*;
 pub use get_jetton_data_result::*;
@@ -15,3 +16,4 @@ pub use get_nft_content_result::*;
 pub use get_nft_data_result::*;
 pub use get_wallet_address_result::*;
 pub use get_wallet_data_result::*;
+pub use tvm_result::*;
