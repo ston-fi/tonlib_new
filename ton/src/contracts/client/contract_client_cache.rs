@@ -1,6 +1,6 @@
 use crate::contracts::client::cache_stats::CacheStats;
 use crate::contracts::client::contract_client::ContractClientConfig;
-use crate::error::TLError;
+use crate::errors::TonError;
 use futures_util::future::join_all;
 use moka::future::Cache;
 use std::collections::HashMap;
@@ -8,7 +8,7 @@ use std::hash::Hash;
 use std::sync::atomic::Ordering::Relaxed;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
@@ -21,7 +21,10 @@ pub(super) struct ContractClientCache {
 }
 
 impl ContractClientCache {
-    pub(super) fn new(config: ContractClientConfig, provider: Arc<dyn ContractProvider>) -> Result<Arc<Self>, TLError> {
+    pub(super) fn new(
+        config: ContractClientConfig,
+        provider: Arc<dyn ContractProvider>,
+    ) -> Result<Arc<Self>, TonError> {
         let (capacity, ttl) = (config.cache_capacity, config.cache_ttl);
         let client_cache = Arc::new(Self {
             provider: provider.clone(),
@@ -39,7 +42,7 @@ impl ContractClientCache {
         &self,
         address: &TonAddress,
         tx_id: Option<&TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TLError> {
+    ) -> Result<Arc<ContractState>, TonError> {
         if let Some(tx_id) = tx_id {
             self.cache_stats.state_by_tx_req.fetch_add(1, Relaxed);
             return Ok(self
@@ -67,7 +70,7 @@ impl ContractClientCache {
         &self,
         address: &TonAddress,
         tx_id: Option<TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TLCoreError> {
+    ) -> Result<Arc<ContractState>, TonCoreError> {
         match &tx_id {
             Some(_) => self.cache_stats.state_by_tx_miss.fetch_add(1, Relaxed),
             None => self.cache_stats.state_latest_miss.fetch_add(1, Relaxed),

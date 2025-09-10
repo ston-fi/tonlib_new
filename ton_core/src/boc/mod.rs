@@ -6,7 +6,7 @@ mod boc_raw;
 
 use crate::boc::boc_raw::BOCRaw;
 use crate::cell::{TonCell, TonCellRef, TonCellStorage};
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::marker::PhantomData;
@@ -30,10 +30,10 @@ impl BOC {
         }
     }
 
-    pub fn from_bytes<T: AsRef<[u8]>>(bytes: T) -> Result<Self, TLCoreError> {
+    pub fn from_bytes<T: AsRef<[u8]>>(bytes: T) -> Result<Self, TonCoreError> {
         let bytes_ref = bytes.as_ref();
         if bytes_ref.is_empty() {
-            return Err(TLCoreError::BOCEmpty);
+            return Err(TonCoreError::data("BOC", "Can't read BOC from empty slice"));
         }
         Ok(Self {
             roots: BOCRaw::from_bytes(bytes_ref)?.into_ton_cells()?,
@@ -41,24 +41,25 @@ impl BOC {
         })
     }
 
-    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TLCoreError> {
+    pub fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonCoreError> {
         Self::from_bytes(hex::decode(hex.as_ref())?)
     }
-    pub fn from_base64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TLCoreError> {
+    pub fn from_base64<T: AsRef<[u8]>>(hex: T) -> Result<Self, TonCoreError> {
         Self::from_bytes(BASE64_STANDARD.decode(hex.as_ref())?)
     }
 
-    pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TLCoreError> {
+    pub fn to_bytes(&self, add_crc32: bool) -> Result<Vec<u8>, TonCoreError> {
         BOCRaw::from_ton_cells(self.roots.as_slice())?.to_bytes(add_crc32)
     }
-    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TLCoreError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
-    pub fn to_base64(&self, add_crc32: bool) -> Result<String, TLCoreError> {
+    pub fn to_hex(&self, add_crc32: bool) -> Result<String, TonCoreError> { Ok(hex::encode(self.to_bytes(add_crc32)?)) }
+    pub fn to_base64(&self, add_crc32: bool) -> Result<String, TonCoreError> {
         Ok(BASE64_STANDARD.encode(self.to_bytes(add_crc32)?))
     }
 
-    pub fn single_root(mut self) -> Result<TonCellRef, TLCoreError> {
+    pub fn single_root(mut self) -> Result<TonCellRef, TonCoreError> {
         if self.roots.len() != 1 {
-            return Err(TLCoreError::BOCSingleRoot(self.roots.len()));
+            let msg = format!("Expected 1 root cell, got {}", self.roots.len());
+            return Err(TonCoreError::data("BOC", msg));
         }
         Ok(self.roots.pop().unwrap())
     }

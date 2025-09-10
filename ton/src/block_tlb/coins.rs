@@ -6,7 +6,7 @@ use num_traits::ToPrimitive;
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::types::tlb_core::VarLenBytes;
 use ton_lib_core::TLB;
 
@@ -33,10 +33,10 @@ impl Coins {
         let bits_len = (128 - amount.leading_zeros()).div_ceil(8) * 8;
         Self(VarLenBytes::new(amount, bits_len as usize))
     }
-    pub fn from_signed<T: Into<i128>>(amount: T) -> Result<Self, TLCoreError> {
+    pub fn from_signed<T: Into<i128>>(amount: T) -> Result<Self, TonCoreError> {
         let amount = amount.into();
         if amount < 0 {
-            return Err(TLCoreError::UnexpectedValue {
+            return Err(TonCoreError::UnexpectedValue {
                 expected: "positive int".to_string(),
                 actual: format!("{amount}"),
             });
@@ -44,15 +44,15 @@ impl Coins {
         Ok(Self::new(amount as u128))
     }
 
-    pub fn to_u32(&self) -> Result<u32, TLCoreError> {
-        self.0.to_u32().ok_or(TLCoreError::UnexpectedValue {
+    pub fn to_u32(&self) -> Result<u32, TonCoreError> {
+        self.0.to_u32().ok_or(TonCoreError::UnexpectedValue {
             expected: "u32".to_string(),
             actual: format!("{}", self.0.data),
         })
     }
 
-    pub fn to_u64(&self) -> Result<u64, TLCoreError> {
-        self.0.to_u64().ok_or(TLCoreError::UnexpectedValue {
+    pub fn to_u64(&self) -> Result<u64, TonCoreError> {
+        self.0.to_u64().ok_or(TonCoreError::UnexpectedValue {
             expected: "u64".to_string(),
             actual: format!("{}", self.0.data),
         })
@@ -76,7 +76,7 @@ mod traits_impl {
     impl Copy for Coins {}
 
     impl FromStr for CurrencyCollection {
-        type Err = TLCoreError;
+        type Err = TonCoreError;
         fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
     }
 
@@ -94,7 +94,7 @@ mod traits_impl {
     }
 
     impl FromStr for Coins {
-        type Err = TLCoreError;
+        type Err = TonCoreError;
         fn from_str(grams: &str) -> Result<Self, Self::Err> { Ok(Self::new(u128::from_str(grams)?)) }
     }
 

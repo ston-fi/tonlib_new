@@ -1,7 +1,7 @@
 use crate::block_tlb::BlockIdExt;
 use crate::clients::tl_client::tl::client::TLClientTrait;
 use crate::clients::tl_client::{TLClient, TLConnection};
-use crate::error::TLError;
+use crate::errors::TonError;
 use async_recursion::async_recursion;
 use async_trait::async_trait;
 use futures_util::future::try_join_all;
@@ -11,7 +11,7 @@ use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 
@@ -37,9 +37,9 @@ impl TLProvider {
 
 #[async_trait]
 impl ContractProvider for TLProvider {
-    async fn last_mc_seqno(&self) -> Result<u32, TLCoreError> { Ok(self.client.get_mc_info().await?.last.seqno) }
+    async fn last_mc_seqno(&self) -> Result<u32, TonCoreError> { Ok(self.client.get_mc_info().await?.last.seqno) }
 
-    async fn load_state(&self, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<ContractState, TLCoreError> {
+    async fn load_state(&self, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<ContractState, TonCoreError> {
         let raw_state = match tx_id {
             Some(id) => self.client.get_account_state_raw_by_tx(address.clone(), id).await,
             None => self.client.get_account_state_raw(address.clone()).await,
@@ -62,7 +62,7 @@ impl ContractProvider for TLProvider {
         })
     }
 
-    async fn load_bc_config(&self, _mc_seqno: Option<u32>) -> Result<Vec<u8>, TLCoreError> {
+    async fn load_bc_config(&self, _mc_seqno: Option<u32>) -> Result<Vec<u8>, TonCoreError> {
         Ok(self.client.get_config_boc_all(0).await?)
     }
 
@@ -70,7 +70,7 @@ impl ContractProvider for TLProvider {
         &self,
         lib_ids: Vec<TonHash>,
         _mc_seqno: Option<u32>,
-    ) -> Result<Vec<(TonHash, Vec<u8>)>, TLCoreError> {
+    ) -> Result<Vec<(TonHash, Vec<u8>)>, TonCoreError> {
         let libs_raw = self.client.get_libs(lib_ids).await?;
         let mut libs = Vec::with_capacity(libs_raw.len());
         for lib in libs_raw {
@@ -79,7 +79,7 @@ impl ContractProvider for TLProvider {
         Ok(libs)
     }
 
-    async fn load_latest_tx_per_address(&self, mc_seqno: u32) -> Result<HashMap<TonAddress, TxIdLTHash>, TLCoreError> {
+    async fn load_latest_tx_per_address(&self, mc_seqno: u32) -> Result<HashMap<TonAddress, TxIdLTHash>, TonCoreError> {
         let conn = self.find_connection(mc_seqno).await?;
         let prev_mc_block = self.get_or_load_master(conn, mc_seqno - 1).await?;
         let prev_shards = self.get_or_load_shards(conn, &prev_mc_block).await?;
@@ -98,7 +98,7 @@ impl ContractProvider for TLProvider {
                     (TxIdLTHash::new(x.lt, x.tx_hash), TonAddress::new(block_id.shard_ident.workchain, x.address_hash))
                 })
                 .collect::<Vec<_>>();
-            Ok::<_, TLCoreError>(res)
+            Ok::<_, TonCoreError>(res)
         });
         let block_txs = try_join_all(txs_futs).await?;
 
@@ -122,7 +122,7 @@ impl ContractProvider for TLProvider {
 }
 
 impl TLProvider {
-    async fn find_connection(&self, mc_seqno: u32) -> Result<&TLConnection, TLError> {
+    async fn find_connection(&self, mc_seqno: u32) -> Result<&TLConnection, TonError> {
         loop {
             let conn = self.client.get_connection();
             let mc_info = conn.get_mc_info().await?;
@@ -133,7 +133,7 @@ impl TLProvider {
         }
     }
 
-    async fn get_or_load_master(&self, conn: &TLConnection, mc_seqno: u32) -> Result<BlockIdExt, TLError> {
+    async fn get_or_load_master(&self, conn: &TLConnection, mc_seqno: u32) -> Result<BlockIdExt, TonError> {
         Ok(self.mc_block_cache.try_get_with(mc_seqno, async move { Ok(conn.lookup_mc_block(mc_seqno).await?) }).await?)
     }
 
@@ -141,7 +141,7 @@ impl TLProvider {
         &self,
         conn: &TLConnection,
         mc_block: &BlockIdExt,
-    ) -> Result<Arc<HashSet<BlockIdExt>>, TLError> {
+    ) -> Result<Arc<HashSet<BlockIdExt>>, TonError> {
         Ok(self
             .block_shards_cache
             .try_get_with(mc_block.seqno, async move {
@@ -157,7 +157,7 @@ impl TLProvider {
         mc_seqno: u32,
         prev_shards: &HashSet<BlockIdExt>,
         cur_shards: HashSet<BlockIdExt>,
-    ) -> Result<Arc<HashSet<BlockIdExt>>, TLError> {
+    ) -> Result<Arc<HashSet<BlockIdExt>>, TonError> {
         Ok(self
             .unseen_cache
             .try_get_with(mc_seqno, async move {
@@ -174,10 +174,10 @@ impl TLProvider {
         mc_seqno: u32,
         prev_shards: &HashSet<BlockIdExt>,
         cur_shards: HashSet<BlockIdExt>,
-    ) -> Result<HashSet<BlockIdExt>, TLError> {
+    ) -> Result<HashSet<BlockIdExt>, TonError> {
         let get_prev_ids_futs = cur_shards.into_iter().map(|block_id| async {
             if prev_shards.contains(&block_id) || block_id.seqno == 0 {
-                return Ok::<_, TLError>(Default::default());
+                return Ok::<_, TonError>(Default::default());
             }
 
             let prev_ids = self.get_prev_blocks_with_retry(conn, mc_seqno, &block_id).await?;
@@ -195,7 +195,7 @@ impl TLProvider {
         conn: &TLConnection,
         mc_seqno: u32,
         block_id: &BlockIdExt,
-    ) -> Result<HashSet<BlockIdExt>, TLError> {
+    ) -> Result<HashSet<BlockIdExt>, TonError> {
         if let Ok(header) = conn.get_block_header(block_id.clone()).await {
             return Ok(HashSet::from_iter(header.prev_blocks.unwrap_or_default().into_iter()));
         }

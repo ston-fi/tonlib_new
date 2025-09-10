@@ -1,12 +1,17 @@
-# TON-rs
+# ton-rs
 
-General purpose library to work with [TON](https://ton.org/) blockchain.
+Set of general-purpose rust libraries to interact with [TON](https://ton.org/) blockchain.
 
 [![CI](https://github.com/sild/ton_lib_rs/actions/workflows/build.yml/badge.svg)](https://github.com/sild/ton_lib_rs/actions/workflows/build.yml)
 [![Crates.io](https://img.shields.io/crates/v/ton_lib.svg)](https://crates.io/crates/ton_lib)
 [![codecov](https://codecov.io/gh/sild/ton_lib_rs/branch/main/graph/badge.svg)](https://codecov.io/gh/sild/ton_lib_rs)
 
 This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib-rs) repository and also uses [tonlib-sys](https://github.com/ston-fi/tonlib-sys) underneath for the [tonlibjson_client](ton/src/clients/tonlibjson) implementation.
+
+## ton_macros
+
+- TLB Derive - Automatically derive TLB trait for your types based on it's members
+- TonContract Derive - Automatically derive TonContract trait for your contract wrappers
 
 ## ton_core
 
@@ -26,10 +31,9 @@ This crate is heavily based on the [tonlib-rs](https://github.com/ston-fi/tonlib
 
 
 ## Getting started
-- Few examples can be found in `examples` folder (feel free to add your own).
-- `examples/ton_transfer.rs` - A good example of a simple TON transaction.
+Examples can be found in `examples` folder (feel free to add your own).
 
-### Basic Usage
+### Basic usage
 ```rust
 // Build and read custom cells
 fn main() -> anyhow::Result<()> {

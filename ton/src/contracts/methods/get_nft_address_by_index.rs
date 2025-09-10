@@ -1,8 +1,8 @@
 use crate::block_tlb::TVMStack;
 use crate::contracts::ton_contract::TonContract;
-use crate::error::TLError;
-use crate::tep::tvm_results::tvm_result::TVMResult;
+use crate::errors::TonError;
 use crate::tep::tvm_results::GetNFTAddressByIndexResult;
+use crate::tep::tvm_results::TVMResult;
 use async_trait::async_trait;
 use num_bigint::BigInt;
 
@@ -11,7 +11,7 @@ pub trait GetNFTAddressByIndex: TonContract {
     async fn get_nft_address_by_index<T: Into<BigInt> + Send>(
         &self,
         index: T,
-    ) -> Result<GetNFTAddressByIndexResult, TLError> {
+    ) -> Result<GetNFTAddressByIndexResult, TonError> {
         let mut stack = TVMStack::default();
         stack.push_int(index.into());
 

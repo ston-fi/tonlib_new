@@ -3,15 +3,15 @@ use crate::clients::lite_client::client::LiteClient;
 use crate::clients::lite_client::config::LiteClientConfig;
 use crate::clients::tl_client::config::TLClientConfig;
 use crate::clients::tl_client::tl::types::TLKeyStoreType;
-use crate::error::TLError;
+use crate::errors::TonError;
 use futures_util::future::join_all;
 use std::time::Duration;
 use ton_lib_core::cell::TonCell;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_liteapi::tl::response::BlockData;
 
-pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), TLError> {
+pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), TonError> {
     if config.update_init_block {
         update_init_block(config).await?;
     }
@@ -22,7 +22,7 @@ pub async fn prepare_client_env(config: &mut TLClientConfig) -> Result<(), TLErr
     Ok(())
 }
 
-async fn update_init_block(config: &mut TLClientConfig) -> Result<(), TLError> {
+async fn update_init_block(config: &mut TLClientConfig) -> Result<(), TonError> {
     log::info!("Updating init_block...");
     let lite_config = LiteClientConfig::new(&config.init_opts.config.net_config_json)?;
     let cur_init_seqno = lite_config.net_config.get_init_block_seqno();
@@ -61,16 +61,16 @@ async fn update_init_block(config: &mut TLClientConfig) -> Result<(), TLError> {
     Ok(())
 }
 
-fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TLError> {
+fn parse_key_block_seqno(block: &BlockData) -> Result<u32, TonError> {
     let block_cell = TonCell::from_boc(&block.data)?;
     if block_cell.refs.is_empty() {
-        return Err(TLError::Custom("No refs in block cell".to_string()));
+        return Err(TonError::Custom("No refs in block cell".to_string()));
         // TODO make proper block parser
     }
     let mut parser = block_cell.refs[0].parser();
     let tag: usize = parser.read_num(32)?;
     if tag != BlockInfo::PREFIX.value {
-        return Err(TLCoreError::TLBWrongPrefix {
+        return Err(TonCoreError::TLBWrongPrefix {
             exp: BlockInfo::PREFIX.value,
             given: tag,
             bits_exp: BlockInfo::PREFIX.bits_len,

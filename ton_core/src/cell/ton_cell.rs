@@ -4,7 +4,7 @@ use crate::cell::meta::LevelMask;
 use crate::cell::ton_hash::TonHash;
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use std::fmt::Formatter;
 use std::ops::Deref;
 use std::sync::Arc;
@@ -50,15 +50,15 @@ impl TonCell {
 
     pub fn level_mask(&self) -> LevelMask { self.meta.level_mask(self) }
 
-    pub fn hash(&self) -> Result<&TonHash, TLCoreError> { self.hash_for_level(LevelMask::MAX_LEVEL) }
+    pub fn hash(&self) -> Result<&TonHash, TonCoreError> { self.hash_for_level(LevelMask::MAX_LEVEL) }
 
-    pub fn depth(&self) -> Result<u16, TLCoreError> { self.depth_for_level(LevelMask::MAX_LEVEL) }
+    pub fn depth(&self) -> Result<u16, TonCoreError> { self.depth_for_level(LevelMask::MAX_LEVEL) }
 
-    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TLCoreError> {
+    pub fn hash_for_level(&self, level: LevelMask) -> Result<&TonHash, TonCoreError> {
         self.meta.hash_for_level(self, level)
     }
 
-    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TLCoreError> {
+    pub fn depth_for_level(&self, level: LevelMask) -> Result<u16, TonCoreError> {
         self.meta.depth_for_level(self, level)
     }
 

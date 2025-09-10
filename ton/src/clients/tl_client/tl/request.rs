@@ -7,7 +7,7 @@ use crate::clients::tl_client::tl::types::{
 use crate::clients::tl_client::tl::Base64Standard;
 
 use crate::block_tlb::BlockIdExt;
-use crate::error::TLError;
+use crate::errors::TonError;
 use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use strum::IntoStaticStr;
@@ -217,7 +217,7 @@ pub enum TLRequest {
 }
 
 impl TLRequest {
-    pub fn to_c_str_json(&self, extra: &str) -> Result<CString, TLError> {
+    pub fn to_c_str_json(&self, extra: &str) -> Result<CString, TonError> {
         let mut value = serde_json::to_value(self)?;
         let obj = value.as_object_mut().unwrap();
         let extra_val = serde_json::Value::from(extra);

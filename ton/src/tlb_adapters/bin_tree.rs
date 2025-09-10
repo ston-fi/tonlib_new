@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::marker::PhantomData;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell};
 use ton_lib_core::constants::TON_MAX_SPLIT_DEPTH;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 // for now it's used only only with ShardPfx in keys
@@ -17,7 +17,7 @@ impl<VA: DictValAdapter<T>, T: TLB> Default for BinTree<VA, T> {
 impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
     pub fn new() -> Self { Self(PhantomData) }
 
-    pub fn read(parser: &mut CellParser) -> Result<HashMap<ShardPfx, T>, TLCoreError> {
+    pub fn read(parser: &mut CellParser) -> Result<HashMap<ShardPfx, T>, TonCoreError> {
         let mut val = HashMap::new();
         Self::read_impl(parser, ShardPfx::default(), &mut val)?;
         Ok(val)
@@ -27,9 +27,9 @@ impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
         parser: &mut CellParser,
         cur_key: ShardPfx,
         cur_val: &mut HashMap<ShardPfx, T>,
-    ) -> Result<(), TLCoreError> {
+    ) -> Result<(), TonCoreError> {
         if cur_key.bits_len > TON_MAX_SPLIT_DEPTH as u32 {
-            return Err(TLCoreError::TLBWrongData(format!(
+            return Err(TonCoreError::TLBWrongData(format!(
                 "[read] BinTree depth exceeded: {} > {TON_MAX_SPLIT_DEPTH}",
                 cur_key.bits_len
             )));
@@ -54,9 +54,9 @@ impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
         Ok(())
     }
 
-    pub fn write(builder: &mut CellBuilder, data: &HashMap<ShardPfx, T>) -> Result<(), TLCoreError> {
+    pub fn write(builder: &mut CellBuilder, data: &HashMap<ShardPfx, T>) -> Result<(), TonCoreError> {
         if data.is_empty() {
-            return Err(TLCoreError::TLBWrongData("BinTree can't be empty".to_string()));
+            return Err(TonCoreError::TLBWrongData("BinTree can't be empty".to_string()));
         }
         Self::write_impl(builder, ShardPfx::default(), data)
     }
@@ -65,9 +65,9 @@ impl<VA: DictValAdapter<T>, T: TLB> BinTree<VA, T> {
         builder: &mut CellBuilder,
         cur_key: ShardPfx,
         data: &HashMap<ShardPfx, T>,
-    ) -> Result<(), TLCoreError> {
+    ) -> Result<(), TonCoreError> {
         if cur_key.bits_len > TON_MAX_SPLIT_DEPTH as u32 {
-            return Err(TLCoreError::TLBWrongData(format!(
+            return Err(TonCoreError::TLBWrongData(format!(
                 "[write] BinTree depth exceeded: {} > {TON_MAX_SPLIT_DEPTH}",
                 cur_key.bits_len
             )));

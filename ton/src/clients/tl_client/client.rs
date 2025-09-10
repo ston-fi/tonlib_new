@@ -2,7 +2,7 @@ use crate::clients::tl_client::connection::TLConnection;
 use crate::clients::tl_client::env::prepare_client_env;
 use crate::clients::tl_client::RetryStrategy;
 use crate::clients::tl_client::{config::TLClientConfig, tl::client::TLClientTrait};
-use crate::error::TLError;
+use crate::errors::TonError;
 use async_trait::async_trait;
 use futures_util::future::try_join_all;
 use rand::prelude::{IndexedRandom, StdRng};
@@ -34,7 +34,7 @@ impl TLClientTrait for TLClient {
 }
 
 impl TLClient {
-    pub async fn new(mut config: TLClientConfig) -> Result<TLClient, TLError> {
+    pub async fn new(mut config: TLClientConfig) -> Result<TLClient, TonError> {
         prepare_client_env(&mut config).await?;
 
         let semaphore = Arc::new(Semaphore::new(config.max_parallel_requests));

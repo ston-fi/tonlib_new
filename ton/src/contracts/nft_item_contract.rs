@@ -7,14 +7,14 @@ use crate::{
     },
     tep::metadata::MetadataContent,
 };
-use ton_lib_core::{error::TLCoreError, ton_contract};
+use ton_lib_core::{errors::TonCoreError, ton_contract};
 
 #[ton_contract]
 pub struct NFTItemContract;
 impl GetNFTData for NFTItemContract {}
 
 impl NFTItemContract {
-    pub async fn load_full_nft_data(&self) -> Result<GetNFTDataResult, TLCoreError> {
+    pub async fn load_full_nft_data(&self) -> Result<GetNFTDataResult, TonCoreError> {
         let mut data = self.get_nft_data().await?;
         if let MetadataContent::Unsupported(meta) = data.individual_content {
             let collection =

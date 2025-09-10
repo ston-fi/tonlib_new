@@ -1,9 +1,9 @@
-use crate::error::TLError;
+use crate::errors::TonError;
 use crate::wallet::WalletVersion::*;
 use crate::wallet::*;
-use ton_lib_core::bail_tl_core;
+use ton_lib_core::bail_ton_core;
 use ton_lib_core::cell::{TonCell, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 #[derive(Debug, PartialEq, Eq, Clone, Copy, Hash)]
@@ -30,7 +30,7 @@ impl WalletVersion {
         version: WalletVersion,
         key_pair: &KeyPair,
         wallet_id: i32,
-    ) -> Result<TonCellRef, TLCoreError> {
+    ) -> Result<TonCellRef, TonCoreError> {
         let public_key = TonHash::from_slice(&key_pair.public_key)?;
         match version {
             V1R1 | V1R2 | V1R3 | V2R1 | V2R2 => WalletV1V2Data::new(public_key).to_cell_ref(),
@@ -39,28 +39,28 @@ impl WalletVersion {
             V5R1 => WalletV5Data::new(wallet_id, public_key).to_cell_ref(),
             HLV2R2 => WalletHLV2R2Data::new(wallet_id, public_key).to_cell_ref(),
             HLV1R1 | HLV1R2 | HLV2 | HLV2R1 => {
-                bail_tl_core!("initial_data for {version:?} is unsupported");
+                bail_ton_core!("initial_data for {version:?} is unsupported");
             }
         }
     }
 
-    pub fn get_code(version: WalletVersion) -> Result<&'static TonCellRef, TLCoreError> {
+    pub fn get_code(version: WalletVersion) -> Result<&'static TonCellRef, TonCoreError> {
         TON_WALLET_CODE_BY_VERSION
             .get(&version)
-            .ok_or_else(|| TLCoreError::Custom(format!("No code found for {version:?}")))
+            .ok_or_else(|| TonCoreError::Custom(format!("No code found for {version:?}")))
     }
 
-    pub fn code_by_version(ver: WalletVersion) -> Result<&'static TonCellRef, TLCoreError> {
+    pub fn code_by_version(ver: WalletVersion) -> Result<&'static TonCellRef, TonCoreError> {
         TON_WALLET_CODE_BY_VERSION
             .get(&ver)
-            .ok_or_else(|| TLCoreError::Custom(format!("No code found for version: {ver:?}")))
+            .ok_or_else(|| TonCoreError::Custom(format!("No code found for version: {ver:?}")))
     }
 
-    pub fn version_by_code(code_hash: TonHash) -> Result<WalletVersion, TLCoreError> {
+    pub fn version_by_code(code_hash: TonHash) -> Result<WalletVersion, TonCoreError> {
         TON_WALLET_VERSION_BY_CODE
             .get(&code_hash)
             .copied()
-            .ok_or_else(|| TLCoreError::Custom(format!("No version found for code_hash: {code_hash}")))
+            .ok_or_else(|| TonCoreError::Custom(format!("No version found for code_hash: {code_hash}")))
     }
 
     pub fn build_ext_in_body(
@@ -69,7 +69,7 @@ impl WalletVersion {
         msg_seqno: u32,
         wallet_id: i32,
         msgs: Vec<TonCellRef>,
-    ) -> Result<TonCell, TLError> {
+    ) -> Result<TonCell, TonError> {
         let res = match version {
             V2R1 | V2R2 => WalletV2ExtMsgBody {
                 msg_seqno,
@@ -103,12 +103,12 @@ impl WalletVersion {
                 msgs,
             }
             .to_cell(),
-            _ => Err(TLCoreError::Custom(format!("build_ext_in_body for {version:?} is unsupported"))),
+            _ => Err(TonCoreError::Custom(format!("build_ext_in_body for {version:?} is unsupported"))),
         };
-        res.map_err(TLError::from)
+        res.map_err(TonError::from)
     }
 
-    pub(super) fn sign_msg(version: WalletVersion, msg_cell: &TonCell, sign: &[u8]) -> Result<TonCell, TLError> {
+    pub(super) fn sign_msg(version: WalletVersion, msg_cell: &TonCell, sign: &[u8]) -> Result<TonCell, TonError> {
         match version {
             // different order
             V5R1 => {

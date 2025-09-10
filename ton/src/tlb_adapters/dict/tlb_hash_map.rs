@@ -1,4 +1,4 @@
-use crate::error::TLError;
+use crate::errors::TonError;
 use crate::tlb_adapters::dict::data_builder::DictDataBuilder;
 use crate::tlb_adapters::dict::data_parser::DictDataParser;
 use crate::tlb_adapters::{DictKeyAdapter, DictValAdapter};
@@ -7,7 +7,7 @@ use std::hash::Hash;
 use std::marker::PhantomData;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::CellParser;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 
 // https://github.com/ton-blockchain/ton/blame/72056a2261cbb11f7cf0f20b389bcbffe018b1a8/crypto/block/block.tlb#L22
 /// Adapter to write HashMap with arbitrary key/values into a cell
@@ -31,22 +31,22 @@ where
         }
     }
 
-    pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TonCoreError> {
         let mut data_parser = DictDataParser::new(self.key_bits_len as usize);
         let data_raw = data_parser.read::<V, VA>(parser)?;
         let data = data_raw
             .into_iter()
-            .map(|(k, v)| Ok::<_, TLCoreError>((KA::extract_key(&k)?, v)))
+            .map(|(k, v)| Ok::<_, TonCoreError>((KA::extract_key(&k)?, v)))
             .collect::<Result<HashMap<K, V>, _>>()?;
         Ok(data)
     }
 
-    pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TLCoreError> {
+    pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TonCoreError> {
         if data.is_empty() {
-            return Err(TLCoreError::TLBWrongData("empty HashMap can't be written".to_string()));
+            return Err(TonCoreError::TLBWrongData("empty HashMap can't be written".to_string()));
         }
         let mut key_value_pairs =
-            data.iter().map(|(k, v)| Ok::<_, TLError>((KA::make_key(k)?, v))).collect::<Result<Vec<_>, _>>()?;
+            data.iter().map(|(k, v)| Ok::<_, TonError>((KA::make_key(k)?, v))).collect::<Result<Vec<_>, _>>()?;
         key_value_pairs.sort_by_key(|(x, _)| x.clone());
 
         let mut keys_sorted = Vec::with_capacity(key_value_pairs.len());

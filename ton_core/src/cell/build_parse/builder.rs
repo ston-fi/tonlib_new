@@ -2,7 +2,7 @@ use crate::cell::meta::CellMeta;
 use crate::cell::meta::CellType;
 use crate::cell::ton_cell::{TonCell, TonCellRef, TonCellStorage};
 use crate::cell::ton_cell_num::TonCellNum;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use std::cmp::min;
 use std::ops::Deref;
@@ -24,7 +24,7 @@ impl CellBuilder {
         }
     }
 
-    pub fn build(self) -> Result<TonCell, TLCoreError> {
+    pub fn build(self) -> Result<TonCell, TonCoreError> {
         let (data, data_bits_len) = build_cell_data(self.data_writer)?;
         let cell = TonCell {
             cell_type: self.cell_type,
@@ -39,9 +39,9 @@ impl CellBuilder {
         Ok(cell)
     }
 
-    pub fn build_ref(self) -> Result<TonCellRef, TLCoreError> { Ok(self.build()?.into_ref()) }
+    pub fn build_ref(self) -> Result<TonCellRef, TonCoreError> { Ok(self.build()?.into_ref()) }
 
-    pub fn write_bit(&mut self, data: bool) -> Result<(), TLCoreError> {
+    pub fn write_bit(&mut self, data: bool) -> Result<(), TonCoreError> {
         self.ensure_capacity(1)?;
         self.data_writer.write_bit(data)?;
         Ok(())
@@ -53,15 +53,14 @@ impl CellBuilder {
         data: T,
         mut bits_len: usize,
         mut bits_offset: usize,
-    ) -> Result<(), TLCoreError> {
+    ) -> Result<(), TonCoreError> {
         self.ensure_capacity(bits_len)?;
         let mut data_ref = data.as_ref();
 
         if (bits_len + bits_offset).div_ceil(8) > data_ref.len() {
-            return Err(TLCoreError::BuilderNotEnoughData {
-                required_bits: bits_len + bits_offset,
-                given: data_ref.len(),
-            });
+            let err_msg =
+                format!("Can't read {} bits from slice with only {} bytes", bits_len + bits_offset, data_ref.len());
+            return Err(TonCoreError::data("CellBuilder", err_msg));
         }
 
         if bits_len == 0 {
@@ -91,24 +90,25 @@ impl CellBuilder {
         Ok(())
     }
 
-    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: usize) -> Result<(), TLCoreError> {
+    pub fn write_bits<T: AsRef<[u8]>>(&mut self, data: T, bits_len: usize) -> Result<(), TonCoreError> {
         self.write_bits_with_offset(data, bits_len, 0)
     }
 
-    pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TLCoreError> {
+    pub fn write_cell(&mut self, cell: &TonCell) -> Result<(), TonCoreError> {
         self.write_bits(&cell.data, cell.data_bits_len)?;
         cell.refs.iter().cloned().try_for_each(|r| self.write_ref(r))
     }
 
-    pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TLCoreError> {
+    pub fn write_ref(&mut self, cell: TonCellRef) -> Result<(), TonCoreError> {
         if self.refs.len() >= TonCell::MAX_REFS_COUNT {
-            return Err(TLCoreError::BuilderRefsOverflow);
+            let msg = format!("Can't add more refs: {} refs are written already", TonCell::MAX_REFS_COUNT);
+            return Err(TonCoreError::data("CallBuilder", msg));
         }
         self.refs.push(cell);
         Ok(())
     }
 
-    pub fn write_num<N, D>(&mut self, data: D, bits_len: usize) -> Result<(), TLCoreError>
+    pub fn write_num<N, D>(&mut self, data: D, bits_len: usize) -> Result<(), TonCoreError>
     where
         N: TonCellNum,
         D: Deref<Target = N>,
@@ -120,10 +120,8 @@ impl CellBuilder {
             if data_ref.tcn_is_zero() {
                 return Ok(());
             }
-            return Err(TLCoreError::BuilderNumberBitsMismatch {
-                number: format!("{data_ref}"),
-                bits: bits_len,
-            });
+            let err_msg = format!("Can't write number {data_ref} in 0 bits");
+            return Err(TonCoreError::data("CellBuilder", err_msg));
         }
 
         if let Some(unsigned) = data_ref.tcn_to_unsigned_primitive() {
@@ -134,10 +132,8 @@ impl CellBuilder {
 
         let min_bits_len = data_ref.tcn_min_bits_len();
         if min_bits_len > bits_len {
-            return Err(TLCoreError::BuilderNumberBitsMismatch {
-                number: format!("{data_ref}"),
-                bits: bits_len,
-            });
+            let err_msg = format!("Can't write number {data_ref} ({min_bits_len} bits) in {bits_len} bits");
+            return Err(TonCoreError::data("CellBuilder", err_msg));
         }
 
         let data_bytes = data_ref.tcn_to_bytes();
@@ -155,20 +151,18 @@ impl CellBuilder {
 
     pub fn data_bits_left(&self) -> usize { TonCell::MAX_DATA_BITS_LEN - self.data_bits_len }
 
-    fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TLCoreError> {
+    fn ensure_capacity(&mut self, bits_len: usize) -> Result<(), TonCoreError> {
         let new_bits_len = self.data_bits_len + bits_len;
         if new_bits_len <= TonCell::MAX_DATA_BITS_LEN {
             self.data_bits_len = new_bits_len;
             return Ok(());
         }
-        Err(TLCoreError::BuilderDataOverflow {
-            req: bits_len,
-            left: TonCell::MAX_DATA_BITS_LEN - self.data_bits_len,
-        })
+        let msg = format!("Can't write {bits_len} bits: only {} free bits available", self.data_bits_left());
+        Err(TonCoreError::data("CellBuilder", msg))
     }
 }
 
-fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec<u8>, usize), TLCoreError> {
+fn build_cell_data(mut bit_writer: BitWriter<Vec<u8>, BigEndian>) -> Result<(Vec<u8>, usize), TonCoreError> {
     let mut trailing_zeros = 0;
     while !bit_writer.byte_aligned() {
         bit_writer.write_bit(false)?;

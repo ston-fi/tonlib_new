@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::CellParser;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 /// TLBOptRef - allows to save optional object ( Maybe(^X) ) in a reference cell.
@@ -12,14 +12,14 @@ pub struct TLBRefOpt<T: TLB>(PhantomData<T>);
 impl<T: TLB> TLBRefOpt<Option<T>> {
     pub fn new() -> Self { TLBRefOpt(PhantomData) }
 
-    pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<Option<T>, TonCoreError> {
         match parser.read_bit()? {
             true => Ok(Some(T::from_cell(parser.read_next_ref()?)?)),
             false => Ok(None),
         }
     }
 
-    pub fn write(&self, builder: &mut CellBuilder, val: &Option<T>) -> Result<(), TLCoreError> {
+    pub fn write(&self, builder: &mut CellBuilder, val: &Option<T>) -> Result<(), TonCoreError> {
         builder.write_bit(val.is_some())?;
         if let Some(val) = val {
             builder.write_ref(val.to_cell_ref()?)?;

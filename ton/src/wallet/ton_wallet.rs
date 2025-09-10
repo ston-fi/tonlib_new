@@ -1,6 +1,6 @@
 use super::*;
 use crate::block_tlb::*;
-use crate::error::TLError;
+use crate::errors::TonError;
 use nacl::sign::signature;
 use ton_lib_core::cell::{TonCell, TonCellRef};
 use ton_lib_core::traits::tlb::TLB;
@@ -16,7 +16,7 @@ pub struct TonWallet {
 }
 
 impl TonWallet {
-    pub fn new(version: WalletVersion, key_pair: KeyPair) -> Result<Self, TLError> {
+    pub fn new(version: WalletVersion, key_pair: KeyPair) -> Result<Self, TonError> {
         let wallet_id = match version {
             WalletVersion::V5R1 => WALLET_V5R1_DEFAULT_ID,
             _ => WALLET_DEFAULT_ID,
@@ -24,7 +24,7 @@ impl TonWallet {
         Self::new_with_params(version, key_pair, 0, wallet_id)
     }
 
-    pub fn new_with_creds(version: WalletVersion, seed: &str, pass: Option<String>) -> Result<Self, TLError> {
+    pub fn new_with_creds(version: WalletVersion, seed: &str, pass: Option<String>) -> Result<Self, TonError> {
         Self::new(version, Mnemonic::from_str(seed, pass)?.to_key_pair()?)
     }
 
@@ -33,7 +33,7 @@ impl TonWallet {
         key_pair: KeyPair,
         workchain: i32,
         wallet_id: i32,
-    ) -> Result<Self, TLError> {
+    ) -> Result<Self, TonError> {
         let code = WalletVersion::get_code(version)?.clone();
         let data = WalletVersion::get_default_data(version, &key_pair, wallet_id)?;
         let address = StateInit::new(code, data).derive_address(workchain)?;
@@ -52,7 +52,7 @@ impl TonWallet {
         seqno: u32,
         expire_at: u32,
         add_state_init: bool,
-    ) -> Result<TonCell, TLError> {
+    ) -> Result<TonCell, TonError> {
         let body = self.create_ext_in_body(expire_at, seqno, int_msgs)?;
         let signed = self.sign_ext_in_body(&body)?;
         let external = self.create_ext_in_msg_from_body(signed, add_state_init)?;
@@ -64,20 +64,20 @@ impl TonWallet {
         expire_at: u32,
         seqno: u32,
         int_msgs: Vec<TonCellRef>,
-    ) -> Result<TonCell, TLError> {
+    ) -> Result<TonCell, TonError> {
         WalletVersion::build_ext_in_body(self.version, expire_at, seqno, self.wallet_id, int_msgs)
     }
 
-    pub fn sign_ext_in_body(&self, ext_in_body: &TonCell) -> Result<TonCell, TLError> {
+    pub fn sign_ext_in_body(&self, ext_in_body: &TonCell) -> Result<TonCell, TonError> {
         let message_hash = ext_in_body.cell_hash()?;
         let sign = match signature(message_hash.as_slice(), self.key_pair.secret_key.as_slice()) {
             Ok(signature) => signature,
-            Err(err) => return Err(TLError::Custom(format!("{err:?}"))),
+            Err(err) => return Err(TonError::Custom(format!("{err:?}"))),
         };
         WalletVersion::sign_msg(self.version, ext_in_body, &sign)
     }
 
-    pub fn create_ext_in_msg_from_body(&self, signed_body: TonCell, add_state_init: bool) -> Result<TonCell, TLError> {
+    pub fn create_ext_in_msg_from_body(&self, signed_body: TonCell, add_state_init: bool) -> Result<TonCell, TonError> {
         let msg_info = CommonMsgInfo::ExtIn(CommonMsgInfoExtIn {
             src: MsgAddressExt::NONE,
             dst: self.address.to_msg_address_int(),

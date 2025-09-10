@@ -1,6 +1,6 @@
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
@@ -32,7 +32,7 @@ impl<T> TLBEitherRef<T> {
 }
 
 impl<T: TLB> TLB for TLBEitherRef<T> {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let val = match parser.read_bit()? {
             false => TLBEitherRef {
                 value: TLB::read(parser)?,
@@ -46,7 +46,7 @@ impl<T: TLB> TLB for TLBEitherRef<T> {
         Ok(val)
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         let cell = self.value.to_cell()?;
         let serial_layout = match self.layout {
             EitherRefLayout::ToCell => EitherRefLayout::ToCell,
@@ -152,14 +152,14 @@ mod tests {
         }
 
         impl TLB for List {
-            fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+            fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
                 match parser.data_bits_remaining()? {
                     0 => Ok(Self::Empty),
                     _ => Ok(Self::Some(TLB::read(parser)?)),
                 }
             }
 
-            fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
+            fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonCoreError> {
                 match self {
                     List::Empty => {}
                     List::Some(item) => item.write(dst)?,

@@ -1,4 +1,4 @@
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use bitstream_io::{BigEndian, BitWrite, BitWriter};
 use crc::Crc;
 
@@ -8,7 +8,7 @@ const CRC_32_ISCSI: Crc<u32> = Crc::<u32>::new(&crc::CRC_32_ISCSI);
 
 impl BOCRaw {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
-    pub fn to_bytes(&self, has_crc32: bool) -> Result<Vec<u8>, TLCoreError> {
+    pub fn to_bytes(&self, has_crc32: bool) -> Result<Vec<u8>, TonCoreError> {
         let root_count = self.roots_position.len();
         let num_ref_bits = 32 - (self.cells.len() as u32).leading_zeros();
         let num_ref_bytes = num_ref_bits.div_ceil(8);
@@ -71,7 +71,7 @@ fn write_raw_cell(
     writer: &mut BitWriter<Vec<u8>, BigEndian>,
     cell: &CellRaw,
     ref_size_bytes: u32,
-) -> Result<(), TLCoreError> {
+) -> Result<(), TonCoreError> {
     let level = cell.level_mask;
     let is_exotic = cell.cell_type.is_exotic() as u32;
     let num_refs = cell.refs_positions.len() as u32;

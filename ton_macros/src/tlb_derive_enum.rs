@@ -22,8 +22,8 @@ pub(crate) fn tlb_derive_enum(
         quote! {
                 match #field_type::read(parser) {
                     Ok(res) => return Ok(#ident::#variant_name(res)),
-                    Err(#crate_path::error::TLCoreError::TLBWrongPrefix { .. }) => {},
-                    Err(#crate_path::error::TLCoreError::TLBEnumOutOfOptions { .. }) => {},
+                    Err(#crate_path::errors::TonCoreError::TLBWrongPrefix { .. }) => {},
+                    Err(#crate_path::errors::TonCoreError::TLBEnumOutOfOptions { .. }) => {},
                     Err(err) => return Err(err),
                 };
         }
@@ -48,7 +48,7 @@ pub(crate) fn tlb_derive_enum(
 
     let read_impl = quote! {
         #(#variant_readers)*
-        Err(#crate_path::error::TLCoreError::TLBEnumOutOfOptions((#ident_str).to_string()))
+        Err(#crate_path::errors::TonCoreError::TLBEnumOutOfOptions((#ident_str).to_string()))
     };
 
     let write_impl = quote! {

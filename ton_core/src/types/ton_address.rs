@@ -2,9 +2,9 @@ use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::TonHash;
 
-use crate::bail_tl_core;
+use crate::bail_ton_core;
 use crate::bits_utils::BitsUtils;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 use crate::types::tlb_core::*;
 use base64::engine::general_purpose::{STANDARD, URL_SAFE_NO_PAD};
@@ -31,7 +31,7 @@ impl TonAddress {
 
     pub const fn new(workchain: i32, hash: TonHash) -> Self { Self { workchain, hash } }
 
-    pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TLCoreError> {
+    pub fn from_msg_address<T: Into<MsgAddress>>(msg_address: T) -> Result<Self, TonCoreError> {
         match msg_address.into() {
             MsgAddress::Ext(MsgAddressExt::None(_)) => Ok(TonAddress::ZERO),
             MsgAddress::Int(int) => from_msg_address_int(&int),
@@ -65,9 +65,9 @@ impl TonAddress {
         }
     }
 
-    pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TLCoreError> {
+    pub fn to_msg_address_none(&self) -> Result<MsgAddressNone, TonCoreError> {
         if self != &TonAddress::ZERO {
-            bail_tl_core!("Can't convert non-zero address={self} to MsgAddressNone");
+            bail_ton_core!("Can't convert non-zero address={self} to MsgAddressNone");
         }
         Ok(MsgAddressNone {})
     }
@@ -90,7 +90,7 @@ impl TonAddress {
 }
 
 impl FromStr for TonAddress {
-    type Err = TLCoreError;
+    type Err = TonCoreError;
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.len() == 48 {
             return from_base64(s);
@@ -129,11 +129,11 @@ impl PartialOrd for TonAddress {
 }
 
 impl TLB for TonAddress {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         TonAddress::from_msg_address(MsgAddress::read(parser)?)
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         match self.to_msg_address_none() {
             Ok(none) => none.write(builder),
             Err(_) => self.to_msg_address_int().write(builder),
@@ -141,7 +141,7 @@ impl TLB for TonAddress {
     }
 }
 
-fn from_base64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TLCoreError> {
+fn from_base64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonCoreError> {
     let addr_str = addr.as_ref();
     if addr_str.chars().any(|c| c == '-' || c == '_') {
         from_bytes(&URL_SAFE_NO_PAD.decode(addr_str)?, addr_str)
@@ -150,7 +150,7 @@ fn from_base64<T: AsRef<str>>(addr: T) -> Result<TonAddress, TLCoreError> {
     }
 }
 
-fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TLCoreError> {
+fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TonCoreError> {
     let addr_str = addr.as_ref();
     let parts: Vec<&str> = addr_str.split(':').collect();
 
@@ -164,7 +164,7 @@ fn from_hex<T: AsRef<str>>(addr: T) -> Result<TonAddress, TLCoreError> {
     Ok(TonAddress::new(wc, hash))
 }
 
-fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TLCoreError> {
+fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TonCoreError> {
     if bytes.len() != 36 {
         raise_address_error(addr_str, format!("expecting 36 bytes, got {}", bytes.len()))?;
     }
@@ -181,7 +181,7 @@ fn from_bytes(bytes: &[u8], addr_str: &str) -> Result<TonAddress, TLCoreError> {
     Ok(address)
 }
 
-fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TLCoreError> {
+fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TonCoreError> {
     let (wc, addr, bits_len, anycast) = match msg_address {
         MsgAddressInt::Std(MsgAddressIntStd {
             workchain,
@@ -224,8 +224,9 @@ fn from_msg_address_int(msg_address: &MsgAddressInt) -> Result<TonAddress, TLCor
     Ok(TonAddress::new(wc, TonHash::from_vec(addr_mutable)?))
 }
 
-fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TLCoreError> {
-    Err(TLCoreError::TonAddressParseError(address.to_string(), msg.as_ref().to_string()))
+fn raise_address_error<T: AsRef<str>>(address: &str, msg: T) -> Result<(), TonCoreError> {
+    let err_msg = format!("Can't parse {address}, err: {}", msg.as_ref());
+    Err(TonCoreError::data("TonAddress", err_msg))
 }
 
 #[cfg(test)]

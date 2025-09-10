@@ -1,7 +1,7 @@
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::TonHash;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::{TLBPrefix, TLB};
 use crate::types::tlb_core::VarLenBits;
 use std::convert::Into;
@@ -60,7 +60,7 @@ pub struct MsgAddressIntVar {
 impl TLB for MsgAddressIntVar {
     const PREFIX: TLBPrefix = TLBPrefix::new(0b11, 2);
 
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let anycast = TLB::read(parser)?;
         let addr_bits_len = parser.read_num(9)?;
         let workchain = TLB::read(parser)?;
@@ -73,7 +73,7 @@ impl TLB for MsgAddressIntVar {
         })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.anycast.write(builder)?;
         builder.write_num(&self.addr_bits_len, 9)?;
         self.workchain.write(builder)?;

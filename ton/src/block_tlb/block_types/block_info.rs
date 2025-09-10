@@ -3,7 +3,7 @@ use crate::block_tlb::block_types::block_prev_info::{BlockPrevInfoAfterMerge, Pr
 use crate::block_tlb::GlobalVersion;
 use crate::block_tlb::ShardIdent;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::TLB;
 
@@ -50,7 +50,7 @@ pub struct ExtBlockRef {
 }
 
 impl BlockInfo {
-    pub fn prev_block_ids(&self) -> Result<Vec<BlockIdExt>, TLCoreError> {
+    pub fn prev_block_ids(&self) -> Result<Vec<BlockIdExt>, TonCoreError> {
         let make_block_id = |ext_ref: ExtBlockRef, shard| BlockIdExt {
             shard_ident: shard,
             seqno: ext_ref.seqno,
@@ -80,7 +80,7 @@ impl BlockInfo {
 impl TLB for BlockInfo {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x9bc7a987, 32);
 
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let version = parser.read_num(32)?;
         let not_master = parser.read_bit()?;
         let after_merge = parser.read_bit()?;
@@ -154,7 +154,7 @@ impl TLB for BlockInfo {
         })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.version.write(builder)?;
         self.not_master.write(builder)?;
         self.after_merge.write(builder)?;

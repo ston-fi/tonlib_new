@@ -1,9 +1,9 @@
 use crate::block_tlb::TVMStack;
-use crate::tep::tvm_results::tvm_result::TVMResult;
+use crate::tep::tvm_results::TVMResult;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 
@@ -16,7 +16,7 @@ pub struct GetWalletDataResult {
 }
 
 impl TVMResult for GetWalletDataResult {
-    fn from_stack(stack: &mut TVMStack) -> Result<Self, TLCoreError> {
+    fn from_stack(stack: &mut TVMStack) -> Result<Self, TonCoreError> {
         let wallet_code = stack.pop_cell()?;
         let master = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let owner = TonAddress::from_cell(stack.pop_cell()?.deref())?;

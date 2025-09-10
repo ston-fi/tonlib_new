@@ -2,7 +2,7 @@ use crate::emulators::emul_bc_config::EmulBCConfig;
 use crate::emulators::emul_utils::{convert_emulator_response, make_b64_c_str, set_param_failed};
 use crate::emulators::tx::tx_emul_args::{TXEmulArgs, TXEmulOrdArgs, TXEmulTickTockArgs};
 use crate::emulators::tx::tx_emul_response::{TXEmulationResponse, TXEmulationSuccess};
-use crate::error::TLError;
+use crate::errors::TonError;
 use std::ffi::CString;
 use std::sync::Arc;
 use ton_lib_core::cell::TonHash;
@@ -21,11 +21,11 @@ pub struct TXEmulator {
 }
 
 impl TXEmulator {
-    pub fn new(log_level: u32, debug_enabled: bool) -> Result<Self, TLError> {
+    pub fn new(log_level: u32, debug_enabled: bool) -> Result<Self, TonError> {
         let zero_config = Arc::new(CString::new(TON_ZERO_CONFIG_BOC_B64)?);
         let ptr = unsafe { transaction_emulator_create(zero_config.as_ptr(), log_level) };
         if ptr.is_null() {
-            return Err(TLError::EmulatorCreationFailed);
+            return Err(TonError::EmulatorCreationFailed);
         }
         let mut emulator = Self {
             emulator: ptr,
@@ -43,7 +43,7 @@ impl TXEmulator {
 
     /// shard_account: https://github.com/ton-blockchain/ton/blob/cee4c674ea999fecc072968677a34a7545ac9c4d/crypto/block/block.tlb#L275 (NOT Account!!)
     /// You can't emulate tick-tock tx using this method
-    pub fn emulate_ord(&mut self, args: &TXEmulOrdArgs) -> Result<TXEmulationSuccess, TLError> {
+    pub fn emulate_ord(&mut self, args: &TXEmulOrdArgs) -> Result<TXEmulationSuccess, TonError> {
         self.prepare_emulator(&args.emul_args)?;
         let state_c_str = make_b64_c_str(&args.emul_args.shard_account_boc)?;
         let in_msg_c_str = make_b64_c_str(&args.in_msg_boc)?;
@@ -54,7 +54,7 @@ impl TXEmulator {
         TXEmulationResponse::from_json(response_str)?.into_success()
     }
 
-    pub fn emulate_ticktock(&mut self, args: &TXEmulTickTockArgs) -> Result<TXEmulationSuccess, TLError> {
+    pub fn emulate_ticktock(&mut self, args: &TXEmulTickTockArgs) -> Result<TXEmulationSuccess, TonError> {
         self.prepare_emulator(&args.emul_args)?;
         let state_c_str = make_b64_c_str(&args.emul_args.shard_account_boc)?;
         let response_ptr = unsafe {
@@ -64,7 +64,7 @@ impl TXEmulator {
         TXEmulationResponse::from_json(response_str)?.into_success()
     }
 
-    fn prepare_emulator(&mut self, args: &TXEmulArgs) -> Result<(), TLError> {
+    fn prepare_emulator(&mut self, args: &TXEmulArgs) -> Result<(), TonError> {
         self.actualize_config(&args.bc_config)?;
         self.actualize_rand_seed(&args.rand_seed)?;
         self.actualize_utime(args.utime)?;
@@ -79,7 +79,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_config(&mut self, config: &EmulBCConfig) -> Result<(), TLError> {
+    fn actualize_config(&mut self, config: &EmulBCConfig) -> Result<(), TonError> {
         let config_hash = calc_hash(config.as_bytes());
         if self.cur_bc_config_hash == config_hash {
             return Ok(());
@@ -91,7 +91,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_rand_seed(&mut self, rand_seed: &TonHash) -> Result<(), TLError> {
+    fn actualize_rand_seed(&mut self, rand_seed: &TonHash) -> Result<(), TonError> {
         if self.cur_random_seed == *rand_seed {
             return Ok(());
         }
@@ -104,7 +104,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_utime(&mut self, utime: u32) -> Result<(), TLError> {
+    fn actualize_utime(&mut self, utime: u32) -> Result<(), TonError> {
         if self.cur_utime == utime {
             return Ok(());
         }
@@ -115,7 +115,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_lt(&mut self, lt: u64) -> Result<(), TLError> {
+    fn actualize_lt(&mut self, lt: u64) -> Result<(), TonError> {
         if self.cur_lt == lt {
             return Ok(());
         }
@@ -126,7 +126,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_libs(&mut self, libs_boc: &[u8]) -> Result<(), TLError> {
+    fn actualize_libs(&mut self, libs_boc: &[u8]) -> Result<(), TonError> {
         let libs_hash = calc_hash(libs_boc);
         if self.cur_libs_hash == libs_hash {
             return Ok(());
@@ -139,14 +139,14 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn set_debug_enabled(&mut self, debug_enabled: bool) -> Result<(), TLError> {
+    fn set_debug_enabled(&mut self, debug_enabled: bool) -> Result<(), TonError> {
         match unsafe { transaction_emulator_set_debug_enabled(self.emulator, debug_enabled) } {
             true => Ok(()),
             false => set_param_failed("debug_enabled"),
         }
     }
 
-    fn actualize_prev_blocks_info(&mut self, prev_blocks_info: &[u8]) -> Result<(), TLError> {
+    fn actualize_prev_blocks_info(&mut self, prev_blocks_info: &[u8]) -> Result<(), TonError> {
         let prev_blocks_hash = calc_hash(prev_blocks_info);
         if self.cur_prev_blocks_info_hash == prev_blocks_hash {
             return Ok(());
@@ -159,7 +159,7 @@ impl TXEmulator {
         Ok(())
     }
 
-    fn actualize_ignore_chksig(&mut self, ignore: bool) -> Result<(), TLError> {
+    fn actualize_ignore_chksig(&mut self, ignore: bool) -> Result<(), TonError> {
         if self.cur_ignore_chksig == ignore {
             return Ok(());
         }

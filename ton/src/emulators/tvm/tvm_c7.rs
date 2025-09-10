@@ -1,5 +1,5 @@
 use crate::emulators::emul_bc_config::EmulBCConfig;
-use crate::error::TLError;
+use crate::errors::TonError;
 use std::time::{SystemTime, UNIX_EPOCH};
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::types::TonAddress;
@@ -14,7 +14,7 @@ pub struct TVMEmulatorC7 {
 }
 
 impl TVMEmulatorC7 {
-    pub fn new(address: TonAddress, config: EmulBCConfig) -> Result<Self, TLError> {
+    pub fn new(address: TonAddress, config: EmulBCConfig) -> Result<Self, TonError> {
         Ok(Self {
             address,
             unix_time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs() as u32,

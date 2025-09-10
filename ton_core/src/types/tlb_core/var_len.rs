@@ -1,7 +1,7 @@
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::TonCellNum;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
@@ -38,16 +38,16 @@ impl<T, const L: usize, const BL: bool> DerefMut for VarLen<T, L, BL> {
 
 // TonNum impl
 impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for VarLen<T, LEN_BITS_LEN, LEN_IN_BYTES> {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let len = parser.read_num(LEN_BITS_LEN)?;
         let bits_len = if LEN_IN_BYTES { len * 8 } else { len };
         let data = parser.read_num(bits_len)?;
         Ok(Self { data, bits_len })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         if LEN_IN_BYTES && self.bits_len % 8 != 0 {
-            return Err(TLCoreError::TLBWrongData(format!(
+            return Err(TonCoreError::TLBWrongData(format!(
                 "VarLen: len in bits must be multiple of 8, but got {}",
                 self.bits_len
             )));
@@ -61,16 +61,16 @@ impl<T: TonCellNum, const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for
 
 // Vec impl
 impl<const LEN_BITS_LEN: usize, const LEN_IN_BYTES: bool> TLB for VarLen<Vec<u8>, LEN_BITS_LEN, LEN_IN_BYTES> {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let len = parser.read_num(LEN_BITS_LEN)?;
         let bits_len = if LEN_IN_BYTES { len * 8 } else { len };
         let data = parser.read_bits(bits_len)?;
         Ok(Self { data, bits_len })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         if LEN_IN_BYTES && self.bits_len % 8 != 0 {
-            return Err(TLCoreError::TLBWrongData(format!(
+            return Err(TonCoreError::TLBWrongData(format!(
                 "VarLen: len in bytes must be multiple of 8, but got {}",
                 self.bits_len
             )));

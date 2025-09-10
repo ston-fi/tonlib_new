@@ -4,7 +4,7 @@ use crate::tlb_adapters::TLBRef;
 use crate::tlb_adapters::{DictKeyAdapterInto, DictValAdapterTLBRef, TLBHashMapE, TLBRefOpt};
 use std::collections::HashMap;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::TLB;
 
@@ -37,7 +37,7 @@ pub struct TxMsgs {
 }
 
 impl TLB for TxMsgs {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let in_msg = TLBRefOpt::<_>::new().read(parser)?;
         let mut out_msgs_map = TLBHashMapE::<DictKeyAdapterInto, DictValAdapterTLBRef, u32, _>::new(15).read(parser)?;
         let mut out_msgs = Vec::with_capacity(out_msgs_map.len());
@@ -45,14 +45,14 @@ impl TLB for TxMsgs {
         for msg_index in 0..out_msgs_map.len() as u32 {
             let msg = match out_msgs_map.remove(&msg_index) {
                 Some(msg) => msg,
-                None => return Err(TLCoreError::TLBWrongData(format!("Missing out message with index {msg_index}"))),
+                None => return Err(TonCoreError::TLBWrongData(format!("Missing out message with index {msg_index}"))),
             };
             out_msgs.push(msg);
         }
         Ok(Self { in_msg, out_msgs })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         TLBRefOpt::<_>::new().write(builder, &self.in_msg)?;
         let out_msgs_map: HashMap<_, _> =
             self.out_msgs.iter().enumerate().map(|(i, msg)| (i as u32, msg.clone())).collect();

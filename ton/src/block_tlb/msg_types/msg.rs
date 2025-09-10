@@ -1,7 +1,7 @@
 use crate::block_tlb::msg_types::common_msg_info::CommonMsgInfo;
 use crate::block_tlb::*;
 use ton_lib_core::cell::{TonCell, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::*;
 use ton_lib_core::TLB;
@@ -57,7 +57,7 @@ impl Msg {
 
     pub fn state_init(&self) -> Option<&StateInit> { self.init.as_ref().map(|init| &init.value) }
 
-    pub fn cell_hash_normalized(&self) -> Result<TonHash, TLCoreError> {
+    pub fn cell_hash_normalized(&self) -> Result<TonHash, TonCoreError> {
         match &self.info {
             CommonMsgInfo::ExtIn(_) => {
                 let mut msg_normalized = self.clone();

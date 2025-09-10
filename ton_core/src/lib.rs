@@ -3,6 +3,6 @@ pub mod bits_utils;
 pub mod boc;
 pub mod cell;
 pub mod constants;
-pub mod error;
+pub mod errors;
 pub mod traits;
 pub mod types;

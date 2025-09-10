@@ -1,7 +1,7 @@
 use crate::tests::utils::make_lite_client;
 use std::str::FromStr;
-use ton_lib::error::TLError;
-use ton_lib::unwrap_lite_response;
+use ton_lib::errors::TonError;
+use ton_lib::unwrap_lite_rsp;
 use ton_lib_core::types::TonAddress;
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::tl::response::Response;
@@ -12,7 +12,7 @@ async fn test_lite_client() -> anyhow::Result<()> {
 
     // generic interface
     let mc_info_rsp = lite_client.exec(Request::GetMasterchainInfo, None, None).await?;
-    let mc_info_generic = unwrap_lite_response!(mc_info_rsp, MasterchainInfo)?;
+    let mc_info_generic = unwrap_lite_rsp!(mc_info_rsp, MasterchainInfo)?;
     assert_ne!(mc_info_generic.last.seqno, 0);
 
     // === specialized interface ===

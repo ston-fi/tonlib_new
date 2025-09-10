@@ -5,7 +5,7 @@ use crate::tlb_adapters::DictValAdapter;
 use num_bigint::BigUint;
 use num_traits::One;
 use ton_lib_core::cell::CellParser;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::UnaryLen;
 
@@ -25,7 +25,7 @@ impl DictDataParser {
     pub fn read<T, VA: DictValAdapter<T>>(
         &mut self,
         parser: &mut CellParser,
-    ) -> Result<HashMap<BigUint, T>, TLCoreError> {
+    ) -> Result<HashMap<BigUint, T>, TonCoreError> {
         // reset state in case of reusing
         self.cur_key_prefix = BigUint::one();
 
@@ -38,7 +38,7 @@ impl DictDataParser {
         &mut self,
         parser: &mut CellParser,
         dst: &mut HashMap<BigUint, T>,
-    ) -> Result<(), TLCoreError> {
+    ) -> Result<(), TonCoreError> {
         // will rollback prefix to original value at the end of the function
         let origin_key_prefix_len = self.cur_key_prefix.bits();
 
@@ -91,7 +91,7 @@ impl DictDataParser {
         Ok(())
     }
 
-    fn detect_label_type(&self, parser: &mut CellParser) -> Result<DictLabelType, TLCoreError> {
+    fn detect_label_type(&self, parser: &mut CellParser) -> Result<DictLabelType, TonCoreError> {
         let label = if parser.read_bit()? {
             if parser.read_bit()? {
                 DictLabelType::Same

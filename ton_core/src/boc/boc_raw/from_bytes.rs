@@ -1,6 +1,6 @@
 use crate::cell::CellType;
 use crate::cell::LevelMask;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use bitstream_io::{BigEndian, ByteRead, ByteReader};
 use std::io::Cursor;
 
@@ -8,13 +8,13 @@ use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
 
 impl BOCRaw {
     // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
-    pub fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TLCoreError> {
+    pub fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonCoreError> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
         let magic = reader.read::<u32>()?;
 
         if magic != GENERIC_BOC_MAGIC {
-            return Err(TLCoreError::BOCWrongData(format!("Unexpected magic: {magic}")));
+            return boc_data_error(format!("Unexpected magic: {magic}"));
         };
 
         let (has_idx, has_crc32c, _has_cache_bits, size) = {
@@ -27,7 +27,7 @@ impl BOCRaw {
             // size:(## 3) { size <= 4 }
             let size = header & 0b0000_0111;
             if size > 4 {
-                return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: size({size}) <= 4")));
+                return boc_data_error(format!("Invalid BoC header: size({size}) <= 4"));
             }
 
             (has_idx, has_crc32c, has_cache_bits, size)
@@ -36,21 +36,20 @@ impl BOCRaw {
         //   off_bytes:(## 8) { off_bytes <= 8 }
         let off_bytes = reader.read::<u8>()?;
         if off_bytes > 8 {
-            return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: off_bytes({off_bytes}) <= 8")));
+            return boc_data_error(format!("Invalid BoC header: off_bytes({off_bytes}) <= 8"));
         }
         //cells:(##(size * 8))
         let cells_cnt = read_var_size(&mut reader, size)?;
         //   roots:(##(size * 8)) { roots >= 1 }
         let roots_cnt = read_var_size(&mut reader, size)?;
         if roots_cnt < 1 {
-            return Err(TLCoreError::BOCWrongData(format!("Invalid BoC header: roots({roots_cnt}) >= 1")));
+            return boc_data_error(format!("Invalid BoC header: roots({roots_cnt}) >= 1"));
         }
         //   absent:(##(size * 8)) { roots + absent <= cells }
         let absent = read_var_size(&mut reader, size)?;
         if roots_cnt + absent > cells_cnt {
-            return Err(TLCoreError::BOCWrongData(format!(
-                "Invalid header: roots({roots_cnt}) + absent({absent}) <= cells({cells_cnt})"
-            )));
+            let msg = format!("Invalid header: roots({roots_cnt}) + absent({absent}) <= cells({cells_cnt})");
+            return boc_data_error(msg);
         }
         //   tot_cells_size:(##(off_bytes * 8))
         let _tot_cells_size = read_var_size(&mut reader, off_bytes)?;
@@ -77,7 +76,7 @@ impl BOCRaw {
     }
 }
 
-fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<CellRaw, TLCoreError> {
+fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<CellRaw, TonCoreError> {
     let d1 = reader.read::<u8>()?;
     let d2 = reader.read::<u8>()?;
 
@@ -104,7 +103,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
         // see https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/BitString.js#L302
         let num_zeros = data[data_len - 1].trailing_zeros();
         if num_zeros >= 8 {
-            return Err(TLCoreError::Custom(
+            return Err(TonCoreError::Custom(
                 "Last byte of binary must not be zero if full_byte flag is not set".to_string(),
             ));
         }
@@ -122,7 +121,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     let cell_type = match is_exotic {
         true => {
             if data.is_empty() {
-                return Err(TLCoreError::BOCWrongData("Exotic cell must have at least 1 byte".to_string()));
+                return boc_data_error("Exotic cell must have at least 1 byte");
             }
             CellType::new_exotic(data[0])?
         }
@@ -139,7 +138,9 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
     Ok(cell)
 }
 
-fn read_var_size(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, n: u8) -> Result<usize, TLCoreError> {
+fn boc_data_error<T, M: Into<String>>(msg: M) -> Result<T, TonCoreError> { Err(TonCoreError::data("BOC", msg.into())) }
+
+fn read_var_size(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, n: u8) -> Result<usize, TonCoreError> {
     let bytes = reader.read_to_vec(n.into())?;
 
     let mut result = 0;

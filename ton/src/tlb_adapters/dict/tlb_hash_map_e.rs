@@ -4,7 +4,7 @@ use std::hash::Hash;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::CellParser;
 use ton_lib_core::cell::TonCell;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 
 // https://github.com/ton-blockchain/ton/blame/72056a2261cbb11f7cf0f20b389bcbffe018b1a8/crypto/block/block.tlb#L37
 /// Write present marker (0|1 bit) to root cell, and then Dict data to first ref cell.
@@ -19,14 +19,14 @@ where
 {
     pub fn new(key_bits_len: u32) -> Self { Self(TLBHashMap::new(key_bits_len)) }
 
-    pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<HashMap<K, V>, TonCoreError> {
         if !parser.read_bit()? {
             return Ok(HashMap::new());
         }
         self.0.read(&mut parser.read_next_ref()?.parser())
     }
 
-    pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TLCoreError> {
+    pub fn write(&self, builder: &mut CellBuilder, data: &HashMap<K, V>) -> Result<(), TonCoreError> {
         if data.is_empty() {
             builder.write_bit(false)?;
             return Ok(());

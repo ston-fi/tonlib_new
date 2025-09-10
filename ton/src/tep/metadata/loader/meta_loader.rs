@@ -1,15 +1,14 @@
-use reqwest::header;
-use reqwest::header::HeaderValue;
-use reqwest::StatusCode;
-use std::num::ParseIntError;
-use thiserror::Error;
-use ton_lib_core::error::TLCoreError;
-
+use crate::errors::TonError;
 use crate::tep::metadata::loader::ipfs_loader::{IpfsLoader, IpfsLoaderError};
 use crate::tep::metadata::Metadata;
 use crate::tep::metadata::MetadataExternal;
 use crate::tep::metadata::MetadataInternal;
 use crate::tep::metadata::{MetadataContent, META_URI};
+use reqwest::header;
+use reqwest::header::HeaderValue;
+use reqwest::StatusCode;
+use std::num::ParseIntError;
+use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum MetaLoaderError {
@@ -35,7 +34,7 @@ pub enum MetaLoaderError {
     ParseIntError(#[from] ParseIntError),
 
     #[error(transparent)]
-    MetadataParseError(#[from] TLCoreError),
+    MetadataParseError(#[from] TonError),
 }
 
 pub struct MetaLoader {

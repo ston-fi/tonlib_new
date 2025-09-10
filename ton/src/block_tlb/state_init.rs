@@ -4,7 +4,7 @@ use crate::tlb_adapters::DictValAdapterTLB;
 use crate::tlb_adapters::TLBHashMapE;
 use std::collections::HashMap;
 use ton_lib_core::cell::{TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 use ton_lib_core::TLB;
@@ -44,7 +44,7 @@ impl StateInit {
         }
     }
 
-    pub fn derive_address(&self, workchain: i32) -> Result<TonAddress, TLCoreError> {
+    pub fn derive_address(&self, workchain: i32) -> Result<TonAddress, TonCoreError> {
         Ok(TonAddress::new(workchain, self.cell_hash()?))
     }
 }

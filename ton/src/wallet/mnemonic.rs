@@ -1,4 +1,4 @@
-use crate::error::TLError;
+use crate::errors::TonError;
 use hmac::{Hmac, Mac};
 use nacl::sign::generate_keypair;
 use pbkdf2::password_hash::Output;
@@ -35,16 +35,16 @@ impl fmt::Debug for KeyPair {
 }
 
 impl Mnemonic {
-    pub fn new(words: Vec<&str>, password: Option<String>) -> Result<Mnemonic, TLError> {
+    pub fn new(words: Vec<&str>, password: Option<String>) -> Result<Mnemonic, TonError> {
         let normalized_words: Vec<String> = words.iter().map(|w| w.trim().to_lowercase()).collect();
 
         // Check words
         if normalized_words.len() != 24 {
-            return Err(TLError::MnemonicWordsCount(normalized_words.len()));
+            return Err(TonError::MnemonicWordsCount(normalized_words.len()));
         }
         for word in &normalized_words {
             if !WORDLIST_EN_SET.contains(word.as_str()) {
-                return Err(TLError::MnemonicWord(word.clone()));
+                return Err(TonError::MnemonicWord(word.clone()));
             }
         }
 
@@ -54,20 +54,20 @@ impl Mnemonic {
                 let passless_entropy = to_entropy(&normalized_words, None)?;
                 let seed = pbkdf2_sha512(passless_entropy, "TON fast seed version", 1, 64)?;
                 if seed[0] != 1 {
-                    return Err(TLError::MnemonicFirstByte(seed[0]));
+                    return Err(TonError::MnemonicFirstByte(seed[0]));
                 }
                 // Make that this also is not a valid passwordless mnemonic
                 let entropy = to_entropy(&normalized_words, password.as_ref())?;
                 let seed = pbkdf2_sha512(entropy, "TON seed version", cmp::max(1, PBKDF_ITERATIONS / 256), 64)?;
                 if seed[0] == 0 {
-                    return Err(TLError::MnemonicFirstByte(seed[0]));
+                    return Err(TonError::MnemonicFirstByte(seed[0]));
                 }
             }
             _ => {
                 let entropy = to_entropy(&normalized_words, None)?;
                 let seed = pbkdf2_sha512(entropy, "TON seed version", cmp::max(1, PBKDF_ITERATIONS / 256), 64)?;
                 if seed[0] != 0 {
-                    return Err(TLError::MnemonicFirstBytePassless(seed[0]));
+                    return Err(TonError::MnemonicFirstBytePassless(seed[0]));
                 }
             }
         }
@@ -78,12 +78,12 @@ impl Mnemonic {
         })
     }
 
-    pub fn from_str(s: &str, password: Option<String>) -> Result<Mnemonic, TLError> {
+    pub fn from_str(s: &str, password: Option<String>) -> Result<Mnemonic, TonError> {
         let words: Vec<&str> = s.split(' ').map(|w| w.trim()).filter(|w| !w.is_empty()).collect();
         Mnemonic::new(words, password)
     }
 
-    pub fn to_key_pair(&self) -> Result<KeyPair, TLError> {
+    pub fn to_key_pair(&self) -> Result<KeyPair, TonError> {
         let entropy = to_entropy(&self.words, self.password.as_ref())?;
         let seed = pbkdf2_sha512(entropy, "TON default seed", PBKDF_ITERATIONS, 64)?;
         let key_pair = generate_keypair(&seed.as_slice()[0..32]);
@@ -94,7 +94,7 @@ impl Mnemonic {
     }
 }
 
-fn to_entropy(words: &[String], password: Option<&String>) -> Result<Vec<u8>, TLError> {
+fn to_entropy(words: &[String], password: Option<&String>) -> Result<Vec<u8>, TonError> {
     let mut mac = Hmac::<Sha512>::new_from_slice(words.join(" ").as_bytes())?;
     if let Some(s) = password {
         mac.update(s.as_bytes());
@@ -104,7 +104,7 @@ fn to_entropy(words: &[String], password: Option<&String>) -> Result<Vec<u8>, TL
     Ok(code_bytes)
 }
 
-fn pbkdf2_sha512(key: Vec<u8>, salt: &str, rounds: u32, output_len_bytes: usize) -> Result<Vec<u8>, TLError> {
+fn pbkdf2_sha512(key: Vec<u8>, salt: &str, rounds: u32, output_len_bytes: usize) -> Result<Vec<u8>, TonError> {
     let params = Params {
         rounds,
         output_length: output_len_bytes,
@@ -114,7 +114,7 @@ fn pbkdf2_sha512(key: Vec<u8>, salt: &str, rounds: u32, output_len_bytes: usize)
         pbkdf2_hmac::<Sha512>(key.as_slice(), salt.as_bytes(), params.rounds, out);
         Ok(())
     })
-    .map_err(|err| TLError::Custom(format!("Fail to parse hash: {err}")))?;
+    .map_err(|err| TonError::Custom(format!("Fail to parse hash: {err}")))?;
     Ok(output.as_bytes().to_vec())
 }
 

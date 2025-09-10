@@ -2,7 +2,7 @@ use num_bigint::{BigInt, BigUint};
 use std::marker::PhantomData;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::CellParser;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 
 /// Adapter to write data with fixed length into a cell.
 /// use `#[tlb_derive(bits_len={BITS_LEN})]` to apply it using TLBDerive macro
@@ -24,19 +24,19 @@ impl<T> ConstLen<T> {
 macro_rules! const_len_num_impl {
     ($src:ty) => {
         impl ConstLen<$src> {
-            pub fn read(&self, parser: &mut CellParser) -> Result<$src, TLCoreError> { parser.read_num(self.bits_len) }
-            pub fn write(&self, builder: &mut CellBuilder, val: &$src) -> Result<(), TLCoreError> {
+            pub fn read(&self, parser: &mut CellParser) -> Result<$src, TonCoreError> { parser.read_num(self.bits_len) }
+            pub fn write(&self, builder: &mut CellBuilder, val: &$src) -> Result<(), TonCoreError> {
                 builder.write_num(val, self.bits_len)
             }
         }
         impl ConstLen<Option<$src>> {
-            pub fn read(&self, parser: &mut CellParser) -> Result<Option<$src>, TLCoreError> {
+            pub fn read(&self, parser: &mut CellParser) -> Result<Option<$src>, TonCoreError> {
                 match parser.read_bit()? {
                     true => Ok(Some(parser.read_num(self.bits_len)?)),
                     false => Ok(None),
                 }
             }
-            pub fn write(&self, builder: &mut CellBuilder, val: &Option<$src>) -> Result<(), TLCoreError> {
+            pub fn write(&self, builder: &mut CellBuilder, val: &Option<$src>) -> Result<(), TonCoreError> {
                 builder.write_bit(val.is_some())?;
                 if let Some(val) = val {
                     return builder.write_num(val, self.bits_len);
@@ -61,20 +61,20 @@ const_len_num_impl!(BigInt);
 const_len_num_impl!(BigUint);
 
 impl ConstLen<Vec<u8>> {
-    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TLCoreError> { parser.read_bits(self.bits_len) }
-    pub fn write(&self, builder: &mut CellBuilder, val: &Vec<u8>) -> Result<(), TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<Vec<u8>, TonCoreError> { parser.read_bits(self.bits_len) }
+    pub fn write(&self, builder: &mut CellBuilder, val: &Vec<u8>) -> Result<(), TonCoreError> {
         builder.write_bits(val, self.bits_len)
     }
 }
 
 impl ConstLen<Option<Vec<u8>>> {
-    pub fn read(&self, parser: &mut CellParser) -> Result<Option<Vec<u8>>, TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<Option<Vec<u8>>, TonCoreError> {
         match parser.read_bit()? {
             true => Ok(Some(parser.read_bits(self.bits_len)?)),
             false => Ok(None),
         }
     }
-    pub fn write(&self, builder: &mut CellBuilder, val: &Option<Vec<u8>>) -> Result<(), TLCoreError> {
+    pub fn write(&self, builder: &mut CellBuilder, val: &Option<Vec<u8>>) -> Result<(), TonCoreError> {
         match val {
             Some(val) => {
                 builder.write_bit(true)?;

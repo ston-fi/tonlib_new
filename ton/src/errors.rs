@@ -3,24 +3,26 @@ use std::sync::Arc;
 use std::time::Duration;
 use thiserror::Error;
 use tokio::time::error::Elapsed;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::types::LiteError;
 
 #[macro_export]
-macro_rules! bail_tl {
+macro_rules! bail_ton {
     ($($arg:tt)*) => {
-        return Err(TLError::Custom(format!($($arg)*)))
+        return Err(TonError::Custom(format!($($arg)*)))
     };
 }
 
 #[derive(Error, Debug)]
-pub enum TLError {
+pub enum TonError {
     #[error("TLCoreError: {0}")]
-    TLCoreError(#[from] TLCoreError),
+    TLCoreError(#[from] TonCoreError),
     #[error("TLCoreError: {0}")]
-    TLCoreArcError(#[from] Arc<TLCoreError>),
+    TLCoreArcError(#[from] Arc<TonCoreError>),
+    #[error("Failed to parse metadata")]
+    MetadataParseError,
     #[error("NetRequestTimeout: {msg}, timeout={timeout:?}")]
     NetRequestTimeout { msg: String, timeout: Duration },
 
@@ -126,15 +128,15 @@ pub enum TLError {
     AcquireError(#[from] tokio::sync::AcquireError),
 }
 
-impl From<TLError> for TLCoreError {
-    fn from(err: TLError) -> Self {
+impl From<TonError> for TonCoreError {
+    fn from(err: TonError) -> Self {
         match err {
-            TLError::TLCoreError(err) => err,
-            other => TLCoreError::Custom(other.to_string()),
+            TonError::TLCoreError(err) => err,
+            other => TonCoreError::Custom(other.to_string()),
         }
     }
 }
 
-impl From<&TLError> for TLCoreError {
-    fn from(err: &TLError) -> Self { TLCoreError::Custom(err.to_string()) }
+impl From<&TonError> for TonCoreError {
+    fn from(err: &TonError) -> Self { TonCoreError::Custom(err.to_string()) }
 }

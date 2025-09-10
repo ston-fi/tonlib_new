@@ -1,6 +1,6 @@
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 
 /// Either X Y
@@ -13,14 +13,14 @@ pub enum TLBEither<L, R> {
 }
 
 impl<L: TLB, R: TLB> TLB for TLBEither<L, R> {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         match parser.read_bit()? {
             false => Ok(Self::Left(L::read(parser)?)),
             true => Ok(Self::Right(R::read(parser)?)),
         }
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         match self {
             TLBEither::Left(left) => {
                 builder.write_bit(false)?;

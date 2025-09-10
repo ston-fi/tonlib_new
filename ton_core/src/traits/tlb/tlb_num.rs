@@ -1,14 +1,14 @@
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 
 macro_rules! tlb_num_impl {
     ($t:ty, $bits:tt) => {
         impl TLB for $t {
-            fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> { parser.read_num($bits) }
+            fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> { parser.read_num($bits) }
 
-            fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+            fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
                 builder.write_num(self, $bits)
             }
         }

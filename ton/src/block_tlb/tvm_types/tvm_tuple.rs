@@ -1,17 +1,17 @@
 use crate::block_tlb::{TVMCell, TVMCellSlice, TVMInt, TVMStackValue, TVMTinyInt};
-use crate::error::TLError;
+use crate::errors::TonError;
 use num_bigint::BigInt;
 use std::ops::{Deref, DerefMut};
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 
 macro_rules! extract_tuple_val {
     ($maybe_result:expr, $variant:ident) => {
         match &$maybe_result {
-            None => Err(TLError::TVMStackEmpty),
+            None => Err(TonError::TVMStackEmpty),
             Some(TVMStackValue::$variant(val)) => Ok(&val.value),
-            Some(rest) => Err(TLError::TVMStackWrongType(stringify!($variant).to_string(), format!("{rest:?}"))),
+            Some(rest) => Err(TonError::TVMStackWrongType(stringify!($variant).to_string(), format!("{rest:?}"))),
         }
     };
 }
@@ -40,16 +40,16 @@ impl TVMTuple {
     pub fn push_cell(&mut self, value: TonCellRef) { self.push(TVMStackValue::Cell(TVMCell { value })); }
     pub fn push_cell_slice(&mut self, cell: TonCellRef) { self.push(TVMStackValue::CellSlice(TVMCellSlice::from_cell(cell))); }
 
-    pub fn get_tiny_int(&mut self, index: usize) -> Result<&i64, TLError> { extract_tuple_val!(self.get(index), TinyInt) }
-    pub fn get_int(&mut self, index: usize) -> Result<&BigInt, TLError> { extract_tuple_val!(self.get(index), Int) }
-    pub fn get_cell(&mut self, index: usize) -> Result<&TonCellRef, TLError> { extract_tuple_val!(self.get(index), Cell) }
-    pub fn get_cell_slice(&mut self, index: usize) -> Result<&TonCellRef, TLError> { extract_tuple_val!(self.get(index), CellSlice) }
+    pub fn get_tiny_int(&mut self, index: usize) -> Result<&i64, TonError> { extract_tuple_val!(self.get(index), TinyInt) }
+    pub fn get_int(&mut self, index: usize) -> Result<&BigInt, TonError> { extract_tuple_val!(self.get(index), Int) }
+    pub fn get_cell(&mut self, index: usize) -> Result<&TonCellRef, TonError> { extract_tuple_val!(self.get(index), Cell) }
+    pub fn get_cell_slice(&mut self, index: usize) -> Result<&TonCellRef, TonError> { extract_tuple_val!(self.get(index), CellSlice) }
 }
 
 impl TLB for TVMTuple {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x07, 8);
 
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let len: usize = parser.read_num(16)?;
         if len == 0 {
             return Ok(TVMTuple(Vec::new()));
@@ -59,7 +59,7 @@ impl TLB for TVMTuple {
         Ok(TVMTuple(data))
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         builder.write_num(&self.len(), 16)?;
         if self.is_empty() {
             return Ok(());
@@ -69,13 +69,13 @@ impl TLB for TVMTuple {
     }
 }
 
-fn read_tuple(parser: &mut CellParser, data: &mut Vec<TVMStackValue>, rest_len: usize) -> Result<(), TLCoreError> {
+fn read_tuple(parser: &mut CellParser, data: &mut Vec<TVMStackValue>, rest_len: usize) -> Result<(), TonCoreError> {
     read_tuple_ref(parser, data, rest_len - 1)?;
     data.push(TVMStackValue::from_cell(parser.read_next_ref()?)?);
     Ok(())
 }
 
-fn read_tuple_ref(parser: &mut CellParser, data: &mut Vec<TVMStackValue>, rest_len: usize) -> Result<(), TLCoreError> {
+fn read_tuple_ref(parser: &mut CellParser, data: &mut Vec<TVMStackValue>, rest_len: usize) -> Result<(), TonCoreError> {
     match rest_len {
         0 => {}
         1 => data.push(TVMStackValue::from_cell(parser.read_next_ref()?)?),
@@ -87,12 +87,12 @@ fn read_tuple_ref(parser: &mut CellParser, data: &mut Vec<TVMStackValue>, rest_l
     Ok(())
 }
 
-fn write_tuple(builder: &mut CellBuilder, data: &[TVMStackValue], rest_len: usize) -> Result<(), TLCoreError> {
+fn write_tuple(builder: &mut CellBuilder, data: &[TVMStackValue], rest_len: usize) -> Result<(), TonCoreError> {
     write_tuple_ref(builder, data, rest_len - 1)?;
     builder.write_ref(data[rest_len - 1].to_cell_ref()?)
 }
 
-fn write_tuple_ref(builder: &mut CellBuilder, data: &[TVMStackValue], rest_len: usize) -> Result<(), TLCoreError> {
+fn write_tuple_ref(builder: &mut CellBuilder, data: &[TVMStackValue], rest_len: usize) -> Result<(), TonCoreError> {
     match rest_len {
         0 => {}
         1 => builder.write_ref(data[0].to_cell_ref()?)?,

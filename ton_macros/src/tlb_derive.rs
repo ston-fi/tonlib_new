@@ -63,13 +63,13 @@ pub(crate) fn tlb_derive_impl(input: proc_macro::TokenStream) -> TokenStream {
         impl #crate_path::traits::tlb::TLB for #ident {
             const PREFIX: #crate_path::traits::tlb::TLBPrefix = #crate_path::traits::tlb::TLBPrefix::new(#prefix_val, #prefix_bits_len);
 
-            fn read_definition(parser: &mut #crate_path::cell::CellParser) -> Result<Self, #crate_path::error::TLCoreError> {
+            fn read_definition(parser: &mut #crate_path::cell::CellParser) -> Result<Self, #crate_path::errors::TonCoreError> {
                 use #crate_path::traits::tlb::TLB;
 
                 #read_def_tokens
             }
 
-            fn write_definition(&self, builder: &mut #crate_path::cell::CellBuilder) -> Result<(), #crate_path::error::TLCoreError> {
+            fn write_definition(&self, builder: &mut #crate_path::cell::CellBuilder) -> Result<(), #crate_path::errors::TonCoreError> {
                 #write_def_tokens
             }
         }

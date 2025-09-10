@@ -1,5 +1,5 @@
 use crate::cell::TonCellNum;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use std::hash::Hash;
@@ -20,22 +20,19 @@ impl TonHash {
 
     pub const fn from_slice_sized(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) }
 
-    pub fn from_slice(data: &[u8]) -> Result<Self, TLCoreError> {
+    pub fn from_slice(data: &[u8]) -> Result<Self, TonCoreError> {
         check_bytes_len(data)?;
         Ok(Self::from_slice_sized(data[..32].try_into().unwrap()))
     }
 
-    pub fn from_vec(data: Vec<u8>) -> Result<Self, TLCoreError> {
+    pub fn from_vec(data: Vec<u8>) -> Result<Self, TonCoreError> {
         check_bytes_len(&data)?;
         Ok(Self(TonHashData::Vec(data)))
     }
 
-    pub fn from_num<T: TonCellNum>(num: &T) -> Result<Self, TLCoreError> {
+    pub fn from_num<T: TonCellNum>(num: &T) -> Result<Self, TonCoreError> {
         if T::IS_PRIMITIVE {
-            return Err(TLCoreError::TonHashWrongLen {
-                exp: TonHash::BYTES_LEN,
-                given: 128, // max primitive size
-            });
+            return Err(TonCoreError::data("TonHash", "Can't create from primitive type (not enough bytes)"));
         }
         Self::from_slice(&num.tcn_to_bytes())
     }
@@ -88,22 +85,20 @@ impl TonHashData {
     }
 }
 
-fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<TonHash, TLCoreError> {
+fn from_hex<T: AsRef<[u8]>>(hex: T) -> Result<TonHash, TonCoreError> {
     let bytes = hex::decode(hex)?;
     check_bytes_len(&bytes)?;
     Ok(TonHash(TonHashData::Vec(bytes)))
 }
 
-fn from_base64<T: AsRef<[u8]>>(base64: T) -> Result<TonHash, TLCoreError> {
+fn from_base64<T: AsRef<[u8]>>(base64: T) -> Result<TonHash, TonCoreError> {
     TonHash::from_vec(BASE64_STANDARD.decode(base64)?)
 }
 
-fn check_bytes_len(bytes: &[u8]) -> Result<(), TLCoreError> {
+fn check_bytes_len(bytes: &[u8]) -> Result<(), TonCoreError> {
     if bytes.len() != TonHash::BYTES_LEN {
-        return Err(TLCoreError::TonHashWrongLen {
-            exp: TonHash::BYTES_LEN,
-            given: bytes.len(),
-        });
+        let err_str = format!("expected bytes_len {}, but got {}", TonHash::BYTES_LEN, bytes.len());
+        return Err(TonCoreError::data("TonHash", err_str));
     }
     Ok(())
 }
@@ -115,13 +110,13 @@ mod traits_impl {
     use std::hash::Hash;
     use std::str::FromStr;
     use crate::cell::ton_hash::{from_base64, from_hex, TonHash, TonHashData};
-    use crate::error::TLCoreError;
+    use crate::errors::TonCoreError;
 
 
     impl From<[u8; 32]> for TonHash { fn from(data: [u8; 32]) -> Self { Self(TonHashData::Slice(data)) } }
     impl From<&[u8; 32]> for TonHash { fn from(data: &[u8; 32]) -> Self { Self(TonHashData::Slice(*data)) } }
     impl FromStr for TonHash {
-        type Err = TLCoreError;
+        type Err = TonCoreError;
         fn from_str(s: &str) -> Result<Self, Self::Err> {
             if s.len() == 64 {
                 return from_hex(s);

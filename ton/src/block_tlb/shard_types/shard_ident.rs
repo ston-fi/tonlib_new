@@ -1,9 +1,9 @@
 use std::fmt::{Debug, Display, Formatter};
-use ton_lib_core::bail_tl_core;
+use ton_lib_core::bail_ton_core;
 use ton_lib_core::bits_utils::BitsUtils;
 use ton_lib_core::cell::{CellBuilder, CellParser};
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_MAX_SPLIT_DEPTH, TON_SHARD_FULL};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::types::tlb_core::MsgAddressInt;
 
@@ -43,19 +43,19 @@ impl ShardIdent {
     }
     pub fn new_mc() -> Self { Self::new(TON_MASTERCHAIN, TON_SHARD_FULL) }
     pub fn prefix_len(&self) -> u32 { 63u32 - self.shard.trailing_zeros() }
-    pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TLCoreError> {
+    pub fn split(&self) -> Result<(ShardIdent, ShardIdent), TonCoreError> {
         let lower_bits = self.prefix_lower_bits() >> 1;
         if lower_bits & (!0 >> (TON_MAX_SPLIT_DEPTH + 1)) != 0 {
-            bail_tl_core!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
+            bail_ton_core!("Can't split shard {}, because of max split depth is {TON_MAX_SPLIT_DEPTH}", self.shard);
         }
         Ok((
             ShardIdent::new(self.workchain, self.shard - lower_bits),
             ShardIdent::new(self.workchain, self.shard + lower_bits),
         ))
     }
-    pub fn merge(&self) -> Result<ShardIdent, TLCoreError> {
+    pub fn merge(&self) -> Result<ShardIdent, TonCoreError> {
         if self.shard == TON_SHARD_FULL {
-            bail_tl_core!("Can't merge shard SHARD_FULL ({})", self.shard);
+            bail_ton_core!("Can't merge shard SHARD_FULL ({})", self.shard);
         }
         let lower_bits = self.prefix_lower_bits();
         Ok(ShardIdent::new(self.workchain, (self.shard - lower_bits) | (lower_bits << 1)))
@@ -82,10 +82,10 @@ impl Default for ShardIdent {
 impl TLB for ShardIdent {
     const PREFIX: TLBPrefix = TLBPrefix::new(0b00, 2);
 
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let pfx_bits_len: u32 = parser.read_num(6)?;
         if pfx_bits_len > TON_MAX_SPLIT_DEPTH as u32 {
-            return Err(TLCoreError::TLBWrongData(format!(
+            return Err(TonCoreError::TLBWrongData(format!(
                 "expecting prefix_len <= {TON_MAX_SPLIT_DEPTH}, got {pfx_bits_len}"
             )));
         }
@@ -98,9 +98,9 @@ impl TLB for ShardIdent {
         Ok(Self::from_pfx(wc, &shard_pfx))
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         if self.shard == 0 {
-            return Err(TLCoreError::TLBWrongData("shard can't be 0".to_string()));
+            return Err(TonCoreError::TLBWrongData("shard can't be 0".to_string()));
         }
         builder.write_num(&self.prefix_len(), 6)?;
         self.workchain.write(builder)?;

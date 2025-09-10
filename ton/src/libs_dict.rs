@@ -2,7 +2,7 @@ use crate::tlb_adapters::{DictKeyAdapterTonHash, DictValAdapterTLB, TLBHashMap};
 use std::collections::HashMap;
 use std::ops::{Deref, DerefMut};
 use ton_lib_core::cell::{TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::TLB;
 
 /// Contains dict (TLBHashMap), no 'present' marker in root cell
@@ -13,7 +13,7 @@ pub struct LibsDict {
 }
 
 impl LibsDict {
-    pub fn new<I: IntoIterator<Item = TonCellRef>>(libs: I) -> Result<Self, TLCoreError> {
+    pub fn new<I: IntoIterator<Item = TonCellRef>>(libs: I) -> Result<Self, TonCoreError> {
         let mut data = HashMap::new();
         for lib in libs {
             data.insert(lib.hash()?.clone(), lib);

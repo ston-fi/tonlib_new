@@ -1,6 +1,6 @@
 use crate::clients::tl_client::tl::request::TLRequest;
 use crate::clients::tl_client::tl::response::TLResponse;
-use crate::error::TLError;
+use crate::errors::TonError;
 use tonlib_sys::*;
 // Wrapper around ton client with support for TL data types
 
@@ -10,24 +10,24 @@ pub(crate) struct TonlibjsonWrapper {
 }
 
 impl TonlibjsonWrapper {
-    pub fn new(tag: String) -> Result<TonlibjsonWrapper, TLError> {
+    pub fn new(tag: String) -> Result<TonlibjsonWrapper, TonError> {
         let client_ptr = unsafe { tonlib_client_json_create() };
         if client_ptr.is_null() {
-            return Err(TLError::TLClientCreationFailed);
+            return Err(TonError::TLClientCreationFailed);
         }
         Ok(TonlibjsonWrapper { ptr: client_ptr, tag })
     }
 
     pub fn tag(&self) -> &str { self.tag.as_str() }
 
-    pub fn send(&self, req: &TLRequest, extra: &str) -> Result<(), TLError> {
+    pub fn send(&self, req: &TLRequest, extra: &str) -> Result<(), TonError> {
         let c_str = req.to_c_str_json(extra)?;
         log::trace!("[{}] send: {c_str:?}", self.tag);
         unsafe { tonlib_client_json_send(self.ptr, c_str.as_ptr()) };
         Ok(())
     }
 
-    pub fn receive(&self, timeout: f64) -> Option<Result<(TLResponse, Option<String>), TLError>> {
+    pub fn receive(&self, timeout: f64) -> Option<Result<(TLResponse, Option<String>), TonError>> {
         let c_str = unsafe { tonlib_client_json_receive(self.ptr, timeout) };
         if c_str.is_null() {
             return None;

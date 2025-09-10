@@ -1,6 +1,6 @@
 use crate::cell::ton_cell::{TonCell, TonCellRef};
 use crate::cell::ton_cell_num::TonCellNum;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use bitstream_io::{BigEndian, BitRead, BitReader};
 use num_traits::Zero;
 use std::io::{Cursor, SeekFrom};
@@ -24,18 +24,18 @@ impl<'a> CellParser<'a> {
         }
     }
 
-    pub fn lookup_bits(&mut self, bits_len: usize) -> Result<u128, TLCoreError> {
+    pub fn lookup_bits(&mut self, bits_len: usize) -> Result<u128, TonCoreError> {
         let value = self.read_num(bits_len)?;
         self.seek_bits(-(bits_len as i32))?;
         Ok(value)
     }
 
-    pub fn read_bit(&mut self) -> Result<bool, TLCoreError> {
+    pub fn read_bit(&mut self) -> Result<bool, TonCoreError> {
         self.ensure_enough_bits(1)?;
         Ok(self.data_reader.read_bit()?)
     }
 
-    pub fn read_bits(&mut self, bits_len: usize) -> Result<Vec<u8>, TLCoreError> {
+    pub fn read_bits(&mut self, bits_len: usize) -> Result<Vec<u8>, TonCoreError> {
         self.ensure_enough_bits(bits_len)?;
         let mut dst = vec![0; bits_len.div_ceil(8)];
         let full_bytes = bits_len / 8;
@@ -50,7 +50,7 @@ impl<'a> CellParser<'a> {
         Ok(dst)
     }
 
-    pub fn read_num<N: TonCellNum>(&mut self, bits_len: usize) -> Result<N, TLCoreError> {
+    pub fn read_num<N: TonCellNum>(&mut self, bits_len: usize) -> Result<N, TonCoreError> {
         if bits_len == 0 {
             return Ok(N::tcn_from_primitive(N::Primitive::zero()));
         }
@@ -67,7 +67,7 @@ impl<'a> CellParser<'a> {
         Ok(res)
     }
 
-    pub fn read_cell(&mut self) -> Result<TonCell, TLCoreError> {
+    pub fn read_cell(&mut self) -> Result<TonCell, TonCoreError> {
         let bits_left = self.data_bits_remaining()?;
         let data = self.read_bits(bits_left)?;
 
@@ -87,12 +87,14 @@ impl<'a> CellParser<'a> {
         end_bit: usize,
         start_ref: usize,
         end_ref: usize,
-    ) -> Result<TonCell, TLCoreError> {
+    ) -> Result<TonCell, TonCoreError> {
         if self.data_reader.position_in_bits()? != 0 && self.next_ref_pos != 0 {
-            return Err(TLCoreError::ParserWrongSlicePosition {
-                bit_pos: self.data_reader.position_in_bits()? as usize,
-                next_ref_pos: self.next_ref_pos,
-            });
+            let msg = format!(
+                "CellParser must be at the beginning of the cell to read a slice: bit_pos {}, next_ref_pos {}",
+                self.data_reader.position_in_bits()? as usize,
+                self.next_ref_pos
+            );
+            return Err(TonCoreError::data("CellParser", msg));
         }
         self.read_bits(start_bit)?; // skip
         let slice_data_bits_len = end_bit - start_bit;
@@ -107,54 +109,52 @@ impl<'a> CellParser<'a> {
         builder.build()
     }
 
-    pub fn read_next_ref(&mut self) -> Result<&TonCellRef, TLCoreError> {
+    pub fn read_next_ref(&mut self) -> Result<&TonCellRef, TonCoreError> {
         if self.next_ref_pos == self.cell.refs.len() {
-            return Err(TLCoreError::ParserRefsUnderflow { req: self.next_ref_pos });
+            let msg =
+                format!("No more refs in cell: next_ref_pos {}, refs_len {}", self.next_ref_pos, self.cell.refs.len());
+            return Err(TonCoreError::data("CellParser", msg));
         }
         let cell_ref = &self.cell.refs[self.next_ref_pos];
         self.next_ref_pos += 1;
         Ok(cell_ref)
     }
 
-    pub fn data_bits_remaining(&mut self) -> Result<usize, TLCoreError> {
+    pub fn data_bits_remaining(&mut self) -> Result<usize, TonCoreError> {
         let reader_pos = self.data_reader.position_in_bits()? as usize;
         Ok(self.cell.data_bits_len - reader_pos)
     }
 
-    pub fn seek_bits(&mut self, offset: i32) -> Result<(), TLCoreError> {
+    pub fn seek_bits(&mut self, offset: i32) -> Result<(), TonCoreError> {
         let new_pos = self.data_reader.position_in_bits()? as i32 + offset;
         let data_bits_len = self.cell.data_bits_len;
         if new_pos < 0 || new_pos as usize > (data_bits_len - 1) {
-            return Err(TLCoreError::ParserBadPosition {
-                new_pos,
-                bits_len: data_bits_len,
-            });
+            let msg = format!("Bad seek position in cell: new_pos {new_pos}, data_bits_len {data_bits_len}");
+            return Err(TonCoreError::data("CellParser", msg));
         }
         self.data_reader.seek_bits(SeekFrom::Current(offset as i64))?;
         Ok(())
     }
 
-    pub fn ensure_empty(&mut self) -> Result<(), TLCoreError> {
+    pub fn ensure_empty(&mut self) -> Result<(), TonCoreError> {
         let bits_left = self.data_bits_remaining()?;
         let refs_left = self.cell.refs.len() - self.next_ref_pos;
         if bits_left == 0 && refs_left == 0 {
             return Ok(());
         }
-
-        Err(TLCoreError::ParserCellNotEmpty { bits_left, refs_left })
+        let msg = format!("Cell is not empty: {bits_left} bits left, {refs_left} refs left");
+        Err(TonCoreError::data("CellParser", msg))
     }
 
     // returns remaining bits
-    fn ensure_enough_bits(&mut self, bit_len: usize) -> Result<usize, TLCoreError> {
+    fn ensure_enough_bits(&mut self, bit_len: usize) -> Result<usize, TonCoreError> {
         let bits_left = self.data_bits_remaining()?;
 
         if bit_len <= bits_left {
             return Ok(bits_left);
         }
-        Err(TLCoreError::ParserDataUnderflow {
-            req: bit_len,
-            left: bits_left,
-        })
+        let msg = format!("Not enough bits in cell: required {bit_len}, left {bits_left}");
+        Err(TonCoreError::data("CallParser", msg))
     }
 }
 

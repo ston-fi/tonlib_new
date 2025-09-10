@@ -5,7 +5,7 @@ use crate::block_tlb::{ShardIdent, ShardPfx};
 use crate::tlb_adapters::{BinTree, DictKeyAdapterInto, DictValAdapterTLB, TLBHashMapE};
 use std::collections::HashMap;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::TLB;
 
@@ -46,7 +46,7 @@ pub struct ShardFeesCreated {
 
 impl TLB for MCBlockExtra {
     const PREFIX: TLBPrefix = TLBPrefix::new(0xcca5, 16);
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let key_block = TLB::read(parser)?;
         let shards_dict = TLBHashMapE::<DictKeyAdapterInto, DictValAdapterTLB, u32, TonCellRef>::new(32);
         let mut shard_hashes = HashMap::new();
@@ -72,7 +72,7 @@ impl TLB for MCBlockExtra {
         })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.key_block.write(builder)?;
         let mut shards_dict = HashMap::<u32, TonCellRef>::new();
         for (wc_id, shards) in &self.shard_hashes {
@@ -89,7 +89,7 @@ impl TLB for MCBlockExtra {
                 Some(config) => config.write(builder)?,
                 None => {
                     let err_msg = "MCBlockExtra has key_block=true, but config_types is None".to_string();
-                    return Err(TLCoreError::TLBWrongData(err_msg));
+                    return Err(TonCoreError::TLBWrongData(err_msg));
                 }
             }
         }

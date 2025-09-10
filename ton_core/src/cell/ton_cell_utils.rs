@@ -1,7 +1,7 @@
 use crate::cell::meta::CellType;
 use crate::cell::TonCell;
 use crate::cell::TonHash;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use std::collections::{HashSet, VecDeque};
 use std::ops::Deref;
 
@@ -9,7 +9,7 @@ pub struct TonCellUtils;
 
 impl TonCellUtils {
     /// Runs over cell trees, collect library_cells and extracts corresponding lib_ids.
-    pub fn extract_lib_ids<'a, I>(cells_iter: I) -> Result<HashSet<TonHash>, TLCoreError>
+    pub fn extract_lib_ids<'a, I>(cells_iter: I) -> Result<HashSet<TonHash>, TonCoreError>
     where
         I: IntoIterator<Item = &'a TonCell>,
     {
@@ -31,7 +31,7 @@ impl TonCellUtils {
     }
 
     // Read lib_ids from library_cell
-    pub fn read_lib_id(cell: &TonCell) -> Result<Option<TonHash>, TLCoreError> {
+    pub fn read_lib_id(cell: &TonCell) -> Result<Option<TonHash>, TonCoreError> {
         if cell.cell_type != CellType::LibraryRef {
             return Ok(None);
         }
@@ -47,7 +47,7 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn test_extract_lib_ids_stonfi_router() -> Result<(), TLCoreError> {
+    fn test_extract_lib_ids_stonfi_router() -> Result<(), TonCoreError> {
         let expected_lib_id = TonHash::from_str("57DE63D28E4D3608E0C02D437A7B50EF5F28F36A4821A047FD663CE63F4597EC")?;
         let code = TonCell::from_boc_hex(
             "b5ee9c720101010100230008420257de63d28e4d3608e0c02d437a7b50ef5f28f36a4821a047fd663ce63f4597ec",
@@ -65,7 +65,7 @@ mod tests {
     }
 
     #[test]
-    fn test_extract_lib_ids_stonfi_pton() -> Result<(), TLCoreError> {
+    fn test_extract_lib_ids_stonfi_pton() -> Result<(), TonCoreError> {
         // https://tonviewer.com/EQBnGWMCf3-FZZq1W4IWcWiGAc3PHuZ0_H-7sad2oY00o83S
         let code = TonCell::from_boc_hex(
             "b5ee9c7201010101002300084202d29017573b8132be742e9c02dabe2311fb3df9f077e661d3ee24d431058b8830",

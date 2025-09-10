@@ -3,12 +3,12 @@ use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::CellType;
 use crate::cell::{TonCell, TonCellRef, TonHash};
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 use std::sync::Arc;
 
 impl TLB for TonCell {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let bits_remaining = parser.data_bits_remaining()?;
         if parser.cell.data_bits_len == bits_remaining && parser.next_ref_pos == 0 {
             // optimization - just clone cell if parser has initial state
@@ -20,45 +20,47 @@ impl TLB for TonCell {
         }
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { builder.write_cell(self) }
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> { builder.write_cell(self) }
 
-    fn cell_hash(&self) -> Result<TonHash, TLCoreError> { Ok(self.hash()?.clone()) }
+    fn cell_hash(&self) -> Result<TonHash, TonCoreError> { Ok(self.hash()?.clone()) }
 
-    fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> {
+    fn from_boc(boc: &[u8]) -> Result<Self, TonCoreError> {
         // optimization - doesn't copy Cell, just takes ownership
         // unwrap is safe - only current scope has a reference because it's just created
         Ok(Arc::try_unwrap(BOC::from_bytes(boc)?.single_root()?.0).unwrap())
     }
 
-    fn to_cell(&self) -> Result<TonCell, TLCoreError> { Ok(self.clone()) }
+    fn to_cell(&self) -> Result<TonCell, TonCoreError> { Ok(self.clone()) }
 
-    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TLCoreError> {
+    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonCoreError> {
         BOC::new(self.clone().into_ref()).to_bytes(add_crc32)
     }
     fn cell_type(&self) -> CellType { self.cell_type }
 }
 
 impl TLB for TonCellRef {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> { parser.read_next_ref().cloned() }
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { builder.write_ref(self.clone()) }
-    fn cell_hash(&self) -> Result<TonHash, TLCoreError> { Ok(self.hash()?.clone()) }
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> { parser.read_next_ref().cloned() }
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
+        builder.write_ref(self.clone())
+    }
+    fn cell_hash(&self) -> Result<TonHash, TonCoreError> { Ok(self.hash()?.clone()) }
     /// Inconsistent with read(): extract value from BOC root, not from the first child
-    fn from_boc(boc: &[u8]) -> Result<Self, TLCoreError> { BOC::from_bytes(boc)?.single_root() }
+    fn from_boc(boc: &[u8]) -> Result<Self, TonCoreError> { BOC::from_bytes(boc)?.single_root() }
 
-    fn to_cell_ref(&self) -> Result<TonCellRef, TLCoreError> { Ok(self.clone()) }
+    fn to_cell_ref(&self) -> Result<TonCellRef, TonCoreError> { Ok(self.clone()) }
     /// Inconsistent with write(): write value to BOC root, not to the first child
-    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TLCoreError> {
+    fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonCoreError> {
         BOC::new(self.clone()).to_bytes(add_crc32)
     }
     fn cell_type(&self) -> CellType { self.cell_type }
 }
 
 impl TLB for TonHash {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         TonHash::from_vec(parser.read_bits(TonHash::BITS_LEN)?)
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         builder.write_bits(self.as_slice(), TonHash::BITS_LEN)
     }
 }

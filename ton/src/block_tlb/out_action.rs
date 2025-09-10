@@ -1,7 +1,7 @@
 use crate::block_tlb::CurrencyCollection;
 use crate::tlb_adapters::ConstLen;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::TLBEither;
 use ton_lib_core::TLB;
@@ -54,7 +54,7 @@ impl OutList {
 }
 
 impl TLB for OutList {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         if parser.data_bits_remaining()? == 0 {
             return Ok(Self::default());
         }
@@ -70,7 +70,7 @@ impl TLB for OutList {
         Ok(Self { actions })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         if self.actions.is_empty() {
             return Ok(());
         }

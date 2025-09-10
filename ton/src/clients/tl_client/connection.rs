@@ -15,9 +15,9 @@ use crate::clients::tl_client::{
     callback::{TLCallback, TLCallbacksStore},
     tl::request_context::TLRequestCtx,
 };
-use crate::error::TLError;
+use crate::errors::TonError;
 use crate::sys_utils::sys_tonlib_set_verbosity_level;
-use crate::unwrap_tl_response;
+use crate::unwrap_tl_rsp;
 use async_trait::async_trait;
 use tokio::sync::{oneshot, Mutex, Semaphore};
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
@@ -51,20 +51,20 @@ impl TLClientTrait for TLConnection {
 }
 
 impl TLConnection {
-    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TLError> {
+    pub async fn new(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonError> {
         new_connection_checked(config, semaphore).await
     }
 
-    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TLError> { self.inner.exec_impl(req).await }
+    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonError> { self.inner.exec_impl(req).await }
 
-    async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TLError> {
+    async fn init(&self, options: TLOptions) -> Result<TLOptionsInfo, TonError> {
         let req = TLRequest::Init { options };
-        unwrap_tl_response!(self.exec_impl(&req).await?, TLOptionsInfo)
+        unwrap_tl_rsp!(self.exec_impl(&req).await?, TLOptionsInfo)
     }
 }
 
 impl Inner {
-    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TLError> {
+    pub async fn exec_impl(&self, req: &TLRequest) -> Result<TLResponse, TonError> {
         let _permit = self.semaphore.acquire().await?;
         let req_id = self.next_request_id.fetch_add(1, Ordering::Relaxed);
         let tag = self.tonlibjson_wrapper.tag();
@@ -123,7 +123,7 @@ fn run_loop(tag: String, weak_inner: Weak<Inner>, callbacks: TLCallbacksStore) {
     callbacks.on_loop_exit(&tag);
 }
 
-async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TLError> {
+async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonError> {
     let conn = loop {
         let conn = new_connection(config, semaphore.clone()).await?;
         match config.connection_check {
@@ -153,7 +153,7 @@ async fn new_connection_checked(config: &TLClientConfig, semaphore: Arc<Semaphor
     Ok(conn)
 }
 
-async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TLError> {
+async fn new_connection(config: &TLClientConfig, semaphore: Arc<Semaphore>) -> Result<TLConnection, TonError> {
     let conn_id = CONNECTION_COUNTER.fetch_add(1, Ordering::Relaxed);
     let tag = format!("ton-conn-{conn_id}");
 

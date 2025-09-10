@@ -1,10 +1,10 @@
 use crate::block_tlb::{ShardAccount, Tx};
 use crate::emulators::emul_utils::require_field;
-use crate::error::TLError;
+use crate::errors::TonError;
 use base64::prelude::BASE64_STANDARD;
 use base64_serde::base64_serde_type;
 use serde::Deserialize;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 base64_serde_type!(Base64Standard, BASE64_STANDARD);
@@ -37,15 +37,15 @@ pub struct TXEmulationResponse {
 }
 
 impl TXEmulationResponse {
-    pub fn from_json(json: String) -> Result<Self, TLError> {
+    pub fn from_json(json: String) -> Result<Self, TonError> {
         let mut value: Self = serde_json::from_str(&json)?;
         value.raw_response = json;
         Ok(value)
     }
 
-    pub fn into_success(self) -> Result<TXEmulationSuccess, TLError> {
+    pub fn into_success(self) -> Result<TXEmulationSuccess, TonError> {
         if !self.success {
-            return Err(TLError::EmulatorEmulationError {
+            return Err(TonError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
@@ -65,8 +65,8 @@ impl TXEmulationResponse {
 }
 
 impl TXEmulationSuccess {
-    pub fn shard_account_parsed(&self) -> Result<ShardAccount, TLError> {
+    pub fn shard_account_parsed(&self) -> Result<ShardAccount, TonError> {
         Ok(ShardAccount::from_boc_b64(&self.shard_account_boc_b64)?)
     }
-    pub fn tx_parsed(&self) -> Result<Tx, TLCoreError> { Tx::from_boc_b64(&self.tx_boc_b64) }
+    pub fn tx_parsed(&self) -> Result<Tx, TonCoreError> { Tx::from_boc_b64(&self.tx_boc_b64) }
 }

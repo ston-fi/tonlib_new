@@ -1,6 +1,6 @@
 use crate::block_tlb::TVMStack;
 use crate::emulators::emul_utils::require_field;
-use crate::error::TLError;
+use crate::errors::TonError;
 use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
 use serde::{Deserialize, Serialize};
@@ -30,22 +30,22 @@ pub struct TVMGetMethodResponse {
 }
 
 impl TVMGetMethodResponse {
-    pub fn from_json(json: String) -> Result<Self, TLError> {
+    pub fn from_json(json: String) -> Result<Self, TonError> {
         let mut value: Self = serde_json::from_str(&json)?;
         value.raw_response = json;
         Ok(value)
     }
 
-    pub fn into_success(self) -> Result<TVMGetMethodSuccess, TLError> {
+    pub fn into_success(self) -> Result<TVMGetMethodSuccess, TonError> {
         if !self.success {
-            return Err(TLError::EmulatorEmulationError {
+            return Err(TonError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
         }
         let vm_exit_code = require_field(self.vm_exit_code, "vm_exit_code", &self.raw_response)?;
         if vm_exit_code != 0 && vm_exit_code != 1 {
-            return Err(TLError::EmulatorEmulationError {
+            return Err(TonError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });
@@ -66,9 +66,9 @@ impl TVMGetMethodResponse {
 }
 
 impl TVMGetMethodSuccess {
-    pub fn stack_parsed(&self) -> Result<TVMStack, TLError> { Ok(TVMStack::from_boc_b64(&self.stack_boc_base64)?) }
+    pub fn stack_parsed(&self) -> Result<TVMStack, TonError> { Ok(TVMStack::from_boc_b64(&self.stack_boc_base64)?) }
 
-    pub fn stack_boc(&self) -> Result<Vec<u8>, TLError> {
+    pub fn stack_boc(&self) -> Result<Vec<u8>, TonError> {
         Ok(BASE64_STANDARD.decode(self.stack_boc_base64.as_bytes())?)
     }
 
@@ -110,15 +110,15 @@ pub struct TVMSendMsgResponse {
 }
 
 impl TVMSendMsgResponse {
-    pub fn from_json(json: String) -> Result<Self, TLError> {
+    pub fn from_json(json: String) -> Result<Self, TonError> {
         let mut value: Self = serde_json::from_str(&json)?;
         value.raw_response = json;
         Ok(value)
     }
 
-    pub fn into_success(self) -> Result<TVMSendMsgSuccess, TLError> {
+    pub fn into_success(self) -> Result<TVMSendMsgSuccess, TonError> {
         if !self.success {
-            return Err(TLError::EmulatorEmulationError {
+            return Err(TonError::EmulatorEmulationError {
                 vm_exit_code: self.vm_exit_code,
                 response_raw: self.raw_response,
             });

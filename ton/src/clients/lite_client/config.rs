@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use crate::clients::net_config::TonNetConfig;
-use crate::error::TLError;
+use crate::errors::TonError;
 
 #[derive(Debug, Clone)]
 pub struct LiteClientConfig {
@@ -31,7 +31,7 @@ impl LiteReqParams {
 }
 
 impl LiteClientConfig {
-    pub fn new(net_config: &str) -> Result<Self, TLError> {
+    pub fn new(net_config: &str) -> Result<Self, TonError> {
         Ok(Self {
             net_config: TonNetConfig::new(net_config)?,
             connections_per_node: 1,

@@ -2,7 +2,7 @@ use crate::cell::meta::cell_meta_builder::CellMetaBuilder;
 use crate::cell::meta::level_mask::LevelMask;
 use crate::cell::ton_cell::TonCell;
 use crate::cell::ton_hash::TonHash;
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use once_cell;
 use once_cell::sync::OnceCell;
 use std::collections::VecDeque;
@@ -33,7 +33,7 @@ impl CellMeta {
         hashes_depths: LazyHashesDepths::Static(([TonCell::EMPTY_CELL_HASH; 4], [0; 4])),
     };
 
-    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TLCoreError> { CellMetaBuilder::new(cell).validate() }
+    pub(crate) fn validate(&self, cell: &TonCell) -> Result<(), TonCoreError> { CellMetaBuilder::new(cell).validate() }
 
     pub(crate) fn level_mask(&self, cell: &TonCell) -> LevelMask {
         match &self.level_mask {
@@ -67,16 +67,16 @@ impl CellMeta {
         }
     }
 
-    pub(crate) fn hash_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<&TonHash, TLCoreError> {
+    pub(crate) fn hash_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<&TonHash, TonCoreError> {
         let hashes = &self.get_hashes_depths(cell)?.0;
         Ok(&hashes[level.mask() as usize])
     }
-    pub(crate) fn depth_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<u16, TLCoreError> {
+    pub(crate) fn depth_for_level(&self, cell: &TonCell, level: LevelMask) -> Result<u16, TonCoreError> {
         let depths = &self.get_hashes_depths(cell)?.1;
         Ok(depths[level.mask() as usize])
     }
 
-    fn get_hashes_depths(&self, cell: &TonCell) -> Result<(&[TonHash], &[u16]), TLCoreError> {
+    fn get_hashes_depths(&self, cell: &TonCell) -> Result<(&[TonHash], &[u16]), TonCoreError> {
         let data = match &self.hashes_depths {
             LazyHashesDepths::Static(hashes_depths) => return Ok((&hashes_depths.0, &hashes_depths.1)),
             LazyHashesDepths::Dynamic(once) => {

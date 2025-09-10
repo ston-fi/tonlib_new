@@ -1,5 +1,5 @@
 use crate::cell::{CellBuilder, CellParser};
-use crate::error::TLCoreError;
+use crate::errors::TonCoreError;
 use crate::traits::tlb::TLB;
 use std::ops::{Deref, DerefMut};
 
@@ -10,7 +10,7 @@ use std::ops::{Deref, DerefMut};
 pub struct UnaryLen(pub usize);
 
 impl TLB for UnaryLen {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let mut bits_len = 0;
         while parser.read_bit()? {
             bits_len += 1;
@@ -18,7 +18,7 @@ impl TLB for UnaryLen {
         Ok(UnaryLen(bits_len))
     }
 
-    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonCoreError> {
         for _ in 0..self.0 {
             dst.write_bit(true)?;
         }

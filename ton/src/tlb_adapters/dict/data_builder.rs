@@ -7,7 +7,7 @@ use std::marker::PhantomData;
 use std::mem::swap;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::TonCell;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::tlb_core::UnaryLen;
 
@@ -23,7 +23,7 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         key_bits_len: usize,
         mut keys_sorted: Vec<BigUint>,
         values_sorted: &'a [&'a T],
-    ) -> Result<Self, TLCoreError> {
+    ) -> Result<Self, TonCoreError> {
         // we support writing empty dict, but it's usually handled by 0 bit in parent cell
         prepare_keys(&mut keys_sorted, key_bits_len)?;
         let builder = DictDataBuilder {
@@ -35,7 +35,7 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         Ok(builder)
     }
 
-    pub fn build(mut self) -> Result<TonCell, TLCoreError> {
+    pub fn build(mut self) -> Result<TonCell, TonCoreError> {
         let mut builder = TonCell::builder();
         if self.keys_sorted.is_empty() {
             return builder.build();
@@ -49,7 +49,7 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
     }
 
     // keys: Vec<(original_key_position, remaining_key_part)>
-    fn fill_cell(&mut self, builder: &mut CellBuilder, keys: Vec<(usize, BigUint)>) -> Result<(), TLCoreError> {
+    fn fill_cell(&mut self, builder: &mut CellBuilder, keys: Vec<(usize, BigUint)>) -> Result<(), TonCoreError> {
         if keys.len() == 1 {
             let (orig_key_pos, remaining_key) = &keys[0];
             return self.store_leaf(builder, *orig_key_pos, remaining_key);
@@ -102,14 +102,14 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
         builder: &mut CellBuilder,
         orig_key_pos: usize,
         label: &BigUint,
-    ) -> Result<(), TLCoreError> {
+    ) -> Result<(), TonCoreError> {
         self.store_label(builder, label)?;
         VA::write(builder, self.values_sorted[orig_key_pos])?;
         Ok(())
     }
 
     // expect label with leading one
-    fn store_label(&self, builder: &mut CellBuilder, label: &BigUint) -> Result<(), TLCoreError> {
+    fn store_label(&self, builder: &mut CellBuilder, label: &BigUint) -> Result<(), TonCoreError> {
         assert!(label.bits() > 0);
         if label.is_one() {
             // it's leading bit => label_type == short, len == 0 => store [false, false]
@@ -156,13 +156,13 @@ impl<'a, T, VA: DictValAdapter<T>> DictDataBuilder<'a, T, VA> {
     }
 }
 
-fn prepare_keys(keys: &mut [BigUint], key_bits_len: usize) -> Result<(), TLCoreError> {
+fn prepare_keys(keys: &mut [BigUint], key_bits_len: usize) -> Result<(), TonCoreError> {
     for key in keys {
         let received_len_bits = key.bits() as usize;
         if received_len_bits > key_bits_len {
             let err_str =
                 format!("dict key too long: expected max {key_bits_len} bits, got {received_len_bits} bits, key={key}");
-            return Err(TLCoreError::TLBWrongData(err_str));
+            return Err(TonCoreError::TLBWrongData(err_str));
         }
 
         // add leading bit to maintain proper bits length

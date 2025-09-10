@@ -1,5 +1,5 @@
 use crate::block_tlb::BlockIdExt;
-use crate::error::TLError;
+use crate::errors::TonError;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::fs::{exists, File};
@@ -42,7 +42,7 @@ pub struct Validator {
 }
 
 impl TonNetConfig {
-    pub fn new(json: &str) -> Result<Self, TLError> { Ok(serde_json::from_str(json)?) }
+    pub fn new(json: &str) -> Result<Self, TonError> { Ok(serde_json::from_str(json)?) }
 
     pub fn get_json(mainnet: bool) -> String {
         match get_default_net_conf_throw(mainnet) {
@@ -57,7 +57,7 @@ impl TonNetConfig {
         }
     }
 
-    pub fn from_env_path(env_var: &str, fallback_json: &str) -> Result<Self, TLError> {
+    pub fn from_env_path(env_var: &str, fallback_json: &str) -> Result<Self, TonError> {
         let path = match std::env::var(env_var) {
             Ok(path) => path,
             Err(_) => return TonNetConfig::new(fallback_json),
@@ -82,7 +82,7 @@ impl TonNetConfig {
     }
 }
 
-fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TLError> {
+fn get_default_net_conf_throw(mainnet: bool) -> Result<String, TonError> {
     let env_var_name = match mainnet {
         true => "TON_NET_CONF_MAINNET_PATH",
         false => "TON_NET_CONF_TESTNET_PATH",

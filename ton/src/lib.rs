@@ -1,7 +1,7 @@
 pub use ton_lib_core; // re-export
 pub mod block_tlb;
 pub mod clients;
-pub mod error;
+pub mod errors;
 pub mod libs_dict;
 pub mod tep;
 pub mod tlb_adapters;

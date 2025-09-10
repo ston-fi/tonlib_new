@@ -1,11 +1,11 @@
 use crate::block_tlb::{Coins, TVMStack};
-use crate::error::TLError;
+use crate::errors::TonError;
 use crate::tep::metadata::MetadataContent;
 use crate::tep::tvm_results::tvm_result::TVMResult;
 use num_bigint::BigInt;
 use std::ops::Deref;
 use ton_lib_core::cell::TonCellRef;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::TonAddress;
 
@@ -19,14 +19,14 @@ pub struct GetJettonDataResult {
 }
 
 impl TVMResult for GetJettonDataResult {
-    fn from_stack(stack: &mut TVMStack) -> Result<Self, TLCoreError> {
+    fn from_stack(stack: &mut TVMStack) -> Result<Self, TonCoreError> {
         let wallet_code = stack.pop_cell()?;
         let content = MetadataContent::from_cell(stack.pop_cell()?.deref())?;
         let admin = TonAddress::from_cell(stack.pop_cell()?.deref())?;
         let mintable = stack.pop_int_or_tiny_int()? != BigInt::ZERO;
 
         let total_supply = Coins::from_signed::<i128>(stack.pop_int_or_tiny_int()?.try_into().map_err(|_| {
-            TLError::TVMStackWrongType(
+            TonError::TVMStackWrongType(
                 String::from("TVMint that is convertible to coins"),
                 String::from("Not convertible"),
             )

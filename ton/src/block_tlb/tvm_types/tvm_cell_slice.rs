@@ -1,5 +1,5 @@
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 
 // https://github.com/ton-blockchain/ton/blob/ed4682066978f69ffa38dd98912ca77d4f660f66/crypto/block/block.tlb#L873
@@ -32,7 +32,7 @@ impl TVMCellSlice {
 impl TLB for TVMCellSlice {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x04, 8);
 
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let cell_original = parser.read_next_ref()?.clone();
         let start_bit = parser.read_num(10)?;
         let end_bit = parser.read_num(10)?;
@@ -50,7 +50,7 @@ impl TLB for TVMCellSlice {
         })
     }
 
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         builder.write_ref(self.cell_original.clone())?;
         builder.write_num(&self.start_bit, 10)?;
         builder.write_num(&self.end_bit, 10)?;

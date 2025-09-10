@@ -1,8 +1,8 @@
 use crate::block_tlb::TVMStack;
 use crate::contracts::ton_contract::TonContract;
-use crate::error::TLError;
-use crate::tep::tvm_results::tvm_result::TVMResult;
+use crate::errors::TonError;
 use crate::tep::tvm_results::GetNFTContentResult;
+use crate::tep::tvm_results::TVMResult;
 use async_trait::async_trait;
 use num_bigint::BigInt;
 use ton_lib_core::cell::TonCellRef;
@@ -13,7 +13,7 @@ pub trait GetNFTContent: TonContract {
         &self,
         index: BigInt,
         individual_content: TonCellRef,
-    ) -> Result<GetNFTContentResult, TLError> {
+    ) -> Result<GetNFTContentResult, TonError> {
         let mut stack = TVMStack::default();
         stack.push_int(index);
         stack.push_cell(individual_content);

@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use ton_lib_core::cell::CellBuilder;
 use ton_lib_core::cell::CellParser;
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 /// TLBRef - allows to save object in a reference cell ( ^X).
@@ -11,8 +11,8 @@ pub struct TLBRef<T: TLB>(PhantomData<T>);
 
 impl<T: TLB> TLBRef<T> {
     pub fn new() -> Self { TLBRef(PhantomData) }
-    pub fn read(&self, parser: &mut CellParser) -> Result<T, TLCoreError> { T::from_cell(parser.read_next_ref()?) }
-    pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TLCoreError> {
+    pub fn read(&self, parser: &mut CellParser) -> Result<T, TonCoreError> { T::from_cell(parser.read_next_ref()?) }
+    pub fn write(&self, builder: &mut CellBuilder, val: &T) -> Result<(), TonCoreError> {
         builder.write_ref(val.to_cell_ref()?)
     }
 }

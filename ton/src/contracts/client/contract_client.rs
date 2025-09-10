@@ -3,14 +3,14 @@ use crate::emulators::emul_bc_config::EmulBCConfig;
 use crate::emulators::tvm::tvm_c7::TVMEmulatorC7;
 use crate::emulators::tvm::tvm_emulator::TVMEmulator;
 use crate::emulators::tvm::tvm_response::TVMGetMethodSuccess;
-use crate::error::TLError;
+use crate::errors::TonError;
 use crate::libs_dict::LibsDict;
 use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::sync::OnceCell;
 use ton_lib_core::cell::{TonCell, TonCellRef, TonCellUtils, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::types::{TonAddress, TxIdLTHash};
@@ -36,7 +36,7 @@ impl ContractClientConfig {
 pub struct ContractClient(Arc<Inner>);
 
 impl ContractClient {
-    pub fn new(config: ContractClientConfig, data_provider: impl ContractProvider) -> Result<Self, TLError> {
+    pub fn new(config: ContractClientConfig, data_provider: impl ContractProvider) -> Result<Self, TonError> {
         let provider = Arc::new(data_provider);
         let inner = Inner {
             provider: provider.clone(),
@@ -50,7 +50,7 @@ impl ContractClient {
         &self,
         address: &TonAddress,
         tx_id: Option<&TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TLError> {
+    ) -> Result<Arc<ContractState>, TonError> {
         self.0.cache.get_or_load_contract(address, tx_id).await
     }
 
@@ -59,12 +59,12 @@ impl ContractClient {
         state: &ContractState,
         method_id: i32,
         stack_boc: &[u8],
-    ) -> Result<TVMGetMethodSuccess, TLError> {
+    ) -> Result<TVMGetMethodSuccess, TonError> {
         let code_boc = match &state.code_boc {
             Some(boc) => boc,
             None => {
                 let err_msg = format!("code is None at state: {state:?}");
-                return Err(TLCoreError::ContractError(err_msg).into());
+                return Err(TonCoreError::ContractError(err_msg).into());
             }
         };
 
@@ -72,7 +72,7 @@ impl ContractClient {
 
         let c7 = TVMEmulatorC7 {
             address: state.address.clone(),
-            unix_time: SystemTime::now().duration_since(UNIX_EPOCH).map_err(TLCoreError::from)?.as_secs() as u32,
+            unix_time: SystemTime::now().duration_since(UNIX_EPOCH).map_err(TonCoreError::from)?.as_secs() as u32,
             balance: state.balance as u64,
             rand_seed: TonHash::ZERO,
             config: self.get_bc_config().await?.clone(),
@@ -100,7 +100,7 @@ impl ContractClient {
 
     pub fn cache_stats(&self) -> HashMap<String, usize> { self.0.cache.cache_stats() }
 
-    async fn get_bc_config(&self) -> Result<&EmulBCConfig, TLError> {
+    async fn get_bc_config(&self) -> Result<&EmulBCConfig, TonError> {
         self.0
             .bc_config
             .get_or_try_init(|| async {

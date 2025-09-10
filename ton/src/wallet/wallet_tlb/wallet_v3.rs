@@ -1,6 +1,6 @@
 use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{read_up_to_4_msgs, write_up_to_4_msgs};
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::TLB;
 
@@ -35,7 +35,7 @@ pub struct WalletV3ExtMsgBody {
 }
 
 impl TLB for WalletV3ExtMsgBody {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let subwallet_id = TLB::read(parser)?;
         let valid_until = TLB::read(parser)?;
         let msg_seqno = TLB::read(parser)?;
@@ -49,7 +49,7 @@ impl TLB for WalletV3ExtMsgBody {
         })
     }
 
-    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.subwallet_id.write(dst)?;
         self.valid_until.write(dst)?;
         self.msg_seqno.write(dst)?;
@@ -59,7 +59,7 @@ impl TLB for WalletV3ExtMsgBody {
 }
 
 impl WalletV3ExtMsgBody {
-    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TLCoreError> {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonCoreError> {
         let signature = parser.read_bits(512)?;
         Ok((Self::read(parser)?, signature))
     }

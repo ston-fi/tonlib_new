@@ -5,7 +5,7 @@ use std::collections::HashMap;
 use std::ops::Deref;
 use std::sync::Arc;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 
 // https://github.com/ton-blockchain/ton/blame/6f745c04daf8861bb1791cffce6edb1beec62204/crypto/block/block.tlb#L543
@@ -20,10 +20,10 @@ pub struct ConfigParams {
 #[rustfmt::skip]
 impl ConfigParams {
     // lazy_load for params
-    pub fn storage_prices(&self) -> Result<Arc<ConfigParam18>, TLCoreError> { self.load_param(18, &self.storage_prices) }
-    pub fn global_version(&self) -> Result<Arc<GlobalVersion>, TLCoreError> { self.load_param(8, &self.global_version) }
+    pub fn storage_prices(&self) -> Result<Arc<ConfigParam18>, TonCoreError> { self.load_param(18, &self.storage_prices) }
+    pub fn global_version(&self) -> Result<Arc<GlobalVersion>, TonCoreError> { self.load_param(8, &self.global_version) }
 
-    fn load_param<T: TLB>(&self, index: u32, dst: &RwLock<Option<Arc<T>>>) -> Result<Arc<T>, TLCoreError> {
+    fn load_param<T: TLB>(&self, index: u32, dst: &RwLock<Option<Arc<T>>>) -> Result<Arc<T>, TonCoreError> {
         if let Some(param) = dst.read().deref() {
             return Ok(param.clone());
         }
@@ -34,7 +34,7 @@ impl ConfigParams {
         }
         let value = match self.config.get(&index) {
             Some(cell) => Arc::new(T::from_cell(cell)?),
-            None => return Err(TLCoreError::TLBWrongData(format!("Config param with index {index} not found"))),
+            None => return Err(TonCoreError::TLBWrongData(format!("Config param with index {index} not found"))),
         };
         *lock = Some(value.clone());
         Ok(value)
@@ -57,7 +57,7 @@ impl Clone for ConfigParams {
 }
 
 impl TLB for ConfigParams {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let config_addr = TLB::read(parser)?;
         let config_ref = parser.read_next_ref()?;
         let config =
@@ -69,7 +69,7 @@ impl TLB for ConfigParams {
         })
     }
 
-    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.config_addr.write(dst)?;
         let mut config_cell = TonCell::builder();
         TLBHashMap::<DictKeyAdapterInto, DictValAdapterTLB, _, _>::new(32).write(&mut config_cell, &self.config)?;

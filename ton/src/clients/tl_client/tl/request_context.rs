@@ -4,13 +4,13 @@ use std::time::Instant;
 use tokio::sync::oneshot::Sender;
 
 use crate::clients::tl_client::tl::response::TLResponse;
-use crate::error::TLError;
+use crate::errors::TonError;
 
 pub struct TLRequestCtx {
     pub id: u64,
     pub method: &'static str,
     pub send_time: Instant,
-    pub sender: Sender<Result<TLResponse, TLError>>,
+    pub sender: Sender<Result<TLResponse, TonError>>,
 }
 
 impl Display for TLRequestCtx {

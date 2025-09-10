@@ -1,6 +1,6 @@
 use crate::block_tlb::CurrencyCollection;
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCell, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::TLB;
 use ton_lib_core::TLB;
 
@@ -38,11 +38,11 @@ pub struct ShardDescr {
 // so implement TLB manually, including prefix handling
 // (implement `read` and `write` as well)
 impl TLB for ShardDescr {
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let prefix = match parser.read_num::<u8>(4)? {
             0xb => ShardDescrTag::Old,
             0xa => ShardDescrTag::New,
-            x => return Err(TLCoreError::TLBWrongData(format!("Invalid ShardDescr prefix: {x}"))),
+            x => return Err(TonCoreError::TLBWrongData(format!("Invalid ShardDescr prefix: {x}"))),
         };
         let seqno = TLB::read(parser)?;
         let reg_mc_seqno = TLB::read(parser)?;
@@ -90,7 +90,7 @@ impl TLB for ShardDescr {
             funds_created: funds,
         })
     }
-    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> {
         let prefix = match self.prefix {
             ShardDescrTag::Old => 0xb,
             ShardDescrTag::New => 0xa,
@@ -130,9 +130,9 @@ impl TLB for ShardDescr {
         Ok(())
     }
 
-    fn read(parser: &mut CellParser) -> Result<Self, TLCoreError> { Self::read_definition(parser) }
+    fn read(parser: &mut CellParser) -> Result<Self, TonCoreError> { Self::read_definition(parser) }
 
-    fn write(&self, builder: &mut CellBuilder) -> Result<(), TLCoreError> { self.write_definition(builder) }
+    fn write(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError> { self.write_definition(builder) }
 }
 
 #[derive(Debug, Clone, PartialEq, TLB)]

@@ -1,6 +1,6 @@
 use crate::wallet::wallet_tlb::wallet_ext_msg_utils::{build_inner_request, parse_inner_request, InnerRequest};
 use ton_lib_core::cell::{CellBuilder, CellParser, TonCellRef, TonHash};
-use ton_lib_core::error::TLCoreError;
+use ton_lib_core::errors::TonCoreError;
 use ton_lib_core::traits::tlb::{TLBPrefix, TLB};
 use ton_lib_core::TLB;
 
@@ -42,7 +42,7 @@ pub struct WalletV5ExtMsgBody {
 
 impl TLB for WalletV5ExtMsgBody {
     const PREFIX: TLBPrefix = TLBPrefix::new(0x7369676e, 32);
-    fn read_definition(parser: &mut CellParser) -> Result<Self, TLCoreError> {
+    fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError> {
         let wallet_id = TLB::read(parser)?;
         let valid_until = TLB::read(parser)?;
         let msg_seqno = TLB::read(parser)?;
@@ -57,7 +57,7 @@ impl TLB for WalletV5ExtMsgBody {
         })
     }
 
-    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TLCoreError> {
+    fn write_definition(&self, dst: &mut CellBuilder) -> Result<(), TonCoreError> {
         self.wallet_id.write(dst)?;
         self.valid_until.write(dst)?;
         self.msg_seqno.write(dst)?;
@@ -68,7 +68,7 @@ impl TLB for WalletV5ExtMsgBody {
 }
 
 impl WalletV5ExtMsgBody {
-    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TLCoreError> {
+    pub fn read_signed(parser: &mut CellParser) -> Result<(Self, Vec<u8>), TonCoreError> {
         let body = Self::read(parser)?;
         let signature = parser.read_bits(512)?;
         Ok((body, signature))
