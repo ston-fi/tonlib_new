@@ -19,7 +19,9 @@ pub trait TLB: Sized {
 
     /// read-write definition
     /// https://docs.ton.org/v3/documentation/data-formats/tlb/tl-b-language#overview
+    ///
     /// must be implemented by all TLB objects
+    ///
     /// doesn't include prefix handling
     fn read_definition(parser: &mut CellParser) -> Result<Self, TonCoreError>;
     fn write_definition(&self, builder: &mut CellBuilder) -> Result<(), TonCoreError>;

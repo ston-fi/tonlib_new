@@ -69,7 +69,7 @@ pub(crate) fn tlb_derive_enum(
     (read_impl, write_impl, extra_impl)
 }
 
-// generate as_X and is_X methods for each enum variant
+// generate From<X> for each enum variant
 fn variants_into_impl(ident: &Ident, data: &mut DataEnum) -> TokenStream {
     let from_impls = data.variants.iter().map(|variant| {
         let variant_name = &variant.ident;
