@@ -14,7 +14,7 @@ use tokio_retry::strategy::FixedInterval;
 use tokio_retry::RetryIf;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::constants::{TON_MASTERCHAIN, TON_SHARD_FULL};
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 #[async_trait]
 pub trait TLClientTrait: Send + Sync {
@@ -97,7 +97,7 @@ pub trait TLClientTrait: Send + Sync {
     async fn get_account_state_raw_by_tx(
         &self,
         address: TonAddress,
-        tx_id: TxIdLTHash,
+        tx_id: TxLTHash,
     ) -> Result<TLRawFullAccountState, TonError> {
         let req = TLRequest::RawGetAccountStateByTx {
             account_address: address.into(),
@@ -106,7 +106,7 @@ pub trait TLClientTrait: Send + Sync {
         unwrap_tl_rsp!(self.exec(&req).await?, TLRawFullAccountState)
     }
 
-    async fn get_account_txs(&self, address: TonAddress, from_tx: TxIdLTHash) -> Result<TLRawTxs, TonError> {
+    async fn get_account_txs(&self, address: TonAddress, from_tx: TxLTHash) -> Result<TLRawTxs, TonError> {
         let req = TLRequest::RawGetTxs {
             account_address: address.into(),
             from_tx_id: from_tx,
@@ -117,7 +117,7 @@ pub trait TLClientTrait: Send + Sync {
     async fn get_account_txs_v2(
         &self,
         address: TonAddress,
-        from_tx: TxIdLTHash,
+        from_tx: TxLTHash,
         count: usize,
         try_decode_msg: bool,
     ) -> Result<TLRawTxs, TonError> {

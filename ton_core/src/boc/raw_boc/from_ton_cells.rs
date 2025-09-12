@@ -5,15 +5,15 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::ops::Deref;
 
-use super::{BOCRaw, CellRaw};
+use super::{RawBoC, RawCell};
 
 #[derive(Debug, Clone)]
-struct CellIndexed<'a> {
+struct IndexedCell<'a> {
     cell: &'a TonCellRef,
     index: RefCell<usize>, // internal mutability required
 }
 
-impl BOCRaw {
+impl RawBoC {
     pub fn from_ton_cells(roots: &[TonCellRef]) -> Result<Self, TonCoreError> {
         let cell_by_hash = build_and_verify_index(roots)?;
 
@@ -34,14 +34,14 @@ impl BOCRaw {
 
         let root_indices = roots.iter().map(|x| get_position(x, &cell_by_hash)).collect::<Result<_, TonCoreError>>()?;
 
-        Ok(BOCRaw {
+        Ok(RawBoC {
             cells: raw_cells,
             roots_position: root_indices,
         })
     }
 }
 
-fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellIndexed<'_>>, TonCoreError> {
+fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, IndexedCell<'_>>, TonCoreError> {
     let mut cur_cells = vec![];
     for cell in roots {
         cur_cells.push(cell);
@@ -59,7 +59,7 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellI
                 continue; // Skip if already indexed.
             }
 
-            let indexed_cell = CellIndexed {
+            let indexed_cell = IndexedCell {
                 cell,
                 index: RefCell::new(new_hash_index),
             };
@@ -95,9 +95,9 @@ fn build_and_verify_index(roots: &[TonCellRef]) -> Result<HashMap<TonHash, CellI
     Ok(cells_by_hash)
 }
 
-fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<CellRaw, TonCoreError> {
+fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, IndexedCell>) -> Result<RawCell, TonCoreError> {
     let refs_positions = raw_cell_refs_indexes(cell, cells_by_hash)?;
-    Ok(CellRaw {
+    Ok(RawCell {
         cell_type: cell.cell_type,
         data: cell.data.clone(),
         data_bits_len: cell.data_bits_len,
@@ -108,7 +108,7 @@ fn raw_from_indexed(cell: &TonCellRef, cells_by_hash: &HashMap<TonHash, CellInde
 
 fn raw_cell_refs_indexes(
     cell: &TonCellRef,
-    cells_by_hash: &HashMap<TonHash, CellIndexed>,
+    cells_by_hash: &HashMap<TonHash, IndexedCell>,
 ) -> Result<Vec<usize>, TonCoreError> {
     let mut vec = Vec::with_capacity(cell.refs.len());
     for ref_pos in 0..cell.refs.len() {
@@ -118,7 +118,7 @@ fn raw_cell_refs_indexes(
     Ok(vec)
 }
 
-fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, CellIndexed>) -> Result<usize, TonCoreError> {
+fn get_position(cell: &TonCellRef, call_by_hash: &HashMap<TonHash, IndexedCell>) -> Result<usize, TonCoreError> {
     let hash = cell.hash()?;
     call_by_hash
         .get(hash)

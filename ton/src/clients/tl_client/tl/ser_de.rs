@@ -144,9 +144,9 @@ pub(super) mod serde_tx_id_lt_hash {
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
     use std::str::FromStr;
     use ton_lib_core::cell::TonHash;
-    use ton_lib_core::types::TxIdLTHash;
+    use ton_lib_core::types::TxLTHash;
 
-    pub fn serialize<S: Serializer>(data: &TxIdLTHash, serializer: S) -> Result<S::Ok, S::Error> {
+    pub fn serialize<S: Serializer>(data: &TxLTHash, serializer: S) -> Result<S::Ok, S::Error> {
         let json_val = serde_json::json!({
             "lt": data.lt.to_string(),
             "hash": data.hash.to_base64(),
@@ -154,7 +154,7 @@ pub(super) mod serde_tx_id_lt_hash {
         json_val.serialize(serializer)
     }
 
-    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TxIdLTHash, D::Error> {
+    pub fn deserialize<'de, D: Deserializer<'de>>(deserializer: D) -> Result<TxLTHash, D::Error> {
         let json_val: serde_json::Value = Deserialize::deserialize(deserializer)?;
         let lt = json_val
             .get("lt")
@@ -167,7 +167,7 @@ pub(super) mod serde_tx_id_lt_hash {
             .and_then(|v| v.as_str())
             .ok_or_else(|| Error::custom("Missing or invalid 'hash' field"))?;
         let hash = TonHash::from_str(hash).map_err(Error::custom)?;
-        Ok(TxIdLTHash { lt, hash })
+        Ok(TxLTHash { lt, hash })
     }
 }
 

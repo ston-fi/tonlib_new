@@ -1,9 +1,9 @@
 use crate::cell::{CellMeta, TonCell, TonCellRef};
 use crate::errors::TonCoreError;
 
-use super::BOCRaw;
+use super::RawBoC;
 
-impl BOCRaw {
+impl RawBoC {
     //Based on https://github.com/toncenter/tonweb/blob/c2d5d0fc23d2aec55a0412940ce6e580344a288c/src/boc/Cell.js#L198
     pub fn into_ton_cells(self) -> Result<Vec<TonCellRef>, TonCoreError> {
         let cells_len = self.cells.len();

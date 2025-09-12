@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 use std::ffi::CString;
 use strum::IntoStaticStr;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::types::TxIdLTHash;
+use ton_lib_core::types::TxLTHash;
 
 #[derive(IntoStaticStr, Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
 #[serde(tag = "@type", rename_all = "camelCase")]
@@ -52,7 +52,7 @@ pub enum TLRequest {
         account_address: TLAccountAddress,
         #[serde(rename = "transaction_id")]
         #[serde(with = "serde_tx_id_lt_hash")]
-        tx_id: TxIdLTHash,
+        tx_id: TxLTHash,
     },
 
     // tonlib_api.tl, line 268
@@ -61,7 +61,7 @@ pub enum TLRequest {
         account_address: TLAccountAddress,
         #[serde(rename = "from_transaction_id")]
         #[serde(with = "serde_tx_id_lt_hash")]
-        from_tx_id: TxIdLTHash,
+        from_tx_id: TxLTHash,
     },
 
     // tonlib_api.tl, line 269
@@ -70,7 +70,7 @@ pub enum TLRequest {
         account_address: TLAccountAddress,
         #[serde(rename = "from_transaction_id")]
         #[serde(with = "serde_tx_id_lt_hash")]
-        from_tx_id: TxIdLTHash,
+        from_tx_id: TxLTHash,
         count: u32,
         try_decode_messages: bool,
     },
@@ -113,7 +113,7 @@ pub enum TLRequest {
         account_address: TLAccountAddress,
         #[serde(rename = "transaction_id")]
         #[serde(with = "serde_tx_id_lt_hash")]
-        tx_id: TxIdLTHash,
+        tx_id: TxLTHash,
     },
 
     // tonlib_api.tl, line 308

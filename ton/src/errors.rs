@@ -4,7 +4,7 @@ use std::time::Duration;
 use thiserror::Error;
 use tokio::time::error::Elapsed;
 use ton_lib_core::errors::TonCoreError;
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 use ton_liteapi::tl::request::Request;
 use ton_liteapi::types::LiteError;
 
@@ -93,7 +93,7 @@ pub enum TonError {
     #[error("TonContractNoData: contract {address} has no data at tx_id {tx_id:?}")]
     TonContractNoData {
         address: TonAddress,
-        tx_id: Option<TxIdLTHash>,
+        tx_id: Option<TxLTHash>,
     },
     #[error("CustomError: {0}")]
     Custom(String),

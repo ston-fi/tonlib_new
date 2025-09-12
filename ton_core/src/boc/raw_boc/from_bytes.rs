@@ -4,11 +4,11 @@ use crate::errors::TonCoreError;
 use bitstream_io::{BigEndian, ByteRead, ByteReader};
 use std::io::Cursor;
 
-use super::{BOCRaw, CellRaw, GENERIC_BOC_MAGIC};
+use super::{RawBoC, RawCell, GENERIC_BOC_MAGIC};
 
-impl BOCRaw {
+impl RawBoC {
     // https://github.com/ton-blockchain/ton/blob/24dc184a2ea67f9c47042b4104bbb4d82289fac1/crypto/tl/boc.tlb#L25
-    pub fn from_bytes(serial: &[u8]) -> Result<BOCRaw, TonCoreError> {
+    pub fn from_bytes(serial: &[u8]) -> Result<RawBoC, TonCoreError> {
         let cursor = Cursor::new(serial);
         let mut reader = ByteReader::endian(cursor, BigEndian);
         let magic = reader.read::<u32>()?;
@@ -72,11 +72,11 @@ impl BOCRaw {
         //   crc32c:has_crc32c?uint32
         let _crc32c = if has_crc32c { reader.read::<u32>()? } else { 0 };
 
-        Ok(BOCRaw { cells, roots_position })
+        Ok(RawBoC { cells, roots_position })
     }
 }
 
-fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<CellRaw, TonCoreError> {
+fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Result<RawCell, TonCoreError> {
     let d1 = reader.read::<u8>()?;
     let d2 = reader.read::<u8>()?;
 
@@ -128,7 +128,7 @@ fn read_cell(reader: &mut ByteReader<Cursor<&[u8]>, BigEndian>, size: u8) -> Res
         false => CellType::Ordinary,
     };
 
-    let cell = CellRaw {
+    let cell = RawCell {
         cell_type,
         data,
         data_bits_len,

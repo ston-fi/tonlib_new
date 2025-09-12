@@ -11,9 +11,9 @@ use std::time::{Duration, SystemTime, UNIX_EPOCH};
 use tokio::sync::OnceCell;
 use ton_lib_core::cell::{TonCell, TonCellRef, TonCellUtils, TonHash};
 use ton_lib_core::errors::TonCoreError;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
+use ton_lib_core::traits::contract_provider::{TonContractState, TonProvider};
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 #[derive(Clone, Copy, Debug)]
 pub struct ContractClientConfig {
@@ -36,7 +36,7 @@ impl ContractClientConfig {
 pub struct ContractClient(Arc<Inner>);
 
 impl ContractClient {
-    pub fn new(config: ContractClientConfig, data_provider: impl ContractProvider) -> Result<Self, TonError> {
+    pub fn new(config: ContractClientConfig, data_provider: impl TonProvider) -> Result<Self, TonError> {
         let provider = Arc::new(data_provider);
         let inner = Inner {
             provider: provider.clone(),
@@ -49,14 +49,14 @@ impl ContractClient {
     pub async fn get_contract(
         &self,
         address: &TonAddress,
-        tx_id: Option<&TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TonError> {
+        tx_id: Option<&TxLTHash>,
+    ) -> Result<Arc<TonContractState>, TonError> {
         self.0.cache.get_or_load_contract(address, tx_id).await
     }
 
     pub async fn emulate_get_method(
         &self,
-        state: &ContractState,
+        state: &TonContractState,
         method_id: i32,
         stack_boc: &[u8],
     ) -> Result<TVMGetMethodSuccess, TonError> {
@@ -112,7 +112,7 @@ impl ContractClient {
 }
 
 struct Inner {
-    provider: Arc<dyn ContractProvider>,
+    provider: Arc<dyn TonProvider>,
     cache: Arc<ContractClientCache>,
     bc_config: OnceCell<EmulBCConfig>,
 }

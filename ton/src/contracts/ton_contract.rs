@@ -3,14 +3,14 @@ use crate::contracts::client::contract_client::ContractClient;
 use crate::emulators::tvm::tvm_method_id::TVMGetMethodID;
 use crate::errors::TonError;
 use std::sync::Arc;
-use ton_lib_core::traits::contract_provider::ContractState;
+use ton_lib_core::traits::contract_provider::TonContractState;
 use ton_lib_core::traits::tlb::TLB;
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 pub struct ContractCtx {
     pub client: ContractClient,
     pub address: TonAddress,
-    pub state: Arc<ContractState>,
+    pub state: Arc<TonContractState>,
 }
 
 #[async_trait::async_trait]
@@ -18,16 +18,16 @@ pub trait TonContract: Send + Sync + Sized {
     fn ctx(&self) -> &ContractCtx;
     fn from_ctx(ctx: ContractCtx) -> Self;
 
-    async fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<Self, TonError> {
+    async fn new(client: &ContractClient, address: TonAddress, tx_id: Option<TxLTHash>) -> Result<Self, TonError> {
         let state = client.get_contract(&address, tx_id.as_ref()).await?;
         Self::from_state(client.clone(), address, state)
     }
 
-    fn from_state(client: ContractClient, address: TonAddress, state: Arc<ContractState>) -> Result<Self, TonError> {
+    fn from_state(client: ContractClient, address: TonAddress, state: Arc<TonContractState>) -> Result<Self, TonError> {
         Ok(Self::from_ctx(ContractCtx { client, address, state }))
     }
 
-    async fn get_state(&self) -> Result<&Arc<ContractState>, TonError> { Ok(&self.ctx().state) }
+    async fn get_state(&self) -> Result<&Arc<TonContractState>, TonError> { Ok(&self.ctx().state) }
 
     async fn emulate_get_method<M>(&self, method: M, stack: &TVMStack) -> Result<Vec<u8>, TonError>
     where

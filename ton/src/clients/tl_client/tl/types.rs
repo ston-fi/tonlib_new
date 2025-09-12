@@ -7,7 +7,7 @@ use crate::block_tlb::BlockIdExt;
 use serde::{Deserialize, Serialize};
 use serde_aux::prelude::*;
 use ton_lib_core::cell::TonHash;
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 // tonlib_api.tl_api, line 23
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -85,7 +85,7 @@ pub struct TLRawFullAccountState {
     pub data: Vec<u8>,
     #[serde(rename = "last_transaction_id")]
     #[serde(with = "serde_tx_id_lt_hash")]
-    pub last_tx_id: TxIdLTHash,
+    pub last_tx_id: TxLTHash,
     #[serde(with = "serde_block_id_ext")]
     pub block_id: BlockIdExt,
     #[serde(with = "Base64Standard")]
@@ -122,7 +122,7 @@ pub struct TLRawTx {
     pub data: Vec<u8>,
     #[serde(rename = "transaction_id")]
     #[serde(with = "serde_tx_id_lt_hash")]
-    pub tx_id: TxIdLTHash,
+    pub tx_id: TxLTHash,
     #[serde(deserialize_with = "deserialize_number_from_string")]
     pub fee: i64,
     #[serde(deserialize_with = "deserialize_number_from_string")]
@@ -141,7 +141,7 @@ pub struct TLRawTxs {
     pub txs: Vec<TLRawTx>,
     #[serde(rename = "previous_transaction_id")]
     #[serde(with = "serde_tx_id_lt_hash")]
-    pub last_tx_id: TxIdLTHash,
+    pub last_tx_id: TxLTHash,
 }
 // tonlib_api.tl_api, line 58
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Hash)]
@@ -294,7 +294,7 @@ pub struct TLFullAccountState {
     pub balance: i64,
     #[serde(rename = "last_transaction_id")]
     #[serde(with = "serde_tx_id_lt_hash")]
-    pub last_tx_id: TxIdLTHash,
+    pub last_tx_id: TxLTHash,
     #[serde(with = "serde_block_id_ext")]
     pub block_id: BlockIdExt,
     #[serde(deserialize_with = "deserialize_number_from_string")]

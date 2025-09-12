@@ -9,22 +9,19 @@ use std::sync::atomic::Ordering::Relaxed;
 use std::sync::{Arc, Weak};
 use std::time::Duration;
 use ton_lib_core::errors::TonCoreError;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::traits::contract_provider::{TonContractState, TonProvider};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 pub(super) struct ContractClientCache {
-    provider: Arc<dyn ContractProvider>,
-    latest_tx_cache: Cache<TonAddress, TxIdLTHash>,
-    state_latest_cache: Cache<TonAddress, Arc<ContractState>>,
-    state_by_tx_cache: Cache<TxIdLTHash, Arc<ContractState>>,
+    provider: Arc<dyn TonProvider>,
+    latest_tx_cache: Cache<TonAddress, TxLTHash>,
+    state_latest_cache: Cache<TonAddress, Arc<TonContractState>>,
+    state_by_tx_cache: Cache<TxLTHash, Arc<TonContractState>>,
     cache_stats: CacheStats,
 }
 
 impl ContractClientCache {
-    pub(super) fn new(
-        config: ContractClientConfig,
-        provider: Arc<dyn ContractProvider>,
-    ) -> Result<Arc<Self>, TonError> {
+    pub(super) fn new(config: ContractClientConfig, provider: Arc<dyn TonProvider>) -> Result<Arc<Self>, TonError> {
         let (capacity, ttl) = (config.cache_capacity, config.cache_ttl);
         let client_cache = Arc::new(Self {
             provider: provider.clone(),
@@ -41,8 +38,8 @@ impl ContractClientCache {
     pub(super) async fn get_or_load_contract(
         &self,
         address: &TonAddress,
-        tx_id: Option<&TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TonError> {
+        tx_id: Option<&TxLTHash>,
+    ) -> Result<Arc<TonContractState>, TonError> {
         if let Some(tx_id) = tx_id {
             self.cache_stats.state_by_tx_req.fetch_add(1, Relaxed);
             return Ok(self
@@ -69,8 +66,8 @@ impl ContractClientCache {
     async fn load_contract(
         &self,
         address: &TonAddress,
-        tx_id: Option<TxIdLTHash>,
-    ) -> Result<Arc<ContractState>, TonCoreError> {
+        tx_id: Option<TxLTHash>,
+    ) -> Result<Arc<TonContractState>, TonCoreError> {
         match &tx_id {
             Some(_) => self.cache_stats.state_by_tx_miss.fetch_add(1, Relaxed),
             None => self.cache_stats.state_latest_miss.fetch_add(1, Relaxed),

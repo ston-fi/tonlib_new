@@ -4,7 +4,7 @@ mod tlb_num;
 mod tlb_opt;
 mod tlb_ptr;
 
-use crate::boc::BOC;
+use crate::boc::BoC;
 use crate::cell::CellBuilder;
 use crate::cell::CellParser;
 use crate::cell::CellType;
@@ -44,7 +44,7 @@ pub trait TLB: Sized {
     fn from_cell(cell: &TonCell) -> Result<Self, TonCoreError> { Self::read(&mut cell.parser()) }
 
     fn from_boc(boc: &[u8]) -> Result<Self, TonCoreError> {
-        match BOC::from_bytes(boc).and_then(|x| x.single_root()).and_then(|x| Self::from_cell(&x)) {
+        match BoC::from_bytes(boc).and_then(|x| x.single_root()).and_then(|x| Self::from_cell(&x)) {
             Ok(cell) => Ok(cell),
             Err(err) => {
                 let msg = format!(
@@ -79,7 +79,7 @@ pub trait TLB: Sized {
     fn to_boc_extra(&self, add_crc32: bool) -> Result<Vec<u8>, TonCoreError> {
         let mut builder = TonCell::builder();
         self.write(&mut builder)?;
-        BOC::new(builder.build()?.into_ref()).to_bytes(add_crc32)
+        BoC::new(builder.build()?.into_ref()).to_bytes(add_crc32)
     }
 
     fn to_boc_hex_extra(&self, add_crc32: bool) -> Result<String, TonCoreError> {

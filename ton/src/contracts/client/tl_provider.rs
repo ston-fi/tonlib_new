@@ -12,8 +12,8 @@ use std::sync::Arc;
 use std::time::Duration;
 use ton_lib_core::cell::TonHash;
 use ton_lib_core::errors::TonCoreError;
-use ton_lib_core::traits::contract_provider::{ContractProvider, ContractState};
-use ton_lib_core::types::{TonAddress, TxIdLTHash};
+use ton_lib_core::traits::contract_provider::{TonContractState, TonProvider};
+use ton_lib_core::types::{TonAddress, TxLTHash};
 
 static BLOCK_IDS_CACHE_SIZE: u64 = 100;
 
@@ -36,10 +36,10 @@ impl TLProvider {
 }
 
 #[async_trait]
-impl ContractProvider for TLProvider {
+impl TonProvider for TLProvider {
     async fn last_mc_seqno(&self) -> Result<u32, TonCoreError> { Ok(self.client.get_mc_info().await?.last.seqno) }
 
-    async fn load_state(&self, address: TonAddress, tx_id: Option<TxIdLTHash>) -> Result<ContractState, TonCoreError> {
+    async fn load_state(&self, address: TonAddress, tx_id: Option<TxLTHash>) -> Result<TonContractState, TonCoreError> {
         let raw_state = match tx_id {
             Some(id) => self.client.get_account_state_raw_by_tx(address.clone(), id).await,
             None => self.client.get_account_state_raw(address.clone()).await,
@@ -51,7 +51,7 @@ impl ContractProvider for TLProvider {
             true => None,
             false => Some(TonHash::from_vec(raw_state.frozen_hash)?),
         };
-        Ok(ContractState {
+        Ok(TonContractState {
             mc_seqno: None,
             address,
             last_tx_id: raw_state.last_tx_id,
@@ -79,7 +79,7 @@ impl ContractProvider for TLProvider {
         Ok(libs)
     }
 
-    async fn load_latest_tx_per_address(&self, mc_seqno: u32) -> Result<HashMap<TonAddress, TxIdLTHash>, TonCoreError> {
+    async fn load_latest_tx_per_address(&self, mc_seqno: u32) -> Result<Vec<(TonAddress, TxLTHash)>, TonCoreError> {
         let conn = self.find_connection(mc_seqno).await?;
         let prev_mc_block = self.get_or_load_master(conn, mc_seqno - 1).await?;
         let prev_shards = self.get_or_load_shards(conn, &prev_mc_block).await?;
@@ -95,14 +95,14 @@ impl ContractProvider for TLProvider {
                 .await?
                 .into_iter()
                 .map(|x| {
-                    (TxIdLTHash::new(x.lt, x.tx_hash), TonAddress::new(block_id.shard_ident.workchain, x.address_hash))
+                    (TxLTHash::new(x.lt, x.tx_hash), TonAddress::new(block_id.shard_ident.workchain, x.address_hash))
                 })
                 .collect::<Vec<_>>();
             Ok::<_, TonCoreError>(res)
         });
         let block_txs = try_join_all(txs_futs).await?;
 
-        let mut latest_by_address = HashMap::<TonAddress, TxIdLTHash>::new();
+        let mut latest_by_address = HashMap::<TonAddress, TxLTHash>::new();
         for txs in block_txs {
             for (tx_id, address) in txs {
                 match latest_by_address.get_mut(&address) {
@@ -117,7 +117,7 @@ impl ContractProvider for TLProvider {
                 }
             }
         }
-        Ok(latest_by_address)
+        Ok(latest_by_address.into_iter().collect())
     }
 }
 
